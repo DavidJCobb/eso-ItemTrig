@@ -77,33 +77,4 @@ function ItemTrig.Trigger:exec(context)
 end
 function ItemTrig.Trigger:serialize()
    return ItemTrig.serializeTrigobject(self)
-   --[[
-
-   --
-   -- Syntax for serialized triggers is currently:
-   --
-   -- TRIG"Name"{
-   --    CNDS{opcode:arg,arg,arg;opcode:arg,arg,arg}
-   --    ACTS{opcode:arg,arg,arg;opcode:arg,arg,arg}
-   -- }
-   --
-   -- but without the line breaks and spacing. The opcodes are 
-   -- serialized as decimal numbers. The arguments are serialized 
-   -- directly unless they are nested triggers (in which case 
-   -- they run through this code, too) or strings (in which case 
-   -- they are double-quoted, and contained double-quotes are 
-   -- backslash-escaped.
-   --
-   local c = {}
-   local a = {}
-   for i = 1, table.getn(self.conditions) do
-      table.insert(c, self.conditions[i]:serialize())
-   end
-   for i = 1, table.getn(self.actions) do
-      table.insert(a, self.actions[i]:serialize())
-   end
-   c = table.concat(c, ";")
-   a = table.concat(a, ";")
-   return string.format("TRIG\"%s\"{CNDS{%s}ACTS{%s}}", self.name:gsub("\"", "\\\""), c, a)
-   --]]
 end

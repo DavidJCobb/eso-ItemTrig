@@ -53,21 +53,6 @@ function ItemTrig.Condition:format()
 end
 function ItemTrig.Condition:serialize()
    return ItemTrig.serializeTrigobject(self)
-   --[[
-   local count = table.getn(self.args)
-   if count > 0 then
-      local safeArgs = self.args
-      for i = 1, count do
-         if type(safeArgs[i]) == "string" then
-            safeArgs[i] = string.format("\"%s\"", safeArgs[i]:gsub("\"", "\\\""))
-         elseif type(safeArgs[i]) == "boolean" then
-            safeArgs[i] = tostring(safeArgs[i] and 1 or 0)
-         end
-      end
-      return tostring(self.base.opcode) .. ":" .. table.concat(safeArgs, ",")
-   end
-   return tostring(self.base.opcode)
-   --]]
 end
 
 ItemTrig.tableConditions = {
