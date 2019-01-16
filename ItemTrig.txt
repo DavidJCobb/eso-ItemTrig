@@ -4,6 +4,8 @@
 ## Version: alpha01
 
 ItemTrig.lua
+misc/opcode.lua
+misc/string.lua
 triggers/system.lua
 triggers/actions.lua
 triggers/conditions.lua

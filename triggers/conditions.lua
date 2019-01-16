@@ -51,6 +51,24 @@ function ItemTrig.Condition:format()
    end
    return string.format(self.base.format, unpack(renderArgs))
 end
+function ItemTrig.Condition:serialize()
+   return ItemTrig.serializeTrigobject(self)
+   --[[
+   local count = table.getn(self.args)
+   if count > 0 then
+      local safeArgs = self.args
+      for i = 1, count do
+         if type(safeArgs[i]) == "string" then
+            safeArgs[i] = string.format("\"%s\"", safeArgs[i]:gsub("\"", "\\\""))
+         elseif type(safeArgs[i]) == "boolean" then
+            safeArgs[i] = tostring(safeArgs[i] and 1 or 0)
+         end
+      end
+      return tostring(self.base.opcode) .. ":" .. table.concat(safeArgs, ",")
+   end
+   return tostring(self.base.opcode)
+   --]]
+end
 
 ItemTrig.tableConditions = {
    [1] = ConditionBase:new("Comment", "Comment:\n%s",
@@ -63,7 +81,7 @@ ItemTrig.tableConditions = {
    ),
    [2] = ConditionBase:new("Set And/Or", "Switch to using %s to evaluate conditions.",
       {
-         { type = "bool", placeholder = {"AND", "OR"} }
+         { type = "boolean", placeholder = {"AND", "OR"} }
       },
       function(state, context, args)
          if state.using_or == args[1] then
@@ -72,6 +90,10 @@ ItemTrig.tableConditions = {
          if state.using_or then
             state.using_or = false
             if not state.matched_or then
+               --
+               -- None of the "OR" conditions matched, so the 
+               -- trigger should fail.
+               --
                return false
             end
          else
@@ -82,7 +104,7 @@ ItemTrig.tableConditions = {
    ),
    [3] = ConditionBase:new("Always/Never", "This condition is %s true.",
       {
-         { type = "bool", placeholder = {"never", "always"} }
+         { type = "boolean", placeholder = {"never", "always"} }
       },
       function(state, context, args)
          return args[1]
