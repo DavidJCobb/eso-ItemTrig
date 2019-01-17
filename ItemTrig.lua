@@ -89,9 +89,39 @@ local function PerfTest(extra)
    CHAT_SYSTEM:AddMessage("Parsing " .. testcount .. " times took " .. (t2 - t1) .. " seconds.")
 end
 
+local function ShowWin()
+   ItemTrig.UIMain.Toggle()
+end
+local function WinTest()
+   local tList = {}
+   do
+      local t = ItemTrig.Trigger:new()
+      t.name = "Test trigger 01\n   LINE BREAK FUN"
+      table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
+      table.insert(t.conditions, ItemTrig.Condition:new(2, {true}))  -- Set And/Or
+      table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
+      table.insert(t.conditions, ItemTrig.Condition:new(3, {false})) -- Always/Never
+      table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
+      --
+      table.insert(tList, t)
+   end
+   do
+      local t = ItemTrig.Trigger:new()
+      t.name = "Test trigger 02"
+      table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
+      table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
+      --
+      table.insert(tList, t)
+   end
+   ItemTrig.UIMain.RenderTriggers(tList)
+end
+
 local function Initialize()
+   ItemTrig.UIMain.Setup()
    SLASH_COMMANDS["/cobbtrigtest"] = TriggerTest
    SLASH_COMMANDS["/cobbperftest"] = PerfTest
+   SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
+   SLASH_COMMANDS["/cobbwintest"]  = WinTest
 end
 local function OnAddonLoaded(eventCode, addonName)
    if addonName == ItemTrig.name then

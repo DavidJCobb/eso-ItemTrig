@@ -4,12 +4,16 @@
 ## Version: alpha01
 
 ItemTrig.lua
-misc/opcode.lua
 misc/string.lua
 triggers/system.lua
+triggers/serialization.lua
+triggers/opcode.lua
 triggers/actions.lua
 triggers/conditions.lua
 triggers/trigger.lua
+ui/column.xml
+trigedit/main.lua
+trigedit/main.xml
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates.
 # The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States

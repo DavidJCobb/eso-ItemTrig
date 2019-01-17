@@ -1,0 +1,80 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_TrigEdit_Template_TriggerOuter" virtual="true">
+         <Controls>
+            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name" inherits="ZO_SelectableLabel">
+               <Anchor point="TOPLEFT" offsetX="8" offsetY="8" />
+            </Label>
+         </Controls>
+      </Control>
+      <TopLevelControl name="ItemTrig_TrigEdit"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+         inherit="ItemTrig_Template_Column1"
+      >
+         <Dimensions x="800" y="500" />
+         <DimensionConstraints minX="600" minY="200" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.UIMain.OnInitialized(self) </OnInitialized>
+         <OnHide> ItemTrig.UIMain.DispatchEvent("OnHide") </OnHide>
+         <OnShow> ItemTrig.UIMain.DispatchEvent("OnShow") </OnShow>
+         <OnKeyUp> ItemTrig.UIMain.OnKeyUp(key, ctrl, alt, shift, command) </OnKeyUp>
+         <Controls>
+            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+            <Control name="$(parent)Header">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="TOPRIGHT" />
+               <Dimensions y="50" />
+               <Controls>
+                  <Label name="$(parent)Title" text="Window Title" font="ZoFontWinT2">
+                     <Anchor point="TOPLEFT" offsetX="5" offsetY="5" /> <!-- because who needs sensible defaults? -->
+                  </Label>
+               </Controls>
+            </Control>
+            <Control name="$(parent)ViewTriggerList">
+               <Anchor point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)"       relativePoint="BOTTOMRIGHT" />
+               <Controls>
+                  <Control name="$(parent)Col1">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="BOTTOMLEFT" />
+                     <Dimensions x="200" />
+                     <Controls>
+                        <Label name="$(parent)TestLabel" text="Col 1" font="ZoFontWinT2">
+                           <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                        </Label>
+                     </Controls>
+                  </Control>
+                  <Control name="$(parent)Col2" inherits="ZO_ScrollList">
+                     <Anchor point="TOPLEFT"    relativeTo="$(parent)Col1" relativePoint="TOPRIGHT" />
+                     <Anchor point="BOTTOMRIGHT" />
+                     <Controls>
+                     </Controls>
+                  </Control>
+               </Controls>
+            </Control>
+            <Control name="$(parent)ViewTriggerSingle">
+               <Anchor point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)"       relativePoint="BOTTOMRIGHT" />
+               <Controls>
+                  <Control name="$(parent)Col1">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="BOTTOMLEFT" />
+                     <Dimensions x="200" />
+                     <Controls>
+                     </Controls>
+                  </Control>
+                  <Control name="$(parent)Col2">
+                     <Anchor point="TOPLEFT"    relativeTo="$(parent)Col1" relativePoint="TOPRIGHT" />
+                     <Anchor point="BOTTOMRIGHT" />
+                     <Controls>
+                     </Controls>
+                  </Control>
+               </Controls>
+            </Control>
+         </Controls>
+      </TopLevelControl>
+   </Controls>
+</GuiXml>

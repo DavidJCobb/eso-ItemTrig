@@ -1,0 +1,14 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_Template_Column1" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template" virtual="true">
+         <Controls>
+            <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
+         </Controls>
+      </Control>
+      <Control name="ItemTrig_Template_Column2" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors ZO_Gamepad_BackgroundTopLevel_Base_Template" virtual="true">
+         <Controls>
+            <Control name="$(parent)NestedBg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template" />
+         </Controls>
+      </Control>
+   </Controls>
+</GuiXml>
