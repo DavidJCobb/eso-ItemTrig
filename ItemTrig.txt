@@ -12,6 +12,8 @@ triggers/actions.lua
 triggers/conditions.lua
 triggers/trigger.lua
 ui/column.xml
+ui/vscrolllist.lua
+ui/vscrolllist.xml
 trigedit/main.lua
 trigedit/main.xml
 

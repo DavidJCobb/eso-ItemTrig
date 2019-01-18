@@ -13,7 +13,7 @@ end
 
 local function scrollRelative(self, delta, onScrollCompleteCallback, animateInstantly)
    -- if in doubt, model after Zenimax's ZO_ScrollList_ScrollRelative
-   self:scrollBy(delta)
+   ItemTrig.UI.vScrollList.scrollBy(self, delta)
    --
    -- TODO: can/should we animate scrolling?
    --
@@ -22,29 +22,32 @@ local function scrollRelative(self, delta, onScrollCompleteCallback, animateInst
    end
 end
 local function onScrollUpButton(self)
-    scrollRelative(self:GetParent():GetParent(), -self.tlData.scrollStep)
+   local list = self:GetParent():GetParent()
+   scrollRelative(list, -list.tlData.scrollStep)
 end
 local function onScrollDownButton(self)
-    scrollRelative(self:GetParent():GetParent(), self.tlData.scrollStep)
+   local list = self:GetParent():GetParent()
+   scrollRelative(list, list.tlData.scrollStep)
 end
 
 ItemTrig.UI.vScrollList = {}
 ItemTrig.UI.vScrollList.__index = ItemTrig.UI.vScrollList
 function ItemTrig.UI.vScrollList:initialize(control, template, construct, options)
-   assert(template  ~= nil) -- string
-   assert(construct ~= nil) -- callback
+   --assert(template  ~= nil) -- string
+   --assert(construct ~= nil) -- callback
    if not options then
       options = {
          scrollStep = 1,
          reset      = nil, -- callback
       }
    end
+   local scrollbar = GetControl(self, "ScrollBar")
    self.tlData = {
       listItems  = {},
       contents   = GetControl(self, "Contents"),
-      scrollbar  = GetControl(self, "ScrollBar"),
-      scrollBtnU = GetControl(self, "Up"),
-      scrollBtnD = GetControl(self, "Down"),
+      scrollbar  = scrollbar,
+      scrollBtnU = GetControl(scrollbar, "Up"),
+      scrollBtnD = GetControl(scrollbar, "Down"),
       scrollStep = options.scrollStep,
       template   = template,
       construct  = construct,
@@ -54,18 +57,24 @@ function ItemTrig.UI.vScrollList:initialize(control, template, construct, option
    do
       local factoryFunction =
          function(objectPool)
-            return ZO_ObjectPool_CreateNamedControl(string.format("%s%dRow", self:GetName(), typeId), template, objectPool, self.tlData.contents)
+            return ZO_ObjectPool_CreateNamedControl(string.format("%sRow", self:GetName()), self.tlData.template, objectPool, self.tlData.contents)
          end
-      tlData.pool = ZO_ObjectPool:New(factoryFunction, options.reset or ZO_ObjectPool_DefaultResetControl)
+      self.tlData.pool = ZO_ObjectPool:New(factoryFunction, options.reset or ZO_ObjectPool_DefaultResetControl)
    end
    self.tlData.scrollBtnU:SetHandler("OnMouseDown", onScrollUpButton)
    self.tlData.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
    self.tlData.scrollbar:SetEnabled(false)
 end
-function ItemTrig.UI.vScrollList:push(obj, update)
-   table.insert(self.tlData.listItems)
+function ItemTrig.UI.vScrollList:clear(update)
+   ZO_ClearNumericallyIndexedTable(self.tlData.listItems)
    if (update == true) or (update == nil) then
-      self:redraw()
+      ItemTrig.UI.vScrollList.redraw(self)
+   end
+end
+function ItemTrig.UI.vScrollList:push(obj, update)
+   table.insert(self.tlData.listItems, obj)
+   if (update == true) or (update == nil) then
+      ItemTrig.UI.vScrollList.redraw(self)
    end
 end
 function ItemTrig.UI.vScrollList:redraw()
@@ -74,8 +83,9 @@ function ItemTrig.UI.vScrollList:redraw()
    local count    = table.getn(self.tlData.listItems)
    local yOffset  = -self.tlData.scrollTop
    local total    = 0
+   local index    = 0
    for i = 1, existing do
-      local child = self:GetChild(i)
+      local child = contents:GetChild(i)
       if i <= count then
          child:SetHidden(false)
          self.tlData.construct(child, self.tlData.listItems[i])
@@ -89,9 +99,11 @@ function ItemTrig.UI.vScrollList:redraw()
       else
          child:SetHidden(true)
       end
+      index = i
    end
-   if existing < count then
-      for i = count - existing, count do
+   index = index + 1
+   if index <= count then
+      for i = index, count do
          local control, key = self.tlData.pool:AcquireObject()
          control.key = key
          --
@@ -100,8 +112,8 @@ function ItemTrig.UI.vScrollList:redraw()
          control:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
          --
-         local height = child:GetHeight()
-         yOffset = yOffset + child:GetHeight()
+         local height = control:GetHeight()
+         yOffset = yOffset + control:GetHeight()
          total   = total   + height
       end
    end
@@ -116,10 +128,10 @@ function ItemTrig.UI.vScrollList:repositionItems()
    end
    local yOffset  = -self.tlData.scrollTop
    for i = 1, count do
-      local child = self:GetChild(i)
-      control:ClearAnchors()
-      control:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
-      control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
+      local child = contents:GetChild(i)
+      child:ClearAnchors()
+      child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
+      child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
       yOffset = yOffset + child:GetHeight()
    end
 end
@@ -132,14 +144,14 @@ function ItemTrig.UI.vScrollList:measureItems()
    end
    local yOffset  = 0
    for i = 1, count do
-      local child = self:GetChild(i)
+      local child = contents:GetChild(i)
       yOffset = yOffset + child:GetHeight()
    end
    return yOffset
 end
 function ItemTrig.UI.vScrollList:scrollBy(delta) -- analogous to ZO_ScrollList_ScrollRelative
    local position = delta + self.tlData.scrollTop
-   self:scrollTo(position)
+   ItemTrig.UI.vScrollList.scrollTo(self, position)
 end
 function ItemTrig.UI.vScrollList:scrollTo(position) -- analogous to ZO_ScrollList_ScrollAbsolute
    local height = self:GetHeight()
@@ -157,9 +169,5 @@ function ItemTrig.UI.vScrollList:scrollTo(position) -- analogous to ZO_ScrollLis
       end
    end
    self.tlData.scrollTop = position
-   self:repositionItems()
-end
-
-local function render(control)
-   
+   ItemTrig.UI.vScrollList.repositionItems(self)
 end

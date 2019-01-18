@@ -77,6 +77,7 @@ function ItemTrig.UIMain.OnInitialized(control)
    scene:AddFragment(fragment)
    --
    do
+      --[[
       local scrollType = Window.views.triggerlist.paneDataType
       local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
       Window.views.triggerlist.pane = scrollPane
@@ -110,6 +111,16 @@ function ItemTrig.UIMain.OnInitialized(control)
             -- it when setting up gamepad-/keyboard-navigation bindings.
          end
       )
+      --]]--
+      local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
+      Window.views.triggerlist.pane = scrollPane
+      scrollPane.tlData.template  = "ItemTrig_TrigEdit_Template_TriggerOuter"
+      scrollPane.tlData.construct =
+         function(control, data)
+            local text = GetControl(control, "Name")
+            text:SetText(data.name)
+            control:SetHeight(text:GetHeight())
+         end
    end
    
 end
@@ -125,6 +136,7 @@ function ItemTrig.UIMain.OnKeyUp(key, ctrl, alt, shift, command)
 end
 
 function ItemTrig.UIMain.RenderTriggers(tList)
+   --[[--
    local scrollPane = Window.views.triggerlist.pane
    local scrollType = Window.views.triggerlist.paneDataType
    local scrollData = ZO_ScrollList_GetDataList(scrollPane)
@@ -135,4 +147,11 @@ function ItemTrig.UIMain.RenderTriggers(tList)
    end
    --
    ZO_ScrollList_Commit(scrollPane)
+   --]]--
+   local scrollPane = Window.views.triggerlist.pane
+   ItemTrig.UI.vScrollList.clear(scrollPane, false)
+   for i = 1, table.getn(tList) do
+      ItemTrig.UI.vScrollList.push(scrollPane, tList[i], false)
+   end
+   ItemTrig.UI.vScrollList.redraw(scrollPane)
 end

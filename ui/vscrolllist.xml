@@ -1,0 +1,34 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_UITemplate_vScrollList" inherits="ZO_ScrollAreaBarBehavior" virtual="true">
+         <OnInitialized>
+            ItemTrig.UI.vScrollList.initialize(self)
+         </OnInitialized>
+         <!--
+            The inheritance just handles scrollbar opacity on hover, 
+            and our markup doesn't break compatibility with Zenimax 
+            code. However, we may want to keep an eye on that in 
+            case they change it.
+         -->
+         <Controls>
+            <Scroll name="$(parent)Contents" mouseEnabled="true">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SCROLL_BAR_WIDTH" />
+               <OnMouseWheel>
+                  self:scrollBy(self:GetParent(), -delta * self.tlData.scrollStep)
+               </OnMouseWheel>
+            </Scroll>
+            <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
+               <Anchor point="TOPLEFT"    relativeTo="$(parent)Contents" relativePoint="TOPRIGHT"    offsetY="16" />
+               <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Contents" relativePoint="BOTTOMRIGHT" offsetY="-16" />
+               <OnMouseWheel>
+                  self:GetParent():scrollBy(-delta * self.tlData.scrollStep)
+               </OnMouseWheel>
+               <OnValueChanged>
+                  self:GetParent():scrollTo(value)
+               </OnValueChanged>
+            </Slider>
+         </Controls>
+      </Control>
+   </Controls>
+</GuiXml>
