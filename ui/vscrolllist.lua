@@ -97,7 +97,7 @@ function ItemTrig.UI.vScrollList:resizeScrollbar(scrollMax)
    if scrollMax < 0 then
       scrollMax = ItemTrig.UI.vScrollList.measureItems(self)
    end
-   if scrollMax > 0 then
+   if scrollMax > 0 and scrollMax > listHeight then
       scrollbar:SetEnabled(true)
       scrollbar:SetHidden(false)
       scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))

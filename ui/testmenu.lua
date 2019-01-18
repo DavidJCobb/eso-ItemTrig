@@ -17,7 +17,8 @@ function ItemTrig.TestMenu.OnInitialized(control)
       end
    --
    ItemTrig.UI.vScrollList.clear(pane, false)
-   for i = 1, 20 do
+   --for i = 1, 20 do
+   for i = 1, 3 do
       local data = { name = "Test element " .. i }
       ItemTrig.UI.vScrollList.push(pane, data, false)
    end
