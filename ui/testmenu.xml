@@ -1,0 +1,29 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_TestMenu_Template_ScrollListItem" virtual="true">
+         <Controls>
+            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name" inherits="ZO_SelectableLabel">
+               <Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
+            </Label>
+         </Controls>
+      </Control>
+      <TopLevelControl name="ItemTrig_TestMenu"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+      >
+         <Dimensions x="600" y="300" />
+         <DimensionConstraints minX="600" minY="100" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.TestMenu.OnInitialized(self) </OnInitialized>
+         <Controls>
+            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+            <Control name="$(parent)vScrollListTest" inherits="ItemTrig_UITemplate_vScrollList">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="BOTTOMRIGHT" />
+            </Control>
+         </Controls>
+      </TopLevelControl>
+   </Controls>
+</GuiXml>

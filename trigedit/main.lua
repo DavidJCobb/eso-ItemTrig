@@ -77,41 +77,6 @@ function ItemTrig.UIMain.OnInitialized(control)
    scene:AddFragment(fragment)
    --
    do
-      --[[
-      local scrollType = Window.views.triggerlist.paneDataType
-      local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
-      Window.views.triggerlist.pane = scrollPane
-      --ZO_ScrollList_Initialize (scrollPane) -- called by XML inheritance
-      ZO_ScrollList_AddDataType(scrollPane, scrollType, "ItemTrig_TrigEdit_Template_TriggerOuter", 20,
-         function(control, data, scrollList) -- function to render a control
-            --
-            -- Testing indicates that GetChild, GetNamedChild, and friends 
-            -- are completely broken inside of these callbacks?!
-            --
-            local text = GetControl(control, "Name")
-            text:SetText(data.trigger.name)
-            control:SetHeight(text:GetHeight())
-            --
-            -- TODO: there's no way to get ZO_ScrollList to treat every list 
-            -- item as having variable height; it will ALWAYS assume that all 
-            -- instances of a registered data type have a uniform height. the 
-            -- only workaround is to make our own counterpart to ZO_ScrollList 
-            -- that actually checks the generated list items' heights after 
-            -- constructing them.
-            --
-            -- if we want gamepad support, we'll probably have to abstract the 
-            -- hell out of our menus in order to implement something analogous 
-            -- to Oblivion's keyboard navigation. zenimax may have made a system 
-            -- for moving focus from element to element using a gamepad, but i 
-            -- can't find documentation on it. it looks like the keybind system 
-            -- can intercept some keys without blocking all key input to the rest 
-            -- of the game. it's supposed to display your keybinds; for a PC UI, 
-            -- it doesn't even if you have Gamepad Mode enabled in your settings, 
-            -- but if we ever get that working, then we'll want to be mindful of 
-            -- it when setting up gamepad-/keyboard-navigation bindings.
-         end
-      )
-      --]]--
       local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
       Window.views.triggerlist.pane = scrollPane
       scrollPane.tlData.template  = "ItemTrig_TrigEdit_Template_TriggerOuter"
@@ -136,18 +101,6 @@ function ItemTrig.UIMain.OnKeyUp(key, ctrl, alt, shift, command)
 end
 
 function ItemTrig.UIMain.RenderTriggers(tList)
-   --[[--
-   local scrollPane = Window.views.triggerlist.pane
-   local scrollType = Window.views.triggerlist.paneDataType
-   local scrollData = ZO_ScrollList_GetDataList(scrollPane)
-   ZO_ScrollList_Clear(scrollPane)
-   --
-   for i=1, #tList do
-      scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(scrollType, { trigger = tList[i] })
-   end
-   --
-   ZO_ScrollList_Commit(scrollPane)
-   --]]--
    local scrollPane = Window.views.triggerlist.pane
    ItemTrig.UI.vScrollList.clear(scrollPane, false)
    for i = 1, table.getn(tList) do

@@ -15,17 +15,22 @@
                <Anchor point="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SCROLL_BAR_WIDTH" />
                <OnMouseWheel>
-                  self:scrollBy(self:GetParent(), -delta * self.tlData.scrollStep)
+                  local tl = self:GetParent()
+                  ItemTrig.UI.vScrollList.scrollBy(tl, -delta * tl.tlData.scrollStep)
                </OnMouseWheel>
             </Scroll>
             <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
                <Anchor point="TOPLEFT"    relativeTo="$(parent)Contents" relativePoint="TOPRIGHT"    offsetY="16" />
                <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Contents" relativePoint="BOTTOMRIGHT" offsetY="-16" />
                <OnMouseWheel>
-                  self:GetParent():scrollBy(-delta * self.tlData.scrollStep)
+                  local tl = self:GetParent()
+                  ItemTrig.UI.vScrollList.scrollBy(tl, -delta * tl.tlData.scrollStep)
                </OnMouseWheel>
                <OnValueChanged>
-                  self:GetParent():scrollTo(value)
+                  --ItemTrig.UI.vScrollList.scrollTo(self:GetParent(), value, true)
+                  local tl = self:GetParent()
+                  tl.tlData.scrollTop = value
+                  ItemTrig.UI.vScrollList.repositionItems(tl)
                </OnValueChanged>
             </Slider>
          </Controls>

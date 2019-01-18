@@ -115,6 +115,11 @@ local function WinTest()
    end
    ItemTrig.UIMain.RenderTriggers(tList)
 end
+local function ShowTestMenu()
+   SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
+   local pane = ItemTrig_TestMenu:GetNamedChild("vScrollListTest")
+   ItemTrig.UI.vScrollList.measureItems(pane)
+end
 
 local function Initialize()
    ItemTrig.UIMain.Setup()
@@ -122,6 +127,7 @@ local function Initialize()
    SLASH_COMMANDS["/cobbperftest"] = PerfTest
    SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
    SLASH_COMMANDS["/cobbwintest"]  = WinTest
+   SLASH_COMMANDS["/cobbshowtestmenu"]  = ShowTestMenu
 end
 local function OnAddonLoaded(eventCode, addonName)
    if addonName == ItemTrig.name then

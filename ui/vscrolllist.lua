@@ -8,7 +8,17 @@ end
 -- scrolling rather than whole-item scrolling. All items are 
 -- rendered at once.
 --
--- TODO: How do we handle overflow?
+-- TODO: Can we convert this into a wrapper instead of just a set 
+-- of functions that gets called on the element? Like this:
+--
+--    ItemTrig.UI.vScrollList.install(control)
+--
+--    local list = ItemTrig.UI.vScrollList.cast(control)
+--    list:scrollBy(40)
+--
+-- The basic idea would be that install would create an instance 
+-- of the vScrollList class, and write it to an expando field on 
+-- the control; then, cast would just read that field.
 --
 
 local function scrollRelative(self, delta, onScrollCompleteCallback, animateInstantly)
@@ -37,7 +47,7 @@ function ItemTrig.UI.vScrollList:initialize(control, template, construct, option
    --assert(construct ~= nil) -- callback
    if not options then
       options = {
-         scrollStep = 1,
+         scrollStep = 40,
          reset      = nil, -- callback
       }
    end
@@ -52,7 +62,7 @@ function ItemTrig.UI.vScrollList:initialize(control, template, construct, option
       template   = template,
       construct  = construct,
       scrollTop  = 0,
-      scrollMax  = -1,
+      scrollMax  = -1, -- height of all generated elements
    }
    do
       local factoryFunction =
@@ -77,6 +87,29 @@ function ItemTrig.UI.vScrollList:push(obj, update)
       ItemTrig.UI.vScrollList.redraw(self)
    end
 end
+function ItemTrig.UI.vScrollList:resizeScrollbar(scrollMax)
+   local scrollbar  = self.tlData.scrollbar
+   local listHeight = self.tlData.contents:GetHeight()
+   local barHeight  = scrollbar:GetHeight()
+   if scrollMax == nil then
+      scrollMax = self.tlData.scrollMax
+   end
+   if scrollMax < 0 then
+      scrollMax = ItemTrig.UI.vScrollList.measureItems(self)
+   end
+   if scrollMax > 0 then
+      scrollbar:SetEnabled(true)
+      scrollbar:SetHidden(false)
+      scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))
+      scrollbar:SetMinMax(0, scrollMax - listHeight)
+   else
+      self.tlData.scrollTop = 0
+      scrollbar:SetThumbTextureHeight(barHeight)
+      scrollbar:SetMinMax(0, 0)
+      scrollbar:SetEnabled(false)
+      scrollbar:SetHidden(true)
+   end
+end
 function ItemTrig.UI.vScrollList:redraw()
    local contents = self.tlData.contents
    local existing = contents:GetNumChildren()
@@ -94,7 +127,7 @@ function ItemTrig.UI.vScrollList:redraw()
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
          --
          local height = child:GetHeight()
-         yOffset = yOffset + child:GetHeight()
+         yOffset = yOffset + height
          total   = total   + height
       else
          child:SetHidden(true)
@@ -113,11 +146,12 @@ function ItemTrig.UI.vScrollList:redraw()
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
          --
          local height = control:GetHeight()
-         yOffset = yOffset + control:GetHeight()
+         yOffset = yOffset + height
          total   = total   + height
       end
    end
    self.tlData.scrollMax = total
+   ItemTrig.UI.vScrollList.resizeScrollbar(self, total)
 end
 function ItemTrig.UI.vScrollList:repositionItems()
    local contents = self.tlData.contents
@@ -134,6 +168,7 @@ function ItemTrig.UI.vScrollList:repositionItems()
       child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
       yOffset = yOffset + child:GetHeight()
    end
+   ItemTrig.UI.vScrollList.resizeScrollbar(self)
 end
 function ItemTrig.UI.vScrollList:measureItems()
    local contents = self.tlData.contents
@@ -147,14 +182,38 @@ function ItemTrig.UI.vScrollList:measureItems()
       local child = contents:GetChild(i)
       yOffset = yOffset + child:GetHeight()
    end
+   self.tlData.scrollMax = yOffset
    return yOffset
 end
 function ItemTrig.UI.vScrollList:scrollBy(delta) -- analogous to ZO_ScrollList_ScrollRelative
    local position = delta + self.tlData.scrollTop
    ItemTrig.UI.vScrollList.scrollTo(self, position)
 end
+function ItemTrig.UI.vScrollList:scrollToItem(index, shouldBeCentered)
+   if index < 0 then
+      return
+   end
+   local contents = self.tlData.contents
+   if index > contents:GetNumChildren() then
+      return
+   end
+   local child    = contents:GetChild(index)
+   local position = child:GetTop()
+   if shouldBeCentered then
+      local listHeight  = contents:GetHeight()
+      local childHeight = child:GetHeight()
+      if childHeight >= listHeight then
+         ItemTrig.UI.vScrollList.scrollTo(self, position)
+      else
+         local offset = (listHeight - childHeight) / 2
+         ItemTrig.UI.vScrollList.scrollTo(self, position - offset)
+      end
+   else
+      ItemTrig.UI.vScrollList.scrollTo(self, position)
+   end
+end
 function ItemTrig.UI.vScrollList:scrollTo(position) -- analogous to ZO_ScrollList_ScrollAbsolute
-   local height = self:GetHeight()
+   local height = self.tlData.contents:GetHeight()
    if position < 0 then
       position = 0
    else
@@ -168,6 +227,14 @@ function ItemTrig.UI.vScrollList:scrollTo(position) -- analogous to ZO_ScrollLis
          end
       end
    end
-   self.tlData.scrollTop = position
-   ItemTrig.UI.vScrollList.repositionItems(self)
+   if self.tlData.scrollTop == position then
+      return
+   end
+   if self.tlData.scrollbar:IsHidden() then
+      self.tlData.scrollTop = position
+      return
+   end
+   --self.tlData.scrollTop = position
+   --ItemTrig.UI.vScrollList.repositionItems(self)
+   self.tlData.scrollbar:SetValue(position)
 end
