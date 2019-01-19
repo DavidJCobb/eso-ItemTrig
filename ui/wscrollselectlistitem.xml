@@ -1,0 +1,13 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_UITemplate_WScrollSelectListItem" virtual="true">
+         <OnMouseUp>
+            if upInside then -- the mousedown event happened on this same control
+               local list   = self:GetParent():GetParent()
+               local widget = ItemTrig.UI.WScrollSelectList:cast(list)
+               widget:_onItemSelected(self)
+            end
+         </OnMouseUp>
+      </Control>
+   </Controls>
+</GuiXml>

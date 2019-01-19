@@ -9,8 +9,8 @@ function ItemTrig.TestMenu.OnInitialized(control)
    --
    local pane = ItemTrig_TestMenu:GetNamedChild("vScrollListTest")
    local list = ItemTrig.UI.WScrollList:cast(pane)
-   list.elementTemplateName = "ItemTrig_TestMenu_Template_ScrollListItem"
-   list.callbackConstruct   =
+   list.element.template    = "ItemTrig_TestMenu_Template_ScrollListItem"
+   list.element.toConstruct =
       function(control, data)
          local text = GetControl(control, "Name")
          text:SetText(data.name)

@@ -1,0 +1,9 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_UITemplate_WScrollSelectList" inherits="ItemTrig_UITemplate_WScrollList" virtual="true">
+         <OnInitialized>
+            ItemTrig.UI.WScrollSelectList:install(self)
+         </OnInitialized>
+      </Control>
+   </Controls>
+</GuiXml>

@@ -58,20 +58,27 @@ end
 ItemTrig.UI.WScrollList = {}
 ItemTrig.UI.WScrollList.__index = ItemTrig.UI.WScrollList
 function ItemTrig.UI.WScrollList:install(control, options)
+   if control.widgets and control.widgets.scrollList then
+      d("WARNING: Attempting to install WScrollList on a control that already has it?")
+   end
    if not options then
-      options = {}
+      options = {
+         element = {},
+      }
    end
    local scrollbar = GetControl(control, "ScrollBar")
    local result    = {
+      element    = {
+         template    = options.element.template    or "",
+         toConstruct = options.element.toConstruct or nil,
+         toReset     = options.element.toReset     or nil,
+      },
       control    = control,
       contents   = GetControl(control, "Contents"),
       scrollbar  = scrollbar,
       scrollBtnU = GetControl(scrollbar, "Up"),
       scrollBtnD = GetControl(scrollbar, "Down"),
       scrollStep = options.scrollStep or 40,
-      elementTemplateName = options.elementTemplateName or options.template or "",
-      callbackConstruct   = options.callbackConstruct,
-      callbackReset       = options.callbackReset,
       scrollTop      = 0,
       scrollMax      = -1, -- height of all generated elements
       paddingStart   = options.paddingStart   or 0,
@@ -84,9 +91,9 @@ function ItemTrig.UI.WScrollList:install(control, options)
    do
       local factoryFunction =
          function(objectPool)
-            return ZO_ObjectPool_CreateNamedControl(string.format("%sRow", result.control:GetName()), result.elementTemplateName, objectPool, result.contents)
+            return ZO_ObjectPool_CreateNamedControl(string.format("%sRow", result.control:GetName()), result.element.template, objectPool, result.contents)
          end
-      result.pool = ZO_ObjectPool:New(factoryFunction, result.callbackReset or ZO_ObjectPool_DefaultResetControl)
+      result.element._pool = ZO_ObjectPool:New(factoryFunction, result.element.toReset or ZO_ObjectPool_DefaultResetControl)
    end
    result.scrollBtnU:SetHandler("OnMouseDown", onScrollUpButton)
    result.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
@@ -120,6 +127,14 @@ function ItemTrig.UI.WScrollList:indexOf(control)
       end
    end
    return 0
+end
+function ItemTrig.UI.WScrollList:controlByIndex(index)
+   local contents = self.contents
+   local count    = contents:GetNumChildren()
+   if index > count or index < 1 then
+      return nil
+   end
+   return contents:GetChild(index)
 end
 function ItemTrig.UI.WScrollList:push(obj, update)
    table.insert(self.listItems, obj)
@@ -161,7 +176,7 @@ function ItemTrig.UI.WScrollList:redraw()
       local child = contents:GetChild(i)
       if i <= count then
          child:SetHidden(false)
-         self.callbackConstruct(child, self.listItems[i])
+         self.element.toConstruct(child, self.listItems[i])
          control:ClearAnchors()
          control:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
@@ -177,10 +192,10 @@ function ItemTrig.UI.WScrollList:redraw()
    index = index + 1
    if index <= count then
       for i = index, count do
-         local control, key = self.pool:AcquireObject()
+         local control, key = self.element._pool:AcquireObject()
          control.key = key
          --
-         self.callbackConstruct(control, self.listItems[i])
+         self.element.toConstruct(control, self.listItems[i])
          control:ClearAnchors()
          control:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)

@@ -13,6 +13,9 @@ triggers/conditions.lua
 triggers/trigger.lua
 ui/wscrolllist.lua
 ui/wscrolllist.xml
+ui/wscrollselectlist.lua
+ui/wscrollselectlist.xml
+ui/wscrollselectlistitem.xml
 ui/testmenu.lua
 ui/testmenu.xml
 trigedit/main.lua

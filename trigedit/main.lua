@@ -65,16 +65,27 @@ function ItemTrig.UIMain.OnInitialized(control)
    --
    do
       local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
-      scrollPane = ItemTrig.UI.WScrollList:cast(scrollPane)
+      scrollPane = ItemTrig.UI.WScrollSelectList:cast(scrollPane)
       Window.views.triggerlist.pane = scrollPane
       scrollPane.paddingBetween      = 8
-      scrollPane.elementTemplateName = "ItemTrig_TrigEdit_Template_TriggerOuter"
-      scrollPane.callbackConstruct   =
+      scrollPane.element.template    = "ItemTrig_TrigEdit_Template_TriggerOuter"
+      scrollPane.element.toConstruct =
          function(control, data)
             local text = GetControl(control, "Name")
             local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
             text:SetText(data.name)
             control:SetHeight(text:GetHeight() + paddingY * 2)
+         end
+      scrollPane.element.onSelect =
+         function(index, control)
+            local text = GetControl(control, "Name")
+            --text:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
+            text:SetColor(1.0, 0.25, 0.0)
+         end
+      scrollPane.element.onDeselect =
+         function(index, control)
+            local text = GetControl(control, "Name")
+            text:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
          end
    end
 end
