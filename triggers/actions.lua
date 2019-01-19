@@ -22,7 +22,7 @@ ItemTrig.tableActions = {
    ),
    [2] = ActionBase:new("Log Message", "Log a message in the chatbox:\n%s",
       {
-         { type = "string", placeholder = "text" }
+         [1] = { type = "string", placeholder = "text" },
       },
       function(state, context, args)
          CHAT_SYSTEM:AddMessage(args[1])
@@ -30,7 +30,7 @@ ItemTrig.tableActions = {
    ),
    [3] = ActionBase:new("Run Nested Trigger", "Execute a nested trigger.",
       {
-         { type = "trigger" }
+         [1] = { type = "trigger" },
       },
       function(state, context, args)
          local r = args[1]:exec(context)
@@ -41,7 +41,7 @@ ItemTrig.tableActions = {
    ),
    [4] = ActionBase:new("Comment", "Comment:\n%s",
       {
-         { type = "string", placeholder = "text" }
+         [1] = { type = "string", placeholder = "text" },
       },
       function(state, context, args)
          return nil
@@ -52,3 +52,5 @@ ItemTrig.countActions = table.getn(ItemTrig.tableActions)
 for i = 1, ItemTrig.countActions do
    ItemTrig.tableActions[i].opcode = i
 end
+
+ItemTrig.TRIGGER_ACTION_COMMENT = ItemTrig.tableActions[4]

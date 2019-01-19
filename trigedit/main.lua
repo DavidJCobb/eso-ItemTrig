@@ -79,22 +79,53 @@ function ItemTrig.UIMain.OnInitialized(control)
       scrollPane.element.template    = "ItemTrig_TrigEdit_Template_TriggerOuter"
       scrollPane.element.toConstruct =
          function(control, data)
-            local text = GetControl(control, "Name")
-            local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-            text:SetText(data.name)
-            control:SetHeight(text:GetHeight() + paddingY * 2)
+            local height = 0
+            do
+               local text = GetControl(control, "Name")
+               local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
+               text:SetText(data.name)
+               height = text:GetHeight() + paddingY * 2
+            end
+            do
+               local text = GetControl(control, "Description")
+               local desc = data:getDescription()
+               text:SetText(desc)
+               if desc == "" then
+                  text:SetHidden(true)
+               else
+                  text:SetHidden(false)
+               local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
+                  height = height + text:GetHeight()
+               end
+            end
+            control:SetHeight(height)
+            --
+            local enabled = GetControl(control, "Enabled") -- checkbox
+            enabled.toggleFunction =
+               function(self, checked)
+                  local control = self:GetParent()
+                  d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
+               end
          end
       scrollPane.element.onSelect =
          function(index, control)
-            local text = GetControl(control, "Name")
-            --text:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_HIGHLIGHT))
-            text:SetColor(1.0, 0.25, 0.0)
+            local text  = GetControl(control, "Name")
+            local desc  = GetControl(control, "Description")
+            local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
+            --color = {1.0, 0.25, 0.0}
+            text:SetColor(unpack(color))
+            desc:SetColor(unpack(color))
          end
       scrollPane.element.onDeselect =
          function(index, control)
-            local text = GetControl(control, "Name")
-            text:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+            local text  = GetControl(control, "Name")
+            local desc  = GetControl(control, "Description")
+            local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
+            text:SetColor(unpack(color))
+            desc:SetColor(unpack(color))
          end
+         --
+         -- Should we also use INTERFACE_TEXT_COLOR_HIGHLIGHT on mouseover ?
       scrollPane.element.onDoubleClick =
          function(index, control)
             d("List item " .. index .. " double-clicked.")

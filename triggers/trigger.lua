@@ -5,14 +5,39 @@ ItemTrig.Trigger.__index = ItemTrig.Trigger
 function ItemTrig.Trigger:new()
    local result = {}
    setmetatable(result, self)
-   result.name       = ""
-   result.conditions = {} -- array
-   result.actions    = {} -- array
+   result.name        = ""
+   result.enabled     = true
+   result.entryPoints = {}
+   result.conditions  = {} -- array
+   result.actions     = {} -- array
    result.state = {
       using_or   = false,
       matched_or = false
    }
    return result
+end
+function ItemTrig.Trigger:getDescription()
+   --
+   -- If a trigger's first condition or action is a comment, then 
+   -- that comment can be used as a trigger description.
+   --
+   if table.getn(self.conditions) > 0 then
+      local c = self.conditions[1]
+      if c.base == ItemTrig.TRIGGER_CONDITION_COMMENT then
+         if c.args[1] ~= "" then
+            return c.args[1]
+         end
+      end
+   end
+   if table.getn(self.actions) > 0 then
+      local a = self.actions[1]
+      if a.base == ItemTrig.TRIGGER_ACTION_COMMENT then
+         if a.args[1] ~= "" then
+            return a.args[1]
+         end
+      end
+   end
+   return ""
 end
 function ItemTrig.Trigger:debugDump()
    CHAT_SYSTEM:AddMessage("== Printing trigger " .. self.name .. "...")

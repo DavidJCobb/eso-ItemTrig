@@ -3,37 +3,42 @@ if not ItemTrig then return end
 local cc_TRIGGER_START    = "$"
 local cc_TRIGGER_NAME_END = "<"
 local cc_TRIGGER_END      = ">"
+local cc_CHUNK_START      = "["
+local cc_CHUNK_HEADER_END = "|"
+local cc_CHUNK_END        = "]"
 local cc_OPCODE_START     = "("
 local cc_OPCODE_END       = ")"
-local cc_OPCODE_ARG_START = "@"
-local cc_OPCODE_ARG_END   = "#"
-local cc_COND_LIST_START  = "{"
-local cc_ACTN_LIST_START  = "["
-local cc_OPCODE_LIST_END  = "}"
+local cc_OPCODE_ARG_START = "{"
+local cc_OPCODE_ARG_END   = "}"
 local cc_SUBST_TRIG_INDEX = "^"
 
-local allControlCodes = table.concat({
-   cc_TRIGGER_START,
-   cc_TRIGGER_NAME_END,
-   cc_TRIGGER_END,
-   cc_OPCODE_START,
-   cc_OPCODE_END,
-   cc_OPCODE_ARG_START,
-   cc_OPCODE_ARG_END,
-   cc_COND_LIST_START,
-   cc_ACTN_LIST_START,
-   cc_OPCODE_LIST_END,
-   cc_SUBST_TRIG_INDEX,
-}, "")
+local allControlCodes = "" -- used by toSafeString
+do
+   local list = {
+      cc_TRIGGER_START,
+      cc_TRIGGER_NAME_END,
+      cc_TRIGGER_END,
+      cc_CHUNK_START,
+      cc_CHUNK_HEADER_END,
+      cc_CHUNK_END,
+      cc_OPCODE_START,
+      cc_OPCODE_END,
+      cc_OPCODE_ARG_START,
+      cc_OPCODE_ARG_END,
+      cc_SUBST_TRIG_INDEX,
+   }
+   for i = 1, table.getn(list) do
+      allControlCodes = allControlCodes .. "%" .. list[i] -- ensure pattern-matching doesn't choke on these glyphs
+   end
+end
 
-local pattern_TRIGGER     = "%b" .. cc_TRIGGER_START .. cc_TRIGGER_END
-local pattern_TRIGGERNAME = "%b" .. cc_TRIGGER_START .. cc_TRIGGER_NAME_END
-local pattern_TRIGGERBODY = "%b" .. cc_TRIGGER_NAME_END .. cc_TRIGGER_END
-local pattern_CONDITIONS  = "%b" .. cc_COND_LIST_START .. cc_OPCODE_LIST_END
-local pattern_ACTIONS     = "%b" .. cc_ACTN_LIST_START .. cc_OPCODE_LIST_END
-local pattern_OPCODE      = "%b" .. cc_OPCODE_START .. cc_OPCODE_END
-local pattern_OPCODEARG   = "%b" .. cc_OPCODE_ARG_START  .. cc_OPCODE_ARG_END
-local pattern_OPCODEINDEX = "^(%d+)[" .. cc_OPCODE_ARG_START .. cc_OPCODE_END .. "]"
+local pattern_TRIGGER      = "%b" .. cc_TRIGGER_START .. cc_TRIGGER_END
+local pattern_TRIGGERNAME  = "%b" .. cc_TRIGGER_START .. cc_TRIGGER_NAME_END
+local pattern_TRIGGERBODY  = "%b" .. cc_TRIGGER_NAME_END .. cc_TRIGGER_END
+local pattern_TRIGGERCHUNK = "%b" .. cc_CHUNK_START .. cc_CHUNK_END
+local pattern_OPCODE       = "%b" .. cc_OPCODE_START .. cc_OPCODE_END
+local pattern_OPCODEARG    = "%b" .. cc_OPCODE_ARG_START  .. cc_OPCODE_ARG_END
+local pattern_OPCODEINDEX  = "^(%d+)[%" .. cc_OPCODE_ARG_START .. "%" .. cc_OPCODE_END .. "]"
 
 local format_OPCODEARG = cc_OPCODE_ARG_START .. "%s" .. cc_OPCODE_ARG_END
 
@@ -77,20 +82,28 @@ local function serializeOpcode(o)
    return cc_OPCODE_START .. tostring(o.base.opcode) .. cc_OPCODE_END
 end
 local function serializeTrigger(t)
-   local c = {}
-   local a = {}
-   for i = 1, table.getn(t.conditions) do
-      table.insert(c, t.conditions[i]:serialize())
+   local function _toChunk(head, body)
+      return cc_CHUNK_START .. head .. cc_CHUNK_HEADER_END .. body .. cc_CHUNK_END
    end
-   for i = 1, table.getn(t.actions) do
-      table.insert(a, t.actions[i]:serialize())
+   --
+   local chunks = {
+      _toChunk("e", t.enabled and "1" or "0"),
+   }
+   do
+      local c = {}
+      local a = {}
+      for i = 1, table.getn(t.conditions) do
+         table.insert(c, t.conditions[i]:serialize())
+      end
+      for i = 1, table.getn(t.actions) do
+         table.insert(a, t.actions[i]:serialize())
+      end
+      table.insert(chunks, _toChunk("c", table.concat(c, "")))
+      table.insert(chunks, _toChunk("a", table.concat(a, "")))
    end
-   c = table.concat(c, "")
-   a = table.concat(a, "")
-   return string.format("%s%s%s%s%s%s%s%s%s%s",
+   return string.format("%s%s%s%s%s", 
       cc_TRIGGER_START, t.name, cc_TRIGGER_NAME_END,
-      cc_COND_LIST_START, c, cc_OPCODE_LIST_END,
-      cc_ACTN_LIST_START, a, cc_OPCODE_LIST_END,
+      table.concat(chunks, ""),
       cc_TRIGGER_END
    )
 end
@@ -171,21 +184,42 @@ function _Parser:_parseTrigger(s)
    t.name      = sTrig:match(pattern_TRIGGERNAME):sub(2, -2)
    self.currentTrig = t.name -- for _Parse:warn
    sTrig       = sTrig:match(pattern_TRIGGERBODY):sub(2, -2)
-   local cond  = sTrig:match(pattern_CONDITIONS):sub(2, -2)
-   local actn  = sTrig:match(pattern_ACTIONS):sub(2, -2)
+   for chunk in sTrig:gmatch(pattern_TRIGGERCHUNK) do
+      chunk = chunk:sub(2, -2) -- strip bounds
+      local head
+      local body
+      do
+         local delim = chunk:find(cc_CHUNK_HEADER_END)
+         head = chunk:sub(1, delim - 1)
+         body = chunk:sub(delim + 1)
+         chunk = nil -- free
+      end
+      if     head == "a" then -- Chunk: Actions
+         for word in body:gmatch(pattern_OPCODE) do
+            local action = self:_parseOpcode(word:sub(2, -2), ItemTrig.Action)
+            table.insert(t.actions, action)
+         end
+      elseif head == "c" then -- Chunk: Conditions
+         for word in body:gmatch(pattern_OPCODE) do
+            local condition = self:_parseOpcode(word:sub(2, -2), ItemTrig.Condition)
+            table.insert(t.conditions, condition)
+         end
+      elseif head == "e" then -- Chunk: Trigger Is Enabled?
+         t.enabled = false
+         if body ~= "0" then
+            t.enabled = true
+         end
+      else
+         if head == nil then
+            self:warn("Trigger contained a chunk with no header.")
+         else
+            self:warn("Trigger contained unrecognized chunk header: " .. tostring(head))
+         end
+      end
+      head = nil
+      body = nil
+   end
    sTrig = nil -- ditch the string ASAP to save memory
-   --
-   for word in cond:gmatch(pattern_OPCODE) do
-      local condition = self:_parseOpcode(word:sub(2, -2), ItemTrig.Condition)
-      table.insert(t.conditions, condition)
-   end
-   cond = nil -- ditch the string ASAP to save memory
-   --
-   for word in actn:gmatch(pattern_OPCODE) do
-      local action = self:_parseOpcode(word:sub(2, -2), ItemTrig.Action)
-      table.insert(t.actions, action)
-   end
-   actn = nil -- ditch the string ASAP to save memory
    --
    self.currentTrig = ""
    return t
@@ -285,7 +319,7 @@ end
 
 function ItemTrig.serializeTrigobject(o)
    local mt = getmetatable(o)
-   if mt == ItemTrig.Condition or mt == ItemTrig.Action then
+   if mt == ItemTrig.Opcode then
       return serializeOpcode(o)
    elseif mt == ItemTrig.Trigger then
       return serializeTrigger(o)

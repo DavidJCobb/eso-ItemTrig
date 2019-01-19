@@ -16,7 +16,7 @@ end
 ItemTrig.tableConditions = {
    [1] = ConditionBase:new("Comment", "Comment:\n%s",
       {
-         { type = "string", placeholder = "text" }
+         [1] = { type = "string", placeholder = "text" },
       },
       function(state, context, args)
          return nil
@@ -24,7 +24,7 @@ ItemTrig.tableConditions = {
    ),
    [2] = ConditionBase:new("Set And/Or", "Switch to using %s to evaluate conditions.",
       {
-         { type = "boolean", placeholder = {"AND", "OR"} }
+         [1] = { type = "boolean", placeholder = {"AND", "OR"} },
       },
       function(state, context, args)
          if state.using_or == args[1] then
@@ -47,7 +47,7 @@ ItemTrig.tableConditions = {
    ),
    [3] = ConditionBase:new("Always/Never", "This condition is %s true.",
       {
-         { type = "boolean", placeholder = {"never", "always"} }
+         [1] = { type = "boolean", placeholder = {"never", "always"} },
       },
       function(state, context, args)
          return args[1]
@@ -58,3 +58,5 @@ ItemTrig.countConditions = table.getn(ItemTrig.tableConditions)
 for i = 1, ItemTrig.countConditions do
    ItemTrig.tableConditions[i].opcode = i
 end
+
+ItemTrig.TRIGGER_CONDITION_COMMENT = ItemTrig.tableConditions[1]

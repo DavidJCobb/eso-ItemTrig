@@ -6,8 +6,14 @@
       >
          <Controls>
             <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
-            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name">
-               <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+            <Button inherits="ZO_CheckButton" name="$(parent)Enabled">
+               <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+            </Button>
+            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+               <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="5" offsetY="-2" relativeTo="$(parent)Enabled" />
+            </Label>
+            <Label name="$(parent)Description" font="ZoFontWinT2" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+               <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
             </Label>
          </Controls>
       </Control>

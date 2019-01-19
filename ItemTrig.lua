@@ -96,7 +96,8 @@ local function WinTest01()
    local tList = {}
    do
       local t = ItemTrig.Trigger:new()
-      t.name = "Test trigger 01\n   LINE BREAK FUN"
+      t.name = "Test trigger 01"
+      table.insert(t.conditions, ItemTrig.Condition:new(1, {"Condition comment"}))  -- Comment
       table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
       table.insert(t.conditions, ItemTrig.Condition:new(2, {true}))  -- Set And/Or
       table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
@@ -109,6 +110,7 @@ local function WinTest01()
       local t = ItemTrig.Trigger:new()
       t.name = "Test trigger 02"
       table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
+      table.insert(t.actions, ItemTrig.Action:new(4, {"Action comment"})) -- Comment
       table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
       --
       table.insert(tList, t)
