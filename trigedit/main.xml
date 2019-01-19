@@ -47,7 +47,6 @@
          <OnInitialized> ItemTrig.UIMain.OnInitialized(self) </OnInitialized>
          <OnHide> ItemTrig.UIMain.DispatchEvent("OnHide") </OnHide>
          <OnShow> ItemTrig.UIMain.DispatchEvent("OnShow") </OnShow>
-         <OnKeyUp> ItemTrig.UIMain.OnKeyUp(key, ctrl, alt, shift, command) </OnKeyUp>
          <Controls>
             <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
             <Control name="$(parent)Header">
@@ -74,7 +73,7 @@
                         </Label>
                      </Controls>
                   </Control>
-                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_vScrollList">
+                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollList">
                      <Anchor point="TOPLEFT"    relativeTo="$(parent)Col1" relativePoint="TOPRIGHT" />
                      <Anchor point="BOTTOMRIGHT" />
                      <Controls>

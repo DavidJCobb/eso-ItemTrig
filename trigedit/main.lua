@@ -2,29 +2,6 @@ if not ItemTrig then return end
 
 ItemTrig.UIMain = {}
 
-local GAMEPAD_KEY_DUP    = 123 -- D-Pad direction
-local GAMEPAD_KEY_DDOWN  = 124 -- D-Pad direction
-local GAMEPAD_KEY_DLEFT  = 125 -- D-Pad direction
-local GAMEPAD_KEY_DRIGHT = 126 -- D-Pad direction
-local GAMEPAD_KEY_START  = 127
-local GAMEPAD_KEY_BACK   = 128
-local GAMEPAD_KEY_LS     = 129 -- stick click
-local GAMEPAD_KEY_RS     = 130 -- stick click
-local GAMEPAD_KEY_LB     = 131
-local GAMEPAD_KEY_RB     = 132
-local GAMEPAD_KEY_A      = 133
-local GAMEPAD_KEY_B      = 134
-local GAMEPAD_KEY_X      = 135
-local GAMEPAD_KEY_Y      = 136
-local GAMEPAD_KEY_LUP    = 139 -- left stick movement direction
-local GAMEPAD_KEY_LDOWN  = 140 -- left stick movement direction
-local GAMEPAD_KEY_LLEFT  = 141 -- left stick movement direction
-local GAMEPAD_KEY_LRIGHT = 142 -- left stick movement direction
-local GAMEPAD_KEY_RUP    = 143 -- right stick movement direction
-local GAMEPAD_KEY_RDOWN  = 144 -- right stick movement direction
-local GAMEPAD_KEY_RLEFT  = 145 -- right stick movement direction
-local GAMEPAD_KEY_RRIGHT = 146 -- right stick movement direction
-
 local GAMEPAD_ITEMTRIG_WINDOW_SCENE
 local GAMEPAD_ITEMTRIG_WINDOW
 
@@ -88,10 +65,11 @@ function ItemTrig.UIMain.OnInitialized(control)
    --
    do
       local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
+      scrollPane = ItemTrig.UI.WScrollList:cast(scrollPane)
       Window.views.triggerlist.pane = scrollPane
-      scrollPane.tlData.paddingBetween = 8
-      scrollPane.tlData.template  = "ItemTrig_TrigEdit_Template_TriggerOuter"
-      scrollPane.tlData.construct =
+      scrollPane.paddingBetween      = 8
+      scrollPane.elementTemplateName = "ItemTrig_TrigEdit_Template_TriggerOuter"
+      scrollPane.callbackConstruct   =
          function(control, data)
             local text = GetControl(control, "Name")
             local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
@@ -99,24 +77,13 @@ function ItemTrig.UIMain.OnInitialized(control)
             control:SetHeight(text:GetHeight() + paddingY * 2)
          end
    end
-   
-end
-function ItemTrig.UIMain.OnKeyDown(key, ctrl, alt, shift, command)
-   --d("Detected keydown " .. key)
-end
-function ItemTrig.UIMain.OnKeyUp(key, ctrl, alt, shift, command)
-   if key == GAMEPAD_KEY_START then -- safety, while we tinker
-      ItemTrig.UIMain.Toggle()
-   else
-      return false -- don't block the game from receiving other keys (doesn't work? ZOS said they may implement it; did they?)
-   end
 end
 
 function ItemTrig.UIMain.RenderTriggers(tList)
    local scrollPane = Window.views.triggerlist.pane
-   ItemTrig.UI.vScrollList.clear(scrollPane, false)
+   scrollPane:clear(false)
    for i = 1, table.getn(tList) do
-      ItemTrig.UI.vScrollList.push(scrollPane, tList[i], false)
+      scrollPane:push(tList[i], false)
    end
-   ItemTrig.UI.vScrollList.redraw(scrollPane)
+   scrollPane:redraw()
 end
