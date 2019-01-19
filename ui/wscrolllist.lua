@@ -114,6 +114,13 @@ function ItemTrig.UI.WScrollList:indexOf(control)
    end
    return 0
 end
+function ItemTrig.UI.WScrollList:at(index)
+   local count = table.getn(self.listItems)
+   if index > count or index < 1 then
+      return nil
+   end
+   return self.listItems[index]
+end
 function ItemTrig.UI.WScrollList:controlByIndex(index)
    local contents = self.contents
    local count    = contents:GetNumChildren()

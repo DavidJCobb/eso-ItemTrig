@@ -43,6 +43,52 @@ function ItemTrig.UI.WScrollSelectList:hasSelection()
    end
    return true
 end
+function ItemTrig.UI.WScrollSelectList:getFirstSelectedIndex()
+   local multi = self.selection.multi
+   if not self:hasSelection() then
+      return 0
+   end
+   if multi then
+      return self.selection.index[1]
+   end
+   return self.selection.index
+end
+function ItemTrig.UI.WScrollSelectList:getSelectedControls()
+   local multi = self.selection.multi
+   if not self:hasSelection() then
+      if multi then
+         return {}
+      end
+      return nil
+   end
+   if multi then
+      local results = {}
+      local list    = self.selection.index
+      for i = 1, table.getn(list) do
+         results[i] = self:controlByIndex(list[i])
+      end
+      return results
+   end
+   return self:controlByIndex(self.selection.index)
+end
+function ItemTrig.UI.WScrollSelectList:getSelectedItems()
+   local multi = self.selection.multi
+   if not self:hasSelection() then
+      if multi then
+         return {}
+      end
+      return nil
+   end
+   if multi then
+      local results = {}
+      local list    = self.selection.index
+      for i = 1, table.getn(list) do
+         results[i] = self:at(list[i])
+      end
+      return results
+   end
+   return self:at(self.selection.index)
+end
 function ItemTrig.UI.WScrollSelectList:_onDoubleClick(control)
    local callback = self.element.onDoubleClick
    if not callback then

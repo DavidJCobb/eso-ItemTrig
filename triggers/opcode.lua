@@ -28,7 +28,7 @@ end
 function ItemTrig.Opcode:exec(state, context)
    return self.base.func(state, context, self.args)
 end
-function ItemTrig.Opcode:format()
+function ItemTrig.Opcode:format(argTransform)
    local count = table.getn(self.base.args)
    if count == 0 then
       return self.base.format
@@ -49,8 +49,16 @@ function ItemTrig.Opcode:format()
          else
             renderArgs[i] = tostring(a)
          end
+      elseif type(p) == "number" then
+         --
+         -- TODO: add support for enums
+         --
+         renderArgs[i] = ZO_LocalizeDecimalNumber(a)
       else
          renderArgs[i] = a
+      end
+      if argTransform then
+         renderArgs[i] = argTransform(renderArgs[i])
       end
    end
    return string.format(self.base.format, unpack(renderArgs))
