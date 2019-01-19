@@ -118,7 +118,6 @@ end
 local function ShowTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
    local pane = ItemTrig_TestMenu:GetNamedChild("vScrollListTest")
-   ItemTrig.UI.vScrollList.measureItems(pane)
 end
 
 local function Initialize()

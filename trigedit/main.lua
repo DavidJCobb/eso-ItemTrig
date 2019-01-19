@@ -45,7 +45,8 @@ local Window = {
          keybind  = "UI_SHORTCUT_PRIMARY",
          callback = function() ItemTrig.UIMain.Toggle() end,
          visible  = function() return true end,
-         enabled  = true -- set to "false" to make the keybind grey out -- can also be a function
+         enabled  = true,  -- set to "false" to make the keybind grey out -- can also be a function
+         ethereal = false, -- if true, then the keybind isn't actually shown in the menus; vanilla gamepad menus use this for LT/RT flipping pages or fast-scrolling menus
       }
    }
 }

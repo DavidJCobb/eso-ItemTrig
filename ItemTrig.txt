@@ -14,6 +14,8 @@ triggers/trigger.lua
 ui/column.xml
 ui/vscrolllist.lua
 ui/vscrolllist.xml
+ui/wscrolllist.lua
+ui/wscrolllist.xml
 ui/testmenu.lua
 ui/testmenu.xml
 trigedit/main.lua

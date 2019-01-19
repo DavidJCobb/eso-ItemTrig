@@ -8,22 +8,8 @@ end
 -- scrolling rather than whole-item scrolling. All items are 
 -- rendered at once.
 --
--- TODO: Test ItemTrig.UI.vScrollList:scrollToItem().
---
--- TODO: Can we convert this into a wrapper instead of just a set 
--- of functions that gets called on the element? Like this:
---
---    local list = ItemTrig.UI.vScrollList.install(control)
---    list:push(something)
---
--- and later:
---
---    local list = ItemTrig.UI.vScrollList.cast(control)
---    list:scrollBy(40)
---
--- The basic idea would be that install would create an instance 
--- of the vScrollList class, and write it to an expando field on 
--- the control; then, cast would just read that field.
+-- TODO: This class is deprecated in favor of WScrollList; switch 
+-- main.xml and main.lua (for TrigEdit) to use it.
 --
 
 local function scrollRelative(self, delta)

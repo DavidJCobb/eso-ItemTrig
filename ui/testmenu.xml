@@ -19,9 +19,19 @@
          <OnInitialized> ItemTrig.TestMenu.OnInitialized(self) </OnInitialized>
          <Controls>
             <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
-            <Control name="$(parent)vScrollListTest" inherits="ItemTrig_UITemplate_vScrollList">
+            <Control name="$(parent)Topbar">
                <Anchor point="TOPLEFT" />
-               <Anchor point="BOTTOMRIGHT" />
+               <Anchor point="TOPRIGHT" />
+               <Dimensions y="50" />
+               <Controls>
+                  <Label name="$(parent)Name" font="ZoFontWinT2" text="Topbar">
+                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                  </Label>
+               </Controls>
+            </Control>
+            <Control name="$(parent)vScrollListTest" inherits="ItemTrig_UITemplate_WScrollList">
+               <Anchor point="TOPLEFT"     relativeTo="$(parent)Topbar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" />
             </Control>
          </Controls>
       </TopLevelControl>
