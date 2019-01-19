@@ -22,7 +22,7 @@ The item’s rarity is [less than green].
 **Actions:**  
 Run nested trigger.  
 ... **Name:** Stockpile items useful for The Covetous Countess.  
-... **Conditions:**
+... **Conditions:**  
 ... Comment: [Conditions to be determined once I figure out an optimal strat for the CC. Nested trigger no-op'd in the meantime.]  
 ... This condition is [never] true.  
 ... **Actions:**  
