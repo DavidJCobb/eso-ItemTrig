@@ -35,9 +35,9 @@
                   </Label>
                </Controls>
             </Control>
-            <Control name="$(parent)ViewTriggerList">
-               <Anchor point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)"       relativePoint="BOTTOMRIGHT" />
+            <Control name="$(parent)ViewTriggerList" hidden="false">
+               <Anchor offsetX="5"  offsetY="5"  point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+               <Anchor offsetX="-5" offsetY="-5" point="BOTTOMRIGHT" relativeTo="$(parent)"       relativePoint="BOTTOMRIGHT" />
                <Controls>
                   <Control name="$(parent)Col1">
                      <Anchor point="TOPLEFT" />
@@ -45,27 +45,78 @@
                      <Dimensions x="200" />
                      <Controls>
                         <Label name="$(parent)TestLabel" text="Col 1" font="ZoFontWinT2">
-                           <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                           <Anchor point="TOPLEFT" />
                         </Label>
                      </Controls>
                   </Control>
-                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollSelectList">
-                     <Anchor point="TOPLEFT"    relativeTo="$(parent)Col1" relativePoint="TOPRIGHT" />
+                  <Control name="$(parent)Col3">
+                     <Anchor point="TOPRIGHT" />
                      <Anchor point="BOTTOMRIGHT" />
+                     <Dimensions x="150" />
                      <Controls>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)AddTrigger"  text="New">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" />
+                           <OnClicked>
+                           </OnClicked>
+                        </Button>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)EditTrigger" text="Edit">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)AddTrigger" />
+                           <OnClicked>
+                           </OnClicked>
+                        </Button>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="Delete">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EditTrigger" />
+                           <OnClicked>
+                           </OnClicked>
+                        </Button>
                      </Controls>
+                  </Control>
+                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollSelectList">
+                     <Anchor point="TOPLEFT"     relativeTo="$(parent)Col1" relativePoint="TOPRIGHT"   offsetX="5" />
+                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Col3" relativePoint="BOTTOMLEFT" offsetX="-5" />
                   </Control>
                </Controls>
             </Control>
-            <Control name="$(parent)ViewTriggerSingle">
-               <Anchor point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)"       relativePoint="BOTTOMRIGHT" />
+            <Control name="$(parent)ViewTriggerSingle" hidden="true">
+               <Anchor offsetX="5"  offsetY="5"  point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+               <Anchor offsetX="-5" offsetY="-5" point="BOTTOMRIGHT" />
                <Controls>
                   <Control name="$(parent)Col1">
                      <Anchor point="TOPLEFT" />
-                     <Anchor point="BOTTOMLEFT" />
+                     <Anchor point="BOTTOMRIGHT" />
                      <Dimensions x="200" />
                      <Controls>
+                        <Control name="$(parent)Conditions">
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="TOPRIGHT" />
+                           <Dimensions y="200" />
+                           <Controls>
+                              <Label name="$(parent)Header" font="ZoFontWinT2" text="Conditions:">
+                                 <Anchor point="TOPLEFT" />
+                              </Label>
+                              <Control name="$(parent)List" inherits="ItemTrig_UITemplate_WScrollSelectList">
+                                 <Anchor point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                                 <Anchor point="BOTTOMRIGHT" />
+                              </Control>
+                           </Controls>
+                        </Control>
+                        <Control name="$(parent)Actions">
+                           <Anchor point="TOPLEFT"  relativeTo="$(parent)Conditions" relativePoint="BOTTOMLEFT" />
+                           <Anchor point="TOPRIGHT" relativeTo="$(parent)Conditions" relativePoint="BOTTOMRIGHT" />
+                           <Dimensions y="200" />
+                           <Controls>
+                              <Label name="$(parent)Header" font="ZoFontWinT2" text="Actions:">
+                                 <Anchor point="TOPLEFT" />
+                              </Label>
+                              <Control name="$(parent)List" inherits="ItemTrig_UITemplate_WScrollSelectList">
+                                 <Anchor point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                                 <Anchor point="BOTTOMRIGHT" />
+                              </Control>
+                           </Controls>
+                        </Control>
                      </Controls>
                   </Control>
                   <Control name="$(parent)Col2">

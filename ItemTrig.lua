@@ -92,7 +92,7 @@ end
 local function ShowWin()
    ItemTrig.UIMain.Toggle()
 end
-local function WinTest()
+local function WinTest01()
    local tList = {}
    do
       local t = ItemTrig.Trigger:new()
@@ -115,6 +115,9 @@ local function WinTest()
    end
    ItemTrig.UIMain.RenderTriggers(tList)
 end
+local function WinTest02()
+   ItemTrig.TrigEditWindow:showView("trigger")
+end
 local function ShowTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
    local pane = ItemTrig_TestMenu:GetNamedChild("vScrollListTest")
@@ -122,10 +125,11 @@ end
 
 local function Initialize()
    ItemTrig.UIMain.Setup()
-   SLASH_COMMANDS["/cobbtrigtest"] = TriggerTest
-   SLASH_COMMANDS["/cobbperftest"] = PerfTest
-   SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
-   SLASH_COMMANDS["/cobbwintest"]  = WinTest
+   SLASH_COMMANDS["/cobbtrigtest"]  = TriggerTest
+   SLASH_COMMANDS["/cobbperftest"]  = PerfTest
+   SLASH_COMMANDS["/cobbshowwin"]   = ShowWin
+   SLASH_COMMANDS["/cobbwintest01"] = WinTest01
+   SLASH_COMMANDS["/cobbwintest02"] = WinTest02
    SLASH_COMMANDS["/cobbshowtestmenu"]  = ShowTestMenu
 end
 local function OnAddonLoaded(eventCode, addonName)

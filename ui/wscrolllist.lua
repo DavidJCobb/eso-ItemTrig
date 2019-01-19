@@ -30,20 +30,6 @@ end
 --    widget:redraw()
 --
 
-
-
---
--- TODO:
---
--- Make a subclass of this that lets the user select items in the 
--- list (one or multiple depending on the list's options). Use that 
--- for the trigger list in main.xml.
---
-
-local function scrollRelative(self, delta)
-   -- if in doubt, model after Zenimax's ZO_ScrollList_ScrollRelative
-   ItemTrig.UI.vScrollList.scrollBy(self, delta)
-end
 local function onScrollUpButton(self)
    local list   = self:GetParent():GetParent()
    local widget = list.widgets.scrollList
@@ -177,9 +163,9 @@ function ItemTrig.UI.WScrollList:redraw()
       if i <= count then
          child:SetHidden(false)
          self.element.toConstruct(child, self.listItems[i])
-         control:ClearAnchors()
-         control:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
-         control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
+         child:ClearAnchors()
+         child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
+         child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
          --
          local height = child:GetHeight()
          yOffset = yOffset + height + self.paddingBetween

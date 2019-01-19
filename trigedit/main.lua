@@ -9,10 +9,13 @@ local Window = {
    control = nil,
    views = {
       triggerlist = {
-         pane = nil,
-         paneDataType = 1,
+         control = nil,
+         pane    = nil,
       },
       trigger = {
+         control          = nil,
+         currentTrigIndex = -1,
+         currentTrig      = nil,
       },
    },
    keybinds = {
@@ -34,13 +37,14 @@ end
 function Window:onClose()
    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybinds)
 end
-function Window:onTriggerListEntryClick(control)
-   local list = Window.views.triggerlist.pane
-   --
-   -- TODO
-   --
-   d("trigger clicked")
-   --
+function Window:showView(name)
+   if name == "triggerlist" then
+      self.views.triggerlist.control:SetHidden(false)
+      self.views.trigger.control:SetHidden(true)
+   elseif name == "trigger" then
+      self.views.triggerlist.control:SetHidden(true)
+      self.views.trigger.control:SetHidden(false)
+   end
 end
 
 function ItemTrig.UIMain.Setup()
@@ -63,7 +67,11 @@ function ItemTrig.UIMain.OnInitialized(control)
    local scene    = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
    scene:AddFragment(fragment)
    --
-   do
+   do -- Set up views
+      Window.views.triggerlist.control = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList")
+      Window.views.trigger.control     = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerSingle")
+   end
+   do -- Set up trigger list view
       local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
       scrollPane = ItemTrig.UI.WScrollSelectList:cast(scrollPane)
       Window.views.triggerlist.pane = scrollPane
@@ -86,6 +94,10 @@ function ItemTrig.UIMain.OnInitialized(control)
          function(index, control)
             local text = GetControl(control, "Name")
             text:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+         end
+      scrollPane.element.onDoubleClick =
+         function(index, control)
+            d("List item " .. index .. " double-clicked.")
          end
    end
 end

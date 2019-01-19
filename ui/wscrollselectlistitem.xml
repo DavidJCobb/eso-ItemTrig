@@ -8,6 +8,13 @@
                widget:_onItemSelected(self)
             end
          </OnMouseUp>
+         <OnMouseDoubleClick>
+            if button == MOUSE_BUTTON_INDEX_LEFT then
+               local list   = self:GetParent():GetParent()
+               local widget = ItemTrig.UI.WScrollSelectList:cast(list)
+               widget:_onDoubleClick(self)
+            end
+         </OnMouseDoubleClick>
       </Control>
    </Controls>
 </GuiXml>

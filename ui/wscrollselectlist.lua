@@ -19,8 +19,9 @@ function ItemTrig.UI.WScrollSelectList:install(control, options)
       index = 0, -- 0 if no selections; an array if multiselection is enabled
       multi = options.multiSelection or false,
    }
-   result.element.onSelect   = options.element.onSelect   or nil -- callback
-   result.element.onDeselect = options.element.onDeselect or nil -- callback
+   result.element.onSelect      = options.element.onSelect      or nil -- callback
+   result.element.onDeselect    = options.element.onDeselect    or nil -- callback
+   result.element.onDoubleClick = options.element.onDoubleClick or nil
    return result
 end
 function ItemTrig.UI.WScrollSelectList:cast(control)
@@ -41,6 +42,17 @@ function ItemTrig.UI.WScrollSelectList:hasSelection()
       return false
    end
    return true
+end
+function ItemTrig.UI.WScrollSelectList:_onDoubleClick(control)
+   local callback = self.element.onDoubleClick
+   if not callback then
+      return
+   end
+   local index = self:indexOf(control)
+   if not index then
+      return
+   end
+   callback(index, control)
 end
 function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
    local index = self:indexOf(control)
@@ -70,6 +82,9 @@ function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
       end
    else
       if self:hasSelection() then
+         if index == s.index then
+            return
+         end
          if self.element.onDeselect then
             local old = self:controlByIndex(s.index)
             self.element.onDeselect(s.index, old)
