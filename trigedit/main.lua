@@ -100,12 +100,19 @@ function ItemTrig.UIMain.OnInitialized(control)
             end
             control:SetHeight(height)
             --
-            local enabled = GetControl(control, "Enabled") -- checkbox
-            enabled.toggleFunction =
-               function(self, checked)
-                  local control = self:GetParent()
-                  d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
+            do
+               local enabled = GetControl(control, "Enabled") -- checkbox
+               if data.enabled then
+                  ZO_CheckButton_SetChecked(enabled)
+               else
+                  ZO_CheckButton_SetUnchecked(enabled)
                end
+               enabled.toggleFunction =
+                  function(self, checked)
+                     local control = self:GetParent()
+                     d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
+                  end
+            end
          end
       scrollPane.element.onSelect =
          function(index, control)

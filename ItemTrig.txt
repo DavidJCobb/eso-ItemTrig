@@ -2,6 +2,7 @@
 ## APIVersion: 100021
 ## AddOnVersion: 1
 ## Version: alpha01
+## SavedVariables: ItemTrigSavedata
 
 ItemTrig.lua
 misc/string.lua
@@ -20,6 +21,7 @@ ui/testmenu.lua
 ui/testmenu.xml
 trigedit/main.lua
 trigedit/main.xml
+savedata.lua
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates.
 # The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States

@@ -91,6 +91,7 @@ end
 
 local function ShowWin()
    ItemTrig.UIMain.Toggle()
+   ItemTrig.UIMain.RenderTriggers(ItemTrig.Savedata.triggers)
 end
 local function WinTest01()
    local tList = {}
@@ -126,6 +127,7 @@ local function ShowTestMenu()
 end
 
 local function Initialize()
+   ItemTrig.Savedata:load()
    ItemTrig.UIMain.Setup()
    SLASH_COMMANDS["/cobbtrigtest"]  = TriggerTest
    SLASH_COMMANDS["/cobbperftest"]  = PerfTest
