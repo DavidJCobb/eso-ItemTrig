@@ -5,12 +5,13 @@ An attempt at making a trigger-based alternative to the Elder Scrolls Online add
 
 **Name:** Deconstruct intricate items.  
 **Entry points:** Opening a crafting menu  
-**Conditions:**
-*	The item [is] intricate.
-*	You [have not] maxed out your crafting skill for this item.
-*	The item [doesn’t have] a researchable trait.
-**Actions:**
-*	Deconstruct all of these items.
+**Conditions:**  
+The item [is] intricate.  
+You [have not] maxed out your crafting skill for this item.  
+The item [doesn’t have] a researchable trait.  
+The item's trait [is not] [Nirnhoned].  
+**Actions:**  
+Deconstruct all of these items.
 
 **Name:** Thieving: Common Treasures  
 **Entry points:** opening a fence menu; item added to inventory  
@@ -29,3 +30,9 @@ Run nested trigger.
 ... Stop processing the top-level trigger.  
 Destroy all of these items.
 
+**Name:** Protect purchases
+**Entry points:** item purchased  
+**Conditions:**  
+This condition is [always] true.  
+**Actions:**  
+Exempt this item from all trigger processing for [15 minutes].
