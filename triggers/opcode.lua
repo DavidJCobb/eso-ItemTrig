@@ -25,6 +25,32 @@ function ItemTrig.Opcode:new(base, args, opTable)
    result.args = args or {} -- array
    return result
 end
+function ItemTrig.Opcode:clone(deep)
+   local result = {}
+   setmetatable(result, getmetatable(self))
+   result.base = self.base
+   result.args = {}
+   do -- clone args
+      local baseArgs = self.base.args
+      for i = 1, table.getn(self.args) do
+         local a = self.args[i]
+         if type(a) == "table" then
+            if baseArgs[i].type == "trigger" then
+               if deep then
+                  result.args[i] = a:clone()
+               else
+                  result.args[i] = a
+               end
+            else
+               d("ItemTrig WARNING: Problem encountered when cloning opcode: unhandled table type.")
+            end
+         else
+            result.args[i] = a
+         end
+      end
+   end
+   return result
+end
 function ItemTrig.Opcode:exec(state, context)
    return self.base.func(state, context, self.args)
 end

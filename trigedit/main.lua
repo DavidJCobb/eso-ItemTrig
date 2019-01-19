@@ -15,7 +15,8 @@ local Window = {
       trigger = {
          control          = nil,
          currentTrigIndex = -1,
-         currentTrig      = nil,
+         targetTrig       = nil,
+         workingTrig      = nil, -- copy of the trigger, usable for editing
          paneConditions   = nil,
          paneActions      = nil,
       },
@@ -57,12 +58,13 @@ function Window.views.triggerlist:editTrigger()
    end
    local target = Window.views.trigger
    target.currentTrigIndex = index
-   target.currentTrig      = trigger
+   target.targetTrig       = trigger
+   target.workingTrig      = trigger:clone(false) -- see documentation for this function
    Window:showView("trigger")
    target:refresh()
 end
 function Window.views.trigger:refresh()
-   local trigger = self.currentTrig
+   local trigger = self.workingTrig
    do -- render conditions
       local pane = self.paneConditions
       pane:clear(false)

@@ -16,6 +16,41 @@ function ItemTrig.Trigger:new()
    }
    return result
 end
+function ItemTrig.Trigger:clone(deep)
+   --
+   -- If (deep) is truthy, then nested triggers are also cloned; 
+   -- otherwise, actions that have nested triggers will contain 
+   -- references to the original trigger.
+   --
+   -- The serialization code can't account for a trigger being in 
+   -- two places at once; the trigger will end up duplicated when 
+   -- you save and load. Shallow cloning should only be used for 
+   -- cases like copying a trigger for UI-related purposes, i.e. 
+   -- an editor that only commits changes if you click "OK" or 
+   -- something.
+   --
+   if deep == nil then -- default arg
+      deep = true
+   end
+   local result = {}
+   setmetatable(result, getmetatable(self))
+   result.name        = self.name
+   result.enabled     = self.enabled
+   result.entryPoints = {}
+   result.conditions  = {} -- array
+   result.actions     = {} -- array
+   result.state = {
+      using_or   = false,
+      matched_or = false
+   }
+   for i = 1, table.getn(self.conditions) do
+      result.conditions[i] = self.conditions[i]:clone(deep)
+   end
+   for i = 1, table.getn(self.actions) do
+      result.actions[i] = self.actions[i]:clone(deep)
+   end
+   return result
+end
 function ItemTrig.Trigger:getDescription()
    --
    -- If a trigger's first condition or action is a comment, then 
