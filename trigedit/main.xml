@@ -1,9 +1,37 @@
 <GuiXml>
    <Controls>
-      <Control name="ItemTrig_TrigEdit_Template_TriggerOuter" virtual="true">
+      <Control name="ItemTrig_TrigEdit_Template_TriggerOuter" virtual="true"
+         mouseEnabled="true"
+      >
+         <OnMouseUp>
+            if upInside then -- the mousedown event happened on this same control
+               ItemTrig.TrigEditWindow:onTriggerListEntryClick(self)
+            end
+         </OnMouseUp>
+         <!--
+            TODO:
+            
+             - Mouseover/mouseout handlers for showing the label text in a 
+               "highlighted" color
+            
+             - Consider adding drag-and-drop, though we could accomplish something 
+               similar much more easily via "Move Up" and "Move Down" buttons
+               
+                - ...though those buttons would require adding the ability to 
+                  select an item in the list.
+                  
+                   - ...which we need anyway to offer "edit" and "delete" buttons...
+                   
+                   - ...and which would remove the need for explicit mouse handlers 
+                     on these elements.
+                     
+                      - ...if, that is, a "selectable scroll list" prefab could  
+                        dynamically attach event handlers to created elements.
+         -->
          <Controls>
-            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name" inherits="ZO_SelectableLabel">
-               <Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
+            <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
+            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name">
+               <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
             </Label>
          </Controls>
       </Control>

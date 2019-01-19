@@ -8,10 +8,15 @@ end
 -- scrolling rather than whole-item scrolling. All items are 
 -- rendered at once.
 --
+-- TODO: Test ItemTrig.UI.vScrollList:scrollToItem().
+--
 -- TODO: Can we convert this into a wrapper instead of just a set 
 -- of functions that gets called on the element? Like this:
 --
---    ItemTrig.UI.vScrollList.install(control)
+--    local list = ItemTrig.UI.vScrollList.install(control)
+--    list:push(something)
+--
+-- and later:
 --
 --    local list = ItemTrig.UI.vScrollList.cast(control)
 --    list:scrollBy(40)
@@ -21,15 +26,9 @@ end
 -- the control; then, cast would just read that field.
 --
 
-local function scrollRelative(self, delta, onScrollCompleteCallback, animateInstantly)
+local function scrollRelative(self, delta)
    -- if in doubt, model after Zenimax's ZO_ScrollList_ScrollRelative
    ItemTrig.UI.vScrollList.scrollBy(self, delta)
-   --
-   -- TODO: can/should we animate scrolling?
-   --
-   if onScrollCompleteCallback then
-      onScrollCompleteCallback() -- TODO: what args is this meant to take?
-   end
 end
 local function onScrollUpButton(self)
    local list = self:GetParent():GetParent()
@@ -43,12 +42,15 @@ end
 ItemTrig.UI.vScrollList = {}
 ItemTrig.UI.vScrollList.__index = ItemTrig.UI.vScrollList
 function ItemTrig.UI.vScrollList:initialize(control, template, construct, options)
-   --assert(template  ~= nil) -- string
+   --assert(template  ~= nil) -- string   -- can't use these asserts; XML doesn't know what args to pass, but must init
    --assert(construct ~= nil) -- callback
    if not options then
       options = {
          scrollStep = 40,
          reset      = nil, -- callback
+         paddingStart   = 0,
+         paddingBetween = 0,
+         paddingEnd     = 0,
       }
    end
    local scrollbar = GetControl(self, "ScrollBar")
@@ -58,11 +60,14 @@ function ItemTrig.UI.vScrollList:initialize(control, template, construct, option
       scrollbar  = scrollbar,
       scrollBtnU = GetControl(scrollbar, "Up"),
       scrollBtnD = GetControl(scrollbar, "Down"),
-      scrollStep = options.scrollStep,
+      scrollStep = options.scrollStep or 40,
       template   = template,
       construct  = construct,
       scrollTop  = 0,
       scrollMax  = -1, -- height of all generated elements
+      paddingStart   = options.paddingStart   or 0,
+      paddingBetween = options.paddingBetween or 0,
+      paddingEnd     = options.paddingEnd     or 0,
    }
    do
       local factoryFunction =
@@ -80,6 +85,16 @@ function ItemTrig.UI.vScrollList:clear(update)
    if (update == true) or (update == nil) then
       ItemTrig.UI.vScrollList.redraw(self)
    end
+end
+function ItemTrig.UI.vScrollList:indexOf(control)
+   local contents = self.tlData.contents
+   local count    = contents:GetNumChildren()
+   for i = 1, count do
+      if contents:GetChild(i) == control then
+         return i
+      end
+   end
+   return 0
 end
 function ItemTrig.UI.vScrollList:push(obj, update)
    table.insert(self.tlData.listItems, obj)
@@ -114,8 +129,8 @@ function ItemTrig.UI.vScrollList:redraw()
    local contents = self.tlData.contents
    local existing = contents:GetNumChildren()
    local count    = table.getn(self.tlData.listItems)
-   local yOffset  = -self.tlData.scrollTop
-   local total    = 0
+   local yOffset  = -self.tlData.scrollTop + self.tlData.paddingStart
+   local total    = self.tlData.paddingStart
    local index    = 0
    for i = 1, existing do
       local child = contents:GetChild(i)
@@ -127,8 +142,8 @@ function ItemTrig.UI.vScrollList:redraw()
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
          --
          local height = child:GetHeight()
-         yOffset = yOffset + height
-         total   = total   + height
+         yOffset = yOffset + height + self.tlData.paddingBetween
+         total   = total   + height + self.tlData.paddingBetween
       else
          child:SetHidden(true)
       end
@@ -146,9 +161,12 @@ function ItemTrig.UI.vScrollList:redraw()
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
          --
          local height = control:GetHeight()
-         yOffset = yOffset + height
-         total   = total   + height
+         yOffset = yOffset + height + self.tlData.paddingBetween
+         total   = total   + height + self.tlData.paddingBetween
       end
+   end
+   if count then
+      total = total - self.tlData.paddingBetween + self.tlData.paddingEnd
    end
    self.tlData.scrollMax = total
    ItemTrig.UI.vScrollList.resizeScrollbar(self, total)
@@ -160,13 +178,13 @@ function ItemTrig.UI.vScrollList:repositionItems()
    if existing < count then
       count = existing
    end
-   local yOffset  = -self.tlData.scrollTop
+   local yOffset  = -self.tlData.scrollTop + self.tlData.paddingStart
    for i = 1, count do
       local child = contents:GetChild(i)
       child:ClearAnchors()
       child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
       child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
-      yOffset = yOffset + child:GetHeight()
+      yOffset = yOffset + child:GetHeight() + self.tlData.paddingBetween
    end
    ItemTrig.UI.vScrollList.resizeScrollbar(self)
 end
@@ -177,10 +195,13 @@ function ItemTrig.UI.vScrollList:measureItems()
    if existing < count then
       count = existing
    end
-   local yOffset  = 0
+   local yOffset  = self.tlData.paddingStart
    for i = 1, count do
       local child = contents:GetChild(i)
-      yOffset = yOffset + child:GetHeight()
+      yOffset = yOffset + child:GetHeight() + self.tlData.paddingBetween
+   end
+   if count then
+      yOffset = yOffset - self.tlData.paddingBetween + self.tlData.paddingEnd
    end
    self.tlData.scrollMax = yOffset
    return yOffset
@@ -234,7 +255,5 @@ function ItemTrig.UI.vScrollList:scrollTo(position) -- analogous to ZO_ScrollLis
       self.tlData.scrollTop = position
       return
    end
-   --self.tlData.scrollTop = position
-   --ItemTrig.UI.vScrollList.repositionItems(self)
-   self.tlData.scrollbar:SetValue(position)
+   self.tlData.scrollbar:SetValue(position) -- slider XML-side event handler will call repositionItems
 end

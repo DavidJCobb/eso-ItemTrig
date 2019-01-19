@@ -49,11 +49,20 @@ local Window = {
       }
    }
 }
+ItemTrig.TrigEditWindow = Window
 function Window:onOpen()
    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybinds)
 end
 function Window:onClose()
    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybinds)
+end
+function Window:onTriggerListEntryClick(control)
+   local list = Window.views.triggerlist.pane
+   --
+   -- TODO
+   --
+   d("trigger clicked")
+   --
 end
 
 function ItemTrig.UIMain.Setup()
@@ -79,12 +88,14 @@ function ItemTrig.UIMain.OnInitialized(control)
    do
       local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
       Window.views.triggerlist.pane = scrollPane
+      scrollPane.tlData.paddingBetween = 8
       scrollPane.tlData.template  = "ItemTrig_TrigEdit_Template_TriggerOuter"
       scrollPane.tlData.construct =
          function(control, data)
             local text = GetControl(control, "Name")
+            local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
             text:SetText(data.name)
-            control:SetHeight(text:GetHeight())
+            control:SetHeight(text:GetHeight() + paddingY * 2)
          end
    end
    
