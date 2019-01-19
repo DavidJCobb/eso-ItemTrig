@@ -30,7 +30,7 @@ Run nested trigger.
 ... Stop processing the top-level trigger.  
 Destroy all of these items.
 
-**Name:** Protect purchases
+**Name:** Protect purchases  
 **Entry points:** item purchased  
 **Conditions:**  
 This condition is [always] true.  
