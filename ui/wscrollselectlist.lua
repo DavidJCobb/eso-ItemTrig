@@ -98,7 +98,7 @@ function ItemTrig.UI.WScrollSelectList:_onDoubleClick(control)
    if not index then
       return
    end
-   callback(index, control)
+   callback(index, control, self)
 end
 function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
    local index = self:indexOf(control)
@@ -114,7 +114,7 @@ function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
             if callback then
                for i = 1, table.getn(s.index) do
                   local old = self:controlByIndex(s.index)
-                  callback(s.index, old)
+                  callback(s.index, old, self)
                end
             end
             s.index = {}
@@ -124,7 +124,7 @@ function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
       end
       table.insert(self.selection.index, index)
       if self.element.onSelect then
-         self.element.onSelect(index, control)
+         self.element.onSelect(index, control, self)
       end
    else
       if self:hasSelection() then
@@ -133,12 +133,12 @@ function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
          end
          if self.element.onDeselect then
             local old = self:controlByIndex(s.index)
-            self.element.onDeselect(s.index, old)
+            self.element.onDeselect(s.index, old, self)
          end
       end
       s.index = index
       if self.element.onSelect then
-         self.element.onSelect(index, control)
+         self.element.onSelect(index, control, self)
       end
    end
 end

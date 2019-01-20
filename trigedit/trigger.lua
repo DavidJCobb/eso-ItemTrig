@@ -59,6 +59,14 @@ function TriggerEditor:initialize(viewControl)
       setupOpcodeList(self.ui.paneActions)
    end
 end
+function TriggerEditor:abandon()
+   self.trigger.target  = nil
+   self.trigger.working = nil
+   self.trigger.dirty   = false
+   self.ui.paneConditions:clear()
+   self.ui.paneActions:clear()
+   self.ui.view.holder:setView(1)
+end
 function TriggerEditor:commit()
    if not self.trigger.dirty then
       return
@@ -89,10 +97,10 @@ function TriggerEditor:requestExit()
    end
    return true
 end
-function TriggerEditor:edit(trigger)
+function TriggerEditor:edit(trigger, dirty)
    self.trigger.target  = trigger
    self.trigger.working = trigger:clone(false) -- see documentation for this function
-   self.trigger.dirty   = false
+   self.trigger.dirty   = dirty or false
    self:refresh()
    self.ui.view:show()
 end

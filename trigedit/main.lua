@@ -50,6 +50,16 @@ function Window:showView(name)
       self.views.trigger.control:SetHidden(false)
    end
 end
+function Window.views.triggerlist:newTrigger()
+   local editor  = ItemTrig.TrigEditWindow.TriggerEditor
+   local pane    = self.pane
+   local trigger = ItemTrig.Trigger:new()
+   trigger.name = "Unnamed trigger"
+   if not editor:requestEdit() then
+      return
+   end
+   ItemTrig.TrigEditWindow.TriggerEditor:edit(trigger, true)
+end
 function Window.views.triggerlist:editTrigger(t)
    local editor  = ItemTrig.TrigEditWindow.TriggerEditor
    local pane    = self.pane
@@ -136,7 +146,7 @@ function ItemTrig.UIMain.OnInitialized(control)
             end
          end
       scrollPane.element.onSelect =
-         function(index, control)
+         function(index, control, pane)
             local text  = GetControl(control, "Name")
             local desc  = GetControl(control, "Description")
             local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
@@ -145,7 +155,7 @@ function ItemTrig.UIMain.OnInitialized(control)
             desc:SetColor(unpack(color))
          end
       scrollPane.element.onDeselect =
-         function(index, control)
+         function(index, control, pane)
             local text  = GetControl(control, "Name")
             local desc  = GetControl(control, "Description")
             local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
@@ -155,10 +165,11 @@ function ItemTrig.UIMain.OnInitialized(control)
          --
          -- Should we also use INTERFACE_TEXT_COLOR_HIGHLIGHT on mouseover ?
       scrollPane.element.onDoubleClick =
-         function(index, control)
-            d("List item " .. index .. " double-clicked.")
-            --
-            -- TODO: This should immediately open the trigger for editing.
+         function(index, control, pane)
+            local trigger = pane.listItems[index]
+            if trigger then
+               ItemTrig.TrigEditWindow.views.triggerlist:editTrigger(trigger)
+            end
          end
    end
    Window.TriggerEditor:initialize(Window.viewholder.control:GetNamedChild("ViewTriggerSingle")) -- trigger.lua

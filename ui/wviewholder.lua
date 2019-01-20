@@ -25,6 +25,12 @@ function ItemTrig.UI.WViewHolder:install(control)
    return result
 end
 function ItemTrig.UI.WViewHolder:setView(control)
+   if type(control) == "number" then
+      control = self.control:GetChild(control)
+   end
+   if not control then
+      return
+   end
    if self.selected == control then
       return
    end
