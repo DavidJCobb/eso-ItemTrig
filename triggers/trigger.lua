@@ -51,6 +51,33 @@ function ItemTrig.Trigger:clone(deep)
    end
    return result
 end
+function ItemTrig.Trigger:copyAssign(other, deep)
+   --
+   -- Overwrite a trigger with another trigger; use in places 
+   -- where you need to replace a trigger that you have a ref-
+   -- erence to (i.e. simply using the "=" operator would 
+   -- replace the variable rather than overwriting what it 
+   -- pointed to).
+   --
+   self.name        = other.name
+   self.enabled     = other.enabled
+   if deep then
+      ZO_ClearNumericallyIndexedTable(self.conditions)
+      ZO_ClearNumericallyIndexedTable(self.actions)
+      --
+      for i = 1, table.getn(other.conditions) do
+         self.conditions[i] = other.conditions[i]:clone(deep)
+      end
+      for i = 1, table.getn(other.actions) do
+         self.actions[i] = other.actions[i]:clone(deep)
+      end
+   else
+      self.entryPoints = other.entryPoints
+      self.conditions  = other.conditions
+      self.actions     = other.actions
+      self.state       = other.state
+   end
+end
 function ItemTrig.Trigger:getDescription()
    --
    -- If a trigger's first condition or action is a comment, then 

@@ -114,6 +114,14 @@ function ItemTrig.UI.WScrollList:indexOf(control)
    end
    return 0
 end
+function ItemTrig.UI.WScrollList:indexOfData(data)
+   for i = 1, table.getn(self.listItems) do
+      if self.listItems[i] == data then
+         return i
+      end
+   end
+   return 0
+end
 function ItemTrig.UI.WScrollList:at(index)
    local count = table.getn(self.listItems)
    if index > count or index < 1 then

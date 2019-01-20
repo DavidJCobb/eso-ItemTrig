@@ -6,7 +6,8 @@ local GAMEPAD_ITEMTRIG_WINDOW_SCENE
 local GAMEPAD_ITEMTRIG_WINDOW
 
 local Window = {
-   control = nil,
+   control    = nil,
+   viewholder = nil,
    views = {
       triggerlist = {
          control = nil,
@@ -49,38 +50,20 @@ function Window:showView(name)
       self.views.trigger.control:SetHidden(false)
    end
 end
-function Window.views.triggerlist:editTrigger()
+function Window.views.triggerlist:editTrigger(t)
+   local editor  = ItemTrig.TrigEditWindow.TriggerEditor
    local pane    = self.pane
-   local index   = pane:getFirstSelectedIndex()
-   local trigger = pane:at(index)
-   if index <= 0 then
+   local trigger = t
+   if not trigger then
+      trigger = pane:at(pane:getFirstSelectedIndex())
+      if not trigger then
+         return
+      end
+   end
+   if not editor:requestEdit() then
       return
    end
-   local target = Window.views.trigger
-   target.currentTrigIndex = index
-   target.targetTrig       = trigger
-   target.workingTrig      = trigger:clone(false) -- see documentation for this function
-   Window:showView("trigger")
-   target:refresh()
-end
-function Window.views.trigger:refresh()
-   local trigger = self.workingTrig
-   do -- render conditions
-      local pane = self.paneConditions
-      pane:clear(false)
-      for i = 1, table.getn(trigger.conditions) do
-         pane:push(trigger.conditions[i], false)
-      end
-      pane:redraw()
-   end
-   do -- render actions
-      local pane = self.paneActions
-      pane:clear(false)
-      for i = 1, table.getn(trigger.actions) do
-         pane:push(trigger.actions[i], false)
-      end
-      pane:redraw()
-   end
+   ItemTrig.TrigEditWindow.TriggerEditor:edit(trigger)
 end
 
 function ItemTrig.UIMain.Setup()
@@ -103,12 +86,14 @@ function ItemTrig.UIMain.OnInitialized(control)
    local scene    = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
    scene:AddFragment(fragment)
    --
+   Window.viewholder = ItemTrig.UI.WViewHolder:cast(control:GetNamedChild("ViewHolder"))
+   --
    do -- Set up views
-      Window.views.triggerlist.control = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList")
-      Window.views.trigger.control     = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerSingle")
+      Window.views.triggerlist.control = Window.viewholder.control:GetNamedChild("ViewTriggerList")
+      Window.views.trigger.control     = Window.viewholder.control:GetNamedChild("ViewTriggerSingle")
    end
    do -- Set up trigger list view
-      local scrollPane = ItemTrig_TrigEdit:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
+      local scrollPane = Window.viewholder.control:GetNamedChild("ViewTriggerList"):GetNamedChild("Col2")
       scrollPane = ItemTrig.UI.WScrollSelectList:cast(scrollPane)
       Window.views.triggerlist.pane = scrollPane
       scrollPane.paddingBetween      = 8
@@ -176,77 +161,7 @@ function ItemTrig.UIMain.OnInitialized(control)
             -- TODO: This should immediately open the trigger for editing.
          end
    end
-   do -- Set up trigger view
-      local function formatOpcodeArg(s)
-         return string.format("|c70B0FF%s|r", s)
-      end
-      --
-      local view = Window.views.trigger
-      local c
-      local a
-      do
-         local col = view.control:GetNamedChild("Col1")
-         c = col:GetNamedChild("Conditions"):GetNamedChild("List")
-         a = col:GetNamedChild("Actions"):GetNamedChild("List")
-      end
-      view.paneConditions = ItemTrig.UI.WScrollSelectList:cast(c)
-      view.paneActions    = ItemTrig.UI.WScrollSelectList:cast(a)
-      --
-      do
-         local pane = view.paneConditions
-         pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
-         pane.element.toConstruct =
-            function(control, data)
-               local height = 0
-               do
-                  local text = GetControl(control, "Text")
-                  local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-                  text:SetText(data:format(formatOpcodeArg) or "no text, weirdly enough")
-                  height = text:GetHeight() + paddingY * 2
-               end
-               control:SetHeight(height)
-            end
-         pane.element.onSelect =
-            function(index, control)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
-               text:SetColor(unpack(color))
-            end
-         pane.element.onDeselect =
-            function(index, control)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
-               text:SetColor(unpack(color))
-            end
-      end
-      do
-         local pane = view.paneActions
-         pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
-         pane.element.toConstruct =
-            function(control, data)
-               local height = 0
-               do
-                  local text = GetControl(control, "Text")
-                  local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-                  text:SetText(data:format(formatOpcodeArg))
-                  height = text:GetHeight() + paddingY * 2
-               end
-               control:SetHeight(height)
-            end
-         pane.element.onSelect =
-            function(index, control)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
-               text:SetColor(unpack(color))
-            end
-         pane.element.onDeselect =
-            function(index, control)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
-               text:SetColor(unpack(color))
-            end
-      end
-   end
+   Window.TriggerEditor:initialize(Window.viewholder.control:GetNamedChild("ViewTriggerSingle")) -- trigger.lua
 end
 
 function ItemTrig.UIMain.RenderTriggers(tList)

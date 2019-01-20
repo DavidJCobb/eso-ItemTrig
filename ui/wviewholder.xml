@@ -1,0 +1,32 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_UITemplate_WViewHolder" virtual="true">
+         <OnInitialized>
+            ItemTrig.UI.WViewHolder:install(self)
+            --
+            -- We can't guarantee execution order for the holder and views, 
+            -- so we need to rely on this ugly hack.
+            --
+            local function setup()
+               local widget = ItemTrig.UI.WViewHolder:cast(self)
+               if widget.postInstall then
+                  return
+               end
+               for i = 1, self:GetNumChildren() do
+                  local view = ItemTrig.UI.WViewHolderView:cast(self:GetChild(i))
+                  if view then
+                     view:postInstall()
+                  end
+               end
+               widget.postInstall = true
+            end
+            ZO_PreHookHandler(self, "OnEffectivelyShown", setup)
+         </OnInitialized>
+      </Control>
+      <Control name="ItemTrig_UITemplate_WViewHolderView" virtual="true">
+         <OnInitialized>
+            ItemTrig.UI.WViewHolderView:install(self)
+         </OnInitialized>
+      </Control>
+   </Controls>
+</GuiXml>

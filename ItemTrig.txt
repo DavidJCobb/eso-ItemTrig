@@ -17,9 +17,12 @@ ui/wscrolllist.xml
 ui/wscrollselectlist.lua
 ui/wscrollselectlist.xml
 ui/wscrollselectlistitem.xml
+ui/wviewholder.lua
+ui/wviewholder.xml
 ui/testmenu.lua
 ui/testmenu.xml
 trigedit/main.lua
+trigedit/trigger.lua
 trigedit/main.xml
 savedata.lua
 
