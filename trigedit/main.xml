@@ -78,13 +78,12 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
+         inherits="ItemTrig_UITemplate_WModalHost"
       >
          <Dimensions x="800" y="600" />
          <DimensionConstraints minX="600" minY="600" />
          <Anchor point="CENTER" />
-         <OnInitialized>
-            ItemTrig.UIMain.OnInitialized(self)
-         </OnInitialized>
+         <OnInitialized> ItemTrig.UIMain.OnInitialized(self) </OnInitialized>
          <OnHide> ItemTrig.UIMain.DispatchEvent("OnHide") </OnHide>
          <OnShow> ItemTrig.UIMain.DispatchEvent("OnShow") </OnShow>
          <Controls>
@@ -95,7 +94,7 @@
                <Dimensions y="50" />
                <Controls>
                   <Label name="$(parent)Title" text="Window Title" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT" offsetX="5" offsetY="5" /> <!-- because who needs sensible defaults? -->
+                     <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
                   </Label>
                </Controls>
             </Control>

@@ -10,7 +10,7 @@ end
 ItemTrig.Condition = {}
 ItemTrig.Condition.__index = ItemTrig.Condition
 function ItemTrig.Condition:new(base, args)
-   return ItemTrig.Opcode:new(base, args, ItemTrig.tableConditions)
+   return ItemTrig.Opcode:new(base, args, ItemTrig.tableConditions, "condition")
 end
 
 ItemTrig.tableConditions = {

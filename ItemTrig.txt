@@ -5,7 +5,9 @@
 ## SavedVariables: ItemTrigSavedata
 
 ItemTrig.lua
+misc/deferred.lua
 misc/string.lua
+misc/ui.lua
 triggers/system.lua
 triggers/serialization.lua
 triggers/opcode.lua
@@ -19,11 +21,15 @@ ui/wscrollselectlist.xml
 ui/wscrollselectlistitem.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
+ui/modals.lua
+ui/modals.xml
 ui/testmenu.lua
 ui/testmenu.xml
 trigedit/main.lua
 trigedit/trigger.lua
+trigedit/opcode.lua
 trigedit/main.xml
+trigedit/opcode.xml
 savedata.lua
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates.

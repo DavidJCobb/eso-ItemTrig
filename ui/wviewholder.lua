@@ -45,6 +45,7 @@ function ItemTrig.UI.WViewHolder:setView(control)
    self.selected = control
 end
 function ItemTrig.UI.WViewHolder:cast(control)
+   assert(control ~= nil, "Cannot cast a nil control to WViewHolder.")
    if control.widgets then
       return control.widgets.viewHolder
    end
@@ -102,6 +103,7 @@ function ItemTrig.UI.WViewHolderView:install(control)
    return result
 end
 function ItemTrig.UI.WViewHolderView:cast(control)
+   assert(control ~= nil, "Cannot cast a nil control to WViewHolderView.")
    if control.widgets then
       return control.widgets.viewHolderView
    end

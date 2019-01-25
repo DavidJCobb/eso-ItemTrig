@@ -123,7 +123,6 @@ local function WinTest02()
 end
 local function ShowTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
-   local pane = ItemTrig_TestMenu:GetNamedChild("vScrollListTest")
 end
 
 local function Initialize()

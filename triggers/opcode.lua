@@ -15,7 +15,7 @@ end
 
 ItemTrig.Opcode = {}
 ItemTrig.Opcode.__index = ItemTrig.Opcode
-function ItemTrig.Opcode:new(base, args, opTable)
+function ItemTrig.Opcode:new(base, args, opTable, opType)
    if type(base) == "number" then
       base = opTable[base]
    end
@@ -23,6 +23,7 @@ function ItemTrig.Opcode:new(base, args, opTable)
    setmetatable(result, self)
    result.base = base
    result.args = args or {} -- array
+   result.type = opType
    return result
 end
 function ItemTrig.Opcode:clone(deep)
@@ -30,6 +31,7 @@ function ItemTrig.Opcode:clone(deep)
    setmetatable(result, getmetatable(self))
    result.base = self.base
    result.args = {}
+   result.type = self.type
    do -- clone args
       local baseArgs = self.base.args
       for i = 1, table.getn(self.args) do
@@ -50,6 +52,28 @@ function ItemTrig.Opcode:clone(deep)
       end
    end
    return result
+end
+function ItemTrig.Opcode:copyAssign(other, deep)
+   self.base = other.base
+   self.type = other.type
+   if deep then
+      ZO_ClearNumericallyIndexedTable(self.args)
+      --
+      for i = 1, table.getn(other.args) do
+         local a = other.args[i]
+         if type(a) == "table" then
+            if self.base.args[i].type == "trigger" then
+               self.args[i] = a:clone()
+            else
+               self.args[i] = a
+            end
+         else
+            self.args[i] = other.args[i]
+         end
+      end
+   else
+      self.args = other.args
+   end
 end
 function ItemTrig.Opcode:exec(state, context)
    return self.base.func(state, context, self.args)

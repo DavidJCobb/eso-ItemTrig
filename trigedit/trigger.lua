@@ -54,6 +54,35 @@ function TriggerEditor:initialize(viewControl)
                local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
                text:SetColor(unpack(color))
             end
+         --
+         local buttons = pane.control:GetParent():GetNamedChild("Buttons")
+         do
+            local bNew    = buttons:GetNamedChild("New")
+            local bEdit   = buttons:GetNamedChild("Edit")
+            local bUp     = buttons:GetNamedChild("MoveUp")
+            local bDown   = buttons:GetNamedChild("MoveDown")
+            local bDelete = buttons:GetNamedChild("Delete")
+            --
+            -- TODO: other buttons
+            --
+            bEdit:SetHandler("OnMouseUp",
+               function(control, button, upInside, ctrl, alt, shift, command)
+                  if not upInside then
+                     return
+                  end
+                  local editor = ItemTrig.OpcodeEditWindow
+                  local pane   = ItemTrig.UI.WScrollSelectList:cast(control:GetParent():GetParent():GetNamedChild("List"))
+                  local opcode = pane:at(pane:getFirstSelectedIndex())
+                  if not opcode then
+                     return
+                  end
+                  if not editor:requestEdit() then
+                     return
+                  end
+                  editor:edit(opcode)
+               end
+            )
+         end
       end
       setupOpcodeList(self.ui.paneConditions)
       setupOpcodeList(self.ui.paneActions)
@@ -71,7 +100,7 @@ function TriggerEditor:commit()
    if not self.trigger.dirty then
       return
    end
-   self.trigger.target.copyAssign(self.trigger.working)
+   self.trigger.target:copyAssign(self.trigger.working)
 end
 function TriggerEditor:requestEdit()
    if self.trigger.dirty then
@@ -84,6 +113,9 @@ function TriggerEditor:requestEdit()
       -- trigger. We could redesign later to allow seamless 
       -- editing of nested triggers, but let's keep it basic 
       -- for now.
+      --
+      -- TODO: probably requires implementing something 
+      -- comparable to JavaScript promises/deferreds
       --
    end
    return true

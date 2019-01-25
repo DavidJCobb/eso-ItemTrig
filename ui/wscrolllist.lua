@@ -93,6 +93,7 @@ function ItemTrig.UI.WScrollList:install(control, options)
    return result
 end
 function ItemTrig.UI.WScrollList:cast(control)
+   assert(control ~= nil, "Cannot cast a nil control to WScrollList.")
    if control.widgets then
       return control.widgets.scrollList
    end

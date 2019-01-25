@@ -25,6 +25,7 @@ function ItemTrig.UI.WScrollSelectList:install(control, options)
    return result
 end
 function ItemTrig.UI.WScrollSelectList:cast(control)
+   assert(control ~= nil, "Cannot cast a nil control to WScrollSelectList.")
    if control.widgets then
       local widget = control.widgets.scrollList
       if getmetatable(widget) == self then

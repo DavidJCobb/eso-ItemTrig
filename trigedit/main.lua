@@ -1,9 +1,8 @@
 if not ItemTrig then return end
 
-ItemTrig.UIMain = {}
+ItemTrig.SCENE_TRIGEDIT = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
 
-local GAMEPAD_ITEMTRIG_WINDOW_SCENE
-local GAMEPAD_ITEMTRIG_WINDOW
+ItemTrig.UIMain = {}
 
 local Window = {
    control    = nil,
@@ -92,9 +91,8 @@ function ItemTrig.UIMain.DispatchEvent(e)
 end
 function ItemTrig.UIMain.OnInitialized(control)
    Window.control = control
-   local fragment = ZO_SimpleSceneFragment:New(ItemTrig_TrigEdit)
-   local scene    = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
-   scene:AddFragment(fragment)
+   local fragment = ZO_SimpleSceneFragment:New(ItemTrig_TrigEdit, "ITEMTRIG_ACTION_LAYER_TRIGEDIT_BASE")
+   ItemTrig.SCENE_TRIGEDIT:AddFragment(fragment)
    --
    Window.viewholder = ItemTrig.UI.WViewHolder:cast(control:GetNamedChild("ViewHolder"))
    --

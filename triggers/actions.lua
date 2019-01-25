@@ -10,7 +10,7 @@ end
 ItemTrig.Action = {}
 ItemTrig.Action.__index = ItemTrig.Action
 function ItemTrig.Action:new(base, args)
-   return ItemTrig.Opcode:new(base, args, ItemTrig.tableActions)
+   return ItemTrig.Opcode:new(base, args, ItemTrig.tableActions, "action")
 end
 
 ItemTrig.tableActions = {
