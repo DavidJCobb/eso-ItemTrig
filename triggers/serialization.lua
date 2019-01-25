@@ -77,9 +77,9 @@ local function serializeOpcode(o)
          end
          safeArgs[i] = string.format(format_OPCODEARG, safeArgs[i])
       end
-      return cc_OPCODE_START .. tostring(o.base.opcode) .. table.concat(safeArgs, "") .. cc_OPCODE_END
+      return cc_OPCODE_START .. tostring(o.base.opcode or 0) .. table.concat(safeArgs, "") .. cc_OPCODE_END
    end
-   return cc_OPCODE_START .. tostring(o.base.opcode) .. cc_OPCODE_END
+   return cc_OPCODE_START .. tostring(o.base.opcode or 0) .. cc_OPCODE_END
 end
 local function serializeTrigger(t)
    local function _toChunk(head, body)

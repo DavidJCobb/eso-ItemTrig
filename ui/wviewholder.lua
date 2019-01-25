@@ -3,9 +3,17 @@ if not ItemTrig.UI then
    ItemTrig.UI = {}
 end
 
+--[[--
+   WVIEWHOLDER and WVIEWHOLDERVIEW
+   
+   These are convenience classes for managing the visibility of multiple mutually-
+   exclusive "views" within a single context (the "view holder").
+--]]--
+
 ItemTrig.UI.WViewHolder = {}
 ItemTrig.UI.WViewHolder.__index = ItemTrig.UI.WViewHolder
 function ItemTrig.UI.WViewHolder:install(control)
+   assert(control ~= nil, "Cannot install WViewHolder functionality on a nil control.")
    if control.widgets and control.widgets.viewHolder then
       return control.widgets.viewHolder
    end
@@ -78,6 +86,7 @@ end
 ItemTrig.UI.WViewHolderView = {}
 ItemTrig.UI.WViewHolderView.__index = ItemTrig.UI.WViewHolderView
 function ItemTrig.UI.WViewHolderView:install(control)
+   assert(control ~= nil, "Cannot install WViewHolderView functionality on a nil control.")
    if control.widgets and control.widgets.viewHolderView then
       return control.widgets.viewHolderView
    end

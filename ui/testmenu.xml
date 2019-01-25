@@ -35,5 +35,124 @@
             </Control>
          </Controls>
       </TopLevelControl>
+      <Control name="ItemTrig_AnchorTestMenu_ConfigRow" virtual="true">
+         <OnInitialized>
+            local anchorValues = {
+               [1] = { name = "TOP",         value = 1 },
+               [2] = { name = "TOPLEFT",     value = 3 },
+               [3] = { name = "LEFT",        value = 2 },
+               [4] = { name = "BOTTOMLEFT",  value = 6 },
+               [5] = { name = "BOTTOM",      value = 4 },
+               [6] = { name = "BOTTOMRIGHT", value = 12 },
+               [7] = { name = "RIGHT",       value = 8 },
+               [8] = { name = "TOPRIGHT",    value = 9 },
+               [9] = { name = "CENTER",      value = 128 },
+            }
+            local pointSelf = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("PointSelf"))
+            local pointRel  = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("PointRel"))
+            for i = 1, table.getn(anchorValues) do
+               anchorValues[i].callback =
+                  function()
+                     ItemTrig.AnchorTestMenu:refresh()
+                  end
+               pointSelf:AddItem(anchorValues[i], ZO_COMBOBOX_SUPRESS_UPDATE)
+               pointRel:AddItem(anchorValues[i], ZO_COMBOBOX_SUPRESS_UPDATE)
+            end
+            pointSelf:UpdateItems()
+            pointRel:UpdateItems()
+            pointSelf:SetSelectedItemByEval(
+               function(item)
+                  if item.value == 128 then
+                     return true
+                  end
+                  return false
+               end
+            )
+            pointRel:SetSelectedItemByEval(
+               function(item)
+                  if item.value == 128 then
+                     return true
+                  end
+                  return false
+               end
+            )
+            self:SetHeight(self:GetNamedChild("PointSelf"):GetHeight())
+         </OnInitialized>
+         <Controls>
+            <Label name="$(parent)Label" text="Control 1:" font="ZoFontWinT1">
+               <Anchor point="TOPLEFT" />
+            </Label>
+            <Control name="$(parent)PointSelf" inherits="ZO_ScrollableComboBox">
+               <Anchor point="TOPLEFT" offsetX="5" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" />
+               <Dimensions x="120" />
+            </Control>
+            <Label name="$(parent)_t01" text=" relative to " font="ZoFontWinT1">
+               <Anchor point="TOPLEFT" offsetX="5" relativeTo="$(parent)PointSelf" relativePoint="TOPRIGHT" />
+            </Label>
+            <Label name="$(parent)TargetName" text="canvas" font="ZoFontWinT1">
+               <Anchor point="TOPLEFT" relativeTo="$(parent)_t01" relativePoint="TOPRIGHT" />
+            </Label>
+            <Control name="$(parent)PointRel" inherits="ZO_ScrollableComboBox">
+               <Anchor point="TOPLEFT" offsetX="5" relativeTo="$(parent)TargetName" relativePoint="TOPRIGHT" />
+               <Dimensions x="120" />
+            </Control>
+         </Controls>
+      </Control>
+      <TopLevelControl name="ItemTrig_AnchorTestMenu"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+      >
+         <Dimensions x="600" y="600" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.AnchorTestMenu:OnInitialized(self) </OnInitialized>
+         <Controls>
+            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+            <Control name="$(parent)Topbar">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="TOPRIGHT" />
+               <Dimensions y="50" />
+               <Controls>
+                  <Label name="$(parent)Name" font="ZoFontWinT2" text="Anchor test menu">
+                     <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                  </Label>
+                  <Control name="$(parent)Row1" inherits="ItemTrig_AnchorTestMenu_ConfigRow">
+                     <Anchor point="TOPLEFT" offsetY="5" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
+                  </Control>
+                  <Control name="$(parent)Row2" inherits="ItemTrig_AnchorTestMenu_ConfigRow">
+                     <Anchor point="TOPLEFT" offsetY="5" relativeTo="$(parent)Row1" relativePoint="BOTTOMLEFT" />
+                  </Control>
+               </Controls>
+            </Control>
+            <Control name="$(parent)Body">
+               <Anchor point="TOPLEFT"     relativeTo="$(parent)Topbar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" />
+               <Controls>
+                  <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+                  <Control name="ItemTrig_AnchorTest_Control01">
+                     <Dimensions x="100" y="100" />
+                     <Anchor point="CENTER" relativeTo="$(parent)Body" />
+                     <Controls>
+                        <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+                        <Label font="ZoFontWinT2" text="Control 1">
+                           <Anchor point="CENTER" />
+                        </Label>
+                     </Controls>
+                  </Control>
+                  <Control name="ItemTrig_AnchorTest_Control02">
+                     <Dimensions x="100" y="100" />
+                     <Anchor point="CENTER" relativeTo="ItemTrig_AnchorTest_Control01" />
+                     <Controls>
+                        <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+                        <Label font="ZoFontWinT2" text="Control 2">
+                           <Anchor point="CENTER" />
+                        </Label>
+                     </Controls>
+                  </Control>
+               </Controls>
+            </Control>
+         </Controls>
+      </TopLevelControl>
    </Controls>
 </GuiXml>

@@ -29,6 +29,7 @@ trigedit/main.lua
 trigedit/trigger.lua
 trigedit/opcode.lua
 trigedit/main.xml
+trigedit/trigger.xml
 trigedit/opcode.xml
 savedata.lua
 

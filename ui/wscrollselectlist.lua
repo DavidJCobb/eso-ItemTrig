@@ -5,6 +5,7 @@ ItemTrig.UI.WScrollSelectList = {}
 ItemTrig.UI.WScrollSelectList.__index = ItemTrig.UI.WScrollSelectList
 setmetatable(ItemTrig.UI.WScrollSelectList, { __index = ItemTrig.UI.WScrollList })
 function ItemTrig.UI.WScrollSelectList:install(control, options)
+   assert(control ~= nil, "Cannot install WScrollSelectList functionality on a nil control.")
    if control.widgets and control.widgets.scrollList then
       d("WARNING: Attempting to install WScrollSelectList on a control that already has it?")
    end

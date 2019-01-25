@@ -17,62 +17,6 @@
             </Label>
          </Controls>
       </Control>
-      <Control name="ItemTrig_TrigEdit_Template_OpcodeList" virtual="true">
-         <Controls>
-            <Control name="$(parent)Buttons">
-               <Anchor point="TOPRIGHT" />
-               <Anchor point="BOTTOMRIGHT" />
-               <Dimensions x="150" />
-               <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Add"  text="New">
-                     <Anchor point="LEFT" />
-                     <Anchor point="TOPRIGHT" />
-                     <OnClicked>
-                     </OnClicked>
-                  </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Edit" text="Edit">
-                     <Anchor point="LEFT" />
-                     <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Add" />
-                     <OnClicked>
-                     </OnClicked>
-                  </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="Move Up">
-                     <Anchor point="LEFT" />
-                     <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Edit" />
-                     <OnClicked>
-                     </OnClicked>
-                  </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="Move Down">
-                     <Anchor point="LEFT" />
-                     <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
-                     <OnClicked>
-                     </OnClicked>
-                  </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Delete" text="Delete">
-                     <Anchor point="LEFT" />
-                     <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
-                     <OnClicked>
-                     </OnClicked>
-                  </Button>
-               </Controls>
-            </Control>
-            <Control name="$(parent)List" inherits="ItemTrig_UITemplate_WScrollSelectList">
-               <Anchor point="TOPLEFT" />
-               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons" relativePoint="BOTTOMLEFT" offsetX="-5" />
-            </Control>
-         </Controls>
-      </Control>
-      <Control name="ItemTrig_TrigEdit_Template_Opcode" virtual="true"
-         mouseEnabled="true"
-         inherits="ItemTrig_UITemplate_WScrollSelectListItem"
-      >
-         <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
-            <Label name="$(parent)Text" font="ZoFontChat" text="Opcode text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-               <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-            </Label>
-         </Controls>
-      </Control>
       <TopLevelControl name="ItemTrig_TrigEdit"
          mouseEnabled="true"
          movable="true"
@@ -80,183 +24,86 @@
          hidden="true"
          inherits="ItemTrig_UITemplate_WModalHost"
       >
-         <Dimensions x="800" y="600" />
+         <Dimensions x="800" y="500" />
          <DimensionConstraints minX="600" minY="600" />
          <Anchor point="CENTER" />
-         <OnInitialized> ItemTrig.UIMain.OnInitialized(self) </OnInitialized>
-         <OnHide> ItemTrig.UIMain.DispatchEvent("OnHide") </OnHide>
-         <OnShow> ItemTrig.UIMain.DispatchEvent("OnShow") </OnShow>
+         <OnInitialized> ItemTrig.TriggerListWindow:OnInitialized(self) </OnInitialized>
+         <OnHide> ItemTrig.TriggerListWindow:OnClose() </OnHide>
+         <OnShow> ItemTrig.TriggerListWindow:OnOpen() </OnShow>
          <Controls>
             <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
-            <Control name="$(parent)Header">
+            <Control name="$(parent)Header" resizeToFitDescendents="true">
                <Anchor point="TOPLEFT" />
                <Anchor point="TOPRIGHT" />
-               <Dimensions y="50" />
+               <ResizeToFitPadding width="5" height="5" />
                <Controls>
-                  <Label name="$(parent)Title" text="Window Title" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
+                  <Label name="$(parent)Title" text="ItemTrig" font="ZoFontWinT1">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="TOPRIGHT" />
                   </Label>
+                  <Texture name="$(parent)Rule" color="808080" tier="HIGH">
+                     <Dimensions y="1.5"/>
+                     <Anchor point="TOPLEFT"  relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
+                  </Texture>
                </Controls>
             </Control>
-            <Control name="$(parent)ViewHolder"
-               inherits="ItemTrig_UITemplate_WViewHolder"
-            >
+            <Control name="$(parent)Body">
                <Anchor offsetX="5"  offsetY="5"  point="TOPLEFT"     relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
                <Anchor offsetX="-5" offsetY="-5" point="BOTTOMRIGHT" relativeTo="$(parent)"       relativePoint="BOTTOMRIGHT" />
                <Controls>
-                  <Control name="$(parent)ViewTriggerList"
-                     inherits="ItemTrig_UITemplate_WViewHolderView"
-                     hidden="false"
-                  >
-                     <AnchorFill />
+                  <Control name="$(parent)Col1">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="BOTTOMLEFT" />
+                     <Dimensions x="200" />
                      <Controls>
-                        <Control name="$(parent)Col1">
+                        <Label name="$(parent)TestLabel" text="Col 1" font="ZoFontWinT2">
                            <Anchor point="TOPLEFT" />
-                           <Anchor point="BOTTOMLEFT" />
-                           <Dimensions x="200" />
-                           <Controls>
-                              <Label name="$(parent)TestLabel" text="Col 1" font="ZoFontWinT2">
-                                 <Anchor point="TOPLEFT" />
-                              </Label>
-                           </Controls>
-                        </Control>
-                        <Control name="$(parent)Col3">
-                           <Anchor point="TOPRIGHT" />
-                           <Anchor point="BOTTOMRIGHT" />
-                           <Dimensions x="150" />
-                           <Controls>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)AddTrigger"  text="New">
-                                 <Anchor point="LEFT" />
-                                 <Anchor point="TOPRIGHT" />
-                                 <OnClicked>
-                                    ItemTrig.TrigEditWindow.views.triggerlist:newTrigger()
-                                 </OnClicked>
-                              </Button>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)EditTrigger" text="Edit">
-                                 <Anchor point="LEFT" />
-                                 <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)AddTrigger" />
-                                 <OnClicked>
-                                    ItemTrig.TrigEditWindow.views.triggerlist:editTrigger()
-                                 </OnClicked>
-                              </Button>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="Move Up">
-                                 <Anchor point="LEFT" />
-                                 <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EditTrigger" />
-                                 <OnClicked>
-                                 </OnClicked>
-                              </Button>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="Move Down">
-                                 <Anchor point="LEFT" />
-                                 <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
-                                 <OnClicked>
-                                 </OnClicked>
-                              </Button>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="Delete">
-                                 <Anchor point="LEFT" />
-                                 <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
-                                 <OnClicked>
-                                 </OnClicked>
-                              </Button>
-                           </Controls>
-                        </Control>
-                        <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollSelectList">
-                           <Anchor point="TOPLEFT"     relativeTo="$(parent)Col1" relativePoint="TOPRIGHT"   offsetX="5" />
-                           <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Col3" relativePoint="BOTTOMLEFT" offsetX="-5" />
-                        </Control>
+                        </Label>
                      </Controls>
                   </Control>
-                  <Control name="$(parent)ViewTriggerSingle"
-                     inherits="ItemTrig_UITemplate_WViewHolderView"
-                     hidden="true"
-                  >
-                     <AnchorFill />
+                  <Control name="$(parent)Col3">
+                     <Anchor point="TOPRIGHT" />
+                     <Anchor point="BOTTOMRIGHT" />
+                     <Dimensions x="150" />
                      <Controls>
-                        <Control name="$(parent)Bottom">
-                           <Anchor point="BOTTOMLEFT" />
-                           <Anchor point="BOTTOMRIGHT" />
-                           <Dimensions y="50" />
-                           <Controls>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="OK">
-                                 <Anchor point="BOTTOMRIGHT" />
-                                 <OnClicked>
-                                 </OnClicked>
-                              </Button>
-                              <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="Cancel">
-                                 <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
-                                 <OnClicked>
-                                    local editor = ItemTrig.TrigEditWindow.TriggerEditor
-                                    if editor:requestExit() then
-                                       editor:abandon()
-                                    end
-                                 </OnClicked>
-                              </Button>
-                           </Controls>
-                        </Control>
-                        <Control name="$(parent)Col1">
-                           <Anchor point="TOPLEFT" />
-                           <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
-                           <Dimensions x="200" />
-                           <OnInitialized>
-                              --
-                              -- This is ugly, but I can't seem to get this kind of sizing working just using 
-                              -- the anchor system: I want the two opcode lists in this column to flex, each 
-                              -- consuming half of the space not consumed by the text headers.
-                              --
-                              local cHead    = self:GetNamedChild("ConditionsHeader")
-                              local cList    = self:GetNamedChild("Conditions")
-                              local aHead    = self:GetNamedChild("ActionsHeader")
-                              local aList    = self:GetNamedChild("Actions")
-                              local this     = self
-                              local resizing = true
-                              local function onResizeStart(control)
-                                 resizing = true
-                              end
-                              local function onResizeFrame(control)
-                                 if not resizing then
-                                    return
-                                 end
-                                 local span = control:GetHeight()
-                                 span = span - cHead:GetHeight()
-                                 span = span - aHead:GetHeight()
-                                 span = span - 8
-                                 cList:SetHeight(span / 2)
-                                 aList:SetHeight(span / 2)
-                              end
-                              local function onResizeStop(control)
-                                 resizing = false
-                              end
-                              ZO_PreHookHandler(self:GetOwningWindow(), "OnResizeStart", onResizeStart)
-                              ZO_PreHookHandler(self, "OnUpdate", onResizeFrame)
-                              resizing = true
-                              onResizeFrame(self)
-                              resizing = false
-                           </OnInitialized>
-                           <Controls>
-                              <Label name="$(parent)ConditionsHeader" font="ZoFontWinT2" text="Conditions:">
-                                 <Anchor point="TOPLEFT" />
-                                 <Anchor point="TOPRIGHT" />
-                              </Label>
-                              <Control name="$(parent)Conditions" inherits="ItemTrig_TrigEdit_Template_OpcodeList">
-                                 <Anchor point="TOPLEFT"  relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMLEFT" />
-                                 <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMRIGHT" />
-                              </Control>
-                              <Label name="$(parent)ActionsHeader" font="ZoFontWinT2" text="Actions:">
-                                 <Anchor point="TOPLEFT"  relativeTo="$(parent)Conditions" relativePoint="BOTTOMLEFT" />
-                                 <Anchor point="TOPRIGHT" relativeTo="$(parent)Conditions" relativePoint="BOTTOMRIGHT" />
-                              </Label>
-                              <Control name="$(parent)Actions" inherits="ItemTrig_TrigEdit_Template_OpcodeList">
-                                 <Anchor point="TOPLEFT"     relativeTo="$(parent)ActionsHeader" relativePoint="BOTTOMLEFT" />
-                                 <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)Bottom"   relativePoint="TOPRIGHT" offsetY="-8" />
-                              </Control>
-                           </Controls>
-                        </Control>
-                        <Control name="$(parent)Col2">
-                           <Anchor point="TOPLEFT"    relativeTo="$(parent)Col1" relativePoint="TOPRIGHT" />
-                           <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
-                           <Controls>
-                           </Controls>
-                        </Control>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)AddTrigger"  text="New">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" />
+                           <OnClicked>
+                              ItemTrig.TriggerListWindow:newTrigger()
+                           </OnClicked>
+                        </Button>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)EditTrigger" text="Edit">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)AddTrigger" />
+                           <OnClicked>
+                              ItemTrig.TriggerListWindow:editTrigger()
+                           </OnClicked>
+                        </Button>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="Move Up">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EditTrigger" />
+                           <OnClicked>
+                           </OnClicked>
+                        </Button>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="Move Down">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
+                           <OnClicked>
+                           </OnClicked>
+                        </Button>
+                        <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="Delete">
+                           <Anchor point="LEFT" />
+                           <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
+                           <OnClicked>
+                           </OnClicked>
+                        </Button>
                      </Controls>
+                  </Control>
+                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollSelectList">
+                     <Anchor point="TOPLEFT"     relativeTo="$(parent)Col1" relativePoint="TOPRIGHT"   offsetX="5" />
+                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Col3" relativePoint="BOTTOMLEFT" offsetX="-5" />
                   </Control>
                </Controls>
             </Control>

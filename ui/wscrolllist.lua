@@ -44,6 +44,7 @@ end
 ItemTrig.UI.WScrollList = {}
 ItemTrig.UI.WScrollList.__index = ItemTrig.UI.WScrollList
 function ItemTrig.UI.WScrollList:install(control, options)
+   assert(control ~= nil, "Cannot install WScrollList functionality on a nil control.")
    if control.widgets and control.widgets.scrollList then
       d("WARNING: Attempting to install WScrollList on a control that already has it?")
    end
@@ -168,6 +169,8 @@ function ItemTrig.UI.WScrollList:resizeScrollbar(scrollMax)
    end
 end
 function ItemTrig.UI.WScrollList:redraw()
+   assert(self.element.toConstruct ~= nil, "You must supply a constructor callback before WScrollList can render list items.")
+   assert(self.element.template    ~= "",  "You must supply a template to use for list items before WScrollList can render list items.")
    local contents = self.contents
    local existing = contents:GetNumChildren()
    local count    = table.getn(self.listItems)

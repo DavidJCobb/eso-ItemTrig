@@ -1,5 +1,23 @@
 if not ItemTrig then return end
 
+--[[--
+   The workflow for the opcode editor is as follows:
+   
+    * Store a reference to the opcode we wish to edit, akin to 
+      C++ {Opcode* original;}.
+   
+    * Create and store a copy of that opcode, and make our edits 
+      to the copy.
+   
+    * If the user cancels their changes, then we just destroy 
+      the copy.
+   
+    * If the user commits their changes, then we overwrite each 
+      field on the original opcode with the values in the copy; 
+      think of C++ {*original = copy;}. We've created a method 
+      for this purpose: Opcode:copyAssign.
+--]]--
+
 local Window = {
    ui = {
       fragment   = nil,
@@ -33,7 +51,7 @@ function Window:abandon()
    --
    -- TODO: reset UI state
    --
-   SCENE_MANAGER:HideTopLevel(ItemTrig_OpcodeEdit)
+   SCENE_MANAGER:HideTopLevel(self.ui.window)
 end
 function Window:commit()
    if not self.opcode.dirty then
@@ -63,22 +81,19 @@ function Window:requestExit()
    return true
 end
 function Window:edit(opcode, dirty)
+   assert(ItemTrig.TriggerEditWindow ~= nil, "Cannot open the opcode editor window if the trigger editor window doesn't exist.")
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
    self.opcode.dirty   = dirty or false
    do
-      local host  = ItemTrig.UI.WModalHost:cast(ItemTrig_TrigEdit)
-      local modal = ItemTrig.UI.WModal:install(ItemTrig_OpcodeEdit)
+      local host  = ItemTrig.UI.WModalHost:cast(ItemTrig.TriggerEditWindow.ui.window)
+      local modal = ItemTrig.UI.WModal:install(self.ui.window)
       if not modal:prepToShow(host) then
          return
       end
    end
    --
    do
-      --
-      -- TODO: populate the "opcode type" drop-down based on whether we're editing 
-      -- a condition or an action
-      --
       local list
       if opcode.type == "condition" then
          list = ItemTrig.tableConditions
@@ -102,8 +117,8 @@ function Window:edit(opcode, dirty)
    end
    self:refresh()
    --
-   SCENE_MANAGER:ShowTopLevel(ItemTrig_OpcodeEdit)
-   ItemTrig_OpcodeEdit:BringWindowToTop()
+   SCENE_MANAGER:ShowTopLevel(self.ui.window)
+   self.ui.window:BringWindowToTop()
 end
 function Window:refresh()
    --
@@ -113,4 +128,16 @@ function Window:refresh()
    --
    -- * render the opcode body
    --
+   do -- opcode type
+      local opcodeBase = self.opcode.working.base
+      local combobox   = self.ui.opcodeType
+      combobox:SetSelectedItemByEval(
+         function(item)
+            if item.base == opcodeBase then
+               return true
+            end
+            return false
+         end
+      )
+   end
 end

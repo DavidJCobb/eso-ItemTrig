@@ -90,8 +90,7 @@ local function PerfTest(extra)
 end
 
 local function ShowWin()
-   ItemTrig.UIMain.Toggle()
-   ItemTrig.UIMain.RenderTriggers(ItemTrig.Savedata.triggers)
+   ItemTrig.TriggerListWindow:open()
 end
 local function WinTest01()
    local tList = {}
@@ -116,24 +115,23 @@ local function WinTest01()
       --
       table.insert(tList, t)
    end
-   ItemTrig.UIMain.RenderTriggers(tList)
-end
-local function WinTest02()
-   ItemTrig.TrigEditWindow:showView("trigger")
+   ItemTrig.TriggerListWindow:renderTriggers(tList)
 end
 local function ShowTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
 end
+local function ShowAnchorTestMenu()
+   SCENE_MANAGER:ToggleTopLevel(ItemTrig_AnchorTestMenu)
+end
 
 local function Initialize()
    ItemTrig.Savedata:load()
-   ItemTrig.UIMain.Setup()
    SLASH_COMMANDS["/cobbtrigtest"]  = TriggerTest
    SLASH_COMMANDS["/cobbperftest"]  = PerfTest
    SLASH_COMMANDS["/cobbshowwin"]   = ShowWin
    SLASH_COMMANDS["/cobbwintest01"] = WinTest01
-   SLASH_COMMANDS["/cobbwintest02"] = WinTest02
    SLASH_COMMANDS["/cobbshowtestmenu"]  = ShowTestMenu
+   SLASH_COMMANDS["/cobbshowanchortestmenu"]  = ShowAnchorTestMenu
 end
 local function OnAddonLoaded(eventCode, addonName)
    if addonName == ItemTrig.name then

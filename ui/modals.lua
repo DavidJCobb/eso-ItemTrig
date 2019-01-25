@@ -3,15 +3,29 @@ if not ItemTrig.UI then
    ItemTrig.UI = {}
 end
 
+--[[--
+   WMODALHOST and WMODAL
+   
+   These are convenience classes for allowing one window to open another as a 
+   modal, such that the opener is unable to receive mouse input until the modal 
+   is closed. Every WModal instance prehooks its OnEffectivelyHidden event 
+   handler in order to signal its WModalHost.
+   
+   Note that these classes don't actually handle showing and hiding the modal; 
+   they just help to manage mouse-blocking on the opener. Use WModal's 
+   prepToShow method to do that.
+--]]--
+
 ItemTrig.UI.WModalHost = {}
 ItemTrig.UI.WModalHost.__index = ItemTrig.UI.WModalHost
 function ItemTrig.UI.WModalHost:install(control, blocker)
+   assert(control ~= nil, "Cannot install WModalHost functionality on a nil control.")
    if control.widgets and control.widgets.modalHost then
       return control.widgets.modalHost
    end
    local result = {
       control = control,
-      blocker = blocker,
+      blocker = blocker, -- the control used to block mouse focus
       showing = nil,
    }
    setmetatable(result, self)
@@ -53,6 +67,7 @@ end
 ItemTrig.UI.WModal = {}
 ItemTrig.UI.WModal.__index = ItemTrig.UI.WModal
 function ItemTrig.UI.WModal:install(control)
+   assert(control ~= nil, "Cannot install WModal functionality on a nil control.")
    if control.widgets and control.widgets.modal then
       return control.widgets.modal
    end

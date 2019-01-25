@@ -1,24 +1,51 @@
 if not ItemTrig then return end
-if not ItemTrig.TrigEditWindow then return end
 
-local TriggerEditor = {
+--[[--
+   The workflow for the trigger editor is as follows:
+   
+    * Store a reference to the trigger we wish to edit, akin to 
+      C++ {Trigger* original;}.
+   
+    * Create and store a copy of that trigger, and make our edits 
+      to the copy.
+   
+    * If the user cancels their changes, then we just destroy 
+      the copy.
+   
+    * If the user commits their changes, then we overwrite each 
+      field on the original trigger with the values in the copy; 
+      think of C++ {*original = copy;}. We've created a method 
+      for this purpose: Trigger:copyAssign.
+--]]--
+
+local Window = {
    trigger = {
+      --
+      -- TODO: In order to account for nested triggers, we'll probably want to 
+      -- redesign this just *slightly*, in order to function as a stack rather 
+      -- than just a single set of data.
+      --
       target  = nil, -- the trigger we want to edit (reference to something elsewhere)
       working = nil, -- a copy of that trigger, which we edit
       dirty   = false,
    },
    ui = {
-      view           = nil,
+      fragment       = nil,
+      window         = nil,
       paneConditions = nil,
       paneActions    = nil,
    },
 }
-ItemTrig.TrigEditWindow.TriggerEditor = TriggerEditor
+ItemTrig.TriggerEditWindow = Window
 
-function TriggerEditor:initialize(viewControl)
-   self.ui.view = ItemTrig.UI.WViewHolderView:cast(viewControl)
+function Window:OnInitialized(control)
+   self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGEREDIT")
+   ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
+   SCENE_MANAGER:RegisterTopLevel(control, false)
+   --
+   self.ui.window = control
    do
-      local col = viewControl:GetNamedChild("Col1")
+      local col = control:GetNamedChild("Col1")
       local c = col:GetNamedChild("Conditions"):GetNamedChild("List")
       local a = col:GetNamedChild("Actions"):GetNamedChild("List")
       self.ui.paneConditions = ItemTrig.UI.WScrollSelectList:cast(c)
@@ -54,6 +81,17 @@ function TriggerEditor:initialize(viewControl)
                local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
                text:SetColor(unpack(color))
             end
+         pane.element.onDoubleClick =
+            --
+            -- TODO: make consistent with the trigger list
+            --
+            function(index, control, pane)
+               local opcode = pane.listItems[index]
+               if opcode then
+                  local editor = ItemTrig.OpcodeEditWindow
+                  editor:edit(opcode)
+               end
+            end
          --
          local buttons = pane.control:GetParent():GetNamedChild("Buttons")
          do
@@ -66,6 +104,9 @@ function TriggerEditor:initialize(viewControl)
             -- TODO: other buttons
             --
             bEdit:SetHandler("OnMouseUp",
+               --
+               -- TODO: make consistent with the trigger list
+               --
                function(control, button, upInside, ctrl, alt, shift, command)
                   if not upInside then
                      return
@@ -88,21 +129,29 @@ function TriggerEditor:initialize(viewControl)
       setupOpcodeList(self.ui.paneActions)
    end
 end
-function TriggerEditor:abandon()
+
+function Window:tryEdit(trigger, dirty)
+   if not self:requestEdit() then
+      return
+   end
+   self:edit(trigger, dirty)
+end
+
+function Window:abandon()
    self.trigger.target  = nil
    self.trigger.working = nil
    self.trigger.dirty   = false
    self.ui.paneConditions:clear()
    self.ui.paneActions:clear()
-   self.ui.view.holder:setView(1)
+   SCENE_MANAGER:HideTopLevel(self.ui.window)
 end
-function TriggerEditor:commit()
+function Window:commit()
    if not self.trigger.dirty then
       return
    end
    self.trigger.target:copyAssign(self.trigger.working)
 end
-function TriggerEditor:requestEdit()
+function Window:requestEdit()
    if self.trigger.dirty then
       --
       -- TODO: prompt for confirmation; return true if the 
@@ -120,7 +169,7 @@ function TriggerEditor:requestEdit()
    end
    return true
 end
-function TriggerEditor:requestExit()
+function Window:requestExit()
    if self.trigger.dirty then
       --
       -- TODO: prompt for confirmation; return true if the 
@@ -129,14 +178,23 @@ function TriggerEditor:requestExit()
    end
    return true
 end
-function TriggerEditor:edit(trigger, dirty)
+function Window:edit(trigger, dirty)
+   assert(ItemTrig.TriggerListWindow ~= nil, "Cannot open the trigger editor window if the trigger list window doesn't exist.")
    self.trigger.target  = trigger
    self.trigger.working = trigger:clone(false) -- see documentation for this function
    self.trigger.dirty   = dirty or false
+   do
+      local host  = ItemTrig.UI.WModalHost:cast(ItemTrig.TriggerListWindow.ui.window)
+      local modal = ItemTrig.UI.WModal:install(self.ui.window)
+      if not modal:prepToShow(host) then
+         return
+      end
+   end
    self:refresh()
-   self.ui.view:show()
+   SCENE_MANAGER:ShowTopLevel(self.ui.window)
+   self.ui.window:BringWindowToTop()
 end
-function TriggerEditor:refresh()
+function Window:refresh()
    local trigger = self.trigger.working
    do -- render conditions
       local pane = self.ui.paneConditions

@@ -12,15 +12,19 @@
          <OnInitialized> ItemTrig.OpcodeEditWindow:OnInitialized(self) </OnInitialized>
          <Controls>
             <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
-            <Control name="$(parent)Header">
+            <Control name="$(parent)Header" resizeToFitDescendents="true">
                <Anchor point="TOPLEFT" />
                <Anchor point="TOPRIGHT" />
-               <Dimensions y="50" />
                <Controls>
-                  <Label name="$(parent)Title" text="Window Title" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT"  offsetX="5" offsetY="5" />
-                     <Anchor point="TOPRIGHT" offsetX="-5" offsetY="5" />
+                  <Label name="$(parent)Title" text="Edit opcode..." font="ZoFontWinT1">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="TOPRIGHT" />
                   </Label>
+                  <Texture name="$(parent)Rule" color="808080" tier="HIGH">
+                     <Dimensions y="1.5"/>
+                     <Anchor point="TOPLEFT"  relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
+                  </Texture>
                </Controls>
             </Control>
             <Control name="$(parent)Row1">
