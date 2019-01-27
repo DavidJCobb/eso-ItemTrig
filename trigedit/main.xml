@@ -57,6 +57,7 @@
                      <Anchor point="BOTTOMLEFT" />
                      <Dimensions x="200" />
                      <Controls>
+                        <!-- TODO: this column is for trigger entry points -->
                         <Label name="$(parent)TestLabel" text="Col 1" font="ZoFontWinT2">
                            <Anchor point="TOPLEFT" />
                         </Label>

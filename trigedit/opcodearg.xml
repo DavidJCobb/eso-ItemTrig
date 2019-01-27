@@ -1,0 +1,58 @@
+<GuiXml>
+   <Controls>
+      <TopLevelControl name="ItemTrig_OpcodeArgEdit"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+      >
+         <Dimensions x="300" y="150" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.OpcodeArgEditWindow:OnInitialized(self) </OnInitialized>
+         <Controls>
+            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+            <Control name="$(parent)Bottom" resizeToFitDescendents="true">
+               <Anchor point="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" />
+               <Controls>
+                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="OK">
+                     <Anchor point="BOTTOMRIGHT" />
+                     <OnClicked>
+                     </OnClicked>
+                  </Button>
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="Cancel">
+                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
+                     <OnClicked> ItemTrig.OpcodeArgEditWindow:cancel() </OnClicked>
+                  </Button>
+               </Controls>
+            </Control>
+            <Control name="$(parent)Body"
+               inherits="ItemTrig_UITemplate_WViewHolder"
+            >
+               <Anchor point="TOPLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+               <Controls>
+                  <Control name="$(parent)Enum"
+                     inherits="ItemTrig_UITemplate_WViewHolderView"
+                  >
+                     <AnchorFill />
+                     <Controls>
+                        <Control name="$(parent)Value" inherits="ZO_ScrollableComboBox">
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="TOPRIGHT" />
+                        </Control>
+                     </Controls>
+                  </Control>
+                  <Control name="$(parent)Quantity"
+                     inherits="ItemTrig_UITemplate_WViewHolderView"
+                  >
+                     <AnchorFill />
+                     <Controls>
+                     </Controls>
+                  </Control>
+               </Controls>
+            </Control>
+         </Controls>
+      </TopLevelControl>
+   </Controls>
+</GuiXml>

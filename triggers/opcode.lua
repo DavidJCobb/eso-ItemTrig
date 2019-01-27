@@ -12,6 +12,23 @@ function ItemTrig.OpcodeBase:new(name, formatString, args, func)
    result.func   = func
    return result
 end
+function ItemTrig.OpcodeBase:getArgumentArchetype(index)
+   local arg = self.args[tonumber(index)]
+   if arg.type == "string" then
+      return "string"
+   elseif arg.type == "boolean" then
+      if type(arg.placeholder) == "table" then
+         return "enum"
+      end
+      return "checkbox"
+   else
+      --
+      -- "number"
+      -- "quantity"
+      --
+      return arg.type
+   end
+end
 
 ItemTrig.Opcode = {}
 ItemTrig.Opcode.__index = ItemTrig.Opcode
@@ -54,6 +71,7 @@ function ItemTrig.Opcode:clone(deep)
    return result
 end
 function ItemTrig.Opcode:copyAssign(other, deep)
+   assert(other, "Cannot copy-assign from nil.")
    self.base = other.base
    self.type = other.type
    if deep then
@@ -108,7 +126,7 @@ function ItemTrig.Opcode:format(argTransform)
          renderArgs[i] = a
       end
       if argTransform then
-         renderArgs[i] = argTransform(renderArgs[i])
+         renderArgs[i] = argTransform(renderArgs[i], i)
       end
    end
    return string.format(self.base.format, unpack(renderArgs))

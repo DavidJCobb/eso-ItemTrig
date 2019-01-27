@@ -17,7 +17,7 @@ function ItemTrig.UI.WScrollSelectList:install(control, options)
    local result = ItemTrig.UI.WScrollList:install(control, options)
    setmetatable(result, self)
    result.selection = {
-      index = 0, -- 0 if no selections; an array if multiselection is enabled
+      index = nil, -- number, or an array if multiselection is enabled
       multi = options.multiSelection or false,
    }
    result.element.onSelect      = options.element.onSelect      or nil -- callback
@@ -37,7 +37,7 @@ function ItemTrig.UI.WScrollSelectList:cast(control)
 end
 function ItemTrig.UI.WScrollSelectList:hasSelection()
    local i = self.selection.index
-   if (not i) or tonumber(i) < 1 then
+   if not i then
       return false
    end
    if (type(i) == "table") and table.getn(i) == 0 then
@@ -45,10 +45,24 @@ function ItemTrig.UI.WScrollSelectList:hasSelection()
    end
    return true
 end
+function ItemTrig.UI.WScrollSelectList:isIndexSelected(index)
+   local sel = self.selection.index
+   if not sel then
+      return false
+   end
+   if (type(sel) == "table") then
+      for j = 1, table.getn(sel) do
+         if sel[j] == index then
+            return true
+         end
+      end
+   end
+   return sel == index
+end
 function ItemTrig.UI.WScrollSelectList:getFirstSelectedIndex()
    local multi = self.selection.multi
    if not self:hasSelection() then
-      return 0
+      return nil
    end
    if multi then
       return self.selection.index[1]
@@ -90,6 +104,11 @@ function ItemTrig.UI.WScrollSelectList:getSelectedItems()
       return results
    end
    return self:at(self.selection.index)
+end
+function ItemTrig.UI.WScrollSelectList:_getExtraConstructorParams(index)
+   return {
+      selected = self:isIndexSelected(index)
+   }
 end
 function ItemTrig.UI.WScrollSelectList:_onDoubleClick(control)
    local callback = self.element.onDoubleClick

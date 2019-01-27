@@ -2,6 +2,87 @@ if not ItemTrig then return end
 
 ItemTrig.SCENE_TRIGEDIT = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
 
+do -- helper class for trigger list entries
+   if not ItemTrig.UI then
+      ItemTrig.UI = {}
+   end
+   ItemTrig.UI.TriggerListEntry = {}
+   ItemTrig.UI.TriggerListEntry.__index = ItemTrig.UI.TriggerListEntry
+   function ItemTrig.UI.TriggerListEntry:install(control)
+      if control.widgets and control.widgets.triggerListEntry then
+         return control.widgets.triggerListEntry
+      end
+      local result = {
+         control = control,
+         enabled = GetControl(control, "Enabled"),
+         name    = GetControl(control, "Name"),
+         desc    = GetControl(control, "Description"),
+      }
+      setmetatable(result, self)
+      result.enabled.toggleFunction =
+         function(self, checked)
+            local control = self:GetParent()
+            d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
+         end
+      do -- link the wrapper to the control via an expando property
+         if not control.widgets then
+            control.widgets = {}
+         end
+         control.widgets.triggerListEntry = result
+      end
+      return result
+   end
+   function ItemTrig.UI.TriggerListEntry:cast(control)
+      assert(control ~= nil, "Cannot cast a nil control to TriggerListEntry.")
+      if control.widgets then
+         return control.widgets.triggerListEntry
+      end
+      return nil
+   end
+   function ItemTrig.UI.TriggerListEntry:setSelected(state)
+      local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
+      if state then
+         color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
+      end
+      self.name:SetColor(unpack(color))
+      self.desc:SetColor(unpack(color))
+   end
+   function ItemTrig.UI.TriggerListEntry:setEnabled(state)
+      if state then
+         ZO_CheckButton_SetChecked(self.enabled)
+      else
+         ZO_CheckButton_SetUnchecked(self.enabled)
+      end
+   end
+   function ItemTrig.UI.TriggerListEntry:setText(name, description)
+      local cName  = self.name
+      local cDesc  = self.desc
+      local height = 0
+      do
+         local _, _, _, _, paddingX, paddingY = cName:GetAnchor(1)
+         height = paddingY * 2
+      end
+      if name then
+         cName:SetText(name)
+      end
+      height = height + cName:GetHeight()
+      if description then
+         cDesc:SetText(description)
+         if description == "" then
+            cDesc:SetHidden(true)
+         else
+            cDesc:SetHidden(false)
+            height = height + cDesc:GetHeight()
+         end
+      elseif not cDesc:GetHidden() then
+         height = height + cDesc:GetHeight()
+      end
+      if name or description then
+         self.control:SetHeight(height)
+      end
+   end
+end
+
 local Window = {
    ui = {
       fragment = nil,
@@ -36,61 +117,25 @@ function Window:OnInitialized(control)
       scrollPane.paddingBetween      = 8
       scrollPane.element.template    = "ItemTrig_TrigEdit_Template_TriggerOuter"
       scrollPane.element.toConstruct =
-         function(control, data)
-            local height = 0
-            do
-               local text = GetControl(control, "Name")
-               local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-               text:SetText(data.name)
-               height = text:GetHeight() + paddingY * 2
-            end
-            do
-               local text = GetControl(control, "Description")
-               local desc = data:getDescription()
-               text:SetText(desc)
-               if desc == "" then
-                  text:SetHidden(true)
-               else
-                  text:SetHidden(false)
-               local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-                  height = height + text:GetHeight()
-               end
-            end
-            control:SetHeight(height)
-            --
-            do
-               local enabled = GetControl(control, "Enabled") -- checkbox
-               if data.enabled then
-                  ZO_CheckButton_SetChecked(enabled)
-               else
-                  ZO_CheckButton_SetUnchecked(enabled)
-               end
-               enabled.toggleFunction =
-                  function(self, checked)
-                     local control = self:GetParent()
-                     d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
-                  end
-            end
+         function(control, data, extra)
+            local widget = ItemTrig.UI.TriggerListEntry:install(control)
+            widget:setSelected(extra and extra.selected)
+            widget:setText(data.name, data:getDescription())
+            widget:setEnabled(data.enabled)
          end
       scrollPane.element.onSelect =
          function(index, control, pane)
-            local text  = GetControl(control, "Name")
-            local desc  = GetControl(control, "Description")
-            local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
-            --color = {1.0, 0.25, 0.0}
-            text:SetColor(unpack(color))
-            desc:SetColor(unpack(color))
+            local widget = ItemTrig.UI.TriggerListEntry:cast(control)
+            widget:setSelected(true)
          end
       scrollPane.element.onDeselect =
          function(index, control, pane)
-            local text  = GetControl(control, "Name")
-            local desc  = GetControl(control, "Description")
-            local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
-            text:SetColor(unpack(color))
-            desc:SetColor(unpack(color))
+            local widget = ItemTrig.UI.TriggerListEntry:cast(control)
+            widget:setSelected(false)
          end
          --
          -- Should we also use INTERFACE_TEXT_COLOR_HIGHLIGHT on mouseover ?
+         --
       scrollPane.element.onDoubleClick =
          function(index, control, pane)
             local trigger = pane.listItems[index]
@@ -123,8 +168,8 @@ function Window:newTrigger()
 end
 function Window:editTrigger(trigger)
    local editor = ItemTrig.TriggerEditWindow
-   local pane   = self.ui.pane
    if not trigger then
+      local pane = self.ui.pane
       trigger = pane:at(pane:getFirstSelectedIndex())
       if not trigger then
          return

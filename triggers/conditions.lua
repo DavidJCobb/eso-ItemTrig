@@ -24,7 +24,7 @@ ItemTrig.tableConditions = {
    ),
    [2] = ConditionBase:new("Set And/Or", "Switch to using %s to evaluate conditions.",
       {
-         [1] = { type = "boolean", placeholder = {"AND", "OR"} },
+         [1] = { type = "boolean", placeholder = {[1] = "AND", [2] = "OR"} },
       },
       function(state, context, args)
          if state.using_or == args[1] then
@@ -47,7 +47,7 @@ ItemTrig.tableConditions = {
    ),
    [3] = ConditionBase:new("Always/Never", "This condition is %s true.",
       {
-         [1] = { type = "boolean", placeholder = {"never", "always"} },
+         [1] = { type = "boolean", placeholder = {[1] = "never", [2] = "always"} },
       },
       function(state, context, args)
          return args[1]

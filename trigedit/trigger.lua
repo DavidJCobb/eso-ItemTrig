@@ -89,6 +89,9 @@ function Window:OnInitialized(control)
                local opcode = pane.listItems[index]
                if opcode then
                   local editor = ItemTrig.OpcodeEditWindow
+                  if not editor:requestEdit() then
+                     return
+                  end
                   editor:edit(opcode)
                end
             end
@@ -150,6 +153,10 @@ function Window:commit()
       return
    end
    self.trigger.target:copyAssign(self.trigger.working)
+   --
+   -- TODO: In order to account for nested triggers, when we stop 
+   -- commit a nested trigger, we need to flag its parent as dirty.
+   --
 end
 function Window:requestEdit()
    if self.trigger.dirty then

@@ -28,9 +28,11 @@ ui/testmenu.xml
 trigedit/main.lua
 trigedit/trigger.lua
 trigedit/opcode.lua
+trigedit/opcodearg.lua
 trigedit/main.xml
 trigedit/trigger.xml
 trigedit/opcode.xml
+trigedit/opcodearg.xml
 savedata.lua
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates.

@@ -120,14 +120,7 @@ function Window:edit(opcode, dirty)
    SCENE_MANAGER:ShowTopLevel(self.ui.window)
    self.ui.window:BringWindowToTop()
 end
-function Window:refresh()
-   --
-   -- TODO: render the opcode being edited
-   --
-   -- * set the opcode type (combobox selection)
-   --
-   -- * render the opcode body
-   --
+function Window:refresh() -- Render the opcode being edited.
    do -- opcode type
       local opcodeBase = self.opcode.working.base
       local combobox   = self.ui.opcodeType
@@ -140,4 +133,45 @@ function Window:refresh()
          end
       )
    end
+   do -- opcode body
+      --
+      -- It's impossible to combine formatting codes (i.e. color, underline) with 
+      -- links, and custom links cannot have color. We "solve" this by using two 
+      -- separate text elements: an invisible (zero-alpha) one on top, with click-
+      -- able links; and a visible one beneath it, with the exact same text, but 
+      -- colored and underlined as appropriate.
+      --
+      local rendered = self.opcode.working:format(
+         function(s, i)
+            return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i)
+         end
+      )
+      self.ui.opcodeBody:SetText(rendered)
+      --
+      rendered = self.opcode.working:format(
+         function(s, i)
+            return string.format("|c2266FF|l0:1:1:3:1:2266FF|l%s|l|r", s)
+         end
+      )
+      ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
+   end
+end
+function Window:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
+   local editor   = ItemTrig.OpcodeEditWindow
+   local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
+   local argIndex = tonumber(params[3])
+   local deferred = ItemTrig.OpcodeArgEditWindow:requestEdit(editor.ui.window, editor.opcode.working, argIndex)
+   deferred:done(
+      function(...)
+         --
+         -- TODO: user clicked OK
+         --
+      end
+   ):fail(
+      function()
+         --
+         -- TODO: user clicked Cancel
+         --
+      end
+   )
 end

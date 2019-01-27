@@ -125,16 +125,17 @@ function ItemTrig.UI.WScrollList:indexOfData(data)
    return 0
 end
 function ItemTrig.UI.WScrollList:at(index)
-   local count = table.getn(self.listItems)
-   if index > count or index < 1 then
+   if (not index) or index < 1 or index > table.getn(self.listItems) then
       return nil
    end
    return self.listItems[index]
 end
 function ItemTrig.UI.WScrollList:controlByIndex(index)
+   if (not index) or index < 1 then
+      return nil
+   end
    local contents = self.contents
-   local count    = contents:GetNumChildren()
-   if index > count or index < 1 then
+   if index > contents:GetNumChildren() then
       return nil
    end
    return contents:GetChild(index)
@@ -168,6 +169,13 @@ function ItemTrig.UI.WScrollList:resizeScrollbar(scrollMax)
       scrollbar:SetHidden(true)
    end
 end
+function ItemTrig.UI.WScrollList:_getExtraConstructorParams(index)
+   --
+   -- Subclasses can override this in order to provide additional 
+   -- state to elements when they are being constructed.
+   --
+   return nil
+end
 function ItemTrig.UI.WScrollList:redraw()
    assert(self.element.toConstruct ~= nil, "You must supply a constructor callback before WScrollList can render list items.")
    assert(self.element.template    ~= "",  "You must supply a template to use for list items before WScrollList can render list items.")
@@ -181,7 +189,7 @@ function ItemTrig.UI.WScrollList:redraw()
       local child = contents:GetChild(i)
       if i <= count then
          child:SetHidden(false)
-         self.element.toConstruct(child, self.listItems[i])
+         self.element.toConstruct(child, self.listItems[i], self:_getExtraConstructorParams(i))
          child:ClearAnchors()
          child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
          child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
@@ -200,7 +208,7 @@ function ItemTrig.UI.WScrollList:redraw()
          local control, key = self.element._pool:AcquireObject()
          control.key = key
          --
-         self.element.toConstruct(control, self.listItems[i])
+         self.element.toConstruct(control, self.listItems[i], self:_getExtraConstructorParams(i))
          control:ClearAnchors()
          control:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
          control:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
@@ -256,7 +264,7 @@ function ItemTrig.UI.WScrollList:scrollBy(delta) -- analogous to ZO_ScrollList_S
    self:scrollTo(position)
 end
 function ItemTrig.UI.WScrollList:scrollToItem(index, shouldBeCentered, lazy)
-   if index < 0 then
+   if (not index) or index < 0 then
       return
    end
    local contents = self.contents

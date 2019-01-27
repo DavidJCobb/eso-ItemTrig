@@ -5,6 +5,7 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
+         inherits="ItemTrig_UITemplate_WModalHost"
       >
          <Dimensions x="500" y="300" />
          <DimensionConstraints minX="400" minY="200" />
@@ -31,6 +32,11 @@
                <Anchor point="TOPLEFT"  offsetY="5" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
                <Anchor point="TOPRIGHT" offsetY="5" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" />
                <OnInitialized>
+                  --
+                  -- We can't use resizeToFitDescendants, because that's a constant 
+                  -- thing; if you open the combobox, the container resizes to hold 
+                  -- the combobox's contents.
+                  --
                   ItemTrig.fitHeightToChildren(self)
                </OnInitialized>
                <Controls>
@@ -71,13 +77,20 @@
                <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
                <Controls>
                   <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
-                  <Label name="ItemTrig_OpcodeEdit_OpcodeBody" text="" font="ZoFontWinT1">
+                  <Label name="ItemTrig_OpcodeEdit_OpcodeBodyUnderlay" text="" font="ZoFontChat">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
-                     <!-- TODO: How can we make parts of the text clickable?
-                          Can we use custom link types? Even if we can, how 
-                          do we get widgets (e.g. dropdown boxes) to appear 
-                          inline with the text? Unless we just shouldn't? -->
+                  </Label>
+                  <Label name="ItemTrig_OpcodeEdit_OpcodeBody" text="" font="ZoFontChat"
+                     mouseEnabled="true"
+                     linkEnabled="true"
+                     alpha="0"
+                  >
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="TOPRIGHT" />
+                     <OnLinkMouseUp>
+                        ItemTrig.OpcodeEditWindow:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
+                     </OnLinkMouseUp>
                   </Label>
                </Controls>
             </Control>
