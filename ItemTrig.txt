@@ -4,6 +4,8 @@
 ## Version: alpha01
 ## SavedVariables: ItemTrigSavedata
 
+lang/en.lua
+lang/$(language).lua
 ItemTrig.lua
 misc/deferred.lua
 misc/string.lua

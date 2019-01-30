@@ -37,7 +37,7 @@
                <Anchor point="TOPRIGHT" />
                <ResizeToFitPadding width="5" height="5" />
                <Controls>
-                  <Label name="$(parent)Title" text="ItemTrig" font="ZoFontWinT1">
+                  <Label name="$(parent)Title" text="ITEMTRIG_STRING_UI_TRIGGERLIST_TITLE" font="ZoFontWinT1">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
                   </Label>
@@ -68,33 +68,33 @@
                      <Anchor point="BOTTOMRIGHT" />
                      <Dimensions x="150" />
                      <Controls>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)AddTrigger"  text="New">
+                        <Button inherits="ZO_DefaultButton" name="$(parent)AddTrigger"  text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_ADD">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" />
                            <OnClicked>
                               ItemTrig.TriggerListWindow:newTrigger()
                            </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)EditTrigger" text="Edit">
+                        <Button inherits="ZO_DefaultButton" name="$(parent)EditTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_EDIT">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)AddTrigger" />
                            <OnClicked>
                               ItemTrig.TriggerListWindow:editTrigger()
                            </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="Move Up">
+                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEUP">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EditTrigger" />
                            <OnClicked>
                            </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="Move Down">
+                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEDOWN">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
                            <OnClicked>
                            </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="Delete">
+                        <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_DELETE">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
                            <OnClicked>

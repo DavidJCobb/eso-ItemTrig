@@ -15,12 +15,12 @@
                <Anchor point="BOTTOMLEFT" />
                <Anchor point="BOTTOMRIGHT" />
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="OK">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="Cancel">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked> ItemTrig.OpcodeArgEditWindow:cancel() </OnClicked>
                   </Button>
@@ -43,11 +43,57 @@
                         </Control>
                      </Controls>
                   </Control>
+                  <Control name="$(parent)Multiline"
+                     inherits="ItemTrig_UITemplate_WViewHolderView"
+                  >
+                     <AnchorFill />
+                     <Controls>
+                        <EditBox name="$(parent)Value"
+                           inherits="ZO_DefaultEditMultiLine"
+                        >
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="BOTTOMRIGHT" />
+                           <Controls>
+                              <Backdrop name="$(parent)Bg" inherits="ZO_MultiLineEditBackdrop_Keyboard" />
+                           </Controls>
+                        </EditBox>
+                     </Controls>
+                  </Control>
                   <Control name="$(parent)Quantity"
                      inherits="ItemTrig_UITemplate_WViewHolderView"
                   >
                      <AnchorFill />
                      <Controls>
+                        <EditBox name="$(parent)Number"
+                           multiLine="false"
+                           newLineEnabled="false"
+                           textType="TEXT_TYPE_NUMERIC"
+                        >
+                           <Anchor point="TOPRIGHT" />
+                           <Dimensions x="100" />
+                        </EditBox>
+                        <Control name="$(parent)Qualifier" inherits="ZO_ScrollableComboBox">
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="TOPRIGHT" relativeTo="$(parent)Number" relativePoint="TOPLEFT" offsetX="-5" />
+                        </Control>
+                     </Controls>
+                  </Control>
+                  <Control name="$(parent)String"
+                     inherits="ItemTrig_UITemplate_WViewHolderView"
+                  >
+                     <AnchorFill />
+                     <Controls>
+                        <EditBox name="$(parent)Value"
+                           multiLine="false"
+                           newLineEnabled="false"
+                           inherits="ZO_DefaultEdit"
+                        >
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="TOPRIGHT" />
+                           <Controls>
+                              <Backdrop name="$(parent)Bg" inherits="ZO_SingleLineEditBackdrop_Keyboard" />
+                           </Controls>
+                        </EditBox>
                      </Controls>
                   </Control>
                </Controls>

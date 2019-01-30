@@ -21,9 +21,16 @@ function ItemTrig.UI.WViewHolder:install(control)
       control     = control,
       views       = {},  -- view control list
       selected    = nil, -- view control
-      postInstall = false,
    }
    setmetatable(result, self)
+   for i = 1, control:GetNumChildren() do
+      --
+      -- controls run OnInitialized in order of inner first, outer last, so 
+      -- the only way to link views to their holder is via the holder's init 
+      -- routine; consequently, a view must be the direct child of its holder
+      --
+      result:addView(control:GetChild(i)) -- addView returns silently if the control is not a WViewHolderView
+   end
    do -- link the wrapper to the control via an expando property
       if not control.widgets then
          control.widgets = {}
@@ -68,10 +75,16 @@ function ItemTrig.UI.WViewHolder:hasView(control)
    return false
 end
 function ItemTrig.UI.WViewHolder:addView(control)
+   local view = ItemTrig.UI.WViewHolderView:cast(control)
+   if not view then
+      return
+   end
    if self:hasView(control) then
       return
    end
+   assert(view.holder == nil, "Cannot re-parent a WViewHolderView.")
    table.insert(self.views, control)
+   view.holder = self
    if not self.selected then
       if not control:IsHidden() then
          self.selected = control
@@ -117,16 +130,6 @@ function ItemTrig.UI.WViewHolderView:cast(control)
       return control.widgets.viewHolderView
    end
    return nil
-end
-function ItemTrig.UI.WViewHolderView:postInstall()
-   local parent = self.control:GetParent()
-   if parent then
-      local widget = ItemTrig.UI.WViewHolder:cast(parent)
-      if widget then
-         self.holder = widget
-         widget:addView(self.control)
-      end
-   end
 end
 function ItemTrig.UI.WViewHolderView:getHolder()
    return self.holder

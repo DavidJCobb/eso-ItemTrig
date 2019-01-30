@@ -1,6 +1,8 @@
 if not ItemTrig then return end
 if not ItemTrig.OpcodeBase then return end
 
+local _s = GetString
+
 local ConditionBase = {}
 ConditionBase.__index = ConditionBase
 function ConditionBase:new(name, formatString, args, func)
@@ -14,17 +16,21 @@ function ItemTrig.Condition:new(base, args)
 end
 
 ItemTrig.tableConditions = {
-   [1] = ConditionBase:new("Comment", "Comment:\n%s",
+   [1] = ConditionBase:new( -- Comment
+      _s(ITEMTRIG_STRING_CONDITIONNAME_COMMENT),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_COMMENT),
       {
-         [1] = { type = "string", placeholder = "text" },
+         [1] = { type = "string", multiline = true, placeholder = _s(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT) },
       },
       function(state, context, args)
          return nil
       end
    ),
-   [2] = ConditionBase:new("Set And/Or", "Switch to using %s to evaluate conditions.",
+   [2] = ConditionBase:new( -- Set And/Or
+      _s(ITEMTRIG_STRING_CONDITIONNAME_SETANDOR),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_SETANDOR),
       {
-         [1] = { type = "boolean", placeholder = {[1] = "AND", [2] = "OR"} },
+         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_SETANDOR_AND), [2] = _s(ITEMTRIG_STRING_OPCODEARG_SETANDOR_OR)} },
       },
       function(state, context, args)
          if state.using_or == args[1] then
@@ -45,9 +51,11 @@ ItemTrig.tableConditions = {
          return nil
       end
    ),
-   [3] = ConditionBase:new("Always/Never", "This condition is %s true.",
+   [3] = ConditionBase:new( -- Always/Never
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ALWAYS),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ALWAYS),
       {
-         [1] = { type = "boolean", placeholder = {[1] = "never", [2] = "always"} },
+         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_ALWAYS_NEVER), [2] = _s(ITEMTRIG_STRING_OPCODEARG_ALWAYS_ALWAYS)} },
       },
       function(state, context, args)
          return args[1]

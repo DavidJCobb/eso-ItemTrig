@@ -1,6 +1,8 @@
 if not ItemTrig then return end
 if not ItemTrig.OpcodeBase then return end
 
+local _s = GetString
+
 local ActionBase = {}
 ActionBase.__index = ActionBase
 function ActionBase:new(name, formatString, args, func)
@@ -14,21 +16,27 @@ function ItemTrig.Action:new(base, args)
 end
 
 ItemTrig.tableActions = {
-   [1] = ActionBase:new("Return", "Stop executing the top-level trigger.",
+   [1] = ActionBase:new( -- Return
+      _s(ITEMTRIG_STRING_ACTIONNAME_RETURN),
+      _s(ITEMTRIG_STRING_ACTIONDESC_RETURN),
       {},
       function(state, context, args)
          return ItemTrig.RETURN_FROM_TRIGGER
       end
    ),
-   [2] = ActionBase:new("Log Message", "Log a message in the chatbox:\n%s",
+   [2] = ActionBase:new( -- Log Message
+      _s(ITEMTRIG_STRING_ACTIONNAME_LOG),
+      _s(ITEMTRIG_STRING_ACTIONDESC_LOG),
       {
-         [1] = { type = "string", placeholder = "text" },
+         [1] = { type = "string", placeholder = _s(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT) },
       },
       function(state, context, args)
          CHAT_SYSTEM:AddMessage(args[1])
       end
    ),
-   [3] = ActionBase:new("Run Nested Trigger", "Execute a nested trigger.",
+   [3] = ActionBase:new( -- Run Nested Trigger
+      _s(ITEMTRIG_STRING_ACTIONNAME_RUNNESTED),
+      _s(ITEMTRIG_STRING_ACTIONDESC_RUNNESTED),
       {
          [1] = { type = "trigger" },
       },
@@ -39,9 +47,11 @@ ItemTrig.tableActions = {
          end
       end
    ),
-   [4] = ActionBase:new("Comment", "Comment:\n%s",
+   [4] = ActionBase:new( -- Comment
+      _s(ITEMTRIG_STRING_ACTIONNAME_COMMENT),
+      _s(ITEMTRIG_STRING_ACTIONDESC_COMMENT),
       {
-         [1] = { type = "string", placeholder = "text" },
+         [1] = { type = "string", multiline = true, placeholder = _s(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT) },
       },
       function(state, context, args)
          return nil

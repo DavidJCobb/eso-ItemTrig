@@ -17,7 +17,7 @@
                <Anchor point="TOPLEFT" />
                <Anchor point="TOPRIGHT" />
                <Controls>
-                  <Label name="$(parent)Title" text="Edit opcode..." font="ZoFontWinT1">
+                  <Label name="$(parent)Title" text="ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE" font="ZoFontWinT1">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
                   </Label>
@@ -40,7 +40,7 @@
                   ItemTrig.fitHeightToChildren(self)
                </OnInitialized>
                <Controls>
-                  <Label text="Type:" font="ZoFontWinT1">
+                  <Label text="ITEMTRIG_STRING_UI_OPCODEEDIT_LABEL_TYPE" font="ZoFontWinT1">
                      <Anchor point="TOPLEFT"  offsetX="5" offsetY="5" />
                   </Label>
                   <Control name="ItemTrig_OpcodeEdit_Opcode" inherits="ZO_ScrollableComboBox">
@@ -56,12 +56,12 @@
                   ItemTrig.fitHeightToChildren(self)
                </OnInitialized>
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="OK">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="Cancel">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked>
                         local editor = ItemTrig.OpcodeEditWindow

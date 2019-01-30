@@ -15,20 +15,86 @@ end
 function ItemTrig.OpcodeBase:getArgumentArchetype(index)
    local arg = self.args[tonumber(index)]
    if arg.type == "string" then
+      if arg.multiline then
+         return "multiline"
+      end
       return "string"
    elseif arg.type == "boolean" then
-      if type(arg.placeholder) == "table" then
+      if arg.enum then
          return "enum"
       end
       return "checkbox"
+   elseif arg.type == "number" then
+      if arg.enum then
+         return "enum"
+      end
+      return arg.type
    else
       --
-      -- "number"
       -- "quantity"
       --
       return arg.type
    end
 end
+
+--[[--
+   ARGUMENTS
+   
+   Argument types determine what kind of value an opcode can have, where-
+   as argument archetypes determine how that value is displayed to the 
+   user and made available for editing. These are the available argument 
+   types:
+      
+      boolean
+      
+      number
+      
+      quantity
+         A table with fields "qualifier" and "number." The qualifier 
+         must be one of the following strings representing a relational 
+         operator: "GTE" "LTE" "E"
+         
+         The number is a point of comparison to which that relational 
+         operator is applied. For example, the quantity represented as 
+         "GTE 5" or "at least 5" would match numbers 5 and above.
+      
+      string
+         The argument may have an additional field, "multiline," which 
+         is a boolean indicating whether the user should be presented 
+         with a multi-line textbox when editing the value. If this field 
+         is not present, it defaults to false.
+         
+         The argument may have an additional field, "placeholder," which 
+         is shown to the user if the argument is an empty string.
+   
+   Most arguments can have an additional field, "enum," which can be used 
+   to restrict the range of available values and determine how those 
+   values are displayed. When the user edits an enum option, they will be 
+   presented with a combobox. The "enum" field should be a table.
+   
+   Enum behavior varies for some types:
+   
+      boolean
+         The [1] key in the enum is the display text for false values, 
+         and the [2] key in the enum is the display text for true.
+         
+         If the enum object has a "checkboxText" field whose value is a 
+         string, then when the user edits the argument, they will be 
+         presented with an appropriately labeled checkbox rather than a 
+         combobox; the enum's [1] and [2] keys will still be used when 
+         formatting the argument for display in any other context.
+      
+      number
+         The argument value is treated as a key in the enum; the corres-
+         ponding value in the enum is what is shown.
+      
+      quantity
+         This type cannot have an enum.
+      
+      string
+         This type cannot have an enum.
+   
+--]]--
 
 ItemTrig.Opcode = {}
 ItemTrig.Opcode.__index = ItemTrig.Opcode
@@ -104,24 +170,43 @@ function ItemTrig.Opcode:format(argTransform)
    local renderArgs = {}
    for i = 1, count do
       local a = self.args[i]
-      local p = self.base.args[i].placeholder
-      if type(p) == "table" then
-         if type(a) == "boolean" then
-            renderArgs[i] = p[a and 2 or 1]
-         else
-            renderArgs[i] = p[a]
-         end
-      elseif type(p) == "string" then
-         if type(a) == "string" then
-            renderArgs[i] = a
+      local b = self.base.args[i]
+      local t = b.type
+      if t == "boolean" then
+         if b.enum then
+            renderArgs[i] = b.enum[a and 2 or 1]
          else
             renderArgs[i] = tostring(a)
          end
-      elseif type(p) == "number" then
-         --
-         -- TODO: add support for enums
-         --
-         renderArgs[i] = ZO_LocalizeDecimalNumber(a)
+      elseif t == "number" then
+         if b.enum then
+            renderArgs[i] = b.enum[a]
+         else
+            renderArgs[i] = ZO_LocalizeDecimalNumber(a)
+         end
+      elseif t == "quantity" then
+         if not a then
+            renderArgs[i] = GetString(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_QUANTITY)
+         else
+            local format
+            local number = ZO_LocalizeDecimalNumber(a.number)
+            if a.qualifier == "GTE" then
+               format = GetString(ITEMTRIG_STRING_QUALIFIER_ATLEAST)
+            elseif a.qualifier == "LTE" then
+               format = GetString(ITEMTRIG_STRING_QUALIFIER_ATMOST)
+            elseif a.qualifier == "E" then
+               format = GetString(ITEMTRIG_STRING_QUALIFIER_EXACTLY)
+            else
+               format = GetString(ITEMTRIG_STRING_QUALIFIER_INVALID)
+            end
+            renderArgs[i] = string.format(format, number)
+         end
+      elseif t == "string" then
+         if (not a) or a == "" then
+            renderArgs[i] = b.placeholder or ""
+         else
+            renderArgs[i] = a
+         end
       else
          renderArgs[i] = a
       end

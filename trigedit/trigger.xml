@@ -7,31 +7,31 @@
                <Anchor point="BOTTOMRIGHT" />
                <Dimensions x="150" />
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Add"  text="New">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Add"  text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_ADD">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Edit" text="Edit">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Edit" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_EDIT">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Add" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="Move Up">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEUP">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Edit" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="Move Down">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEDOWN">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Delete" text="Delete">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Delete" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DELETE">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
                      <OnClicked>
@@ -73,7 +73,7 @@
                <Anchor point="TOPLEFT" />
                <Anchor point="TOPRIGHT" />
                <Controls>
-                  <Label name="$(parent)Title" text="Edit trigger..." font="ZoFontWinT1">
+                  <Label name="$(parent)Title" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT" font="ZoFontWinT1">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
                   </Label>
@@ -89,12 +89,12 @@
                <Anchor point="BOTTOMRIGHT" offsetY="-5" offsetX="-5" />
                <Dimensions y="50" />
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="OK">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked>
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="Cancel">
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked>
                         local editor = ItemTrig.TriggerEditWindow
@@ -145,7 +145,7 @@
                   resizing = false
                </OnInitialized>
                <Controls>
-                  <Label name="$(parent)ConditionsHeader" font="ZoFontWinT2" text="Conditions:">
+                  <Label name="$(parent)ConditionsHeader" font="ZoFontWinT2" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
                   </Label>
@@ -153,7 +153,7 @@
                      <Anchor point="TOPLEFT"  relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMLEFT" />
                      <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMRIGHT" />
                   </Control>
-                  <Label name="$(parent)ActionsHeader" font="ZoFontWinT2" text="Actions:">
+                  <Label name="$(parent)ActionsHeader" font="ZoFontWinT2" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_ACTIONS">
                      <Anchor point="TOPLEFT"  relativeTo="$(parent)Conditions" relativePoint="BOTTOMLEFT" />
                      <Anchor point="TOPRIGHT" relativeTo="$(parent)Conditions" relativePoint="BOTTOMRIGHT" />
                   </Label>

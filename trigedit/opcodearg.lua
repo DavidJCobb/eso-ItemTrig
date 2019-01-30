@@ -3,9 +3,27 @@ if not ItemTrig then return end
 local Window = {
    ui = {
       control    = nil,
-      viewholder = nil,
-      viewEnum   = nil,
-      valueEnum  = nil,
+      viewholder = nil, -- WViewHolder
+      --
+      views = {
+         enum = {
+            widget = nil, -- WViewHolderView
+            value  = nil,
+         },
+         multiline = {
+            widget = nil, -- WViewHolderView
+            value  = nil,
+         },
+         quantity = {
+            widget    = nil, -- WViewHolderView
+            number    = nil,
+            qualifier = nil,
+         },
+         string = {
+            widget = nil, -- WViewHolderView
+            value  = nil,
+         },
+      },
    },
    type     = nil,
    deferred = nil,
@@ -19,11 +37,36 @@ function Window:OnInitialized(control)
    --
    self.ui.window = control
    do
-      local viewholder  = GetControl(control, "Body")
+      local viewholder = GetControl(control, "Body")
+      local view
       --
-      self.ui.viewEnum  = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Enum"))
-      self.ui.valueEnum = ZO_ComboBox_ObjectFromContainer(GetControl(self.ui.viewEnum.control, "Value"))
+      view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Enum"))
+      self.ui.views.enum.widget = view
+      self.ui.views.enum.value  = ZO_ComboBox_ObjectFromContainer(GetControl(view.control, "Value"))
       --
+      do -- multiline
+         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Multiline"))
+         self.ui.views.multiline.widget = view
+         self.ui.views.multiline.value  = GetControl(view.control, "Value")
+      end
+      do -- quantity
+         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Quantity"))
+         local qualifier = ZO_ComboBox_ObjectFromContainer(GetControl(view.control, "Qualifier"))
+         self.ui.views.quantity.widget    = view
+         self.ui.views.quantity.number    = GetControl(view.control, "Number")
+         self.ui.views.quantity.qualifier = qualifier
+         --
+         qualifier:ClearItems()
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = ">=" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "<=" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "==" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:UpdateItems()
+      end
+      do -- string
+         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "String"))
+         self.ui.views.string.widget = view
+         self.ui.views.string.value  = GetControl(view.control, "Value")
+      end
    end
 end
 function Window:requestEdit(opener, opcode, argIndex)
@@ -51,28 +94,33 @@ function Window:requestEdit(opener, opcode, argIndex)
          --
       elseif archetype == "enum" then
          if arg.type == "boolean" then
-            val = (val and 2) or 1
+            val = val and 2 or 1
          end
-         self.ui.viewEnum:show()
-         local combobox = self.ui.valueEnum
+         self.ui.views.enum.widget:show()
+         local combobox = self.ui.views.enum.value
          combobox:ClearItems()
-         for i = 1, table.getn(arg.placeholder) do
-            combobox:AddItem({ name = arg.placeholder[i], index = i }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         for i = 1, table.getn(arg.enum) do
+            combobox:AddItem({ name = arg.enum[i], index = i }, ZO_COMBOBOX_SUPRESS_UPDATE)
          end
          combobox:UpdateItems()
          combobox:SetSelectedItemByEval(function(item) return item.index == tonumber(val) end)
+      elseif archetype == "multiline" then
+         local view = self.ui.views.multiline
+         view.widget:show()
+         view.value:SetText(val)
       elseif archetype == "number" then
          --
          -- TODO
          --
       elseif archetype == "quantity" then
-         --
-         -- TODO
-         --
+         local view = self.ui.views.quantity
+         view.widget:show()
+         view.qualifier:SetSelectedItemByEval(function(item) return item.value == val.qualifier end)
+         view.number:SetText(val.number)
       elseif archetype == "string" then
-         --
-         -- TODO
-         --
+         local view = self.ui.views.string
+         view.widget:show()
+         view.value:SetText(val)
       end
       --
       -- TODO: compress window size
