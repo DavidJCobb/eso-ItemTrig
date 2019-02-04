@@ -97,7 +97,7 @@ function Window:OnInitialized(control)
             end
          --
          local buttons = pane.control:GetParent():GetNamedChild("Buttons")
-         do
+         do -- opcode list buttons
             local bNew    = buttons:GetNamedChild("New")
             local bEdit   = buttons:GetNamedChild("Edit")
             local bUp     = buttons:GetNamedChild("MoveUp")
@@ -120,10 +120,17 @@ function Window:OnInitialized(control)
                   if not opcode then
                      return
                   end
-                  if not editor:requestEdit() then
-                     return
-                  end
-                  editor:edit(opcode)
+                  local deferred = editor:requestEdit(editor.ui.window, opcode)
+                  deferred:done(
+                     function(context, deferred, dirty) -- user clicked OK
+                        if dirty then
+                           ItemTrig.TriggerEditWindow:refresh()
+                        end
+                     end
+                  ):fail(
+                     function(context, deferred) -- user clicked Cancel
+                     end
+                  )
                end
             )
          end

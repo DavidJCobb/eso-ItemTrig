@@ -59,6 +59,8 @@
                   <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked>
+                        local editor = ItemTrig.OpcodeEditWindow
+                        editor:commit()
                      </OnClicked>
                   </Button>
                   <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_CANCEL">

@@ -30,6 +30,7 @@ local Window = {
       working = nil, -- a copy of that opcode; we make changes to it and then commit to (target) later
       dirty   = false,
    },
+   deferred = nil, -- Deferred for sending a result back to the opener
 }
 ItemTrig.OpcodeEditWindow = Window
 
@@ -44,7 +45,7 @@ function Window:OnInitialized(control)
    --
    self.ui.opcodeType:SetSortsItems(true)
 end
-function Window:abandon()
+function Window:close()
    self.opcode.target  = nil
    self.opcode.working = nil
    self.opcode.dirty   = nil
@@ -53,23 +54,17 @@ function Window:abandon()
    --
    SCENE_MANAGER:HideTopLevel(self.ui.window)
 end
-function Window:commit()
-   if not self.opcode.dirty then
-      return
-   end
-   self.opcode.target:copyAssign(self.opcode.working)
+function Window:abandon()
+   self.deferred:reject()
+   self.deferred = nil
+   self:close()
 end
-function Window:requestEdit()
+function Window:commit()
    if self.opcode.dirty then
-      --
-      -- TODO: prompt for confirmation
-      --
-      -- TODO: probably requires implementing something 
-      -- comparable to JavaScript promises/deferreds
-      --
-      return false
+      self.opcode.target:copyAssign(self.opcode.working)
    end
-   return true
+   self.deferred:resolve(self.opcode.dirty)
+   self:close()
 end
 function Window:requestExit()
    if self.opcode.dirty then
@@ -80,8 +75,19 @@ function Window:requestExit()
    end
    return true
 end
-function Window:edit(opcode, dirty)
-   assert(ItemTrig.TriggerEditWindow ~= nil, "Cannot open the opcode editor window if the trigger editor window doesn't exist.")
+function Window:requestEdit(opener, opcode, dirty)
+   assert(opener        ~= nil, "The opcode editor must be aware of its opener.")
+   assert(self.deferred == nil, "The opcode editor is already showing!")
+   assert(opcode        ~= nil, "No opcode.")
+   assert(opcode.base   ~= nil, "Opcode is invalid.")
+   self.deferred = ItemTrig.Deferred:new()
+   do
+      local host  = ItemTrig.UI.WModalHost:cast(opener)
+      local modal = ItemTrig.UI.WModal:install(self.ui.window)
+      if not modal:prepToShow(host) then
+         return
+      end
+   end
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
    self.opcode.dirty   = dirty or false
@@ -119,6 +125,8 @@ function Window:edit(opcode, dirty)
    --
    SCENE_MANAGER:ShowTopLevel(self.ui.window)
    self.ui.window:BringWindowToTop()
+   --
+   return self.deferred
 end
 function Window:refresh() -- Render the opcode being edited.
    do -- opcode type
@@ -156,22 +164,24 @@ function Window:refresh() -- Render the opcode being edited.
       ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
    end
 end
+
 function Window:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
    local editor   = ItemTrig.OpcodeEditWindow
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
    local deferred = ItemTrig.OpcodeArgEditWindow:requestEdit(editor.ui.window, editor.opcode.working, argIndex)
    deferred:done(
-      function(...)
-         --
-         -- TODO: user clicked OK
-         --
+      function(context, deferred, result) -- user clicked OK
+         local working = Window.opcode.working
+         local index   = result.argIndex
+         if working.args[index] ~= result.value then
+            working.args[index] = result.value
+            Window.opcode.dirty = true
+            Window:refresh()
+         end
       end
    ):fail(
-      function()
-         --
-         -- TODO: user clicked Cancel
-         --
+      function(context, deferred) -- user clicked Cancel
       end
    )
 end
