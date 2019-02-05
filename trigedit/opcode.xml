@@ -28,7 +28,7 @@
                   </Texture>
                </Controls>
             </Control>
-            <Control name="$(parent)Row1">
+            <Control name="$(parent)Row1" level="2"> <!-- need to raise the level so that controls in Body don't block clicks to the combobox when it's opened -->
                <Anchor point="TOPLEFT"  offsetY="5" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
                <Anchor point="TOPRIGHT" offsetY="5" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" />
                <OnInitialized>

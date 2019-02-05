@@ -41,7 +41,7 @@ local Window = {
    type     = nil, -- raw argument type, not ui type; i.e. boolean, number, string, quantity
    opcode   = nil, -- Opcode
    argIndex = nil, -- number
-   deferred = nil, -- Deferred
+   deferred = nil, -- Deferred for sending a result back to the opener
 }
 ItemTrig.OpcodeArgEditWindow = Window
 
@@ -133,7 +133,6 @@ function Window:requestEdit(opener, opcode, argIndex)
    assert(opcode ~= nil,      "No opcode.")
    assert(argIndex ~= nil,    "No argument index.")
    assert(opcode.base ~= nil, "Opcode is invalid.")
-   self.deferred = ItemTrig.Deferred:new()
    do
       local host  = ItemTrig.UI.WModalHost:cast(opener)
       local modal = ItemTrig.UI.WModal:install(self.ui.window)
@@ -141,6 +140,7 @@ function Window:requestEdit(opener, opcode, argIndex)
          return
       end
    end
+   self.deferred = ItemTrig.Deferred:new()
    self.opcode   = opcode
    self.argIndex = argIndex
    self.view     = nil
@@ -214,7 +214,6 @@ end
 function Window:commit()
    assert(self.argIndex ~= nil, "Don't know what argument index to commit.")
    assert(self.view     ~= nil, "Don't know what kind of value to commit.")
-   d("Returning value: " .. tostring(self.view:GetValue()))
    local result = {
       argIndex = self.argIndex,
       value    = self.view:GetValue()

@@ -74,7 +74,7 @@ function ItemTrig.UI.WModal:install(control)
    local result = {
       control  = control,
       opener   = nil,
-      deferred = nil,
+      deferred = nil, -- Used to signal to the modal's host when the modal closes.
    }
    setmetatable(result, self)
    ZO_PreHookHandler(control, "OnEffectivelyHidden",
@@ -82,8 +82,8 @@ function ItemTrig.UI.WModal:install(control)
          if result.deferred then
             result.deferred:resolve()
             result.deferred = nil
-            result.opener   = nil
          end
+         result.opener = nil
       end
    )
    do -- link the wrapper to the control via an expando property
@@ -105,9 +105,11 @@ function ItemTrig.UI.WModal:cast(control)
    return nil
 end
 function ItemTrig.UI.WModal:prepToShow(opener)
-   assert(not self.opener,   "This modal is already being shown.")
-   assert(not self.deferred, "This modal is already being shown.")
-   assert(opener ~= nil, "Cannot show this modal; no opener.")
+   assert(opener        ~= nil, "Cannot show this modal; no opener.")
+   assert(self.opener   ~= opener, "The specified opener is already showing the modal; did you accidentally call this function twice?")
+   assert(self.opener   == nil, "This modal is already being shown.")
+   assert(self.deferred == nil, "This modal is already being shown.")
+   assert(opener ~= self and opener ~= self.control, "A modal cannot open from itself.")
    local o = ItemTrig.UI.WModalHost:cast(opener)
    assert(o ~= nil, "Cannot show this modal; invalid opener.")
    local deferred = o:prepToShowModal(self.control)

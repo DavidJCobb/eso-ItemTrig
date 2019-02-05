@@ -9,6 +9,7 @@ lang/$(language).lua
 ItemTrig.lua
 misc/deferred.lua
 misc/string.lua
+misc/table.lua
 misc/ui.lua
 triggers/system.lua
 triggers/serialization.lua

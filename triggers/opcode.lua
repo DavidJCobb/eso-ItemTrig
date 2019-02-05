@@ -36,6 +36,50 @@ function ItemTrig.OpcodeBase:getArgumentArchetype(index)
       return arg.type
    end
 end
+function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
+   local arg = self.args[tonumber(index)]
+   assert(arg ~= nil, "Invalid argument index.")
+   if arg.default ~= nil then
+      return arg.default
+   end
+   local t = arg.type
+   if t == "boolean" then
+      return false
+   elseif t == "number" then
+      if arg.enum then
+         return ItemTrig.firstIn(arg.enum) -- defined in /misc/table.lua
+      end
+      return 0
+   elseif t == "quantity" then
+      return {
+         qualifier = "E",
+         number    = 0
+      }
+   elseif t == "string" then
+      if arg.enum then
+         return ItemTrig.firstIn(arg.enum) -- defined in /misc/table.lua
+      end
+      return ""
+   end
+   do -- log error
+      local eIndex = tostring(tonumber(index))
+      if type(index) ~= "number" then
+         eIndex = eIndex .. " (specified as " .. tostring(index) .. ")"
+      end
+      local eOpcode = self.name
+      if type(self.opcode) == "number" then
+         eOpcode = string.format("%#%d (%s)", self.opcode, eOpcode)
+      end
+      assert(false,
+         string.format(
+            "ItemTrig.OpcodeBase:getArgumentDefaultValue choked on opcode %s argument %s with type %s.",
+            eOpcode,
+            eIndex,
+            tostring(t)
+         )
+      )
+   end
+end
 
 --[[--
    ARGUMENTS
@@ -66,6 +110,9 @@ end
          
          The argument may have an additional field, "placeholder," which 
          is shown to the user if the argument is an empty string.
+   
+   Any argument can have a "default" field, which indicates the default 
+   value for the argument when creating an opcode through the UI.
    
    Most arguments can have an additional field, "enum," which can be used 
    to restrict the range of available values and determine how those 
@@ -159,6 +206,17 @@ function ItemTrig.Opcode:copyAssign(other, deep)
       self.args = other.args
    end
 end
+function ItemTrig.Opcode:resetArgs()
+   if self.base == nil then
+      self.args = {}
+      return
+   end
+   self.args = {}
+   local baseArgs = self.base.args
+   for i = 1, table.getn(baseArgs) do
+      self.args[i] = self.base:getArgumentDefaultValue(i)
+   end
+end
 function ItemTrig.Opcode:exec(state, context)
    return self.base.func(state, context, self.args)
 end
@@ -205,16 +263,23 @@ function ItemTrig.Opcode:format(argTransform)
          if (not a) or a == "" then
             renderArgs[i] = b.placeholder or ""
          else
-            renderArgs[i] = a
+            renderArgs[i] = tostring(a)
          end
       else
-         renderArgs[i] = a
+         renderArgs[i] = tostring(a)
       end
       if argTransform then
          renderArgs[i] = argTransform(renderArgs[i], i)
       end
    end
-   return string.format(self.base.format, unpack(renderArgs))
+   --
+   -- LocalizeString is a Zenimax-provided native method. The zo_strformat 
+   -- function is a wrapper for it that does type-checking on the arguments 
+   -- it receives (primarily to handle numbers); since we're using Zenimax's 
+   -- functions for decimal numbers anyway, we don't need to bother using 
+   -- the wrapper.
+   --
+   return LocalizeString(self.base.format, unpack(renderArgs))
 end
 function ItemTrig.Opcode:serialize()
    return ItemTrig.serializeTrigobject(self)

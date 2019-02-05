@@ -89,10 +89,17 @@ function Window:OnInitialized(control)
                local opcode = pane.listItems[index]
                if opcode then
                   local editor = ItemTrig.OpcodeEditWindow
-                  if not editor:requestEdit() then
-                     return
-                  end
-                  editor:edit(opcode)
+                  local deferred = editor:requestEdit(Window.ui.window, opcode)
+                  deferred:done(
+                     function(context, deferred, dirty) -- user clicked OK
+                        if dirty then
+                           ItemTrig.TriggerEditWindow:refresh()
+                        end
+                     end
+                  ):fail(
+                     function(context, deferred) -- user clicked Cancel
+                     end
+                  )
                end
             end
          --
@@ -120,7 +127,7 @@ function Window:OnInitialized(control)
                   if not opcode then
                      return
                   end
-                  local deferred = editor:requestEdit(editor.ui.window, opcode)
+                  local deferred = editor:requestEdit(Window.ui.window, opcode)
                   deferred:done(
                      function(context, deferred, dirty) -- user clicked OK
                         if dirty then

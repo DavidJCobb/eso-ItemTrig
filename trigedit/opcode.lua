@@ -46,6 +46,7 @@ function Window:OnInitialized(control)
    self.ui.opcodeType:SetSortsItems(true)
 end
 function Window:close()
+   assert(self.deferred == nil, "Can't close the OpcodeEdit window -- we still have to notify its opener!")
    self.opcode.target  = nil
    self.opcode.working = nil
    self.opcode.dirty   = nil
@@ -64,6 +65,7 @@ function Window:commit()
       self.opcode.target:copyAssign(self.opcode.working)
    end
    self.deferred:resolve(self.opcode.dirty)
+   self.deferred = nil
    self:close()
 end
 function Window:requestExit()
@@ -80,7 +82,6 @@ function Window:requestEdit(opener, opcode, dirty)
    assert(self.deferred == nil, "The opcode editor is already showing!")
    assert(opcode        ~= nil, "No opcode.")
    assert(opcode.base   ~= nil, "Opcode is invalid.")
-   self.deferred = ItemTrig.Deferred:new()
    do
       local host  = ItemTrig.UI.WModalHost:cast(opener)
       local modal = ItemTrig.UI.WModal:install(self.ui.window)
@@ -88,18 +89,16 @@ function Window:requestEdit(opener, opcode, dirty)
          return
       end
    end
+   self.deferred = ItemTrig.Deferred:new()
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
    self.opcode.dirty   = dirty or false
    do
-      local host  = ItemTrig.UI.WModalHost:cast(ItemTrig.TriggerEditWindow.ui.window)
-      local modal = ItemTrig.UI.WModal:install(self.ui.window)
-      if not modal:prepToShow(host) then
-         return
+      local function _onSelect(combobox, name, item, selectionChanged, oldItem)
+         if selectionChanged then
+            Window:_onTypeChanged(item.base)
+         end
       end
-   end
-   --
-   do
       local list
       if opcode.type == "condition" then
          list = ItemTrig.tableConditions
@@ -117,7 +116,7 @@ function Window:requestEdit(opener, opcode, dirty)
          -- to pass the OpcodeBase instances directly, as ZO_ScrollList tracks state 
          -- by storing it directly on the data items we push into it.)
          --
-         combobox:AddItem({ name = base.name, base = base }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         combobox:AddItem({ name = base.name, base = base, callback = _onSelect }, ZO_COMBOBOX_SUPRESS_UPDATE)
       end
       combobox:UpdateItems()
    end
@@ -127,6 +126,24 @@ function Window:requestEdit(opener, opcode, dirty)
    self.ui.window:BringWindowToTop()
    --
    return self.deferred
+end
+function Window:_onTypeChanged(opcodeBase)
+   local list
+   if self.opcode.type == "condition" then
+      list = ItemTrig.tableConditions
+   else
+      list = ItemTrig.tableActions
+   end
+   --
+   -- TODO: If switching away from the Run Nested Trigger opcode-base, 
+   -- warn the user that their data is going to be lost. (This would 
+   -- mean making a confirmation dialogue modal that uses a Deferred, 
+   -- similar to our existing modals, and then setting the following 
+   -- lines up to run when that Deferred is resolved.)
+   --
+   self.opcode.working.base = opcodeBase
+   self.opcode.working:resetArgs()
+   self:refresh()
 end
 function Window:refresh() -- Render the opcode being edited.
    do -- opcode type
@@ -158,7 +175,7 @@ function Window:refresh() -- Render the opcode being edited.
       --
       rendered = self.opcode.working:format(
          function(s, i)
-            return string.format("|c2266FF|l0:1:1:3:1:2266FF|l%s|l|r", s)
+            return string.format("|c70B0FF|l0:1:1:3:1:70B0FF|l%s|l|r", s)
          end
       )
       ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
