@@ -91,3 +91,75 @@ function ItemTrig.AnchorTestMenu:refresh()
       --
    end
 end
+
+ItemTrig.WClassTestMenu = ItemTrig.UI.WWindow:makeSubclass("WClassTestMenu")
+function ItemTrig.WClassTestMenu:_construct()
+   self:callSuper("_construct")
+   local control  = self:asControl()
+   self:setTitle("Test menu for WClass and WWindow")
+   local fragment = ZO_SimpleSceneFragment:New(control)
+   scene:AddFragment(fragment)
+   SCENE_MANAGER:RegisterTopLevel(control, false)
+   --
+   local pane = control:GetNamedChild("vScrollListTest")
+   local list = ItemTrig.UI.WScrollList:cast(pane)
+   list.element.template    = "ItemTrig_TestMenu_Template_ScrollListItem"
+   list.element.toConstruct =
+      function(control, data)
+         local text = GetControl(control, "Name")
+         text:SetText(data.name)
+         control:SetHeight(text:GetHeight())
+      end
+   --
+   list:clear(false)
+   for i = 1, 20 do
+      local data = { name = "Test element " .. i }
+      list:push(data, false)
+   end
+   list:redraw()
+end
+function ItemTrig.WClassTestMenu:popTestModal()
+   local kid = ItemTrig.WClassTestConfirm:cast(ItemTrig_WClassTestConfirm)
+   local deferred = self:showModal(kid)
+   if deferred then
+      deferred:done(
+         function()
+            d("Modal was closed with: YES")
+         end
+      ):fail(
+         function()
+            d("Modal was closed with: NO")
+         end
+      )
+   end
+end
+
+ItemTrig.WClassTestConfirm = ItemTrig.UI.WWindow:makeSubclass("WClassTestMenu")
+function ItemTrig.WClassTestConfirm:_construct()
+   self:callSuper("_construct")
+   self:setTitle("Confirmation dialog example")
+   self.result = nil
+   local control  = self:asControl()
+   local fragment = ZO_SimpleSceneFragment:New(control)
+   scene:AddFragment(fragment)
+   SCENE_MANAGER:RegisterTopLevel(control, false)
+end
+function ItemTrig.WClassTestConfirm:_handleModalDeferredOnHide(deferred)
+   if self.result then
+      deferred:resolve()
+   else
+      deferred:reject()
+   end
+end
+function ItemTrig.WClassTestConfirm:onCloseClicked()
+   self.result = false
+   self:hide()
+end
+function ItemTrig.WClassTestConfirm:yes()
+   self.result = true
+   self:hide()
+end
+function ItemTrig.WClassTestConfirm:no()
+   self.result = false
+   self:hide()
+end

@@ -1,0 +1,62 @@
+<GuiXml>
+   <Controls>
+      <TopLevelControl name="ItemTrig_UITemplate_WWindow" virtual="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+      >
+         <OnInitialized>
+            ItemTrig.UI.WWindow:install(self)
+         </OnInitialized>
+         <Controls>
+            <Texture name="$(parent)ModalUnderlay"
+               color="000000" alpha=".55" excludeFromResizeToFitExtents="true"
+               tier="MEDIUM" level="1"
+               mouseEnabled="true"
+               hidden="true"
+            >
+               <AnchorFill />
+               <OnMouseWheel />
+            </Texture>
+            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+            <Control name="$(parent)TitleBar" resizeToFitDescendents="true">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="TOPRIGHT" />
+               <Controls>
+                  <Label name="$(parent)Title" text="Window title" font="ZoFontWinT1">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="TOPRIGHT" />
+                  </Label>
+                  <Button name="$(parent)Close" inherits="ZO_ButtonBehaviorClickSound">
+                     <Dimensions x="32" y="32" />
+                     <Anchor point="TOPRIGHT" offsetX="8" offsetY="0" />
+                     <Textures
+                        normal="EsoUI/Art/Buttons/closebutton_up.dds"
+                        pressed="EsoUI/Art/Buttons/closebutton_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/closebutton_mouseover.dds"
+                        disabled="EsoUI/Art/Buttons/closebutton_disabled.dds"
+                     />
+                     <OnClicked>
+                        local win = ItemTrig.UI.WWindow:cast(self:GetParent():GetParent())
+                        if win then
+                           win:onCloseClicked()
+                        end
+                     </OnClicked>
+                  </Button>
+                  <Texture name="$(parent)Rule" color="808080" tier="HIGH">
+                     <Dimensions y="1.5"/>
+                     <Anchor point="TOPLEFT"  relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
+                  </Texture>
+               </Controls>
+            </Control>
+         </Controls>
+      </TopLevelControl>
+      <Control name="ItemTrig_UITemplate_WWindowBelowTitleBarL" virtual="true">
+          <Anchor point="TOPLEFT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+      </Control>
+      <Control name="ItemTrig_UITemplate_WWindowBelowTitleBarR" virtual="true">
+          <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+      </Control>
+   </Controls>
+</GuiXml>

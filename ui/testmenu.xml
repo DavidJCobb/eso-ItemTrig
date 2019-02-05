@@ -35,6 +35,66 @@
             </Control>
          </Controls>
       </TopLevelControl>
+      <TopLevelControl name="ItemTrig_WClassTestMenu"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+         inherits="ItemTrig_UITemplate_WWindow"
+      >
+         <Dimensions x="600" y="300" />
+         <DimensionConstraints minX="600" minY="100" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.WClassTestMenu:install(self) </OnInitialized>
+         <Controls>
+            <Button
+               inherits="ZO_DefaultButton ItemTrig_UITemplate_WWindowBelowTitleBarL"
+               name="$(parent)PopTest" text="Show test modal"
+            >
+               <OnClicked>
+                  local window = ItemTrig.WClassTestMenu:cast(self:GetParent())
+                  if window then
+                     window:popTestModal()
+                  end
+               </OnClicked>
+            </Button>
+            <Control name="$(parent)vScrollListTest" inherits="ItemTrig_UITemplate_WScrollList">
+               <Anchor point="TOPLEFT"     relativeTo="$(parent)PopTest" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" />
+            </Control>
+         </Controls>
+      </TopLevelControl>
+      <TopLevelControl name="ItemTrig_WClassTestConfirm"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+         inherits="ItemTrig_UITemplate_WWindow"
+      >
+         <Dimensions x="300" y="100" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.WClassTestConfirm:install(self) </OnInitialized>
+         <Controls>
+            <Button inherits="ZO_DefaultButton" name="$(parent)Y" text="Yes">
+               <Anchor point="BOTTOMRIGHT" />
+               <OnClicked>
+                  local window = ItemTrig.WClassTestConfirm:cast(self:GetParent())
+                  if window then
+                     window:yes()
+                  end
+               </OnClicked>
+            </Button>
+            <Button inherits="ZO_DefaultButton" name="$(parent)N" text="No">
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Y" relativePoint="BOTTOMLEFT" offsetX="-8" />
+               <OnClicked>
+                  local window = ItemTrig.WClassTestConfirm:cast(self:GetParent())
+                  if window then
+                     window:no()
+                  end
+               </OnClicked>
+            </Button>
+         </Controls>
+      </TopLevelControl>
       <Control name="ItemTrig_AnchorTestMenu_ConfigRow" virtual="true">
          <OnInitialized>
             local anchorValues = {

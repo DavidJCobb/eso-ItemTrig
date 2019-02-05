@@ -37,6 +37,15 @@ function ItemTrig.Deferred:fail(callback, context)
    table.insert(self.rejectCallbacks, { func = callback, context = context })
    return self
 end
+function ItemTrig.Deferred:always(callback, context)
+   if self.state ~= DEFERRED_STATE_PENDING then
+      callback(self, context)
+      return
+   end
+   table.insert(self.resolveCallbacks, { func = callback, context = context })
+   table.insert(self.rejectCallbacks,  { func = callback, context = context })
+   return self
+end
 function ItemTrig.Deferred:resolve(...)
    if self.state ~= DEFERRED_STATE_PENDING then
       return
@@ -46,6 +55,8 @@ function ItemTrig.Deferred:resolve(...)
       local meta = self.resolveCallbacks[i]
       meta.func(meta.context, self, ...)
    end
+   self.resolveCallbacks = {}
+   self.rejectCallbacks  = {}
 end
 function ItemTrig.Deferred:reject(...)
    if self.state ~= DEFERRED_STATE_PENDING then
@@ -56,4 +67,6 @@ function ItemTrig.Deferred:reject(...)
       local meta = self.rejectCallbacks[i]
       meta.func(meta.context, self, ...)
    end
+   self.resolveCallbacks = {}
+   self.rejectCallbacks  = {}
 end

@@ -119,6 +119,7 @@ local function WinTest01()
 end
 local function ShowTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
+   ItemTrig.WClassTestMenu:cast(ItemTrig_WClassTestMenu):show()
 end
 local function ShowAnchorTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_AnchorTestMenu)

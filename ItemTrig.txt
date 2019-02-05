@@ -10,6 +10,7 @@ ItemTrig.lua
 misc/deferred.lua
 misc/string.lua
 misc/table.lua
+misc/timing.lua
 misc/ui.lua
 triggers/system.lua
 triggers/serialization.lua
@@ -17,6 +18,9 @@ triggers/opcode.lua
 triggers/actions.lua
 triggers/conditions.lua
 triggers/trigger.lua
+ui/base.lua
+ui/window.xml
+ui/window.lua
 ui/wscrolllist.lua
 ui/wscrolllist.xml
 ui/wscrollselectlist.lua
