@@ -18,10 +18,10 @@ if not ItemTrig then return end
       for this purpose: Opcode:copyAssign.
 --]]--
 
-local Window = {}
-local WinCls = ItemTrig.UI.WWindow:makeSubclass("OpcodeEditWindow")
+local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("OpcodeEditWindow")
+ItemTrig:registerWindow("opcodeEdit", WinCls)
+
 function WinCls:_construct()
-   ItemTrig.windows.opcodeEdit = self
    self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE))
    --
    local control = self:asControl()
@@ -51,15 +51,6 @@ function WinCls:_construct()
    --
    self.ui.opcodeType:SetSortsItems(true)
 end
-
-ItemTrig.OpcodeEditWindow = {}
-function ItemTrig.OpcodeEditWindow:OnInitialized(control)
-   ItemTrig.OpcodeEditWindow = WinCls:install(control)
-   Window = ItemTrig.OpcodeEditWindow
-end
-
---
-
 function WinCls:_handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
       deferred:resolve(self.pendingResults.results)
@@ -119,7 +110,7 @@ function WinCls:requestEdit(opener, opcode, dirty)
    do
       local function _onSelect(combobox, name, item, selectionChanged, oldItem)
          if selectionChanged then
-            Window:_onTypeChanged(item.base)
+            WinCls:getInstance():_onTypeChanged(item.base)
          end
       end
       local list
@@ -204,12 +195,13 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
    local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(editor, editor.opcode.working, argIndex)
    deferred:done(
       function(context, deferred, result) -- user clicked OK
-         local working = Window.opcode.working
+         local editor  = WinCls:getInstance()
+         local working = editor.opcode.working
          local index   = result.argIndex
          if working.args[index] ~= result.value then
             working.args[index] = result.value
-            Window.opcode.dirty = true
-            Window:refresh()
+            editor.opcode.dirty = true
+            editor:refresh()
          end
       end
    ):fail(

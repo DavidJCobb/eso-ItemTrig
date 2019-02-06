@@ -27,7 +27,7 @@
          <Dimensions x="800" y="500" />
          <DimensionConstraints minX="600" minY="600" />
          <Anchor point="CENTER" />
-         <OnInitialized> ItemTrig.TriggerListWindow:OnInitialized(self) </OnInitialized>
+         <OnInitialized> ItemTrig:setupWindow("triggerList", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Body">
                <Anchor point="TOPLEFT" offsetX="5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />

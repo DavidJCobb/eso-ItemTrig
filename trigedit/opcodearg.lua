@@ -1,65 +1,67 @@
 if not ItemTrig then return end
 
-local Window  = {}
+local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("OpcodeArgEditWindow")
+ItemTrig:registerWindow("opcodeArgEdit", WinCls)
+
 local ViewCls = {}
-do -- enum
-   ViewCls.Enum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgEnumView")
-   function ViewCls.Enum:_construct()
-      self.value = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Value"))
-   end
-   function ViewCls.Enum:GetValue()
-      local x = self.value:GetSelectedItemData()
-      if x then
-         x = x.index
-         if Window.type == "boolean" then
-            --
-            -- Convert from enum index to boolean.
-            --
-            x = (x == 2)
+do -- helper classes for views
+   do -- enum
+      ViewCls.Enum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgEnumView")
+      function ViewCls.Enum:_construct()
+         self.value = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Value"))
+      end
+      function ViewCls.Enum:GetValue()
+         local x = self.value:GetSelectedItemData()
+         if x then
+            x = x.index
+            if WinCls:getInstance().type == "boolean" then
+               --
+               -- Convert from enum index to boolean.
+               --
+               x = (x == 2)
+            end
+            return x
          end
-         return x
       end
    end
-end
-do  -- quantity
-   ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
-   function ViewCls.Quantity:_construct()
-      self.number    = self:GetNamedChild("Number")
-      self.qualifier = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Qualifier"))
-      --
-      local qualifier = self.qualifier
-      qualifier:ClearItems()
-      qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
-      qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
-      qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, ZO_COMBOBOX_SUPRESS_UPDATE)
-      qualifier:UpdateItems()
-   end
-   function ViewCls.Quantity:GetValue()
-      local q = {
-         qualifier = self.qualifier:GetSelectedItemData(),
-         number    = tonumber(self.number:GetText() or 0)
-      }
-      if q.qualifier then
-         q.qualifier = q.qualifier.value
-      else
-         q.qualifier = "E"
+   do  -- quantity
+      ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
+      function ViewCls.Quantity:_construct()
+         self.number    = self:GetNamedChild("Number")
+         self.qualifier = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Qualifier"))
+         --
+         local qualifier = self.qualifier
+         qualifier:ClearItems()
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:UpdateItems()
       end
-      return q
+      function ViewCls.Quantity:GetValue()
+         local q = {
+            qualifier = self.qualifier:GetSelectedItemData(),
+            number    = tonumber(self.number:GetText() or 0)
+         }
+         if q.qualifier then
+            q.qualifier = q.qualifier.value
+         else
+            q.qualifier = "E"
+         end
+         return q
+      end
    end
-end
-do  -- string
-   ViewCls.String = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgStringView")
-   function ViewCls.String:_construct()
-      self.value = self:GetNamedChild("Value")
-   end
-   function ViewCls.String:GetValue()
-      return self.value:GetText()
+   do  -- string
+      ViewCls.String = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgStringView")
+      function ViewCls.String:_construct()
+         self.value = self:GetNamedChild("Value")
+      end
+      function ViewCls.String:GetValue()
+         return self.value:GetText()
+      end
    end
 end
 
-local WinCls = ItemTrig.UI.WWindow:makeSubclass("OpcodeArgEditWindow")
 function WinCls:_construct()
-   ItemTrig.windows.opcodeArgEdit = self
    self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEARGEDIT_TITLE))
    --
    local control = self:asControl()
@@ -96,13 +98,6 @@ function WinCls:_construct()
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
    end
 end
-
-ItemTrig.OpcodeArgEditWindow = {}
-function ItemTrig.OpcodeArgEditWindow:OnInitialized(control)
-   ItemTrig.OpcodeArgEditWindow = WinCls:install(control)
-   Window = ItemTrig.OpcodeArgEditWindow
-end
-
 function WinCls:_handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
       deferred:resolve(self.pendingResults.results)

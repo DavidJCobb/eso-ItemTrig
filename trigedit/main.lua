@@ -2,8 +2,8 @@ if not ItemTrig then return end
 
 ItemTrig.SCENE_TRIGEDIT = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
 
-local Window = {}
-local WinCls = ItemTrig.UI.WWindow:makeSubclass("TriggerListWindow")
+local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("TriggerListWindow")
+ItemTrig:registerWindow("triggerList", WinCls)
 
 do -- helper class for trigger list entries
    ItemTrig.UI.TriggerListEntry = ItemTrig.UI.WidgetClass:makeSubclass("TriggerListEntry", "triggerListEntry")
@@ -66,10 +66,7 @@ do -- helper class for trigger list entries
    end
 end
 
-local Window = {}
-local WinCls = ItemTrig.UI.WWindow:makeSubclass("OpcodeEditWindow")
 function WinCls:_construct()
-   ItemTrig.windows.triggerList = self
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_TITLE))
    --
    local control = self:asControl()
@@ -83,7 +80,7 @@ function WinCls:_construct()
          {
             name     = "Close Menu (Debugging)",
             keybind  = "UI_SHORTCUT_PRIMARY",
-            callback = function() Window:close() end,
+            callback = function() WinCls:getInstance():close() end,
             visible  = function() return true end,
             enabled  = true,  -- set to "false" to make the keybind grey out -- can also be a function
             ethereal = false, -- if true, then the keybind isn't actually shown in the menus; vanilla gamepad menus use this for LT/RT flipping pages or fast-scrolling menus
@@ -123,15 +120,10 @@ function WinCls:_construct()
          function(index, control, pane)
             local trigger = pane.listItems[index]
             if trigger then
-               Window:editTrigger(trigger)
+               WinCls:getInstance():editTrigger(trigger)
             end
          end
    end
-end
-
-ItemTrig.TriggerListWindow = {}
-function ItemTrig.TriggerListWindow:OnInitialized(control)
-   Window = WinCls:install(control)
 end
 
 function WinCls:onShow()

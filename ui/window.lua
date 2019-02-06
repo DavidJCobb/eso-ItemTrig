@@ -1,5 +1,13 @@
 if not (ItemTrig and ItemTrig.UI) then return end
 
+--[[--
+   WWINDOW: HELPER CLASS FOR WINDOWS
+   
+   This helper class offers the ability to show and hide windows both incidentally 
+   and as modals to other WWindows. You can subclass it and override a number of 
+   methods to control advanced behaviors.
+--]]--
+
 ItemTrig.UI.WWindow = ItemTrig.UI.WidgetClass:makeSubclass("WWindow", "window")
 function ItemTrig.UI.WWindow:_construct(options)
    if not options then
@@ -174,4 +182,25 @@ function ItemTrig.UI.WWindow:getTitle()
 end
 function ItemTrig.UI.WWindow:setTitle(text)
    return self.controls.titleText:SetText(text)
+end
+
+--[[--
+   WSINGLETONWINDOW
+   
+   If you want to define a unique window, you can subclass WSingletonWindow. Your 
+   subclass will only allow one instance of itself to exist, and will provide an 
+   accessor to that instance after the instance is created.
+--]]--
+
+local SINGLETON_WINDOW_KEY = " window"
+
+ItemTrig.UI.WSingletonWindow = ItemTrig.UI.WWindow:makeSubclass("WSingletonWindow")
+function ItemTrig.UI.WSingletonWindow:_construct()
+   local class = self:getClass()
+   assert(class ~= ItemTrig.UI.WSingletonWindow, "You're supposed to subclass this!")
+   assert(class[SINGLETON_WINDOW_KEY] == nil, "An instance of this window class already exists.")
+   class[SINGLETON_WINDOW_KEY] = self
+end
+function ItemTrig.UI.WSingletonWindow:getInstance() -- static method
+   return self[SINGLETON_WINDOW_KEY]
 end

@@ -1,7 +1,22 @@
 ItemTrig = {
    name    = "ItemTrig",
-   windows = {}
+   windows = {},
+   windowClasses = {},
 }
+
+--[[--
+   System for handling windows such that the window classes don't need to 
+   be in the global scope.
+--]]--
+function ItemTrig:registerWindow(name, class)
+   assert(type(name) == "string", "Bad window name.")
+   assert(self.windowClasses[name] == nil, "Window " .. name .. " is already registered.")
+   self.windowClasses[name] = class
+end
+function ItemTrig:setupWindow(name, control)
+   assert(self.windows[name] == nil, "The " .. name .. " window already exists.")
+   self.windows[name] = self.windowClasses[name]:install(control)
+end
 
 local function PerfTest(extra)
    local testcount = 100
@@ -37,24 +52,23 @@ local function PerfTest(extra)
    
    -------------
    
-   local s
-   local t2 = os.clock()
-   local t1 = os.clock()
+   local diff
+   ItemTrig.pertTestStart()
    for i = 1, testcount do
       s = t:serialize()
    end
-   t2 = os.clock()
-   CHAT_SYSTEM:AddMessage("Serializating " .. testcount .. " times took " .. (t2 - t1) .. " seconds.")
+   diff = ItemTrig.perfTestEnd()
+   CHAT_SYSTEM:AddMessage("Serializating " .. testcount .. " times took " .. diff .. " ms.")
    --
    local tparsed
    s = t:serialize()
    d(s)
-   t1 = os.clock()
+   ItemTrig.pertTestStart()
    for i = 1, testcount do
       tparsed = ItemTrig.parseTrigger(s)
    end
-   t2 = os.clock()
-   CHAT_SYSTEM:AddMessage("Parsing " .. testcount .. " times took " .. (t2 - t1) .. " seconds.")
+   diff = ItemTrig.perfTestEnd()
+   CHAT_SYSTEM:AddMessage("Parsing " .. testcount .. " times took " .. diff .. " ms.")
 end
 
 local function ShowWin()

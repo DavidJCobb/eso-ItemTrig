@@ -18,10 +18,9 @@ if not ItemTrig then return end
       for this purpose: Trigger:copyAssign.
 --]]--
 
-local Window = nil
-local WinCls = ItemTrig.UI.WWindow:makeSubclass("TriggerEditWindow")
+local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("TriggerEditWindow")
+ItemTrig:registerWindow("triggerEdit", WinCls)
 function WinCls:_construct()
-   ItemTrig.windows.triggerEdit = self
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    --
    local control = self:asControl()
@@ -85,12 +84,12 @@ function WinCls:_construct()
             function(index, control, pane)
                local opcode = pane.listItems[index]
                if opcode then
-                  local editor = ItemTrig.OpcodeEditWindow
-                  local deferred = editor:requestEdit(Window, opcode)
+                  local editor = ItemTrig.windows.opcodeEdit
+                  local deferred = editor:requestEdit(WinCls:getInstance(), opcode)
                   deferred:done(
                      function(context, deferred, dirty) -- user clicked OK
                         if dirty then
-                           Window:refresh()
+                           WinCls:getInstance():refresh()
                         end
                      end
                   ):fail(
@@ -124,11 +123,11 @@ function WinCls:_construct()
                   if not opcode then
                      return
                   end
-                  local deferred = editor:requestEdit(Window, opcode)
+                  local deferred = editor:requestEdit(WinCls:getInstance(), opcode)
                   deferred:done(
                      function(context, deferred, dirty) -- user clicked OK
                         if dirty then
-                           Window:refresh()
+                           WinCls:getInstance():refresh()
                         end
                      end
                   ):fail(
@@ -142,11 +141,6 @@ function WinCls:_construct()
       setupOpcodeList(self.ui.paneConditions)
       setupOpcodeList(self.ui.paneActions)
    end
-end
-
-ItemTrig.TriggerEditWindow = {}
-function ItemTrig.TriggerEditWindow:OnInitialized(control)
-   Window = WinCls:install(control)
 end
 
 function WinCls:abandon()

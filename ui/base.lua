@@ -73,6 +73,10 @@ function WClass:_construct(...)
    -- Override me! This is where you should construct your instance 
    -- based on the additional arguments (if any) you can receive.
    --
+   -- Note that when an instance of any class is created, the same 
+   -- arguments are passed to all of its constructors (i.e. subclass, 
+   -- superclass, etc.).
+   --
 end
 function WClass:install(control, ...)
    local instance = setmetatable({}, { __index = self })

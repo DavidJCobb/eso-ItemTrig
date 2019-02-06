@@ -9,7 +9,7 @@
       >
          <Dimensions x="300" y="150" />
          <Anchor point="CENTER" />
-         <OnInitialized> ItemTrig.OpcodeArgEditWindow:OnInitialized(self) </OnInitialized>
+         <OnInitialized> ItemTrig:setupWindow("opcodeArgEdit", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Bottom" resizeToFitDescendents="true">
                <Anchor point="BOTTOMLEFT" />
