@@ -5,37 +5,34 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
+         inherits="ItemTrig_UITemplate_WWindow"
       >
          <Dimensions x="300" y="150" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig.OpcodeArgEditWindow:OnInitialized(self) </OnInitialized>
          <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
             <Control name="$(parent)Bottom" resizeToFitDescendents="true">
                <Anchor point="BOTTOMLEFT" />
                <Anchor point="BOTTOMRIGHT" />
                <Controls>
                   <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
-                     <OnClicked> ItemTrig.OpcodeArgEditWindow:commit() </OnClicked>
+                     <OnClicked> ItemTrig.windows.opcodeArgEdit:commit() </OnClicked>
                   </Button>
                   <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
-                     <OnClicked> ItemTrig.OpcodeArgEditWindow:cancel() </OnClicked>
+                     <OnClicked> ItemTrig.windows.opcodeArgEdit:cancel() </OnClicked>
                   </Button>
                </Controls>
             </Control>
-            <Control name="$(parent)Body"
-               inherits="ItemTrig_UITemplate_WViewHolder"
-            >
-               <Anchor point="TOPLEFT" />
+            <Control name="$(parent)Body" inherits="ItemTrig_UITemplate_WViewHolder">
+               <Anchor point="TOPLEFT" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
                <Controls>
                   <!-- START OF VIEWS -->
-                  <Control name="$(parent)Enum"
-                     inherits="ItemTrig_UITemplate_WViewHolderView"
-                  >
+                  <Control name="$(parent)Enum">
                      <AnchorFill />
+                     <OnInitialized /> <!-- Handled by Lua -->
                      <Controls>
                         <Control name="$(parent)Value" inherits="ZO_ScrollableComboBox">
                            <Anchor point="TOPLEFT" />

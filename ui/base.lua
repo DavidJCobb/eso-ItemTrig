@@ -85,7 +85,31 @@ function WClass:install(control, ...)
       control[CONTROL_STORAGE_KEY_NAME][cname] = instance
    end
    instance[CONTROL_PRIVATE_KEY_NAME] = control
-   instance:_construct(...)
+   do
+      --
+      -- Call superclass constructors in order from supermost to submost.
+      --
+      -- We use rawget(table, key) to get the constructors without using 
+      -- the metatable; this ensures that if a superclass doesn't define 
+      -- its own constructor, we don't call its superclass's constructor 
+      -- multiple times.
+      --
+      local superclasses = {}
+      local class = self:getSuperclass()
+      while class do
+         table.insert(superclasses, class)
+         class = class:getSuperclass()
+      end
+      for i = #superclasses, 1, -1 do
+         local constructor = rawget(superclasses[i], "_construct")
+         if constructor then
+            constructor(instance, ...)
+         end
+      end
+   end
+   if rawget(self, "_construct") then
+      instance:_construct(...)
+   end
    return instance
 end
 function WClass:makeSubclass(name, keyOnControl) -- static method
@@ -128,6 +152,13 @@ function WClass:getInstanceSuperclass()
    return self:getClass():getSuperclass()
 end
 function WClass:callSuper(methodName, ...)
+   if methodName == "_construct" then
+      --
+      -- TODO: log a warning somewhere so we can go and clean this up; 
+      -- older code required you to manually call-super in constructors
+      --
+      return
+   end
    local super = self:getInstanceSuperclass()[methodName]
    assert(type(super) == "function", "This method does not exist, or was overridden with a non-function, on the superclass.")
    return super(self, ...)
@@ -153,4 +184,7 @@ function WClass:cast(control) -- static method
       return nil
    end
    assert(false, "Cannot cast a " .. type(control) .. " to " .. self[CLASSNAME_KEY_NAME] ..  ".")
+end
+function WClass:GetNamedChild(name)
+   return GetControl(self:asControl(), name)
 end

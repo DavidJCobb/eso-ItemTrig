@@ -18,8 +18,20 @@ if not ItemTrig then return end
       for this purpose: Trigger:copyAssign.
 --]]--
 
-local Window = {
-   trigger = {
+local Window = nil
+local WinCls = ItemTrig.UI.WWindow:makeSubclass("TriggerEditWindow")
+function WinCls:_construct()
+   ItemTrig.windows.triggerEdit = self
+   self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
+   --
+   local control = self:asControl()
+   self.ui = {}
+   do -- scene setup
+      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGEREDIT")
+      ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
+      SCENE_MANAGER:RegisterTopLevel(control, false)
+   end
+   self.trigger = {
       --
       -- TODO: In order to account for nested triggers, we'll probably want to 
       -- redesign this just *slightly*, in order to function as a stack rather 
@@ -28,24 +40,9 @@ local Window = {
       target  = nil, -- the trigger we want to edit (reference to something elsewhere)
       working = nil, -- a copy of that trigger, which we edit
       dirty   = false,
-   },
-   ui = {
-      fragment       = nil,
-      window         = nil,
-      paneConditions = nil,
-      paneActions    = nil,
-   },
-}
-ItemTrig.TriggerEditWindow = Window
-
-function Window:OnInitialized(control)
-   self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGEREDIT")
-   ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-   SCENE_MANAGER:RegisterTopLevel(control, false)
-   --
-   self.ui.window = control
+   }
    do
-      local col = control:GetNamedChild("Col1")
+      local col = self:GetNamedChild("Col1")
       local c = col:GetNamedChild("Conditions"):GetNamedChild("List")
       local a = col:GetNamedChild("Actions"):GetNamedChild("List")
       self.ui.paneConditions = ItemTrig.UI.WScrollSelectList:cast(c)
@@ -89,11 +86,11 @@ function Window:OnInitialized(control)
                local opcode = pane.listItems[index]
                if opcode then
                   local editor = ItemTrig.OpcodeEditWindow
-                  local deferred = editor:requestEdit(Window.ui.window, opcode)
+                  local deferred = editor:requestEdit(Window, opcode)
                   deferred:done(
                      function(context, deferred, dirty) -- user clicked OK
                         if dirty then
-                           ItemTrig.TriggerEditWindow:refresh()
+                           Window:refresh()
                         end
                      end
                   ):fail(
@@ -103,7 +100,7 @@ function Window:OnInitialized(control)
                end
             end
          --
-         local buttons = pane.control:GetParent():GetNamedChild("Buttons")
+         local buttons = pane:asControl():GetParent():GetNamedChild("Buttons")
          do -- opcode list buttons
             local bNew    = buttons:GetNamedChild("New")
             local bEdit   = buttons:GetNamedChild("Edit")
@@ -121,17 +118,17 @@ function Window:OnInitialized(control)
                   if not upInside then
                      return
                   end
-                  local editor = ItemTrig.OpcodeEditWindow
+                  local editor = ItemTrig.windows.opcodeEdit
                   local pane   = ItemTrig.UI.WScrollSelectList:cast(control:GetParent():GetParent():GetNamedChild("List"))
                   local opcode = pane:at(pane:getFirstSelectedIndex())
                   if not opcode then
                      return
                   end
-                  local deferred = editor:requestEdit(Window.ui.window, opcode)
+                  local deferred = editor:requestEdit(Window, opcode)
                   deferred:done(
                      function(context, deferred, dirty) -- user clicked OK
                         if dirty then
-                           ItemTrig.TriggerEditWindow:refresh()
+                           Window:refresh()
                         end
                      end
                   ):fail(
@@ -147,22 +144,20 @@ function Window:OnInitialized(control)
    end
 end
 
-function Window:tryEdit(trigger, dirty)
-   if not self:requestEdit() then
-      return
-   end
-   self:edit(trigger, dirty)
+ItemTrig.TriggerEditWindow = {}
+function ItemTrig.TriggerEditWindow:OnInitialized(control)
+   Window = WinCls:install(control)
 end
 
-function Window:abandon()
+function WinCls:abandon()
    self.trigger.target  = nil
    self.trigger.working = nil
    self.trigger.dirty   = false
    self.ui.paneConditions:clear()
    self.ui.paneActions:clear()
-   SCENE_MANAGER:HideTopLevel(self.ui.window)
+   self:hide()
 end
-function Window:commit()
+function WinCls:commit()
    if not self.trigger.dirty then
       return
    end
@@ -171,26 +166,9 @@ function Window:commit()
    -- TODO: In order to account for nested triggers, when we stop 
    -- commit a nested trigger, we need to flag its parent as dirty.
    --
+   self:hide()
 end
-function Window:requestEdit()
-   if self.trigger.dirty then
-      --
-      -- TODO: prompt for confirmation; return true if the 
-      -- user confirms leaving, or false otherwise
-      --
-      -- This would run if we've made unsaved changes to 
-      -- an outer trigger and then attempt to edit a nested 
-      -- trigger. We could redesign later to allow seamless 
-      -- editing of nested triggers, but let's keep it basic 
-      -- for now.
-      --
-      -- TODO: probably requires implementing something 
-      -- comparable to JavaScript promises/deferreds
-      --
-   end
-   return true
-end
-function Window:requestExit()
+function WinCls:requestExit()
    if self.trigger.dirty then
       --
       -- TODO: prompt for confirmation; return true if the 
@@ -199,23 +177,24 @@ function Window:requestExit()
    end
    return true
 end
-function Window:edit(trigger, dirty)
-   assert(ItemTrig.TriggerListWindow ~= nil, "Cannot open the trigger editor window if the trigger list window doesn't exist.")
+function WinCls:requestEdit(opener, trigger, dirty)
+   assert(opener  ~= nil, "The trigger editor must be aware of its opener.")
+   assert(trigger ~= nil, "No opcode.")
+   assert(self:getModalOpener() == nil, "The trigger editor is already showing!")
+   if not opener:showModal(self) then
+      return
+   end
    self.trigger.target  = trigger
    self.trigger.working = trigger:clone(false) -- see documentation for this function
    self.trigger.dirty   = dirty or false
-   do
-      local host  = ItemTrig.UI.WModalHost:cast(ItemTrig.TriggerListWindow.ui.window)
-      local modal = ItemTrig.UI.WModal:install(self.ui.window)
-      if not modal:prepToShow(host) then
-         return
-      end
+   if dirty then
+      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW))
+   else
+      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    end
    self:refresh()
-   SCENE_MANAGER:ShowTopLevel(self.ui.window)
-   self.ui.window:BringWindowToTop()
 end
-function Window:refresh()
+function WinCls:refresh()
    local trigger = self.trigger.working
    do -- render conditions
       local pane = self.ui.paneConditions

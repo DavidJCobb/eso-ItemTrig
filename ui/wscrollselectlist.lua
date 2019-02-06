@@ -1,39 +1,20 @@
-if not ItemTrig then return end
-if not ItemTrig.UI then return end
+if not (ItemTrig and ItemTrig.UI) then return end
 
-ItemTrig.UI.WScrollSelectList = {}
-ItemTrig.UI.WScrollSelectList.__index = ItemTrig.UI.WScrollSelectList
-setmetatable(ItemTrig.UI.WScrollSelectList, { __index = ItemTrig.UI.WScrollList })
-function ItemTrig.UI.WScrollSelectList:install(control, options)
-   assert(control ~= nil, "Cannot install WScrollSelectList functionality on a nil control.")
-   if control.widgets and control.widgets.scrollList then
-      d("WARNING: Attempting to install WScrollSelectList on a control that already has it?")
-   end
+ItemTrig.UI.WScrollSelectList = ItemTrig.UI.WScrollList:makeSubclass("WScrollSelectList")
+function ItemTrig.UI.WScrollSelectList:_construct(options)
    if not options then
       options = {
          element = {},
       }
    end
-   local result = ItemTrig.UI.WScrollList:install(control, options)
-   setmetatable(result, self)
-   result.selection = {
+   self:callSuper("_construct", options)
+   self.selection = {
       index = nil, -- number, or an array if multiselection is enabled
       multi = options.multiSelection or false,
    }
-   result.element.onSelect      = options.element.onSelect      or nil -- callback
-   result.element.onDeselect    = options.element.onDeselect    or nil -- callback
-   result.element.onDoubleClick = options.element.onDoubleClick or nil
-   return result
-end
-function ItemTrig.UI.WScrollSelectList:cast(control)
-   assert(control ~= nil, "Cannot cast a nil control to WScrollSelectList.")
-   if control.widgets then
-      local widget = control.widgets.scrollList
-      if getmetatable(widget) == self then
-         return widget
-      end
-   end
-   return nil
+   self.element.onSelect      = options.element.onSelect      or nil -- callback
+   self.element.onDeselect    = options.element.onDeselect    or nil -- callback
+   self.element.onDoubleClick = options.element.onDoubleClick or nil
 end
 function ItemTrig.UI.WScrollSelectList:hasSelection()
    local i = self.selection.index

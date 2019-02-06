@@ -5,32 +5,16 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
-         inherits="ItemTrig_UITemplate_WModalHost"
+         inherits="ItemTrig_UITemplate_WWindow"
       >
          <Dimensions x="500" y="300" />
          <DimensionConstraints minX="400" minY="200" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig.OpcodeEditWindow:OnInitialized(self) </OnInitialized>
          <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
-            <Control name="$(parent)Header" resizeToFitDescendents="true">
-               <Anchor point="TOPLEFT" />
-               <Anchor point="TOPRIGHT" />
-               <Controls>
-                  <Label name="$(parent)Title" text="ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT" />
-                     <Anchor point="TOPRIGHT" />
-                  </Label>
-                  <Texture name="$(parent)Rule" color="808080" tier="HIGH">
-                     <Dimensions y="1.5"/>
-                     <Anchor point="TOPLEFT"  relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
-                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
-                  </Texture>
-               </Controls>
-            </Control>
             <Control name="$(parent)Row1" level="2"> <!-- need to raise the level so that controls in Body don't block clicks to the combobox when it's opened -->
-               <Anchor point="TOPLEFT"  offsetY="5" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
-               <Anchor point="TOPRIGHT" offsetY="5" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" />
+               <Anchor point="TOPLEFT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
                <OnInitialized>
                   --
                   -- We can't use resizeToFitDescendants, because that's a constant 
@@ -45,7 +29,7 @@
                   </Label>
                   <Control name="ItemTrig_OpcodeEdit_Opcode" inherits="ZO_ScrollableComboBox">
                      <Anchor point="TOPLEFT"  offsetX="120" offsetY="5" />
-                     <Anchor point="TOPRIGHT" offsetY="5" />
+                     <Anchor point="TOPRIGHT" offsetX="-5" offsetY="5" />
                   </Control>
                </Controls>
             </Control>
@@ -59,14 +43,13 @@
                   <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked>
-                        local editor = ItemTrig.OpcodeEditWindow
-                        editor:commit()
+                        ItemTrig.windows.opcodeEdit:commit()
                      </OnClicked>
                   </Button>
                   <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked>
-                        local editor = ItemTrig.OpcodeEditWindow
+                        local editor = ItemTrig.windows.opcodeEdit
                         if editor:requestExit() then
                            editor:abandon()
                         end
@@ -91,7 +74,7 @@
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
                      <OnLinkMouseUp>
-                        ItemTrig.OpcodeEditWindow:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
+                        ItemTrig.windows.opcodeEdit:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
                      </OnLinkMouseUp>
                   </Label>
                </Controls>

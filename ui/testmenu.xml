@@ -73,7 +73,13 @@
       >
          <Dimensions x="300" y="100" />
          <Anchor point="CENTER" />
-         <OnInitialized> ItemTrig.WClassTestConfirm:install(self) </OnInitialized>
+         <OnInitialized>
+            ItemTrig.WClassTestConfirm:install(self,
+               {
+                  modalOnly = true
+               }
+            )
+         </OnInitialized>
          <Controls>
             <Button inherits="ZO_DefaultButton" name="$(parent)Y" text="Yes">
                <Anchor point="BOTTOMRIGHT" />

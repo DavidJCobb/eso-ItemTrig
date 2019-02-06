@@ -1,7 +1,4 @@
-if not ItemTrig then return end
-if not ItemTrig.UI then
-   ItemTrig.UI = {}
-end
+if not (ItemTrig and ItemTrig.UI) then return end
 
 --[[--
    WVIEWHOLDER and WVIEWHOLDERVIEW
@@ -10,38 +7,23 @@ end
    exclusive "views" within a single context (the "view holder").
 --]]--
 
-ItemTrig.UI.WViewHolder = {}
-ItemTrig.UI.WViewHolder.__index = ItemTrig.UI.WViewHolder
-function ItemTrig.UI.WViewHolder:install(control)
-   assert(control ~= nil, "Cannot install WViewHolder functionality on a nil control.")
-   if control.widgets and control.widgets.viewHolder then
-      return control.widgets.viewHolder
-   end
-   local result = {
-      control     = control,
-      views       = {},  -- view control list
-      selected    = nil, -- view control
-   }
-   setmetatable(result, self)
+ItemTrig.UI.WViewHolder = ItemTrig.UI.WidgetClass:makeSubclass("WViewHolder", "viewHolder")
+function ItemTrig.UI.WViewHolder:_construct()
+   local control = self:asControl()
+   self.views    = {}  -- view control list
+   self.selected = nil -- view control
    for i = 1, control:GetNumChildren() do
       --
       -- controls run OnInitialized in order of inner first, outer last, so 
       -- the only way to link views to their holder is via the holder's init 
       -- routine; consequently, a view must be the direct child of its holder
       --
-      result:addView(control:GetChild(i)) -- addView returns silently if the control is not a WViewHolderView
+      self:addView(control:GetChild(i)) -- addView returns silently if the control is not a WViewHolderView
    end
-   do -- link the wrapper to the control via an expando property
-      if not control.widgets then
-         control.widgets = {}
-      end
-      control.widgets.viewHolder = result
-   end
-   return result
 end
 function ItemTrig.UI.WViewHolder:setView(control)
    if type(control) == "number" then
-      control = self.control:GetChild(control)
+      control = self:asControl():GetChild(control)
    end
    if not control then
       return
@@ -59,12 +41,12 @@ function ItemTrig.UI.WViewHolder:setView(control)
    control:SetHidden(false)
    self.selected = control
 end
-function ItemTrig.UI.WViewHolder:cast(control)
-   assert(control ~= nil, "Cannot cast a nil control to WViewHolder.")
-   if control.widgets then
-      return control.widgets.viewHolder
+function ItemTrig.UI.WViewHolder:viewByName(name)
+   local c = GetControl(self:asControl(), name)
+   if not c then
+      return nil
    end
-   return nil
+   return ItemTrig.UI.WViewHolderView:cast(c)
 end
 function ItemTrig.UI.WViewHolder:hasView(control)
    for i = 1, table.getn(self.views) do
@@ -96,40 +78,17 @@ end
 
 --
 
-ItemTrig.UI.WViewHolderView = {}
-ItemTrig.UI.WViewHolderView.__index = ItemTrig.UI.WViewHolderView
-function ItemTrig.UI.WViewHolderView:install(control)
-   assert(control ~= nil, "Cannot install WViewHolderView functionality on a nil control.")
-   if control.widgets and control.widgets.viewHolderView then
-      return control.widgets.viewHolderView
-   end
-   local result = {
-      control = control,
-      holder  = nil
-   }
-   setmetatable(result, self)
-   local parent  = control:GetParent()
+ItemTrig.UI.WViewHolderView = ItemTrig.UI.WidgetClass:makeSubclass("WViewHolderView", "viewHolderView")
+function ItemTrig.UI.WViewHolderView:_construct()
+   local control = self:asControl()
+   self.holder = nil -- WViewHolder
+   local parent = control:GetParent()
    if parent then
       local widget = ItemTrig.UI.WViewHolder:cast(parent)
       if widget then
-         result.holder = widget
          widget:addView(control)
       end
    end
-   do -- link the wrapper to the control via an expando property
-      if not control.widgets then
-         control.widgets = {}
-      end
-      control.widgets.viewHolderView = result
-   end
-   return result
-end
-function ItemTrig.UI.WViewHolderView:cast(control)
-   assert(control ~= nil, "Cannot cast a nil control to WViewHolderView.")
-   if control.widgets then
-      return control.widgets.viewHolderView
-   end
-   return nil
 end
 function ItemTrig.UI.WViewHolderView:getHolder()
    return self.holder
@@ -139,5 +98,5 @@ function ItemTrig.UI.WViewHolderView:show()
       d("Warning: A WViewHolderView instance is trying to show itself when it has no WViewHolder.")
       return
    end
-   self.holder:setView(self.control)
+   self.holder:setView(self:asControl())
 end

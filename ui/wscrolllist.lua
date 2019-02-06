@@ -41,64 +41,42 @@ local function onScrollDownButton(self)
    widget:scrollBy(widget.scrollStep)
 end
 
-ItemTrig.UI.WScrollList = {}
-ItemTrig.UI.WScrollList.__index = ItemTrig.UI.WScrollList
-function ItemTrig.UI.WScrollList:install(control, options)
-   assert(control ~= nil, "Cannot install WScrollList functionality on a nil control.")
-   if control.widgets and control.widgets.scrollList then
-      d("WARNING: Attempting to install WScrollList on a control that already has it?")
-   end
+ItemTrig.UI.WScrollList = ItemTrig.UI.WidgetClass:makeSubclass("WScrollList", "scrollList")
+function ItemTrig.UI.WScrollList:_construct(options)
    if not options then
       options = {
          element = {},
       }
    end
+   local control   = self:asControl()
    local scrollbar = GetControl(control, "ScrollBar")
-   local result    = {
-      element    = {
-         template    = options.element.template    or "",
-         toConstruct = options.element.toConstruct or nil,
-         toReset     = options.element.toReset     or nil,
-      },
-      control    = control,
-      contents   = GetControl(control, "Contents"),
-      scrollbar  = scrollbar,
-      scrollBtnU = GetControl(scrollbar, "Up"),
-      scrollBtnD = GetControl(scrollbar, "Down"),
-      scrollStep = options.scrollStep or 40,
-      scrollTop      = 0,
-      scrollMax      = -1, -- height of all generated elements
-      paddingStart   = options.paddingStart   or 0,
-      paddingBetween = options.paddingBetween or 0,
-      paddingEnd     = options.paddingEnd     or 0,
-      pool           = nil,
-      listItems      = {}, -- data items
+   self.element = {
+      template    = options.element.template    or "",
+      toConstruct = options.element.toConstruct or nil,
+      toReset     = options.element.toReset     or nil,
+      _pool       = nil,
    }
-   setmetatable(result, self)
+   self.contents   = GetControl(control, "Contents")
+   self.scrollbar  = scrollbar
+   self.scrollBtnU = GetControl(scrollbar, "Up")
+   self.scrollBtnD = GetControl(scrollbar, "Down")
+   self.scrollStep = options.scrollStep or 40
+   self.scrollTop      = 0
+   self.scrollMax      = -1 -- height of all generated elements
+   self.paddingStart   = options.paddingStart   or 0
+   self.paddingBetween = options.paddingBetween or 0
+   self.paddingEnd     = options.paddingEnd     or 0
+   self.listItems      = {} -- data items
    do
       local factoryFunction =
          function(objectPool)
-            return ZO_ObjectPool_CreateNamedControl(string.format("%sRow", result.control:GetName()), result.element.template, objectPool, result.contents)
+            return ZO_ObjectPool_CreateNamedControl(string.format("%sRow", self:asControl():GetName()), self.element.template, objectPool, self.contents)
          end
-      result.element._pool = ZO_ObjectPool:New(factoryFunction, result.element.toReset or ZO_ObjectPool_DefaultResetControl)
+      self.element._pool = ZO_ObjectPool:New(factoryFunction, self.element.toReset or ZO_ObjectPool_DefaultResetControl)
    end
-   result.scrollBtnU:SetHandler("OnMouseDown", onScrollUpButton)
-   result.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
-   result.scrollbar:SetEnabled(false)
-   do -- link the wrapper to the control via an expando property
-      if not control.widgets then
-         control.widgets = {}
-      end
-      control.widgets.scrollList = result
-   end
-   return result
-end
-function ItemTrig.UI.WScrollList:cast(control)
-   assert(control ~= nil, "Cannot cast a nil control to WScrollList.")
-   if control.widgets then
-      return control.widgets.scrollList
-   end
-   return nil
+   self.scrollBtnU:SetHandler("OnMouseDown", onScrollUpButton)
+   self.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
+   self.scrollbar:SetEnabled(false)
 end
 function ItemTrig.UI.WScrollList:clear(update)
    ZO_ClearNumericallyIndexedTable(self.listItems)

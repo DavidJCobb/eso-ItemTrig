@@ -53,10 +53,16 @@
          </Controls>
       </TopLevelControl>
       <Control name="ItemTrig_UITemplate_WWindowBelowTitleBarL" virtual="true">
-          <Anchor point="TOPLEFT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+         <Anchor point="TOPLEFT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
       </Control>
       <Control name="ItemTrig_UITemplate_WWindowBelowTitleBarR" virtual="true">
-          <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+         <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+      </Control>
+      <Control name="ItemTrig_UITemplate_WWindowBelowTitleBarLPad" virtual="true">
+         <Anchor point="TOPLEFT" offsetX="5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+      </Control>
+      <Control name="ItemTrig_UITemplate_WWindowBelowTitleBarRPad" virtual="true">
+         <Anchor point="TOPRIGHT" offsetX="-5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
       </Control>
    </Controls>
 </GuiXml>

@@ -7,8 +7,8 @@ function ItemTrig.UI.WWindow:_construct(options)
    end
    local control = self:asControl()
    self.controls = {
-      blocker   = control:GetNamedChild("ModalUnderlay"), -- the control used to block mouse focus
-      titleBar  = control:GetNamedChild("TitleBar"),
+      blocker   = self:GetNamedChild("ModalUnderlay"), -- the control used to block mouse focus
+      titleBar  = self:GetNamedChild("TitleBar"),
       titleText = nil,
       titleExit = nil,
    }
@@ -22,8 +22,8 @@ function ItemTrig.UI.WWindow:_construct(options)
    }
    assert(self.controls.blocker ~= nil, "A WWindow control must have a child named \"$(parent)ModalUnderlay\".")
    if self.controls.titleBar then
-      self.controls.titleText = self.controls.titleBar:GetNamedChild("Title")
-      self.controls.titleExit = self.controls.titleBar:GetNamedChild("Close")
+      self.controls.titleText = GetControl(self.controls.titleBar, "Title")
+      self.controls.titleExit = GetControl(self.controls.titleBar, "Close")
       if (options.closeButton == false) and self.controls.titleExit then
          self.controls.titleExit:SetHidden(true)
       end
@@ -59,6 +59,11 @@ function ItemTrig.UI.WWindow:_onBeforeShow()
    -- Subclasses can override this. Returning false cancels the show operation.
    --
    return true
+end
+function ItemTrig.UI.WWindow:onShow()
+   --
+   -- Subclasses can override this.
+   --
 end
 function ItemTrig.UI.WWindow:_onBeforeOpenBy(opener)
    --
@@ -121,8 +126,9 @@ function ItemTrig.UI.WWindow:show()
    end
    SCENE_MANAGER:ShowTopLevel(c)
    c:BringWindowToTop()
+   self:onShow()
 end
-function ItemTrig.UI.WWindow:hide(options)
+function ItemTrig.UI.WWindow:hide()
    SCENE_MANAGER:HideTopLevel(self:asControl())
 end
 function ItemTrig.UI.WWindow:showModal(modal)
@@ -167,9 +173,5 @@ function ItemTrig.UI.WWindow:getTitle()
    return self.controls.titleText:GetText()
 end
 function ItemTrig.UI.WWindow:setTitle(text)
-   if self.controls == nil then
-      d(self)
-      assert(false)
-   end
    return self.controls.titleText:SetText(text)
 end

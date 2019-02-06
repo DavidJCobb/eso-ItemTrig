@@ -18,34 +18,61 @@ if not ItemTrig then return end
       for this purpose: Opcode:copyAssign.
 --]]--
 
-local Window = {
-   ui = {
-      fragment   = nil,
-      window     = nil,
-      opcodeType = nil,
-      opcodeBody = nil,
-   },
-   opcode = {
-      target  = nil, -- the opcode we want to edit (i.e. Opcode* other)
-      working = nil, -- a copy of that opcode; we make changes to it and then commit to (target) later
-      dirty   = false,
-   },
-   deferred = nil, -- Deferred for sending a result back to the opener
-}
-ItemTrig.OpcodeEditWindow = Window
-
-function Window:OnInitialized(control)
-   self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_OPCODEEDIT")
-   ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-   SCENE_MANAGER:RegisterTopLevel(control, false)
+local Window = {}
+local WinCls = ItemTrig.UI.WWindow:makeSubclass("OpcodeEditWindow")
+function WinCls:_construct()
+   ItemTrig.windows.opcodeEdit = self
+   self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE))
    --
-   self.ui.window     = control
+   local control = self:asControl()
+   ItemTrig.assign(self, {
+      ui = {
+         fragment   = nil,
+         opcodeType = nil,
+         opcodeBody = nil,
+      },
+      opcode = {
+         target  = nil, -- the opcode we want to edit (i.e. Opcode* other)
+         working = nil, -- a copy of that opcode; we make changes to it and then commit to (target) later
+         dirty   = false,
+      },
+      pendingResults = {
+         outcome = false, -- true to resolve; false to reject
+         results = nil,   -- param to send back
+      },
+   })
+   do -- scene setup
+      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_OPCODEEDIT")
+      ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
+      SCENE_MANAGER:RegisterTopLevel(control, false)
+   end
    self.ui.opcodeType = ZO_ComboBox_ObjectFromContainer(ItemTrig_OpcodeEdit_Opcode)
    self.ui.opcodeBody = ItemTrig_OpcodeEdit_OpcodeBody
    --
    self.ui.opcodeType:SetSortsItems(true)
 end
-function Window:close()
+
+ItemTrig.OpcodeEditWindow = {}
+function ItemTrig.OpcodeEditWindow:OnInitialized(control)
+   ItemTrig.OpcodeEditWindow = WinCls:install(control)
+   Window = ItemTrig.OpcodeEditWindow
+end
+
+--
+
+function WinCls:_handleModalDeferredOnHide(deferred)
+   if self.pendingResults.outcome then
+      deferred:resolve(self.pendingResults.results)
+   else
+      deferred:reject(self.pendingResults.results)
+   end
+end
+function WinCls:onCloseClicked()
+   if self:requestExit() then
+      self:abandon()
+   end
+end
+function WinCls:close()
    assert(self.deferred == nil, "Can't close the OpcodeEdit window -- we still have to notify its opener!")
    self.opcode.target  = nil
    self.opcode.working = nil
@@ -53,22 +80,22 @@ function Window:close()
    --
    -- TODO: reset UI state
    --
-   SCENE_MANAGER:HideTopLevel(self.ui.window)
+   self:hide()
 end
-function Window:abandon()
-   self.deferred:reject()
-   self.deferred = nil
+function WinCls:abandon()
+   self.pendingResults.outcome = false
+   self.pendingResults.results = nil
    self:close()
 end
-function Window:commit()
+function WinCls:commit()
    if self.opcode.dirty then
       self.opcode.target:copyAssign(self.opcode.working)
    end
-   self.deferred:resolve(self.opcode.dirty)
-   self.deferred = nil
+   self.pendingResults.outcome = true
+   self.pendingResults.results = self.opcode.dirty
    self:close()
 end
-function Window:requestExit()
+function WinCls:requestExit()
    if self.opcode.dirty then
       --
       -- TODO: prompt for confirmation; same as above
@@ -77,19 +104,15 @@ function Window:requestExit()
    end
    return true
 end
-function Window:requestEdit(opener, opcode, dirty)
+function WinCls:requestEdit(opener, opcode, dirty)
    assert(opener        ~= nil, "The opcode editor must be aware of its opener.")
-   assert(self.deferred == nil, "The opcode editor is already showing!")
    assert(opcode        ~= nil, "No opcode.")
    assert(opcode.base   ~= nil, "Opcode is invalid.")
-   do
-      local host  = ItemTrig.UI.WModalHost:cast(opener)
-      local modal = ItemTrig.UI.WModal:install(self.ui.window)
-      if not modal:prepToShow(host) then
-         return
-      end
+   assert(self:getModalOpener() == nil, "The opcode editor is already showing!")
+   local deferred = opener:showModal(self)
+   if not deferred then
+      return
    end
-   self.deferred = ItemTrig.Deferred:new()
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
    self.opcode.dirty   = dirty or false
@@ -102,8 +125,10 @@ function Window:requestEdit(opener, opcode, dirty)
       local list
       if opcode.type == "condition" then
          list = ItemTrig.tableConditions
+         self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_C))
       else
          list = ItemTrig.tableActions
+         self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_A))
       end
       local combobox = self.ui.opcodeType
       combobox:ClearItems()
@@ -122,12 +147,9 @@ function Window:requestEdit(opener, opcode, dirty)
    end
    self:refresh()
    --
-   SCENE_MANAGER:ShowTopLevel(self.ui.window)
-   self.ui.window:BringWindowToTop()
-   --
-   return self.deferred
+   return deferred
 end
-function Window:_onTypeChanged(opcodeBase)
+function WinCls:_onTypeChanged(opcodeBase)
    local list
    if self.opcode.type == "condition" then
       list = ItemTrig.tableConditions
@@ -145,18 +167,11 @@ function Window:_onTypeChanged(opcodeBase)
    self.opcode.working:resetArgs()
    self:refresh()
 end
-function Window:refresh() -- Render the opcode being edited.
+function WinCls:refresh() -- Render the opcode being edited.
    do -- opcode type
       local opcodeBase = self.opcode.working.base
       local combobox   = self.ui.opcodeType
-      combobox:SetSelectedItemByEval(
-         function(item)
-            if item.base == opcodeBase then
-               return true
-            end
-            return false
-         end
-      )
+      combobox:SetSelectedItemByEval(function(item) return item.base == opcodeBase end)
    end
    do -- opcode body
       --
@@ -182,11 +197,11 @@ function Window:refresh() -- Render the opcode being edited.
    end
 end
 
-function Window:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
-   local editor   = ItemTrig.OpcodeEditWindow
+function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
+   local editor   = ItemTrig.windows.opcodeEdit
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
-   local deferred = ItemTrig.OpcodeArgEditWindow:requestEdit(editor.ui.window, editor.opcode.working, argIndex)
+   local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(editor, editor.opcode.working, argIndex)
    deferred:done(
       function(context, deferred, result) -- user clicked OK
          local working = Window.opcode.working

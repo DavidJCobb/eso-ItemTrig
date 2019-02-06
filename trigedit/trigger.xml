@@ -61,29 +61,13 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
-         inherits="ItemTrig_UITemplate_WModalHost"
+         inherits="ItemTrig_UITemplate_WWindow"
       >
          <Dimensions x="800" y="600" />
          <DimensionConstraints minX="600" minY="600" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig.TriggerEditWindow:OnInitialized(self) </OnInitialized>
          <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
-            <Control name="$(parent)Header" resizeToFitDescendents="true">
-               <Anchor point="TOPLEFT" />
-               <Anchor point="TOPRIGHT" />
-               <Controls>
-                  <Label name="$(parent)Title" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT" />
-                     <Anchor point="TOPRIGHT" />
-                  </Label>
-                  <Texture name="$(parent)Rule" color="808080" tier="HIGH">
-                     <Dimensions y="1.5"/>
-                     <Anchor point="TOPLEFT"  relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
-                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
-                  </Texture>
-               </Controls>
-            </Control>
             <Control name="$(parent)Bottom">
                <Anchor point="BOTTOMLEFT"  offsetY="-5" offsetX="5" />
                <Anchor point="BOTTOMRIGHT" offsetY="-5" offsetX="-5" />
@@ -97,7 +81,7 @@
                   <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked>
-                        local editor = ItemTrig.TriggerEditWindow
+                        local editor = ItemTrig.windows.triggerEdit
                         if editor:requestExit() then
                            editor:abandon()
                         end
@@ -106,7 +90,7 @@
                </Controls>
             </Control>
             <Control name="$(parent)Col1">
-               <Anchor point="TOPLEFT"     offsetX="5"  offsetY="5"  relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPLEFT" offsetX="5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
                <Dimensions x="200" />
                <OnInitialized>

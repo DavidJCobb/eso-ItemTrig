@@ -1,146 +1,128 @@
 if not ItemTrig then return end
 
-local Window = {
-   ui = {
-      control    = nil,
-      viewholder = nil, -- WViewHolder
+local Window  = {}
+local ViewCls = {}
+do -- enum
+   ViewCls.Enum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgEnumView")
+   function ViewCls.Enum:_construct()
+      self.value = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Value"))
+   end
+   function ViewCls.Enum:GetValue()
+      local x = self.value:GetSelectedItemData()
+      if x then
+         x = x.index
+         if Window.type == "boolean" then
+            --
+            -- Convert from enum index to boolean.
+            --
+            x = (x == 2)
+         end
+         return x
+      end
+   end
+end
+do  -- quantity
+   ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
+   function ViewCls.Quantity:_construct()
+      self.number    = self:GetNamedChild("Number")
+      self.qualifier = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Qualifier"))
       --
-      views = {
-         checkbox = {
-            widget = nil,
-            --
-            -- TODO
-            --
-         },
-         enum = {
-            widget = nil, -- WViewHolderView
-            value  = nil, -- ZO_ComboBox_Base
-         },
-         multiline = {
-            widget = nil, -- WViewHolderView
-            value  = nil,
-         },
-         number = {
-            widget = nil,
-            --
-            -- TODO
-            --
-         },
-         quantity = {
-            widget    = nil, -- WViewHolderView
+      local qualifier = self.qualifier
+      qualifier:ClearItems()
+      qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+      qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
+      qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, ZO_COMBOBOX_SUPRESS_UPDATE)
+      qualifier:UpdateItems()
+   end
+   function ViewCls.Quantity:GetValue()
+      local q = {
+         qualifier = self.qualifier:GetSelectedItemData(),
+         number    = tonumber(self.number:GetText() or 0)
+      }
+      if q.qualifier then
+         q.qualifier = q.qualifier.value
+      else
+         q.qualifier = "E"
+      end
+      return q
+   end
+end
+do  -- string
+   ViewCls.String = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgStringView")
+   function ViewCls.String:_construct()
+      self.value = self:GetNamedChild("Value")
+   end
+   function ViewCls.String:GetValue()
+      return self.value:GetText()
+   end
+end
+
+local WinCls = ItemTrig.UI.WWindow:makeSubclass("OpcodeArgEditWindow")
+function WinCls:_construct()
+   ItemTrig.windows.opcodeArgEdit = self
+   self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEARGEDIT_TITLE))
+   --
+   local control = self:asControl()
+   ItemTrig.assign(self, {
+      ui = {
+         views = {
+            checkbox  = nil,
+            enum      = nil,
+            multiline = nil,
             number    = nil,
-            qualifier = nil, -- ZO_ComboBox_Base
-         },
-         string = {
-            widget = nil, -- WViewHolderView
-            value  = nil,
+            quantity  = nil,
+            string    = nil,
          },
       },
-   },
-   view     = nil, -- one of the "views" objects above
-   type     = nil, -- raw argument type, not ui type; i.e. boolean, number, string, quantity
-   opcode   = nil, -- Opcode
-   argIndex = nil, -- number
-   deferred = nil, -- Deferred for sending a result back to the opener
-}
-ItemTrig.OpcodeArgEditWindow = Window
-
-function Window.ui.views.checkbox:GetValue()
-   --
-   -- TODO
-   --
-end
-function Window.ui.views.enum:GetValue()
-   local x = self.value:GetSelectedItemData()
-   if x then
-      x = x.index
-      if Window.type == "boolean" then
-         --
-         -- Convert from enum index to boolean.
-         --
-         x = (x == 2)
-      end
-      return x
+      view     = nil, -- one of the "views" objects above
+      type     = nil, -- raw argument type, not ui type; i.e. boolean, number, string, quantity
+      opcode   = nil, -- Opcode
+      argIndex = nil, -- number
+      pendingResults = {
+         outcome = false, -- true to resolve; false to reject
+         results = nil,   -- param to send back
+      },
+   })
+   do -- scene setup
+      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_OPCODEARGEDIT")
+      ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
+      SCENE_MANAGER:RegisterTopLevel(control, false)
    end
-end
-function Window.ui.views.multiline:GetValue()
-   return self.value:GetText()
-end
-function Window.ui.views.number:GetValue()
-   --
-   -- TODO
-   --
-end
-function Window.ui.views.quantity:GetValue()
-   local q = {
-      qualifier = self.qualifier:GetSelectedItemData(),
-      number    = tonumber(self.number:GetText() or 0)
-   }
-   if q.qualifier then
-      q.qualifier = q.qualifier.value
-   else
-      q.qualifier = "E"
-   end
-   return q
-end
-function Window.ui.views.string:GetValue()
-   return self.value:GetText()
-end
-
-function Window:OnInitialized(control)
-   self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_OPCODEARGEDIT")
-   ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-   SCENE_MANAGER:RegisterTopLevel(control, false)
-   --
-   self.ui.window = control
    do
-      local viewholder = GetControl(control, "Body")
-      local view
-      --
-      do -- enum
-         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Enum"))
-         self.ui.views.enum.widget = view
-         self.ui.views.enum.value  = ZO_ComboBox_ObjectFromContainer(GetControl(view.control, "Value"))
-      end
-      do -- multiline
-         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Multiline"))
-         self.ui.views.multiline.widget = view
-         self.ui.views.multiline.value  = GetControl(view.control, "Value")
-      end
-      do -- quantity
-         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "Quantity"))
-         local qualifier = ZO_ComboBox_ObjectFromContainer(GetControl(view.control, "Qualifier"))
-         self.ui.views.quantity.widget    = view
-         self.ui.views.quantity.number    = GetControl(view.control, "Number")
-         self.ui.views.quantity.qualifier = qualifier
-         --
-         qualifier:ClearItems()
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:UpdateItems()
-      end
-      do -- string
-         view = ItemTrig.UI.WViewHolderView:cast(GetControl(viewholder, "String"))
-         self.ui.views.string.widget = view
-         self.ui.views.string.value  = GetControl(view.control, "Value")
-      end
+      local viewholder = ItemTrig.UI.WViewHolder:cast(self:GetNamedChild("Body"))
+      self.ui.views.enum      = ViewCls.Enum:install(viewholder:GetNamedChild("Enum"))
+      self.ui.views.multiline = ViewCls.String:install(viewholder:GetNamedChild("Multiline"))
+      self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
+      self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
    end
 end
-function Window:requestEdit(opener, opcode, argIndex)
-   assert(opener ~= nil, "The argument editor must be aware of its opener.")
-   assert(self.deferred == nil, "The argument editor is already showing!")
+
+ItemTrig.OpcodeArgEditWindow = {}
+function ItemTrig.OpcodeArgEditWindow:OnInitialized(control)
+   ItemTrig.OpcodeArgEditWindow = WinCls:install(control)
+   Window = ItemTrig.OpcodeArgEditWindow
+end
+
+function WinCls:_handleModalDeferredOnHide(deferred)
+   if self.pendingResults.outcome then
+      deferred:resolve(self.pendingResults.results)
+   else
+      deferred:reject(self.pendingResults.results)
+   end
+end
+function WinCls:onCloseClicked()
+   self:cancel()
+end
+function WinCls:requestEdit(opener, opcode, argIndex)
+   assert(opener ~= nil,      "The argument editor must be aware of its opener.")
    assert(opcode ~= nil,      "No opcode.")
    assert(argIndex ~= nil,    "No argument index.")
    assert(opcode.base ~= nil, "Opcode is invalid.")
-   do
-      local host  = ItemTrig.UI.WModalHost:cast(opener)
-      local modal = ItemTrig.UI.WModal:install(self.ui.window)
-      if not modal:prepToShow(host) then
-         return
-      end
+   assert(self:getModalOpener() == nil, "The argument editor is already showing!")
+   local deferred = opener:showModal(self)
+   if not deferred then
+      return
    end
-   self.deferred = ItemTrig.Deferred:new()
    self.opcode   = opcode
    self.argIndex = argIndex
    self.view     = nil
@@ -160,7 +142,7 @@ function Window:requestEdit(opener, opcode, argIndex)
          if arg.type == "boolean" then
             val = val and 2 or 1
          end
-         self.view.widget:show()
+         self.view:show()
          local combobox = self.view.value
          combobox:ClearItems()
          for i = 1, table.getn(arg.enum) do
@@ -173,7 +155,7 @@ function Window:requestEdit(opener, opcode, argIndex)
          --
       elseif archetype == "multiline" then
          self.view = self.ui.views.multiline
-         self.view.widget:show()
+         self.view:show()
          self.view.value:SetText(val or "")
       elseif archetype == "number" then
          self.view = self.ui.views.number
@@ -182,7 +164,7 @@ function Window:requestEdit(opener, opcode, argIndex)
          --
       elseif archetype == "quantity" then
          self.view = self.ui.views.quantity
-         self.view.widget:show()
+         self.view:show()
          self.view.qualifier:SetSelectedItemByEval(function(item) return item.value == val.qualifier end)
          --
          -- TODO: If no qualifier is selected, select the first list item.
@@ -190,37 +172,32 @@ function Window:requestEdit(opener, opcode, argIndex)
          self.view.number:SetText(val.number or "0")
       elseif archetype == "string" then
          self.view = self.ui.views.string
-         self.view.widget:show()
+         self.view:show()
          self.view.value:SetText(val or "")
       end
       --
       -- TODO: compress window size
       --
    end
-   --
-   SCENE_MANAGER:ShowTopLevel(self.ui.window)
-   self.ui.window:BringWindowToTop()
-   --
-   return self.deferred
+   return deferred
 end
-function Window:cancel()
+function WinCls:cancel()
    assert(self.deferred ~= nil, "Can't stop editing an argument if we aren't editing one yet.")
    self.view     = nil
    self.argIndex = nil
-   self.deferred:reject()
-   self.deferred = nil
-   SCENE_MANAGER:HideTopLevel(self.ui.window)
+   self.pendingResults.outcome = false
+   self.pendingResults.results = nil
+   self:hide()
 end
-function Window:commit()
+function WinCls:commit()
    assert(self.argIndex ~= nil, "Don't know what argument index to commit.")
    assert(self.view     ~= nil, "Don't know what kind of value to commit.")
-   local result = {
+   self.pendingResults.outcome = true
+   self.pendingResults.results = {
       argIndex = self.argIndex,
       value    = self.view:GetValue()
    }
    self.view     = nil
    self.argIndex = nil
-   self.deferred:resolve(result)
-   self.deferred = nil
-   SCENE_MANAGER:HideTopLevel(self.ui.window)
+   self:hide()
 end

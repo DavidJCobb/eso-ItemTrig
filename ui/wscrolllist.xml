@@ -15,7 +15,7 @@
                <Anchor point="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SCROLL_BAR_WIDTH" />
                <OnMouseWheel>
-                  local widget = self:GetParent().widgets.scrollList
+                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
                   widget:scrollBy(-delta * widget.scrollStep)
                </OnMouseWheel>
             </Scroll>
@@ -23,11 +23,11 @@
                <Anchor point="TOPLEFT"    relativeTo="$(parent)Contents" relativePoint="TOPRIGHT"    offsetY="16" />
                <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Contents" relativePoint="BOTTOMRIGHT" offsetY="-16" />
                <OnMouseWheel>
-                  local widget = self:GetParent().widgets.scrollList
+                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
                   widget:scrollBy(-delta * widget.scrollStep)
                </OnMouseWheel>
                <OnValueChanged>
-                  local widget = self:GetParent().widgets.scrollList
+                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
                   widget.scrollTop = value
                   widget:repositionItems()
                </OnValueChanged>

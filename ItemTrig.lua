@@ -1,39 +1,7 @@
-ItemTrig = {}
-ItemTrig.name = "ItemTrig"
-
-local function TriggerTest()
-   local t = ItemTrig.Trigger:new()
-   t.name = "Test trigger"
-   table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-   table.insert(t.conditions, ItemTrig.Condition:new(2, {true}))  -- Set And/Or
-   table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-   table.insert(t.conditions, ItemTrig.Condition:new(3, {false})) -- Always/Never
-   table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
-   
-   local n = ItemTrig.Trigger:new()
-   n.name = "Nested test trigger"
-   table.insert(n.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-   table.insert(n.actions, ItemTrig.Action:new(2, {"I am nested!"})) -- Log Message
-   table.insert(n.actions, ItemTrig.Action:new(1)) -- Return
-   
-   table.insert(t.actions, ItemTrig.Action:new(3, {n})) -- Run Nested Trigger
-   table.insert(t.actions, ItemTrig.Action:new(2, {"After nested!"})) -- Log Message
-   
-   t:exec()
-   CHAT_SYSTEM:AddMessage("ABOUT TO LOG SERIALIZED TRIGGER")
-   local s = t:serialize()
-   CHAT_SYSTEM:AddMessage(s)
-   CHAT_SYSTEM:AddMessage("LOGGED SERIALIZED TRIGGER")
-   CHAT_SYSTEM:AddMessage("ABOUT TO PARSE TRIGGER")
-   local tparsed = ItemTrig.parseTrigger(s)
-   CHAT_SYSTEM:AddMessage(tparsed:debugDump())
-   CHAT_SYSTEM:AddMessage("LOGGED PARSED TRIGGER")
-   if tparsed then
-      CHAT_SYSTEM:AddMessage("THE NESTED TRIGGER IS:")
-      CHAT_SYSTEM:AddMessage(tparsed.actions[2].args[1]:debugDump())
-      CHAT_SYSTEM:AddMessage("LOGGED PARSED NESTED TRIGGER")
-   end
-end
+ItemTrig = {
+   name    = "ItemTrig",
+   windows = {}
+}
 
 local function PerfTest(extra)
    local testcount = 100
@@ -90,32 +58,7 @@ local function PerfTest(extra)
 end
 
 local function ShowWin()
-   ItemTrig.TriggerListWindow:open()
-end
-local function WinTest01()
-   local tList = {}
-   do
-      local t = ItemTrig.Trigger:new()
-      t.name = "Test trigger 01"
-      table.insert(t.conditions, ItemTrig.Condition:new(1, {"Condition comment"}))  -- Comment
-      table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-      table.insert(t.conditions, ItemTrig.Condition:new(2, {true}))  -- Set And/Or
-      table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-      table.insert(t.conditions, ItemTrig.Condition:new(3, {false})) -- Always/Never
-      table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
-      --
-      table.insert(tList, t)
-   end
-   do
-      local t = ItemTrig.Trigger:new()
-      t.name = "Test trigger 02"
-      table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-      table.insert(t.actions, ItemTrig.Action:new(4, {"Action comment"})) -- Comment
-      table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
-      --
-      table.insert(tList, t)
-   end
-   ItemTrig.TriggerListWindow:renderTriggers(tList)
+   ItemTrig.windows.triggerList:show()
 end
 local function ShowTestMenu()
    SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
@@ -127,10 +70,8 @@ end
 
 local function Initialize()
    ItemTrig.Savedata:load()
-   SLASH_COMMANDS["/cobbtrigtest"]  = TriggerTest
    SLASH_COMMANDS["/cobbperftest"]  = PerfTest
    SLASH_COMMANDS["/cobbshowwin"]   = ShowWin
-   SLASH_COMMANDS["/cobbwintest01"] = WinTest01
    SLASH_COMMANDS["/cobbshowtestmenu"]  = ShowTestMenu
    SLASH_COMMANDS["/cobbshowanchortestmenu"]  = ShowAnchorTestMenu
 end
