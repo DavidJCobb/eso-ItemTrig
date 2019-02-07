@@ -193,19 +193,7 @@ function WinCls:unsavedChangesMatter()
    if not self.dirty or not self.view then
       return false
    end
-   local b = self.opcode.base.args[self.argIndex]
-   local a = self.opcode.args[self.argIndex]
-   local v = self.view:GetValue()
-   if b.type == "string" then
-      if a ~= v and v ~= "" then
-         return true
-      end
-   end
-   --
-   -- TODO: Once we figure something out for editing nested triggers, we'll 
-   -- want to revisit this.
-   --
-   return false
+   return self.opcode:isArgumentEffortful(self.argIndex, self.view:GetValue())
 end
 function WinCls:cancel()
    assert(self.opcode ~= nil, "Can't stop editing an argument if we aren't editing one yet.")

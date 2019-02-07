@@ -78,11 +78,27 @@ function ItemTrig.UI.WScrollList:_construct(options)
    self.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
    self.scrollbar:SetEnabled(false)
 end
+function ItemTrig.UI.WScrollList:at(index)
+   if (not index) or index < 1 or index > table.getn(self.listItems) then
+      return nil
+   end
+   return self.listItems[index]
+end
 function ItemTrig.UI.WScrollList:clear(update)
    ZO_ClearNumericallyIndexedTable(self.listItems)
    if (update == true) or (update == nil) then
       self:redraw()
    end
+end
+function ItemTrig.UI.WScrollList:controlByIndex(index)
+   if (not index) or index < 1 then
+      return nil
+   end
+   local contents = self.contents
+   if index > contents:GetNumChildren() then
+      return nil
+   end
+   return contents:GetChild(index)
 end
 function ItemTrig.UI.WScrollList:indexOf(control)
    local contents = self.contents
@@ -102,24 +118,29 @@ function ItemTrig.UI.WScrollList:indexOfData(data)
    end
    return 0
 end
-function ItemTrig.UI.WScrollList:at(index)
-   if (not index) or index < 1 or index > table.getn(self.listItems) then
-      return nil
-   end
-   return self.listItems[index]
-end
-function ItemTrig.UI.WScrollList:controlByIndex(index)
-   if (not index) or index < 1 then
-      return nil
-   end
-   local contents = self.contents
-   if index > contents:GetNumChildren() then
-      return nil
-   end
-   return contents:GetChild(index)
-end
 function ItemTrig.UI.WScrollList:push(obj, update)
    table.insert(self.listItems, obj)
+   if (update == true) or (update == nil) then
+      self:redraw()
+   end
+end
+function ItemTrig.UI.WScrollList:_onRemoved(index, data) -- for subclasses to override
+end
+function ItemTrig.UI.WScrollList:remove(x, update)
+   if not x then
+      return
+   end
+   if type(x) == "userdata" then
+      x = self:indexOf(x)
+   elseif type(x) ~= "number" then
+      x = self:indexOfData(x)
+   end
+   if x < 1 then
+      return
+   end
+   local item = self.listItems[x]
+   table.remove(self.listItems, x)
+   self:_onRemoved(x, item)
    if (update == true) or (update == nil) then
       self:redraw()
    end

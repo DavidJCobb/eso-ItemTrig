@@ -23,7 +23,8 @@ function ItemTrig.UI.WWindow:_construct(options)
       titleExit = nil,
    }
    self.prefs = {
-      modalOnly = options.modalOnly or false, -- boolean OR the name of the only allowed opener
+      centerIfModal = options.centerIfModal or false, -- if true, then the modal opens at the center of the screen; if false, it opens relative to its creator
+      modalOnly     = options.modalOnly     or false, -- boolean OR the name of the only allowed opener
    }
    self.modalState = {
       child    = nil, -- WWindow: a modal that we've opened
@@ -200,10 +201,36 @@ function ItemTrig.UI.WWindow:showModal(modal, ...)
    local deferred = ItemTrig.Deferred:new()
    deferred:always(self._onChildModalHidden, self) -- internal event for handling the modal blocker properly
    deferred:always(self.onChildModalHidden, self)  -- event provided for subclasses to override
-   child.modalState.opener   = self
-   child.modalState.deferred = deferred
-   SCENE_MANAGER:ShowTopLevel(child:asControl())
-   child:asControl():BringWindowToTop()
+   do -- show the modal
+      local control = child:asControl()
+      local openerC = self:asControl()
+      child.modalState.opener   = self
+      child.modalState.deferred = deferred
+      --
+      -- Position the opened modal:
+      --
+      control:ClearAnchors()
+      if child.prefs.centerIfModal then
+         control:SetAnchor(CENTER, GuiRoot, CENTER, 0, 0)
+      else
+         local offsetX = 50
+         local offsetY = 50
+         -- account for the opener being crammed into the lower corner
+         local cw = openerC:GetWidth()
+         local ch = openerC:GetHeight()
+         local sw = GuiRoot:GetWidth()
+         local sh = GuiRoot:GetHeight()
+         if openerC:GetTop() + ch + offsetY > sh then
+            offsetY = -offsetY
+         end
+         if openerC:GetLeft() + cw + offsetX > sw then
+            offsetX = -offsetX
+         end
+         control:SetAnchor(CENTER, openerC, CENTER, offsetX, offsetY)
+      end
+      SCENE_MANAGER:ShowTopLevel(control)
+      control:BringWindowToTop()
+   end
    return deferred:promise()
 end
 function ItemTrig.UI.WWindow:getTitle()

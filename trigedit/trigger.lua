@@ -20,6 +20,103 @@ if not ItemTrig then return end
 
 local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("TriggerEditWindow")
 ItemTrig:registerWindow("triggerEdit", WinCls)
+
+local OpcodeListCls = ItemTrig.UI.WidgetClass:makeSubclass("OpcodeListCls", "opcodeList")
+do -- helper class for opcode lists
+   function OpcodeListCls:_construct(type)
+      self.type = type
+      self.pane = ItemTrig.UI.WScrollSelectList:cast(self:GetNamedChild("List"))
+      do -- pane
+         local function formatOpcodeArg(s)
+            return string.format("|c70B0FF%s|r", s)
+         end
+         --
+         local pane = self.pane
+         pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
+         pane.paddingBetween   = 4
+         pane.element.toConstruct =
+            function(control, data)
+               local height = 0
+               do
+                  local text = GetControl(control, "Text")
+                  local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
+                  text:SetText(data:format(formatOpcodeArg))
+                  height = text:GetHeight() + paddingY * 2
+               end
+               control:SetHeight(height)
+            end
+         pane.element.onSelect =
+            function(index, control, pane)
+               local text  = GetControl(control, "Text")
+               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
+               text:SetColor(unpack(color))
+               WinCls:getInstance():onPaneSelection(pane)
+            end
+         pane.element.onDeselect =
+            function(index, control, pane)
+               local text  = GetControl(control, "Text")
+               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
+               text:SetColor(unpack(color))
+            end
+         pane.element.onDoubleClick =
+            function(index, control, pane)
+               local opcode = pane.listItems[index]
+               if opcode then
+                  WinCls:getInstance():editOpcode(opcode)
+               end
+            end
+      end
+      do -- buttons
+         local buttons = self:GetNamedChild("Buttons")
+         local names   = { "Add", "Edit", "MoveUp", "MoveDown", "Delete" }
+         for _, v in pairs(names) do
+            local button = GetControl(buttons, v)
+            button.operation = v
+            button:SetHandler("OnMouseUp",
+               function(control, button, upInside, ctrl, alt, shift, command)
+                  if upInside then
+                     local ol = OpcodeListCls:cast(control:GetParent():GetParent())
+                     assert(ol ~= nil)
+                     ol["handler" .. control.operation](ol)
+                  end
+               end
+            )
+         end
+      end
+   end
+   function OpcodeListCls:getSelected()
+      return self.pane:at(self.pane:getFirstSelectedIndex())
+   end
+   function OpcodeListCls:handlerAdd()
+      local i = self.pane:getFirstSelectedIndex()
+      WinCls:getInstance():addOpcode(self.type, i)
+   end
+   function OpcodeListCls:handlerEdit()
+      local opcode = self:getSelected()
+      if opcode then
+         WinCls:getInstance():editOpcode(opcode)
+      end
+   end
+   function OpcodeListCls:handlerMoveUp()
+      local opcode = self:getSelected()
+      if opcode then
+         WinCls:getInstance():moveOpcode(opcode, -1)
+      end
+   end
+   function OpcodeListCls:handlerMoveDown()
+      local opcode = self:getSelected()
+      if opcode then
+         WinCls:getInstance():moveOpcode(opcode, 1)
+      end
+   end
+   function OpcodeListCls:handlerDelete()
+      local opcode = self:getSelected()
+      if opcode then
+         WinCls:getInstance():deleteOpcode(opcode)
+      end
+   end
+end
+
 function WinCls:_construct()
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    --
@@ -42,105 +139,124 @@ function WinCls:_construct()
    }
    do
       local col = self:GetNamedChild("Col1")
-      local c = col:GetNamedChild("Conditions"):GetNamedChild("List")
-      local a = col:GetNamedChild("Actions"):GetNamedChild("List")
-      self.ui.paneConditions = ItemTrig.UI.WScrollSelectList:cast(c)
-      self.ui.paneActions    = ItemTrig.UI.WScrollSelectList:cast(a)
+      local c = OpcodeListCls:install(GetControl(col, "Conditions"), "condition")
+      local a = OpcodeListCls:install(GetControl(col, "Actions"),    "action")
+      self.ui.paneConditions = c.pane
+      self.ui.paneActions    = a.pane
    end
-   do
-      local function setupOpcodeList(pane)
-         local function formatOpcodeArg(s)
-            return string.format("|c70B0FF%s|r", s)
+end
+
+function WinCls:onPaneSelection(pane)
+   if pane == self.ui.paneConditions then
+      self.ui.paneActions:deselectAll()
+   else
+      self.ui.paneConditions:deselectAll()
+   end
+end
+function WinCls:addOpcode(type, insertAfterIndex)
+   local created
+   if type == "condition" then
+      created = ItemTrig.Condition:new(1)
+   elseif type == "action" then
+      created = ItemTrig.Action:new(4)
+   end
+   local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, created, true)
+   deferred:done(
+      function(context, deferred, dirty) -- user clicked OK
+         local editor = WinCls:getInstance()
+         local pane
+         if created.type == "condition" then
+            editor.trigger.working:insertConditionAfter(created, insertAfterIndex)
+            pane = editor.ui.paneConditions
+         elseif created.type == "action" then
+            editor.trigger.working:insertActionAfter(created, insertAfterIndex)
+            pane = editor.ui.paneActions
          end
-         --
-         pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
-         pane.element.toConstruct =
-            function(control, data)
-               local height = 0
-               do
-                  local text = GetControl(control, "Text")
-                  local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-                  text:SetText(data:format(formatOpcodeArg))
-                  height = text:GetHeight() + paddingY * 2
-               end
-               control:SetHeight(height)
-            end
-         pane.element.onSelect =
-            function(index, control)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
-               text:SetColor(unpack(color))
-            end
-         pane.element.onDeselect =
-            function(index, control)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
-               text:SetColor(unpack(color))
-            end
-         pane.element.onDoubleClick =
-            --
-            -- TODO: make consistent with the trigger list
-            --
-            function(index, control, pane)
-               local opcode = pane.listItems[index]
-               if opcode then
-                  local editor = ItemTrig.windows.opcodeEdit
-                  local deferred = editor:requestEdit(WinCls:getInstance(), opcode)
-                  deferred:done(
-                     function(context, deferred, dirty) -- user clicked OK
-                        if dirty then
-                           WinCls:getInstance():refresh()
-                        end
-                     end
-                  ):fail(
-                     function(context, deferred) -- user clicked Cancel
-                     end
-                  )
-               end
-            end
-         --
-         local buttons = pane:asControl():GetParent():GetNamedChild("Buttons")
-         do -- opcode list buttons
-            local bNew    = buttons:GetNamedChild("New")
-            local bEdit   = buttons:GetNamedChild("Edit")
-            local bUp     = buttons:GetNamedChild("MoveUp")
-            local bDown   = buttons:GetNamedChild("MoveDown")
-            local bDelete = buttons:GetNamedChild("Delete")
-            --
-            -- TODO: other buttons
-            --
-            bEdit:SetHandler("OnMouseUp",
-               --
-               -- TODO: make consistent with the trigger list
-               --
-               function(control, button, upInside, ctrl, alt, shift, command)
-                  if not upInside then
-                     return
-                  end
-                  local editor = ItemTrig.windows.opcodeEdit
-                  local pane   = ItemTrig.UI.WScrollSelectList:cast(control:GetParent():GetParent():GetNamedChild("List"))
-                  local opcode = pane:at(pane:getFirstSelectedIndex())
-                  if not opcode then
-                     return
-                  end
-                  local deferred = editor:requestEdit(WinCls:getInstance(), opcode)
-                  deferred:done(
-                     function(context, deferred, dirty) -- user clicked OK
-                        if dirty then
-                           WinCls:getInstance():refresh()
-                        end
-                     end
-                  ):fail(
-                     function(context, deferred) -- user clicked Cancel
-                     end
-                  )
-               end
-            )
+         editor:refresh()
+         pane:select(created)
+      end
+   ):fail(
+      function(context, deferred) -- user clicked Cancel
+      end
+   )
+end
+function WinCls:editOpcode(opcode)
+   local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, opcode)
+   deferred:done(
+      function(context, deferred, dirty) -- user clicked OK
+         if dirty then
+            WinCls:getInstance():refresh()
          end
       end
-      setupOpcodeList(self.ui.paneConditions)
-      setupOpcodeList(self.ui.paneActions)
+   ):fail(
+      function(context, deferred) -- user clicked Cancel
+      end
+   )
+end
+function WinCls:moveOpcode(opcode, direction)
+   local list
+   local pane
+   if opcode.type == "condition" then
+      list = self.trigger.working.conditions
+      pane = self.ui.paneConditions
+   else
+      list = self.trigger.working.actions
+      pane = self.ui.paneActions
    end
+   local i = ItemTrig.indexOf(list, opcode)
+   if (not i) or direction == 0 then
+      return
+   end
+   if direction > 0 then
+      if not ItemTrig.swapForward(list, i) then
+         return -- opcode was already at the end of the list, and was not moved
+      end
+   elseif direction < 0 then
+      if not ItemTrig.swapBackward(list, i) then
+         return -- opcode was already at the start of the list, and was not moved
+      end
+   end
+   self:refresh()
+   pane:select(opcode)
+end
+function WinCls:deleteOpcode(opcode)
+   assert(opcode ~= nil, "Cannot delete a nil opcode.")
+   local deferred
+   if opcode:isEffortful() then
+      --
+      -- Only pop a confirmation prompt if it's an opcode whose arguments 
+      -- might take some effort to set up, e.g. strings that the user typed.
+      --
+      local s
+      if opcode.type == "condition" then
+         s = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_CONFIRM_DELETE_C)
+      else
+         s = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_CONFIRM_DELETE_A)
+      end
+      deferred = self:showModal(ItemTrig.windows.genericConfirm, {
+         text = s,
+         showCloseButton = false
+      })
+   else
+      deferred = ItemTrig.Deferred:resolve()
+   end
+   deferred:done(
+      function(w)
+         local pane
+         local list
+         if opcode.type == "condition" then
+            pane = w.ui.paneConditions
+            list = w.trigger.working.conditions
+         else
+            pane = w.ui.paneActions
+            list = w.trigger.working.actions
+         end
+         local index = pane:indexOfData(opcode)
+         table.remove(list, index)
+         pane:remove(index)
+      end,
+      self
+   )
 end
 
 function WinCls:abandon()

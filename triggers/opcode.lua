@@ -206,6 +206,39 @@ function ItemTrig.Opcode:copyAssign(other, deep)
       self.args = other.args
    end
 end
+function ItemTrig.Opcode:isArgumentEffortful(i, change)
+   --
+   -- If passed a parameter, (change), then it checks whether (change) 
+   -- represents an effortful change to the value of the argument (change 
+   -- would be the potential new value).
+   --
+   local b = self.base.args[i]
+   local a = self.args[i]
+   if b.type == "string" then
+      if change then
+         if a ~= change and change ~= "" then
+            return true
+         end
+      else
+         if a ~= "" then
+            return true
+         end
+      end
+   end
+   --
+   -- TODO: Once we figure something out for editing nested triggers, we'll 
+   -- want to revisit this.
+   --
+   return false
+end
+function ItemTrig.Opcode:isEffortful()
+   for i = 1, table.getn(self.base.args) do
+      if self:isArgumentEffortful(i) then
+         return true
+      end
+   end
+   return false
+end
 function ItemTrig.Opcode:resetArgs()
    if self.base == nil then
       self.args = {}

@@ -12,9 +12,46 @@ function ItemTrig.UI.WScrollSelectList:_construct(options)
       index = nil, -- number, or an array if multiselection is enabled
       multi = options.multiSelection or false,
    }
+   if self.selection.multi then
+      self.selection.index = {}
+   end
    self.element.onSelect      = options.element.onSelect      or nil -- callback
    self.element.onDeselect    = options.element.onDeselect    or nil -- callback
    self.element.onDoubleClick = options.element.onDoubleClick or nil
+end
+function ItemTrig.UI.WScrollList:_onRemoved(index, data)
+   if self.selection.multi then
+      ItemTrig.remove(self.selection.multi,
+         function(i, e)
+            return e == index
+         end
+      )
+   else
+      if self.selection.index == index then
+         self.selection.index = nil
+      end
+   end
+   if self.element.onDeselect then
+      local old = self:controlByIndex(index)
+      self.element.onDeselect(index, old, self)
+   end
+end
+function ItemTrig.UI.WScrollSelectList:deselectAll()
+   local s        = self.selection
+   local callback = self.element.onDeselect
+   if s.multi then
+      if callback then
+         for i = 1, table.getn(s.index) do
+            callback(s.index[i], self:controlByIndex(s.index[i]), self)
+         end
+      end
+      s.index = {}
+   elseif s.index then
+      if callback then
+         callback(s.index, self:controlByIndex(s.index), self)
+      end
+      s.index = nil
+   end
 end
 function ItemTrig.UI.WScrollSelectList:hasSelection()
    local i = self.selection.index
@@ -86,6 +123,18 @@ function ItemTrig.UI.WScrollSelectList:getSelectedItems()
    end
    return self:at(self.selection.index)
 end
+function ItemTrig.UI.WScrollSelectList:select(x)
+   if type(x) == "userdata" then
+      x = self:indexOf(x)
+   elseif type(x) ~= "number" then
+      x = self:indexOfData(x)
+   end
+   local c = self:controlByIndex(x)
+   if not c then
+      return
+   end
+   self:_onItemSelected(c)
+end
 function ItemTrig.UI.WScrollSelectList:_getExtraConstructorParams(index)
    return {
       selected = self:isIndexSelected(index)
@@ -115,8 +164,8 @@ function ItemTrig.UI.WScrollSelectList:_onItemSelected(control)
             local callback = self.element.onDeselect
             if callback then
                for i = 1, table.getn(s.index) do
-                  local old = self:controlByIndex(s.index)
-                  callback(s.index, old, self)
+                  local old = self:controlByIndex(s.index[i])
+                  callback(s.index[i], old, self)
                end
             end
             s.index = {}

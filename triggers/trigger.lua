@@ -162,6 +162,20 @@ function ItemTrig.Trigger:exec(context)
 --CHAT_SYSTEM:AddMessage("== All triggers executed.") -- debug
    return true
 end
+function ItemTrig.Trigger:insertActionAfter(opcode, index)
+   if index then
+      table.insert(self.actions, index + 1, opcode)
+   else
+      table.insert(self.actions, opcode)
+   end
+end
+function ItemTrig.Trigger:insertConditionAfter(opcode, index)
+   if index then
+      table.insert(self.conditions, index + 1, opcode)
+   else
+      table.insert(self.conditions, opcode)
+   end
+end
 function ItemTrig.Trigger:serialize()
    return ItemTrig.serializeTrigobject(self)
 end

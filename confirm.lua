@@ -13,7 +13,8 @@ function Cls:_construct()
 end
 function Cls:getDefaultOptions()
    return {
-      modalOnly = true,
+      centerIfModal = true,
+      modalOnly     = true,
    }
 end
 function Cls:handleModalDeferredOnHide(deferred)
