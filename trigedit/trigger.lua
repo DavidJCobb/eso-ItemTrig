@@ -162,18 +162,26 @@ function WinCls:commit()
    --
    self:hide()
 end
+function WinCls:cancel()
+   self:requestExit():done(self.abandon, self)
+end
+function WinCls:onCloseClicked()
+   self:cancel()
+end
 function WinCls:requestExit()
    if self.trigger.dirty then
-      --
-      -- TODO: prompt for confirmation; return true if the 
-      -- user confirms leaving, or false otherwise.
-      --
+      return self:showModal(ItemTrig.windows.genericConfirm, {
+         text = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_ABANDON_UNSAVED_CHANGES),
+         showCloseButton = false
+      })
    end
-   return true
+   local deferred = ItemTrig.Deferred:new()
+   deferred:resolve()
+   return deferred
 end
 function WinCls:requestEdit(opener, trigger, dirty)
    assert(opener  ~= nil, "The trigger editor must be aware of its opener.")
-   assert(trigger ~= nil, "No opcode.")
+   assert(trigger ~= nil, "No trigger.")
    assert(self:getModalOpener() == nil, "The trigger editor is already showing!")
    if not opener:showModal(self) then
       return

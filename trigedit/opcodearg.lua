@@ -32,9 +32,9 @@ do -- helper classes for views
          --
          local qualifier = self.qualifier
          qualifier:ClearItems()
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE", callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE", callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E",   callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end }, ZO_COMBOBOX_SUPRESS_UPDATE)
          qualifier:UpdateItems()
       end
       function ViewCls.Quantity:GetValue()
@@ -68,10 +68,10 @@ function WinCls:_construct()
    ItemTrig.assign(self, {
       ui = {
          views = {
-            checkbox  = nil,
+            checkbox  = nil, -- TODO
             enum      = nil,
             multiline = nil,
-            number    = nil,
+            number    = nil, -- TODO
             quantity  = nil,
             string    = nil,
          },
@@ -80,6 +80,7 @@ function WinCls:_construct()
       type     = nil, -- raw argument type, not ui type; i.e. boolean, number, string, quantity
       opcode   = nil, -- Opcode
       argIndex = nil, -- number
+      dirty    = false,
       pendingResults = {
          outcome = false, -- true to resolve; false to reject
          results = nil,   -- param to send back
@@ -98,7 +99,7 @@ function WinCls:_construct()
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
    end
 end
-function WinCls:_handleModalDeferredOnHide(deferred)
+function WinCls:handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
       deferred:resolve(self.pendingResults.results)
    else
@@ -141,13 +142,18 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          local combobox = self.view.value
          combobox:ClearItems()
          for i = 1, table.getn(arg.enum) do
-            combobox:AddItem({ name = arg.enum[i], index = i }, ZO_COMBOBOX_SUPRESS_UPDATE)
+            combobox:AddItem(
+               {
+                  name     = arg.enum[i],
+                  index    = i,
+                  callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end
+               },
+               ZO_COMBOBOX_SUPRESS_UPDATE
+            )
          end
          combobox:UpdateItems()
+         combobox:SelectItemByIndex(1, true) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
          combobox:SetSelectedItemByEval(function(item) return item.index == tonumber(val) end)
-         --
-         -- TODO: If no value is selected, select the first list item.
-         --
       elseif archetype == "multiline" then
          self.view = self.ui.views.multiline
          self.view:show()
@@ -160,10 +166,8 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       elseif archetype == "quantity" then
          self.view = self.ui.views.quantity
          self.view:show()
+         self.view.qualifier:SelectItemByIndex(1, true) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
          self.view.qualifier:SetSelectedItemByEval(function(item) return item.value == val.qualifier end)
-         --
-         -- TODO: If no qualifier is selected, select the first list item.
-         --
          self.view.number:SetText(val.number or "0")
       elseif archetype == "string" then
          self.view = self.ui.views.string
@@ -174,15 +178,54 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       -- TODO: compress window size
       --
    end
+   self.dirty = false -- writing to UI controls may trigger "change" handlers, so set this here
    return deferred
 end
+function WinCls:onArgumentEdited()
+   self.dirty = true
+end
+function WinCls:unsavedChangesMatter()
+   --
+   -- OpcodeArgEdit only warns if you're about to discard an unsaved change 
+   -- that's actually effortful. Flipping a boolean isn't effortful; chang-
+   -- ing text more often is.
+   --
+   if not self.dirty or not self.view then
+      return false
+   end
+   local b = self.opcode.base.args[self.argIndex]
+   local a = self.opcode.args[self.argIndex]
+   local v = self.view:GetValue()
+   if b.type == "string" then
+      if a ~= v and v ~= "" then
+         return true
+      end
+   end
+   --
+   -- TODO: Once we figure something out for editing nested triggers, we'll 
+   -- want to revisit this.
+   --
+   return false
+end
 function WinCls:cancel()
-   assert(self:getModalOpener() ~= nil, "Can't stop editing an argument if we aren't editing one yet.")
-   self.view     = nil
-   self.argIndex = nil
-   self.pendingResults.outcome = false
-   self.pendingResults.results = nil
-   self:hide()
+   assert(self.opcode ~= nil, "Can't stop editing an argument if we aren't editing one yet.")
+   local deferred
+   if self:unsavedChangesMatter() then
+      deferred = self:showModal(ItemTrig.windows.genericConfirm, {
+         text = GetString(ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES),
+         showCloseButton = false
+      })
+   else
+      deferred = ItemTrig.Deferred:resolve()
+   end
+   deferred:done(
+      function(w)
+         w.pendingResults.outcome = false
+         w.pendingResults.results = nil
+         w:hide() -- onHide does cleanup
+      end,
+      self
+   )
 end
 function WinCls:commit()
    assert(self.argIndex ~= nil, "Don't know what argument index to commit.")
@@ -192,7 +235,12 @@ function WinCls:commit()
       argIndex = self.argIndex,
       value    = self.view:GetValue()
    }
+   self:hide() -- onHide does cleanup
+end
+function WinCls:onHide()
    self.view     = nil
+   self.type     = nil
    self.argIndex = nil
-   self:hide()
+   self.opcode   = nil
+   self.dirty    = false
 end

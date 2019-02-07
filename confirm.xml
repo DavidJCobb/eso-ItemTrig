@@ -8,7 +8,7 @@
          inherits="ItemTrig_UITemplate_WWindow"
       >
          <Anchor point="CENTER" />
-         <Dimensions x="400" y="150" />
+         <Dimensions x="500" y="150" />
          <!--
             TODO: It's not even remotely clear how to make this window expand and contract 
             as necessary to hold longer pieces of text, given the mechanics of the anchor 

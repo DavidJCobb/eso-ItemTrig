@@ -16,14 +16,14 @@ function Cls:getDefaultOptions()
       modalOnly = true,
    }
 end
-function Cls:_handleModalDeferredOnHide(deferred)
+function Cls:handleModalDeferredOnHide(deferred)
    if self.result then
       deferred:resolve()
    else
       deferred:reject()
    end
 end
-function Cls:_onBeforeShow(options)
+function Cls:onBeforeShow(options)
    assert(options      ~= nil, "You must specify options for this modal in the form of a table, passed to showModal, containing at minimum a 'text' key.")
    assert(options.text ~= nil, "You must specify the text for this modal.")
    self:setTitle(options.title or GetString(ITEMTRIG_STRING_UI_GENERIC_CONFIRM_TITLE))

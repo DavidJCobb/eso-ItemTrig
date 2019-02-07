@@ -128,7 +128,7 @@ function ItemTrig.WClassTestConfirm:_construct()
    scene:AddFragment(fragment)
    SCENE_MANAGER:RegisterTopLevel(control, false)
 end
-function ItemTrig.WClassTestConfirm:_handleModalDeferredOnHide(deferred)
+function ItemTrig.WClassTestConfirm:handleModalDeferredOnHide(deferred)
    if self.result then
       deferred:resolve()
    else

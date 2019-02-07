@@ -43,6 +43,7 @@ function ItemTrig.UI.WWindow:_construct(options)
          local window = ItemTrig.UI.WWindow:cast(self)
          if window then
             window:_onHide()
+            window:onHide()
          end
       end
    )
@@ -64,7 +65,7 @@ function ItemTrig.UI.WWindow:onCloseClicked()
    --
    self:hide()
 end
-function ItemTrig.UI.WWindow:_onBeforeShow(...)
+function ItemTrig.UI.WWindow:onBeforeShow(...)
    --
    -- Subclasses can override this. Returning false or nil cancels the show 
    -- operation.
@@ -79,26 +80,34 @@ function ItemTrig.UI.WWindow:onShow()
    -- Subclasses can override this.
    --
 end
-function ItemTrig.UI.WWindow:_onBeforeOpenBy(opener)
+function ItemTrig.UI.WWindow:onBeforeOpenBy(opener)
    --
    -- Subclasses can override this. Returning false or nil cancels the open 
    -- operation. The argument is a WWindow instance.
    --
    return true
 end
-function ItemTrig.UI.WWindow:_onModalHidden()
+function ItemTrig.UI.WWindow:_onChildModalHidden()
+   --
+   -- This method handles cleanup after a window's child modal is closed. An 
+   -- alternate, non-underscore-prefixed, version is provided for you to over-
+   -- ride (two separate methods exist so you don't have to call super if you 
+   -- do override the non-prefixed one).
+   --
+   self.modalState.child = nil
+   self.controls.blocker:SetHidden(true)
+end
+function ItemTrig.UI.WWindow:onChildModalHidden()
    --
    -- This event fires on a window when a modal that it has opened is closed. 
    -- This should be used to perform cleanup in the opener; the default function 
    -- clears some modal state and hides a "blocker" element that prevents clicks 
    -- to the opener while the modal is open.
    --
-   -- Subclasses can override this, but should always call super.
+   -- Subclasses can override this.
    --
-   self.modalState.child = nil
-   self.controls.blocker:SetHidden(true)
 end
-function ItemTrig.UI.WWindow:_handleModalDeferredOnHide(deferred)
+function ItemTrig.UI.WWindow:handleModalDeferredOnHide(deferred)
    --
    -- If the window is opened as a modal, then it will have a Deferred that it can 
    -- use to:
@@ -115,14 +124,22 @@ function ItemTrig.UI.WWindow:_handleModalDeferredOnHide(deferred)
 end
 function ItemTrig.UI.WWindow:_onHide()
    --
-   -- Subclasses can override this, but should always call super.
+   -- This method handles cleanup after a window's child modal is closed. An 
+   -- alternate, non-underscore-prefixed, version is provided for you to over-
+   -- ride (two separate methods exist so you don't have to call super if you 
+   -- do override the non-prefixed one).
    --
    local deferred = self.modalState.deferred
    if deferred then
-      self:_handleModalDeferredOnHide(deferred)
+      self:handleModalDeferredOnHide(deferred)
       self.modalState.deferred = nil
    end
    self.modalState.opener = nil
+end
+function ItemTrig.UI.WWindow:onHide()
+   --
+   -- Subclasses can override this.
+   --
 end
 function ItemTrig.UI.WWindow:getModalOpener()
    return self.modalState.opener
@@ -138,7 +155,7 @@ function ItemTrig.UI.WWindow:show(...)
    if self.prefs.modalOnly then
       return
    end
-   if not self:_onBeforeShow(...) then
+   if not self:onBeforeShow(...) then
       return
    end
    SCENE_MANAGER:ShowTopLevel(c)
@@ -172,21 +189,22 @@ function ItemTrig.UI.WWindow:showModal(modal, ...)
          return nil
       end
    end
-   if not child:_onBeforeOpenBy(self) then
+   if not child:onBeforeOpenBy(self) then
       return nil
    end
-   if not child:_onBeforeShow(...) then
+   if not child:onBeforeShow(...) then
       return nil
    end
    self.controls.blocker:SetHidden(false)
    self.modalState.child = child
    local deferred = ItemTrig.Deferred:new()
-   deferred:always(self._onModalHidden, self)
+   deferred:always(self._onChildModalHidden, self) -- internal event for handling the modal blocker properly
+   deferred:always(self.onChildModalHidden, self)  -- event provided for subclasses to override
    child.modalState.opener   = self
    child.modalState.deferred = deferred
    SCENE_MANAGER:ShowTopLevel(child:asControl())
    child:asControl():BringWindowToTop()
-   return deferred
+   return deferred:promise()
 end
 function ItemTrig.UI.WWindow:getTitle()
    return self.controls.titleText:GetText()

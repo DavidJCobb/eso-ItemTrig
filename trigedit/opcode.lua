@@ -51,7 +51,7 @@ function WinCls:_construct()
    --
    self.ui.opcodeType:SetSortsItems(true)
 end
-function WinCls:_handleModalDeferredOnHide(deferred)
+function WinCls:handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
       deferred:resolve(self.pendingResults.results)
    else
@@ -93,9 +93,7 @@ function WinCls:requestExit()
          showCloseButton = false
       })
    end
-   local deferred = ItemTrig.Deferred:new()
-   deferred:resolve()
-   return deferred
+   return ItemTrig.Deferred:resolve()
 end
 function WinCls:requestEdit(opener, opcode, dirty)
    assert(opener        ~= nil, "The opcode editor must be aware of its opener.")
@@ -108,7 +106,6 @@ function WinCls:requestEdit(opener, opcode, dirty)
    end
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
-   self.opcode.dirty   = dirty or false
    do
       local function _onSelect(combobox, name, item, selectionChanged, oldItem)
          if selectionChanged then
@@ -139,6 +136,7 @@ function WinCls:requestEdit(opener, opcode, dirty)
       combobox:UpdateItems()
    end
    self:refresh()
+   self.opcode.dirty = dirty or false -- writing to UI controls during the refresh may trigger "change" handlers, so set this here
    --
    return deferred
 end
@@ -165,7 +163,7 @@ function WinCls:refresh() -- Render the opcode being edited.
    do -- opcode type
       local opcodeBase = self.opcode.working.base
       local combobox   = self.ui.opcodeType
-      combobox:SetSelectedItemByEval(function(item) return item.base == opcodeBase end)
+      combobox:SetSelectedItemByEval(function(item) return item.base == opcodeBase end, true)
    end
    do -- opcode body
       --
