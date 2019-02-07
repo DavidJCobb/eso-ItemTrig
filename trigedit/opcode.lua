@@ -59,12 +59,9 @@ function WinCls:_handleModalDeferredOnHide(deferred)
    end
 end
 function WinCls:onCloseClicked()
-   if self:requestExit() then
-      self:abandon()
-   end
+   self:cancel()
 end
 function WinCls:close()
-   assert(self.deferred == nil, "Can't close the OpcodeEdit window -- we still have to notify its opener!")
    self.opcode.target  = nil
    self.opcode.working = nil
    self.opcode.dirty   = nil
@@ -78,6 +75,9 @@ function WinCls:abandon()
    self.pendingResults.results = nil
    self:close()
 end
+function WinCls:cancel()
+   self:requestExit():done(self.abandon, self)
+end
 function WinCls:commit()
    if self.opcode.dirty then
       self.opcode.target:copyAssign(self.opcode.working)
@@ -88,12 +88,14 @@ function WinCls:commit()
 end
 function WinCls:requestExit()
    if self.opcode.dirty then
-      --
-      -- TODO: prompt for confirmation; same as above
-      --
-      return false
+      return self:showModal(ItemTrig.windows.genericConfirm, {
+         text = GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_ABANDON_UNSAVED_CHANGES),
+         showCloseButton = false
+      })
    end
-   return true
+   local deferred = ItemTrig.Deferred:new()
+   deferred:resolve()
+   return deferred
 end
 function WinCls:requestEdit(opener, opcode, dirty)
    assert(opener        ~= nil, "The opcode editor must be aware of its opener.")
@@ -154,6 +156,7 @@ function WinCls:_onTypeChanged(opcodeBase)
    -- similar to our existing modals, and then setting the following 
    -- lines up to run when that Deferred is resolved.)
    --
+   self.opcode.dirty = true
    self.opcode.working.base = opcodeBase
    self.opcode.working:resetArgs()
    self:refresh()

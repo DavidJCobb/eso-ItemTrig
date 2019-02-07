@@ -7,34 +7,6 @@
             </Label>
          </Controls>
       </Control>
-      <TopLevelControl name="ItemTrig_TestMenu"
-         mouseEnabled="true"
-         movable="true"
-         clampedToScreen="true"
-         hidden="true"
-      >
-         <Dimensions x="600" y="300" />
-         <DimensionConstraints minX="600" minY="100" />
-         <Anchor point="CENTER" />
-         <OnInitialized> ItemTrig.TestMenu.OnInitialized(self) </OnInitialized>
-         <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
-            <Control name="$(parent)Topbar">
-               <Anchor point="TOPLEFT" />
-               <Anchor point="TOPRIGHT" />
-               <Dimensions y="50" />
-               <Controls>
-                  <Label name="$(parent)Name" font="ZoFontWinT2" text="Topbar">
-                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                  </Label>
-               </Controls>
-            </Control>
-            <Control name="$(parent)vScrollListTest" inherits="ItemTrig_UITemplate_WScrollList">
-               <Anchor point="TOPLEFT"     relativeTo="$(parent)Topbar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" />
-            </Control>
-         </Controls>
-      </TopLevelControl>
       <TopLevelControl name="ItemTrig_WClassTestMenu"
          mouseEnabled="true"
          movable="true"
@@ -114,35 +86,23 @@
                [8] = { name = "TOPRIGHT",    value = 9 },
                [9] = { name = "CENTER",      value = 128 },
             }
-            local pointSelf = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("PointSelf"))
-            local pointRel  = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("PointRel"))
+            local pointSelf = ZO_ComboBox_ObjectFromContainer(GetControl(self, "PointSelf"))
+            local pointRel  = ZO_ComboBox_ObjectFromContainer(GetControl(self, "PointRel"))
             for i = 1, table.getn(anchorValues) do
                anchorValues[i].callback =
                   function()
-                     ItemTrig.AnchorTestMenu:refresh()
+                     if ItemTrig.windows.testMenuAnchors then
+                        ItemTrig.windows.testMenuAnchors:refresh()
+                     end
                   end
                pointSelf:AddItem(anchorValues[i], ZO_COMBOBOX_SUPRESS_UPDATE)
                pointRel:AddItem(anchorValues[i], ZO_COMBOBOX_SUPRESS_UPDATE)
             end
             pointSelf:UpdateItems()
             pointRel:UpdateItems()
-            pointSelf:SetSelectedItemByEval(
-               function(item)
-                  if item.value == 128 then
-                     return true
-                  end
-                  return false
-               end
-            )
-            pointRel:SetSelectedItemByEval(
-               function(item)
-                  if item.value == 128 then
-                     return true
-                  end
-                  return false
-               end
-            )
-            self:SetHeight(self:GetNamedChild("PointSelf"):GetHeight())
+            pointSelf:SetSelectedItemByEval(function(item) return item.value == 128 end)
+            pointRel:SetSelectedItemByEval(function(item) return item.value == 128 end)
+            self:SetHeight(GetControl(self, "PointSelf"):GetHeight())
          </OnInitialized>
          <Controls>
             <Label name="$(parent)Label" text="Control 1:" font="ZoFontWinT1">
@@ -169,12 +129,12 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
+         inherits="ItemTrig_UITemplate_WWindow"
       >
          <Dimensions x="600" y="600" />
          <Anchor point="CENTER" />
-         <OnInitialized> ItemTrig.AnchorTestMenu:OnInitialized(self) </OnInitialized>
+         <OnInitialized> ItemTrig:setupWindow("testMenuAnchors", self) </OnInitialized>
          <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
             <Control name="$(parent)Topbar">
                <Anchor point="TOPLEFT" />
                <Anchor point="TOPRIGHT" />

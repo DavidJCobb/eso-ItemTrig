@@ -28,8 +28,6 @@ ui/wscrollselectlist.xml
 ui/wscrollselectlistitem.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
-ui/modals.lua
-ui/modals.xml
 ui/testmenu.lua
 ui/testmenu.xml
 trigedit/main.lua
@@ -40,6 +38,8 @@ trigedit/main.xml
 trigedit/trigger.xml
 trigedit/opcode.xml
 trigedit/opcodearg.xml
+confirm.lua
+confirm.xml
 savedata.lua
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates.

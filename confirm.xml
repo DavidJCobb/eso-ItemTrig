@@ -1,0 +1,49 @@
+<GuiXml>
+   <Controls>
+      <TopLevelControl name="ItemTrig_GenericConfirm"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+         inherits="ItemTrig_UITemplate_WWindow"
+      >
+         <Anchor point="CENTER" />
+         <Dimensions x="400" y="150" />
+         <!--
+            TODO: It's not even remotely clear how to make this window expand and contract 
+            as necessary to hold longer pieces of text, given the mechanics of the anchor 
+            system and the fact that resizeToFitDescendents is, under the hood, just hard-
+            coded anchors.
+         -->
+         <OnInitialized> ItemTrig:setupWindow("genericConfirm", self) </OnInitialized>
+         <Controls>
+            <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+               <Anchor point="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" />
+               <Controls>
+                  <Button inherits="ZO_DefaultButton" name="$(parent)Y" text="Yes">
+                     <Anchor point="BOTTOMRIGHT" />
+                     <OnClicked> ItemTrig.windows.genericConfirm:yes() </OnClicked>
+                  </Button>
+                  <Button inherits="ZO_DefaultButton" name="$(parent)N" text="No">
+                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Y" relativePoint="BOTTOMLEFT" offsetX="-8" />
+                     <OnClicked> ItemTrig.windows.genericConfirm:no() </OnClicked>
+                  </Button>
+               </Controls>
+            </Control>
+            <Control name="$(parent)Body" resizeToFitDescendents="true">
+               <Anchor point="TOPLEFT"     relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons"  relativePoint="TOPRIGHT" />
+               <Controls>
+                  <Label name="$(parent)NamelessControlsDontLoadProperlyAndThatUpsetsMe" 
+                     font="ZoFontGameMedium"
+                     maxLineCount="10"
+                  >
+                     <Anchor point="CENTER" />
+                  </Label>
+               </Controls>
+            </Control>
+         </Controls>
+      </TopLevelControl>
+   </Controls>
+</GuiXml>

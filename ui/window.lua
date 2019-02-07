@@ -9,9 +9,11 @@ if not (ItemTrig and ItemTrig.UI) then return end
 --]]--
 
 ItemTrig.UI.WWindow = ItemTrig.UI.WidgetClass:makeSubclass("WWindow", "window")
+function ItemTrig.UI.WWindow:getDefaultOptions() -- override me, if you want
+end
 function ItemTrig.UI.WWindow:_construct(options)
    if not options then
-      options = {}
+      options = self:getDefaultOptions() or {}
    end
    local control = self:asControl()
    self.controls = {
@@ -62,9 +64,13 @@ function ItemTrig.UI.WWindow:onCloseClicked()
    --
    self:hide()
 end
-function ItemTrig.UI.WWindow:_onBeforeShow()
+function ItemTrig.UI.WWindow:_onBeforeShow(...)
    --
-   -- Subclasses can override this. Returning false cancels the show operation.
+   -- Subclasses can override this. Returning false or nil cancels the show 
+   -- operation.
+   --
+   -- The function is passed any extra args that were provided to show() or to 
+   -- showModal().
    --
    return true
 end
@@ -75,8 +81,8 @@ function ItemTrig.UI.WWindow:onShow()
 end
 function ItemTrig.UI.WWindow:_onBeforeOpenBy(opener)
    --
-   -- Subclasses can override this. Returning false cancels the open operation. 
-   -- The argument is a WWindow instance.
+   -- Subclasses can override this. Returning false or nil cancels the open 
+   -- operation. The argument is a WWindow instance.
    --
    return true
 end
@@ -121,7 +127,10 @@ end
 function ItemTrig.UI.WWindow:getModalOpener()
    return self.modalState.opener
 end
-function ItemTrig.UI.WWindow:show()
+function ItemTrig.UI.WWindow:show(...)
+   --
+   -- The arguments are passed to the before-show handler.
+   --
    local c = self:asControl()
    if not c:IsHidden() then
       return
@@ -129,7 +138,7 @@ function ItemTrig.UI.WWindow:show()
    if self.prefs.modalOnly then
       return
    end
-   if not self:_onBeforeShow() then
+   if not self:_onBeforeShow(...) then
       return
    end
    SCENE_MANAGER:ShowTopLevel(c)
@@ -139,11 +148,13 @@ end
 function ItemTrig.UI.WWindow:hide()
    SCENE_MANAGER:HideTopLevel(self:asControl())
 end
-function ItemTrig.UI.WWindow:showModal(modal)
+function ItemTrig.UI.WWindow:showModal(modal, ...)
    --
    -- Makes this window show a child modal. If the modal is successfully opened, 
    -- this function returns a Deferred; if the modal fails to open, this function 
    -- returns nil.
+   --
+   -- Extra arguments are passed to the before-show handler.
    --
    assert(modal ~= nil, "Cannot show a nil modal.")
    local child = ItemTrig.UI.WWindow:cast(modal)
@@ -156,7 +167,7 @@ function ItemTrig.UI.WWindow:showModal(modal)
    end
    assert(self.modalState.child == nil, "This window is already showing a modal.")
    if type(self.prefs.modalOnly) == "string" then
-      local name = child.controls.window:GetName()
+      local name = child:asControl():GetName()
       if name ~= self.prefs.modalOnly then
          return nil
       end
@@ -164,7 +175,7 @@ function ItemTrig.UI.WWindow:showModal(modal)
    if not child:_onBeforeOpenBy(self) then
       return nil
    end
-   if not child:_onBeforeShow() then
+   if not child:_onBeforeShow(...) then
       return nil
    end
    self.controls.blocker:SetHidden(false)

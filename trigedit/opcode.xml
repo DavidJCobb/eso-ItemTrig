@@ -49,10 +49,7 @@
                   <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked>
-                        local editor = ItemTrig.windows.opcodeEdit
-                        if editor:requestExit() then
-                           editor:abandon()
-                        end
+                        ItemTrig.windows.opcodeEdit:cancel()
                      </OnClicked>
                   </Button>
                </Controls>

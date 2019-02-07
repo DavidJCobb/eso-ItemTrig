@@ -74,20 +74,11 @@ end
 local function ShowWin()
    ItemTrig.windows.triggerList:show()
 end
-local function ShowTestMenu()
-   SCENE_MANAGER:ToggleTopLevel(ItemTrig_TestMenu)
-   ItemTrig.WClassTestMenu:cast(ItemTrig_WClassTestMenu):show()
-end
-local function ShowAnchorTestMenu()
-   SCENE_MANAGER:ToggleTopLevel(ItemTrig_AnchorTestMenu)
-end
 
 local function Initialize()
    ItemTrig.Savedata:load()
-   SLASH_COMMANDS["/cobbperftest"]  = PerfTest
-   SLASH_COMMANDS["/cobbshowwin"]   = ShowWin
-   SLASH_COMMANDS["/cobbshowtestmenu"]  = ShowTestMenu
-   SLASH_COMMANDS["/cobbshowanchortestmenu"]  = ShowAnchorTestMenu
+   SLASH_COMMANDS["/cobbperftest"] = PerfTest
+   SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
 end
 local function OnAddonLoaded(eventCode, addonName)
    if addonName == ItemTrig.name then

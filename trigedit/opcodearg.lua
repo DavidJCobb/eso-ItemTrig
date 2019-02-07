@@ -24,7 +24,7 @@ do -- helper classes for views
          end
       end
    end
-   do  -- quantity
+   do -- quantity
       ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
       function ViewCls.Quantity:_construct()
          self.number    = self:GetNamedChild("Number")
@@ -50,7 +50,7 @@ do -- helper classes for views
          return q
       end
    end
-   do  -- string
+   do -- string
       ViewCls.String = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgStringView")
       function ViewCls.String:_construct()
          self.value = self:GetNamedChild("Value")
@@ -177,7 +177,7 @@ function WinCls:requestEdit(opener, opcode, argIndex)
    return deferred
 end
 function WinCls:cancel()
-   assert(self.deferred ~= nil, "Can't stop editing an argument if we aren't editing one yet.")
+   assert(self:getModalOpener() ~= nil, "Can't stop editing an argument if we aren't editing one yet.")
    self.view     = nil
    self.argIndex = nil
    self.pendingResults.outcome = false
