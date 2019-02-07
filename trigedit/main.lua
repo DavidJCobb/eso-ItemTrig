@@ -75,6 +75,7 @@ function WinCls:_construct()
          fragment = nil,
          pane     = nil,
       },
+      lastTriggerList = nil,
       keybinds = {
          alignment = KEYBIND_STRIP_ALIGN_CENTER,
          {
@@ -149,12 +150,14 @@ function WinCls:editTrigger(trigger)
          return
       end
    end
-   editor:requestEdit(self, trigger)
+   editor:requestEdit(self, trigger):done(self.refresh, self)
 end
 function WinCls:renderTriggers(tList)
-   if not tList then
-      tList = {}
-   end
+   self.lastTriggerList = tList
+   self:refresh()
+end
+function WinCls:refresh()
+   local tList = self.lastTriggerList or {}
    local scrollPane = self.ui.pane
    scrollPane:clear(false)
    for i = 1, table.getn(tList) do

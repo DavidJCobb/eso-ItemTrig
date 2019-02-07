@@ -137,6 +137,10 @@ function WinCls:_construct()
       working = nil, -- a copy of that trigger, which we edit
       dirty   = false,
    }
+   self.pendingResults = {
+      outcome = false,
+      results = nil,
+   }
    do
       local col = self:GetNamedChild("Col1")
       local c = OpcodeListCls:install(GetControl(col, "Conditions"), "condition")
@@ -172,8 +176,10 @@ function WinCls:addOpcode(type, insertAfterIndex)
             editor.trigger.working:insertActionAfter(created, insertAfterIndex)
             pane = editor.ui.paneActions
          end
+         editor.trigger.dirty = true
          editor:refresh()
          pane:select(created)
+         pane:scrollToItem(pane:indexOfData(created), true, true)
       end
    ):fail(
       function(context, deferred) -- user clicked Cancel
@@ -185,7 +191,9 @@ function WinCls:editOpcode(opcode)
    deferred:done(
       function(context, deferred, dirty) -- user clicked OK
          if dirty then
-            WinCls:getInstance():refresh()
+            local editor = WinCls:getInstance()
+            editor.trigger.dirty = true
+            editor:refresh()
          end
       end
    ):fail(
@@ -216,6 +224,7 @@ function WinCls:moveOpcode(opcode, direction)
          return -- opcode was already at the start of the list, and was not moved
       end
    end
+   self.trigger.dirty = true
    self:refresh()
    pane:select(opcode)
 end
@@ -251,32 +260,44 @@ function WinCls:deleteOpcode(opcode)
             pane = w.ui.paneActions
             list = w.trigger.working.actions
          end
-         local index = pane:indexOfData(opcode)
+         w.trigger.dirty = true
          table.remove(list, index)
-         pane:remove(index)
+         pane:remove(pane:indexOfData(opcode))
       end,
       self
    )
 end
 
+function WinCls:handleModalDeferredOnHide(deferred)
+   if self.pendingResults.outcome then
+      deferred:resolve(self.pendingResults.results)
+   else
+      deferred:reject(self.pendingResults.results)
+   end
+   self.pendingResults.outcome = false
+   self.pendingResults.results = nil
+end
 function WinCls:abandon()
-   self.trigger.target  = nil
-   self.trigger.working = nil
-   self.trigger.dirty   = false
-   self.ui.paneConditions:clear()
-   self.ui.paneActions:clear()
+   self.pendingResults.outcome = false
+   self.pendingResults.results = nil
    self:hide()
 end
 function WinCls:commit()
-   if not self.trigger.dirty then
-      return
-   end
    self.trigger.target:copyAssign(self.trigger.working)
    --
    -- TODO: In order to account for nested triggers, when we stop 
    -- commit a nested trigger, we need to flag its parent as dirty.
    --
+   self.pendingResults.outcome = true
+   self.pendingResults.results = nil
    self:hide()
+end
+function WinCls:onHide()
+   self.trigger.target  = nil
+   self.trigger.working = nil
+   self.trigger.dirty   = false
+   self.ui.paneConditions:clear()
+   self.ui.paneActions:clear()
 end
 function WinCls:cancel()
    self:requestExit():done(self.abandon, self)
@@ -299,7 +320,8 @@ function WinCls:requestEdit(opener, trigger, dirty)
    assert(opener  ~= nil, "The trigger editor must be aware of its opener.")
    assert(trigger ~= nil, "No trigger.")
    assert(self:getModalOpener() == nil, "The trigger editor is already showing!")
-   if not opener:showModal(self) then
+   local deferred = opener:showModal(self)
+   if not deferred then
       return
    end
    self.trigger.target  = trigger
@@ -311,6 +333,7 @@ function WinCls:requestEdit(opener, trigger, dirty)
       self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    end
    self:refresh()
+   return deferred
 end
 function WinCls:refresh()
    local trigger = self.trigger.working

@@ -75,17 +75,11 @@
                <Controls>
                   <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
-                     <OnClicked>
-                     </OnClicked>
+                     <OnClicked> ItemTrig.windows.triggerEdit:commit() </OnClicked>
                   </Button>
                   <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
-                     <OnClicked>
-                        local editor = ItemTrig.windows.triggerEdit
-                        if editor:requestExit() then
-                           editor:abandon()
-                        end
-                     </OnClicked>
+                     <OnClicked> ItemTrig.windows.triggerEdit:cancel() </OnClicked>
                   </Button>
                </Controls>
             </Control>
