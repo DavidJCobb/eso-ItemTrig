@@ -159,34 +159,46 @@ function WinCls:_onTypeChanged(opcodeBase)
    self.opcode.working:resetArgs()
    self:refresh()
 end
-function WinCls:refresh() -- Render the opcode being edited.
+function WinCls:redrawDescription(options)
+   if not options then
+      options = {}
+   end
+   --
+   -- It's impossible to combine formatting codes (i.e. color, underline) with 
+   -- links, and custom links cannot have color. We "solve" this by using two 
+   -- separate text elements: an invisible (zero-alpha) one on top, with click-
+   -- able links; and a visible one beneath it, with the exact same text, but 
+   -- colored and underlined as appropriate.
+   --
+   local rendered = self.opcode.working:format(
+      function(s, i)
+         return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i)
+      end
+   )
+   self.ui.opcodeBody:SetText(rendered)
+   --
+   rendered = self.opcode.working:format(
+      function(s, i)
+         local color = "70B0FF"
+         if i == options.highlightIndex then
+            color = "EE3333"
+         end
+         local fmt = string.format("|c%s|l0:1:1:3:1:%s|l", color, color)
+         return string.format(fmt .. "%s|l|r", s)
+      end
+   )
+   ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
+end
+function WinCls:refresh(options) -- Render the opcode being edited.
+   if not options then
+      options = {}
+   end
    do -- opcode type
       local opcodeBase = self.opcode.working.base
       local combobox   = self.ui.opcodeType
       combobox:SetSelectedItemByEval(function(item) return item.base == opcodeBase end, true)
    end
-   do -- opcode body
-      --
-      -- It's impossible to combine formatting codes (i.e. color, underline) with 
-      -- links, and custom links cannot have color. We "solve" this by using two 
-      -- separate text elements: an invisible (zero-alpha) one on top, with click-
-      -- able links; and a visible one beneath it, with the exact same text, but 
-      -- colored and underlined as appropriate.
-      --
-      local rendered = self.opcode.working:format(
-         function(s, i)
-            return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i)
-         end
-      )
-      self.ui.opcodeBody:SetText(rendered)
-      --
-      rendered = self.opcode.working:format(
-         function(s, i)
-            return string.format("|c70B0FF|l0:1:1:3:1:70B0FF|l%s|l|r", s)
-         end
-      )
-      ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
-   end
+   self:redrawDescription(options)
 end
 
 function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
@@ -194,6 +206,7 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
    local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(editor, editor.opcode.working, argIndex)
+   self:redrawDescription({ highlightIndex = argIndex })
    deferred:done(
       function(context, deferred, result) -- user clicked OK
          local editor  = WinCls:getInstance()
@@ -207,6 +220,7 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
       end
    ):fail(
       function(context, deferred) -- user clicked Cancel
+         WinCls:getInstance():redrawDescription()
       end
    )
 end

@@ -53,7 +53,9 @@
                            <Anchor point="BOTTOMRIGHT" />
                            <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
                            <Controls>
-                              <Backdrop name="$(parent)Bg" inherits="ZO_MultiLineEditBackdrop_Keyboard" />
+                              <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
+                                 <AnchorFill/>
+                              </Backdrop>
                            </Controls>
                         </EditBox>
                      </Controls>
@@ -69,6 +71,11 @@
                            <Anchor point="TOPRIGHT" />
                            <Dimensions x="100" />
                            <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
+                           <Controls>
+                              <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
+                                 <AnchorFill/>
+                              </Backdrop>
+                           </Controls>
                         </EditBox>
                         <Control name="$(parent)Qualifier" inherits="ZO_ScrollableComboBox">
                            <Anchor point="TOPLEFT" />
@@ -88,7 +95,9 @@
                            <Anchor point="TOPRIGHT" />
                            <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
                            <Controls>
-                              <Backdrop name="$(parent)Bg" inherits="ZO_SingleLineEditBackdrop_Keyboard" />
+                              <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
+                                 <AnchorFill/>
+                              </Backdrop>
                            </Controls>
                         </EditBox>
                      </Controls>

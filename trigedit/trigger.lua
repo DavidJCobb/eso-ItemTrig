@@ -147,6 +147,8 @@ function WinCls:_construct()
       local a = OpcodeListCls:install(GetControl(col, "Actions"),    "action")
       self.ui.paneConditions = c.pane
       self.ui.paneActions    = a.pane
+      local namebar = self:GetNamedChild("NameBar")
+      self.ui.triggerNameField = GetControl(namebar, "Value")
    end
 end
 
@@ -268,6 +270,12 @@ function WinCls:deleteOpcode(opcode)
    )
 end
 
+function WinCls:onNameChanged()
+   local edit = self.ui.triggerNameField
+   self.trigger.working.name = edit:GetText()
+   self.trigger.dirty = true
+end
+
 function WinCls:handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
       deferred:resolve(self.pendingResults.results)
@@ -326,12 +334,13 @@ function WinCls:requestEdit(opener, trigger, dirty)
    end
    self.trigger.target  = trigger
    self.trigger.working = trigger:clone(false) -- see documentation for this function
-   self.trigger.dirty   = dirty or false
    if dirty then
       self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW))
    else
       self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    end
+   self.ui.triggerNameField:SetText(self.trigger.working.name)
+   self.trigger.dirty = dirty or false -- needed here since SetText fires a change handler
    self:refresh()
    return deferred
 end

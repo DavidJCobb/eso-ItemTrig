@@ -67,18 +67,21 @@
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EditTrigger" />
                            <OnClicked>
+                              ItemTrig.windows.triggerList:moveSelectedTrigger(-1)
                            </OnClicked>
                         </Button>
                         <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEDOWN">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
                            <OnClicked>
+                              ItemTrig.windows.triggerList:moveSelectedTrigger(1)
                            </OnClicked>
                         </Button>
                         <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_DELETE">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
                            <OnClicked>
+                              ItemTrig.windows.triggerList:deleteSelectedTrigger()
                            </OnClicked>
                         </Button>
                      </Controls>

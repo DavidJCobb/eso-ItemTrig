@@ -139,7 +139,21 @@ function WinCls:newTrigger()
    local editor  = ItemTrig.windows.triggerEdit
    local trigger = ItemTrig.Trigger:new()
    trigger.name = "Unnamed trigger"
-   editor:requestEdit(self, trigger, true)
+   editor:requestEdit(self, trigger, true):done(
+      function()
+         local win  = WinCls:getInstance()
+         local pane = win.ui.pane
+         local i    = pane:getFirstSelectedIndex()
+         if i == nil then
+            table.insert(self.lastTriggerList, trigger)
+         else
+            table.insert(self.lastTriggerList, i + 1, trigger)
+         end
+         self:refresh()
+         pane:select(trigger)
+         pane:scrollToItem(pane:indexOfData(trigger), true, true)
+      end
+   )
 end
 function WinCls:editTrigger(trigger)
    local editor = ItemTrig.windows.triggerEdit
@@ -152,6 +166,38 @@ function WinCls:editTrigger(trigger)
    end
    editor:requestEdit(self, trigger):done(self.refresh, self)
 end
+function WinCls:moveSelectedTrigger(direction)
+   local list = self.lastTriggerList
+   local i    = self.ui.pane:getFirstSelectedIndex()
+   if (not i) or direction == 0 then
+      return
+   end
+   if direction > 0 then
+      if not ItemTrig.swapForward(list, i) then
+         return -- trigger was already at the end of the list, and was not moved
+      end
+   elseif direction < 0 then
+      if not ItemTrig.swapBackward(list, i) then
+         return -- trigger was already at the start of the list, and was not moved
+      end
+   end
+   self:refresh()
+   self.ui.pane:select(i + direction)
+end
+function WinCls:deleteSelectedTrigger()
+   local index = self.ui.pane:getFirstSelectedIndex()
+   deferred = self:showModal(ItemTrig.windows.genericConfirm, {
+      text = GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_CONFIRM_DELETE),
+      showCloseButton = false
+   }):done(
+      function(w)
+         table.remove(w.lastTriggerList, index)
+         w.ui.pane:remove(index)
+      end,
+      self
+   )
+end
+
 function WinCls:renderTriggers(tList)
    self.lastTriggerList = tList
    self:refresh()
