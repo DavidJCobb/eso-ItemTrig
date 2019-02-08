@@ -162,9 +162,9 @@ end
 function WinCls:addOpcode(type, insertAfterIndex)
    local created
    if type == "condition" then
-      created = ItemTrig.Condition:new(1)
+      created = ItemTrig.Condition:new(ItemTrig.TRIGGER_CONDITION_COMMENT)
    elseif type == "action" then
-      created = ItemTrig.Action:new(4)
+      created = ItemTrig.Action:new(ItemTrig.TRIGGER_ACTION_COMMENT)
    end
    local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, created, true)
    deferred:done(
