@@ -3,8 +3,9 @@
    <Font name="ITEMTRIG_FONT_BUTTON"    font="$(BOLD_FONT)|$(KB_18)" />
    <Font name="ITEMTRIG_FONT_LIST_ITEM" font="$(MEDIUM_FONT)|$(KB_16)" /> -->
    <Font name="ITEMTRIG_FONT_TITLE_BAR" font="$(GAMEPAD_BOLD_FONT)|$(GP_34)" />
-   <Font name="ITEMTRIG_FONT_BUTTON"    font="$(GAMEPAD_MEDIUM_FONT)|$(GP_27)|soft-shadow-thin" />
-   <Font name="ITEMTRIG_FONT_LIST_ITEM" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_27)|soft-shadow-thin" />
+   <Font name="ITEMTRIG_FONT_BUTTON"    font="$(GAMEPAD_MEDIUM_FONT)|$(GP_34)|soft-shadow-thin" />
+   <Font name="ITEMTRIG_FONT_LIST_ITEM" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_34)" />
+   <Font name="ITEMTRIG_FONT_BASIC"     font="$(GAMEPAD_MEDIUM_FONT)|$(GP_34)" />
    <Controls>
       <Button name="ItemTrig_UITemplate_ThemedButton" virtual="true"
           font="ITEMTRIG_FONT_BUTTON"
@@ -39,38 +40,32 @@
             </Texture>
          </Controls>
       </Button>
+      <EditBox name="ItemTrig_UITemplate_ThemedEditbox" virtual="true"
+         font="ITEMTRIG_FONT_BASIC"
+         multiLine="false"
+         newLineEnabled="false"
+         inherits="ZO_DefaultEdit"
+      >
+         <Dimensions y="42" />
+         <OnInitialized>
+            self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT))
+            self:SetSelectionColor(unpack(ItemTrig.theme.TEXTEDIT_SELECTION))
+         </OnInitialized>
+         <Controls>
+            <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
+               <AnchorFill />
+               <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_BACKGROUND)) </OnInitialized>
+            </Texture>
+         </Controls>
+      </EditBox>
       <Control name="ItemTrig_UITemplate_ThemedScrollSelectList" virtual="true" inherits="ItemTrig_UITemplate_WScrollSelectList">
          <OnInitialized>
             local widget = ItemTrig.UI.WScrollSelectList:install(self, {
-               paddingSides = 2,
-               paddingStart = 2,
-               paddingEnd   = 2,
+               paddingSides = 9, -- desired padding == 7; border width == 2
+               paddingStart = 9,
+               paddingEnd   = 9,
+               paddingBetween = 7,
             })
-            widget.onRedrawOrReposition =
-               function(self)
-                  local fade     = self:GetNamedChild("Shadow")
-                  local count    = table.getn(self.listItems)
-                  local contents = self.contents
-                  local kids     = contents:GetNumChildren()
-                  if count &lt; kids then
-                     count = kids
-                  end
-                  local last = contents:GetChild(count)
-                  if not last then
-                     fade:SetHidden(true)
-                     return
-                  end
-                  --local y1 = ItemTrig.offsetTop(last)
-                  local y2 = ItemTrig.offsetBottom(last)
-                  if y2 &gt; 0 and y2 &lt; contents:GetHeight() then
-                     fade:ClearAnchors()
-                     fade:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, y2)
-                     fade:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, y2)
-                     fade:SetHidden(false)
-                  else
-                     fade:SetHidden(true)
-                  end
-               end
          </OnInitialized>
          <Controls>
             <Texture name="$(parent)Edge" excludeFromResizeToFitExtents="true">
@@ -83,10 +78,6 @@
                      <OnInitialized> ItemTrig.theming.listBackground(self) </OnInitialized>
                   </Texture>
                </Controls>
-            </Texture>
-            <Texture name="$(parent)Shadow" excludeFromResizeToFitExtents="true">
-               <OnInitialized> ItemTrig.theming.listEnd(self) </OnInitialized>
-               <Dimensions y="4" />
             </Texture>
          </Controls>
       </Control>

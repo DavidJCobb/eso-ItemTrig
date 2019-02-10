@@ -13,8 +13,8 @@
          <OnInitialized> ItemTrig:setupWindow("opcodeEdit", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Row1" level="2"> <!-- need to raise the level so that controls in Body don't block clicks to the combobox when it's opened -->
-               <Anchor point="TOPLEFT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+               <Anchor point="TOPLEFT"  offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPRIGHT" offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
                <OnInitialized>
                   --
                   -- We can't use resizeToFitDescendants, because that's a constant 
@@ -24,12 +24,15 @@
                   ItemTrig.fitHeightToChildren(self)
                </OnInitialized>
                <Controls>
-                  <Label text="ITEMTRIG_STRING_UI_OPCODEEDIT_LABEL_TYPE" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT"  offsetX="5" offsetY="5" />
+                  <Label text="ITEMTRIG_STRING_UI_OPCODEEDIT_LABEL_TYPE" font="ITEMTRIG_FONT_BASIC">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="BOTTOMLEFT" />
+                     <Dimensions x="113" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="ItemTrig_OpcodeEdit_Opcode" inherits="ZO_ScrollableComboBox">
-                     <Anchor point="TOPLEFT"  offsetX="120" offsetY="5" />
-                     <Anchor point="TOPRIGHT" offsetX="-5" offsetY="5" />
+                     <Anchor point="TOPLEFT"  offsetX="120" />
+                     <Anchor point="TOPRIGHT" />
                   </Control>
                </Controls>
             </Control>
@@ -55,21 +58,25 @@
                </Controls>
             </Control>
             <Control> <!-- body -->
-               <Anchor point="TOPLEFT"     offsetY="5"  relativeTo="$(parent)Row1"   relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+               <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)Row1"   relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
                <Controls>
-                  <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
-                  <Label name="ItemTrig_OpcodeEdit_OpcodeBodyUnderlay" text="" font="ZoFontChat">
-                     <Anchor point="TOPLEFT" />
-                     <Anchor point="TOPRIGHT" />
+                  <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
+                     <AnchorFill />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_BACKGROUND)) </OnInitialized>
+                  </Texture>
+                  <Label name="ItemTrig_OpcodeEdit_OpcodeBodyUnderlay" text="" font="ITEMTRIG_FONT_BASIC">
+                     <Anchor point="TOPLEFT"     offsetX="7" />
+                     <Anchor point="BOTTOMRIGHT" offsetX="-7" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT)) </OnInitialized>
                   </Label>
-                  <Label name="ItemTrig_OpcodeEdit_OpcodeBody" text="" font="ZoFontChat"
+                  <Label name="ItemTrig_OpcodeEdit_OpcodeBody" text="" font="ITEMTRIG_FONT_BASIC"
                      mouseEnabled="true"
                      linkEnabled="true"
                      alpha="0"
                   >
-                     <Anchor point="TOPLEFT" />
-                     <Anchor point="TOPRIGHT" />
+                     <Anchor point="TOPLEFT"     offsetX="7" />
+                     <Anchor point="BOTTOMRIGHT" offsetX="-7" />
                      <OnLinkMouseUp>
                         ItemTrig.windows.opcodeEdit:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
                      </OnLinkMouseUp>

@@ -93,22 +93,19 @@
                   end
                </OnInitialized>
                <Controls>
-                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_NAME" font="ZoFontChat">
+                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_NAME" font="ITEMTRIG_FONT_BASIC">
                      <Anchor point="TOPLEFT" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <EditBox name="$(parent)Value"
+                     font="ITEMTRIG_FONT_BASIC"
                      multiLine="false"
                      newLineEnabled="false"
-                     inherits="ZO_DefaultEdit"
+                     inherits="ItemTrig_UITemplate_ThemedEditbox"
                   >
                      <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="8" />
                      <Anchor point="TOPRIGHT" offsetX="-5" />
                      <OnTextChanged> ItemTrig.windows.triggerEdit:onNameChanged() </OnTextChanged>
-                     <Controls>
-                        <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
-                           <AnchorFill/>
-                        </Backdrop>
-                     </Controls>
                   </EditBox>
                </Controls>
             </Control>
@@ -152,17 +149,19 @@
                   resizing = false
                </OnInitialized>
                <Controls>
-                  <Label name="$(parent)ConditionsHeader" font="ZoFontWinT2" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS">
+                  <Label name="$(parent)ConditionsHeader" font="ITEMTRIG_FONT_BASIC" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="$(parent)Conditions" inherits="ItemTrig_TrigEdit_Template_OpcodeList">
                      <Anchor point="TOPLEFT"  relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMLEFT" />
                      <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMRIGHT" />
                   </Control>
-                  <Label name="$(parent)ActionsHeader" font="ZoFontWinT2" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_ACTIONS">
+                  <Label name="$(parent)ActionsHeader" font="ITEMTRIG_FONT_BASIC" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_ACTIONS">
                      <Anchor point="TOPLEFT"  relativeTo="$(parent)Conditions" relativePoint="BOTTOMLEFT" />
                      <Anchor point="TOPRIGHT" relativeTo="$(parent)Conditions" relativePoint="BOTTOMRIGHT" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="$(parent)Actions" inherits="ItemTrig_TrigEdit_Template_OpcodeList">
                      <Anchor point="TOPLEFT"     relativeTo="$(parent)ActionsHeader" relativePoint="BOTTOMLEFT" />

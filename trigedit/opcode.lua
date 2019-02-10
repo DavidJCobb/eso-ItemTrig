@@ -172,7 +172,8 @@ function WinCls:redrawDescription(options)
    --
    local rendered = self.opcode.working:format(
       function(s, i)
-         return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i)
+         --return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i)
+         return ZO_LinkHandler_CreateLinkWithFormat(s, nil, "ItemTrigOpcodeEditArg", 0, "|H%d:%s|h%s|h", i) -- link without brackets
       end
    )
    self.ui.opcodeBody:SetText(rendered)
