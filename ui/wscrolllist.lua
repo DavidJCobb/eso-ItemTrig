@@ -44,9 +44,10 @@ end
 ItemTrig.UI.WScrollList = ItemTrig.UI.WidgetClass:makeSubclass("WScrollList", "scrollList")
 function ItemTrig.UI.WScrollList:_construct(options)
    if not options then
-      options = {
-         element = {},
-      }
+      options = {}
+   end
+   if not options.element then
+      options.element = {}
    end
    local control   = self:asControl()
    local scrollbar = GetControl(control, "ScrollBar")
@@ -63,6 +64,7 @@ function ItemTrig.UI.WScrollList:_construct(options)
    self.scrollStep = options.scrollStep or 40
    self.scrollTop      = 0
    self.scrollMax      = -1 -- height of all generated elements
+   self.paddingSides   = options.paddingSides   or 0 -- padding (except paddingBetween) is applied as a side-effect of self:resizeScrollbar
    self.paddingStart   = options.paddingStart   or 0
    self.paddingBetween = options.paddingBetween or 0
    self.paddingEnd     = options.paddingEnd     or 0
@@ -126,6 +128,11 @@ function ItemTrig.UI.WScrollList:push(obj, update)
 end
 function ItemTrig.UI.WScrollList:_onRemoved(index, data) -- for subclasses to override
 end
+function ItemTrig.UI.WScrollList:onRedrawOrReposition()
+   --
+   -- Can be overridden.
+   --
+end
 function ItemTrig.UI.WScrollList:remove(x, update)
    if not x then
       return
@@ -160,12 +167,28 @@ function ItemTrig.UI.WScrollList:resizeScrollbar(scrollMax)
       scrollbar:SetHidden(false)
       scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))
       scrollbar:SetMinMax(0, scrollMax - listHeight)
+      --
+      do
+         local control  = self:asControl()
+         local contents = self.contents
+         contents:ClearAnchors()
+         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,     self.paddingSides, self.paddingStart)
+         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -(self.paddingSides + ZO_SCROLL_BAR_WIDTH), -self.paddingEnd)
+      end
    else
       self.scrollTop = 0
       scrollbar:SetThumbTextureHeight(barHeight)
       scrollbar:SetMinMax(0, 0)
       scrollbar:SetEnabled(false)
       scrollbar:SetHidden(true)
+      --
+      do
+         local control  = self:asControl()
+         local contents = self.contents
+         contents:ClearAnchors()
+         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,      self.paddingSides, self.paddingStart)
+         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -self.paddingSides, -self.paddingEnd)
+      end
    end
 end
 function ItemTrig.UI.WScrollList:_getExtraConstructorParams(index)
@@ -181,8 +204,8 @@ function ItemTrig.UI.WScrollList:redraw()
    local contents = self.contents
    local existing = contents:GetNumChildren()
    local count    = table.getn(self.listItems)
-   local yOffset  = -self.scrollTop + self.paddingStart
-   local total    = self.paddingStart
+   local yOffset  = -self.scrollTop
+   local total    = 0
    local index    = 0
    for i = 1, existing do
       local child = contents:GetChild(i)
@@ -218,10 +241,11 @@ function ItemTrig.UI.WScrollList:redraw()
       end
    end
    if count then
-      total = total - self.paddingBetween + self.paddingEnd
+      total = total - self.paddingBetween
    end
    self.scrollMax = total
    self:resizeScrollbar(total)
+   self:onRedrawOrReposition()
 end
 function ItemTrig.UI.WScrollList:repositionItems()
    local contents = self.contents
@@ -230,7 +254,7 @@ function ItemTrig.UI.WScrollList:repositionItems()
    if existing < count then
       count = existing
    end
-   local yOffset  = -self.scrollTop + self.paddingStart
+   local yOffset  = -self.scrollTop
    for i = 1, count do
       local child = contents:GetChild(i)
       child:ClearAnchors()
@@ -239,6 +263,7 @@ function ItemTrig.UI.WScrollList:repositionItems()
       yOffset = yOffset + child:GetHeight() + self.paddingBetween
    end
    self:resizeScrollbar()
+   self:onRedrawOrReposition()
 end
 function ItemTrig.UI.WScrollList:measureItems()
    local contents = self.contents
@@ -247,6 +272,12 @@ function ItemTrig.UI.WScrollList:measureItems()
    if existing < count then
       count = existing
    end
+   if count < 1 then
+      return 0
+   end
+   local child = contents:GetChild(count)
+   return ItemTrig.offsetBottom(child) + self.paddingEnd + self.scrollTop
+   --[[--
    local yOffset  = self.paddingStart
    for i = 1, count do
       local child = contents:GetChild(i)
@@ -257,6 +288,7 @@ function ItemTrig.UI.WScrollList:measureItems()
    end
    self.scrollMax = yOffset
    return yOffset
+   --]]--
 end
 function ItemTrig.UI.WScrollList:scrollBy(delta) -- analogous to ZO_ScrollList_ScrollRelative
    local position = delta + self.scrollTop

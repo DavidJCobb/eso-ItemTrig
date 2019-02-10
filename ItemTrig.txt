@@ -8,6 +8,7 @@ lang/en.lua
 lang/$(language).lua
 ItemTrig.lua
 misc/deferred.lua
+misc/math.lua
 misc/string.lua
 misc/table.lua
 misc/timing.lua
@@ -18,6 +19,8 @@ triggers/opcode.lua
 triggers/actions.lua
 triggers/conditions.lua
 triggers/trigger.lua
+ui/theming.lua
+ui/theming.xml
 ui/base.lua
 ui/window.xml
 ui/window.lua

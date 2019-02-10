@@ -1,9 +1,7 @@
 <GuiXml>
    <Controls>
       <Control name="ItemTrig_UITemplate_WScrollList" inherits="ZO_ScrollAreaBarBehavior" virtual="true">
-         <OnInitialized>
-            ItemTrig.UI.WScrollList:install(self)
-         </OnInitialized>
+         <OnInitialized> ItemTrig.UI.WScrollList:install(self) </OnInitialized>
          <!--
             The inheritance just handles scrollbar opacity on hover, 
             and our markup doesn't break compatibility with Zenimax 

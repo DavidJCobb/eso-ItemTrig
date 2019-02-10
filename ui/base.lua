@@ -79,6 +79,19 @@ function WClass:_construct(...)
    --
 end
 function WClass:install(control, ...)
+   assert(control ~= nil, "Cannot install " .. self[CLASSNAME_KEY_NAME] .. " on a nil control.")
+   if control[CONTROL_STORAGE_KEY_NAME] then
+      --
+      -- Return the existing instance, if any, but only if it's the 
+      -- same class (i.e. not a superclass or subclass).
+      --
+      local existing = control[CONTROL_STORAGE_KEY_NAME][cname]
+      if existing then
+         local eClass = existing:getClass()
+         assert(eClass == self, string.format("Cannot install %s on control \"%s\" because it already has an instance of %s.", self[CLASSNAME_KEY_NAME], control:GetName(), eClass[CLASSNAME_KEY_NAME]))
+         return existing
+      end
+   end
    local instance = setmetatable({}, { __index = self })
    local meta     = getmetatable(instance)
    do
@@ -154,6 +167,17 @@ function WClass:getSuperclass() -- static method
 end
 function WClass:getInstanceSuperclass()
    return self:getClass():getSuperclass()
+end
+function WClass:indexInParent() -- helper for controls
+   local c = self:asControl()
+   local p = c:GetParent()
+   if p then
+      for i = 1, p:GetNumChildren() do
+         if p:GetChild(i) == c then
+            return i
+         end
+      end
+   end
 end
 function WClass:callSuper(methodName, ...)
    if methodName == "_construct" then

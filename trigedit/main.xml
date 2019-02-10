@@ -4,18 +4,18 @@
          mouseEnabled="true"
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
       >
+         <OnInitialized> ItemTrig.UI.TriggerListEntry:install(self) </OnInitialized>
          <Controls>
-            <!-- <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" /> -->
-            <Texture name="$(parent)Bg" level="-1" color="282828" excludeFromResizeToFitExtents="true">
+            <Texture name="$(parent)Bg" level="0" excludeFromResizeToFitExtents="true">
                <AnchorFill />
             </Texture>
             <Button inherits="ZO_CheckButton" name="$(parent)Enabled">
                <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
             </Button>
-            <Label name="$(parent)Name" font="ZoFontWinT2" text="Trigger name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <Label name="$(parent)Name" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="5" offsetY="-2" relativeTo="$(parent)Enabled" />
             </Label>
-            <Label name="$(parent)Description" font="ZoFontWinT2" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <Label name="$(parent)Description" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
             </Label>
          </Controls>
@@ -52,60 +52,36 @@
                      <Anchor point="BOTTOMRIGHT" />
                      <Dimensions x="150" />
                      <Controls>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)AddTrigger"  text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_ADD">
+                        <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)AddTrigger"  text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_ADD">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" />
-                           <OnClicked>
-                              ItemTrig.windows.triggerList:newTrigger()
-                           </OnClicked>
+                           <OnClicked> ItemTrig.windows.triggerList:newTrigger() </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)EditTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_EDIT">
+                        <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)EditTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_EDIT">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)AddTrigger" />
-                           <OnClicked>
-                              ItemTrig.windows.triggerList:editTrigger()
-                           </OnClicked>
+                           <OnClicked> ItemTrig.windows.triggerList:editTrigger() </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEUP">
+                        <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)MoveUp" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEUP">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EditTrigger" />
-                           <OnClicked>
-                              ItemTrig.windows.triggerList:moveSelectedTrigger(-1)
-                           </OnClicked>
+                           <OnClicked> ItemTrig.windows.triggerList:moveSelectedTrigger(-1) </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEDOWN">
+                        <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEDOWN">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
-                           <OnClicked>
-                              ItemTrig.windows.triggerList:moveSelectedTrigger(1)
-                           </OnClicked>
+                           <OnClicked> ItemTrig.windows.triggerList:moveSelectedTrigger(1) </OnClicked>
                         </Button>
-                        <Button inherits="ZO_DefaultButton" name="$(parent)DeleteTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_DELETE">
+                        <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)DeleteTrigger" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_DELETE">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
-                           <OnClicked>
-                              ItemTrig.windows.triggerList:deleteSelectedTrigger()
-                           </OnClicked>
+                           <OnClicked> ItemTrig.windows.triggerList:deleteSelectedTrigger() </OnClicked>
                         </Button>
                      </Controls>
                   </Control>
-                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollSelectList">
+                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_ThemedScrollSelectList">
                      <Anchor point="TOPLEFT"     relativeTo="$(parent)Col1" relativePoint="TOPRIGHT"   offsetX="5" />
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Col3" relativePoint="BOTTOMLEFT" offsetX="-5" />
-                     <Controls>
-                        <Texture name="$(parent)Bg" level="-1" excludeFromResizeToFitExtents="true">
-                           <AnchorFill />
-                           <OnInitialized>
-                              --
-                              -- We can't make this a virtual control because ESO's parser 
-                              -- chokes -- it thinks that the scrollbar in our containing 
-                              -- scroll list is trying to use a virtual control that doesn't 
-                              -- exist -- so we have to settle for this:
-                              --
-                              ItemTrig.theming.listBackground(self)
-                           </OnInitialized>
-                        </Texture>
-                     </Controls>
                   </Control>
                </Controls>
             </Control>

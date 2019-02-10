@@ -18,13 +18,13 @@ WWindow.style = {
    --
    borderWidth        = 3,
    borderDistance     = 7,
-   borderColor        = { 140/255, 140/255, 140/255, 255/255 },
-   fillColorTop       = { 0, 0, 0, 1 },
-   fillColorBottom    = { 0.1, 0.1, 0.1, 1 },
-   titleBarColorFocusStart = { 0.55, 0.07, 0.00, 1 },
-   titleBarColorFocusEnd   = { 0.70, 0.35, 0.15, 1 },
-   titleBarColorBlurStart  = { 0.30, 0.30, 0.30, 1 },
-   titleBarColorBlurEnd    = { 0.32, 0.32, 0.32, 1 },
+   borderColor        = ItemTrig.theme.WINDOW_BORDER_COLOR,
+   fillColorTop       = ItemTrig.theme.WINDOW_BACKGROUND_TOP,
+   fillColorBottom    = ItemTrig.theme.WINDOW_BACKGROUND_BOTTOM,
+   titleBarColorFocusStart = ItemTrig.theme.TITLE_BAR_COLOR_FOCUS_START,
+   titleBarColorFocusEnd   = ItemTrig.theme.TITLE_BAR_COLOR_FOCUS_END,
+   titleBarColorBlurStart  = ItemTrig.theme.TITLE_BAR_COLOR_BLUR_START,
+   titleBarColorBlurEnd    = ItemTrig.theme.TITLE_BAR_COLOR_BLUR_END,
 }
 
 function WWindow:getDefaultOptions() -- override me, if you want
@@ -41,12 +41,14 @@ function WWindow:_construct(options)
       titleExit = nil,
    }
    self.prefs = {
-      centerIfModal  = options.centerIfModal  or false, -- if true, then the modal opens at the center of the screen; if false, it opens relative to its creator
-      modalOnly      = options.modalOnly      or false, -- boolean OR the name of the only allowed opener
-      resizeThrottle = options.resizeThrottle or 1, -- onResize will be called every X frames
+      centerIfModal      = options.centerIfModal      or false, -- if true, then the modal opens at the center of the screen; if false, it opens relative to its creator
+      forceIntegerCoords = options.forceIntegerCoords or false, -- if true, then the modal forces itself to integer coordinates, which can help with rounding errors on control positions
+      modalOnly          = options.modalOnly          or false, -- boolean OR the name of the only allowed opener
+      resizeThrottle     = options.resizeThrottle     or 1,     -- onResize will be called every X frames
    }
    self.style = ItemTrig.assignDeep({}, self:getClass().style, WWindow.style) -- TODO: metatables
    self.state = {
+      moving           = false,
       resizing         = false,
       resizeFramecount = 0,
    }
@@ -77,6 +79,9 @@ function WWindow:_construct(options)
          end
       end
    )
+   ZO_PreHookHandler(control, "OnMoveStop",
+      function(self) ItemTrig.UI.WWindow:cast(self):_onMoveStop() end
+   )
    ZO_PreHookHandler(control, "OnUpdate",
       function(self) ItemTrig.UI.WWindow:cast(self):_onUpdate() end
    )
@@ -89,6 +94,14 @@ function WWindow:refreshStyle()
    local style = self.style
    local vEdgeTop = VERTEX_POINTS_TOPLEFT    + VERTEX_POINTS_TOPRIGHT
    local vEdgeBot = VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT
+   do -- blocker
+      local offset  = style.borderDistance + style.borderWidth
+      local blocker = self.controls.blocker
+      local control = self:asControl()
+      blocker:ClearAnchors()
+      blocker:SetAnchor(TOPLEFT,     control, TOPLEFT,     -offset, -offset)
+      blocker:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT,  offset,  offset)
+   end
    do -- edge
       local offset = style.borderDistance + style.borderWidth
       local parent = self:asControl()
@@ -218,6 +231,17 @@ function WWindow:onHide()
    -- Subclasses can override this.
    --
 end
+function WWindow:_onMoveStop()
+   local c = self:asControl()
+   local x = c:GetLeft()
+   local y = c:GetTop()
+   local rx = math.floor(x + 0.5)
+   local ry = math.floor(y + 0.5)
+   if x ~= rx or y ~= ry then
+      c:ClearAnchors()
+      c:SetAnchor(TOPLEFT, GuiXml, TOPLEFT, rx, ry)
+   end
+end
 function WWindow:onResizeFrame()
    --
    -- Subclasses can override this.
@@ -336,7 +360,11 @@ function WWindow:showModal(modal, ...)
          if openerC:GetLeft() + cw + offsetX > sw then
             offsetX = -offsetX
          end
-         control:SetAnchor(CENTER, openerC, CENTER, offsetX, offsetY)
+         if control:GetWidth() > cw and control:GetHeight() > ch then
+            control:SetAnchor(TOPLEFT, openerC, TOPLEFT, offsetX, offsetY)
+         else
+            control:SetAnchor(CENTER, openerC, CENTER, offsetX, offsetY)
+         end
       end
       SCENE_MANAGER:ShowTopLevel(control)
       control:BringWindowToTop()

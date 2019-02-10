@@ -2,12 +2,12 @@
    <Controls>
       <Texture name="ItemTrig_UITemplate_WindowBackdrop" virtual="true"
          blendMode="ALPHA"
-         level="-2"
+         level="0"
       >
          <Controls>
             <Texture name="$(parent)Fill"
                blendMode="ALPHA"
-               level="-1"
+               level="0"
             />
          </Controls>
       </Texture>
@@ -22,7 +22,7 @@
          <Controls>
             <Texture name="$(parent)ModalUnderlay"
                color="000000" alpha=".55" excludeFromResizeToFitExtents="true"
-               tier="MEDIUM" level="1"
+               tier="MEDIUM" level="-1"
                mouseEnabled="true"
                hidden="true"
             >
@@ -36,11 +36,11 @@
                <Controls>
                   <Texture name="$(parent)Bg"
                      excludeFromResizeToFitExtents="true"
-                     level="-1"
+                     level="0"
                   >
                      <AnchorFill />
                   </Texture>
-                  <Label name="$(parent)Title" text="Window title" font="ZoFontWinT1">
+                  <Label name="$(parent)Title" text="Window title" font="ITEMTRIG_FONT_TITLE_BAR">
                      <Anchor point="TOPLEFT"  offsetX="4" />
                      <Anchor point="TOPRIGHT" offsetX="-28" />
                   </Label>

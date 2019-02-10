@@ -69,5 +69,11 @@ end
 --
 ItemTrig.theming = {}
 function ItemTrig.theming.listBackground(control)
-   ItemTrig.fadeToBottom(control, {0,0,0,1}, {0.01, 0.01, 0.01, 0.95})
+   ItemTrig.fadeToBottom(control, ItemTrig.theme.LIST_BACKGROUND_TOP, ItemTrig.theme.LIST_BACKGROUND_BOTTOM)
+end
+function ItemTrig.theming.listBorder(control)
+   control:SetColor(unpack(ItemTrig.theme.LIST_BORDER))
+end
+function ItemTrig.theming.listEnd(control)
+   ItemTrig.fadeToBottom(control, {0,0,0,0.5}, {0,0,0,0})
 end

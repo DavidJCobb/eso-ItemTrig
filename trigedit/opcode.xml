@@ -40,13 +40,13 @@
                   ItemTrig.fitHeightToChildren(self)
                </OnInitialized>
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_SAVE">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked>
                         ItemTrig.windows.opcodeEdit:commit()
                      </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_CANCEL">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEEDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked>
                         ItemTrig.windows.opcodeEdit:cancel()

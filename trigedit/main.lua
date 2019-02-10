@@ -10,9 +10,15 @@ do -- helper class for trigger list entries
    local TriggerListEntry = ItemTrig.UI.TriggerListEntry
    function TriggerListEntry:_construct()
       local control = self:asControl()
+      self.back    = self:GetNamedChild("Bg")
       self.enabled = self:GetNamedChild("Enabled")
       self.name    = self:GetNamedChild("Name")
       self.desc    = self:GetNamedChild("Description")
+      do -- theming
+         self.back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
+         self.name:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+         self.desc:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+      end
       self.enabled.toggleFunction =
          function(self, checked)
             local control = self:GetParent()
@@ -22,13 +28,28 @@ do -- helper class for trigger list entries
             d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
          end
    end
-   function TriggerListEntry:setSelected(state)
-      local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
-      if state then
-         color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
+   function TriggerListEntry:getBaseBackgroundColor()
+      if self:indexInParent() % 2 == 0 then
+         return ItemTrig.theme.LIST_ITEM_BACKGROUND_ALT
       end
-      self.name:SetColor(unpack(color))
-      self.desc:SetColor(unpack(color))
+      return ItemTrig.theme.LIST_ITEM_BACKGROUND
+   end
+   function TriggerListEntry:setSelected(state)
+      do -- background color
+         local color = self:getBaseBackgroundColor()
+         if state then
+            color = ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT
+         end
+         self.back:SetColor(unpack(color))
+      end
+      do -- text color
+         local color = ItemTrig.theme.LIST_ITEM_TEXT_NORMAL
+         if state then
+            color = ItemTrig.theme.LIST_ITEM_TEXT_SELECTED
+         end
+         self.name:SetColor(unpack(color))
+         self.desc:SetColor(unpack(color))
+      end
    end
    function TriggerListEntry:setEnabled(state)
       if state then
@@ -40,9 +61,8 @@ do -- helper class for trigger list entries
    function TriggerListEntry:setText(name, description)
       local cName  = self.name
       local cDesc  = self.desc
-      local paddingTop = 0
+      local paddingTop = ItemTrig.offsetTop(cName)
       local height     = 0
-      local _, _, _, _, paddingX, paddingTop = cName:GetAnchor(1)
       --
       if name then
          cName:SetText(name)
@@ -60,7 +80,7 @@ do -- helper class for trigger list entries
          height = ItemTrig.offsetBottom(cDesc)
       end
       if name or description then
-         self:asControl():SetHeight(height + paddingTop)
+         self:asControl():SetHeight(ItemTrig.round(height + paddingTop))
       end
    end
 end
@@ -96,11 +116,16 @@ function WinCls:_construct()
       local scrollPane = self:GetNamedChild("Body"):GetNamedChild("Col2")
       scrollPane = ItemTrig.UI.WScrollSelectList:cast(scrollPane)
       self.ui.pane = scrollPane
-      scrollPane.paddingBetween      = 8
+      --[[--
+      scrollPane.paddingSides        = 7
+      scrollPane.paddingStart        = 7
+      scrollPane.paddingBetween      = 7
+      scrollPane.paddingEnd          = 7
+      --]]--
       scrollPane.element.template    = "ItemTrig_TrigEdit_Template_TriggerOuter"
       scrollPane.element.toConstruct =
          function(control, data, extra)
-            local widget = ItemTrig.UI.TriggerListEntry:install(control)
+            local widget = ItemTrig.UI.TriggerListEntry:cast(control)
             widget:setSelected(extra and extra.selected)
             widget:setText(data.name, data:getDescription())
             widget:setEnabled(data.enabled)

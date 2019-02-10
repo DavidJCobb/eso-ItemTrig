@@ -7,47 +7,31 @@
                <Anchor point="BOTTOMRIGHT" />
                <Dimensions x="150" />
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Add"  text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_ADD">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Add"  text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_ADD">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" />
-                     <OnClicked>
-                     </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Edit" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_EDIT">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Edit" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_EDIT">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Add" />
-                     <OnClicked>
-                     </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveUp" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEUP">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)MoveUp" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEUP">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Edit" />
-                     <OnClicked>
-                     </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEDOWN">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)MoveDown" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEDOWN">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
-                     <OnClicked>
-                     </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Delete" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DELETE">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Delete" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DELETE">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
-                     <OnClicked>
-                     </OnClicked>
                   </Button>
                </Controls>
             </Control>
-            <Control name="$(parent)List" inherits="ItemTrig_UITemplate_WScrollSelectList">
+            <Control name="$(parent)List" inherits="ItemTrig_UITemplate_ThemedScrollSelectList">
                <Anchor point="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons" relativePoint="BOTTOMLEFT" offsetX="-5" />
-               <Controls>
-                  <Texture name="$(parent)Bg" level="-1" excludeFromResizeToFitExtents="true">
-                     <AnchorFill />
-                     <OnInitialized> ItemTrig.theming.listBackground(self) </OnInitialized>
-                  </Texture>
-               </Controls>
             </Control>
          </Controls>
       </Control>
@@ -55,12 +39,12 @@
          mouseEnabled="true"
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
       >
+         <OnInitialized> ItemTrig.UI.OpcodeListEntry:install(self) </OnInitialized>
          <Controls>
-            <!-- <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" /> -->
-            <Texture name="$(parent)Bg" level="-1" color="282828" excludeFromResizeToFitExtents="true">
+            <Texture name="$(parent)Bg" color="282828" excludeFromResizeToFitExtents="true">
                <AnchorFill />
             </Texture>
-            <Label name="$(parent)Text" font="ZoFontChat" text="Opcode text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <Label name="$(parent)Text" font="ITEMTRIG_FONT_LIST_ITEM" text="Opcode text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
             </Label>
          </Controls>
@@ -72,29 +56,30 @@
          hidden="true"
          inherits="ItemTrig_UITemplate_WWindow"
       >
-         <Dimensions x="800" y="600" />
+         <!-- <Dimensions x="800" y="600" /> -->
+         <Dimensions x="1000" y="800" /> <!-- dimensions for large fonts -->
          <DimensionConstraints minX="600" minY="600" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig:setupWindow("triggerEdit", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Bottom">
-               <Anchor point="BOTTOMLEFT"  offsetY="-5" offsetX="5" />
-               <Anchor point="BOTTOMRIGHT" offsetY="-5" offsetX="-5" />
+               <Anchor point="BOTTOMLEFT"  offsetY="-5" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-5" />
                <Dimensions y="50" />
                <Controls>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_SAVE">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_SAVE">
                      <Anchor point="BOTTOMRIGHT" />
                      <OnClicked> ItemTrig.windows.triggerEdit:commit() </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_CANCEL">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_CANCEL">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked> ItemTrig.windows.triggerEdit:cancel() </OnClicked>
                   </Button>
                </Controls>
             </Control>
             <Control name="$(parent)NameBar">
-               <Anchor point="TOPLEFT"  offsetX="5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="TOPRIGHT" offsetX="5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+               <Anchor point="TOPLEFT"  offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPRIGHT" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
                <Dimensions y="50" />
                <OnInitialized>
                   local text = GetControl(self, "Label")
@@ -128,8 +113,8 @@
                </Controls>
             </Control>
             <Control name="$(parent)Col1">
-               <Anchor point="TOPLEFT" offsetX="5" offsetY="5" relativeTo="$(parent)NameBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+               <Anchor point="TOPLEFT"     offsetY="5" relativeTo="$(parent)NameBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
                <Dimensions x="200" />
                <OnInitialized>
                   --

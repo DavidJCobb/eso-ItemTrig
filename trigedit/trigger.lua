@@ -23,6 +23,47 @@ ItemTrig:registerWindow("triggerEdit", WinCls)
 
 local OpcodeListCls = ItemTrig.UI.WidgetClass:makeSubclass("OpcodeListCls", "opcodeList")
 do -- helper class for opcode lists
+   do -- helper class for list items
+      ItemTrig.UI.OpcodeListEntry = ItemTrig.UI.WidgetClass:makeSubclass("OpcodeListEntry", "opcodeListEntry")
+      local Cls = ItemTrig.UI.OpcodeListEntry
+      function Cls:_construct()
+         local control = self:asControl()
+         self.back = self:GetNamedChild("Bg")
+         self.text = self:GetNamedChild("Text")
+         do -- theming
+            self.back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
+            self.text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+         end
+      end
+      function Cls:getBaseBackgroundColor()
+         if self:indexInParent() % 2 == 0 then
+            return ItemTrig.theme.LIST_ITEM_BACKGROUND_ALT
+         end
+         return ItemTrig.theme.LIST_ITEM_BACKGROUND
+      end
+      function Cls:setSelected(state)
+         do -- background color
+            local color = self:getBaseBackgroundColor()
+            if state then
+               color = ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT
+            end
+            self.back:SetColor(unpack(color))
+         end
+         do -- text color
+            local color = ItemTrig.theme.LIST_ITEM_TEXT_NORMAL
+            if state then
+               color = ItemTrig.theme.LIST_ITEM_TEXT_SELECTED
+            end
+            self.text:SetColor(unpack(color))
+         end
+      end
+      function Cls:setText(t)
+         self.text:SetText(t)
+         local height = ItemTrig.offsetBottom(self.text) + ItemTrig.offsetTop(self.text)
+         self:asControl():SetHeight(ItemTrig.round(height))
+      end
+   end
+   --
    function OpcodeListCls:_construct(type)
       self.type = type
       self.pane = ItemTrig.UI.WScrollSelectList:cast(self:GetNamedChild("List"))
@@ -33,28 +74,20 @@ do -- helper class for opcode lists
          --
          local pane = self.pane
          pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
-         pane.paddingBetween   = 4
          pane.element.toConstruct =
-            function(control, data)
-               local text = GetControl(control, "Text")
-               text:SetText(data:format(formatOpcodeArg))
-               --
-               local _, _, _, _, _, paddingY = text:GetAnchor(1)
-               local height = ItemTrig.offsetBottom(text) + paddingY
-               control:SetHeight(height)
+            function(control, data, extra)
+               local widget = ItemTrig.UI.OpcodeListEntry:cast(control)
+               widget:setText(data:format(formatOpcodeArg))
+               widget:setSelected(extra and extra.selected)
             end
          pane.element.onSelect =
             function(index, control, pane)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)}
-               text:SetColor(unpack(color))
+               ItemTrig.UI.OpcodeListEntry:cast(control):setSelected(true)
                WinCls:getInstance():onPaneSelection(pane)
             end
          pane.element.onDeselect =
             function(index, control, pane)
-               local text  = GetControl(control, "Text")
-               local color = {GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL)}
-               text:SetColor(unpack(color))
+               ItemTrig.UI.OpcodeListEntry:cast(control):setSelected(false)
             end
          pane.element.onDoubleClick =
             function(index, control, pane)
@@ -70,13 +103,11 @@ do -- helper class for opcode lists
          for _, v in pairs(names) do
             local button = GetControl(buttons, v)
             button.operation = v
-            button:SetHandler("OnMouseUp",
-               function(control, button, upInside, ctrl, alt, shift, command)
-                  if upInside then
-                     local ol = OpcodeListCls:cast(control:GetParent():GetParent())
-                     assert(ol ~= nil)
-                     ol["handler" .. control.operation](ol)
-                  end
+            button:SetHandler("OnClicked",
+               function(control, button)
+                  local ol = OpcodeListCls:cast(control:GetParent():GetParent())
+                  assert(ol ~= nil)
+                  ol["handler" .. control.operation](ol)
                end
             )
          end
