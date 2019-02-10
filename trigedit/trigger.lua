@@ -36,13 +36,11 @@ do -- helper class for opcode lists
          pane.paddingBetween   = 4
          pane.element.toConstruct =
             function(control, data)
-               local height = 0
-               do
-                  local text = GetControl(control, "Text")
-                  local _, _, _, _, paddingX, paddingY = text:GetAnchor(1)
-                  text:SetText(data:format(formatOpcodeArg))
-                  height = text:GetHeight() + paddingY * 2
-               end
+               local text = GetControl(control, "Text")
+               text:SetText(data:format(formatOpcodeArg))
+               --
+               local _, _, _, _, _, paddingY = text:GetAnchor(1)
+               local height = ItemTrig.offsetBottom(text) + paddingY
                control:SetHeight(height)
             end
          pane.element.onSelect =

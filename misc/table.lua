@@ -4,10 +4,23 @@ function ItemTrig.assign(tablevar, ...)
    local others = {...}
    for i = 1, table.getn(others) do
       local other = others[i]
-      for k, v in pairs(other) do
-         tablevar[k] = v
+      if other then
+         for k, v in pairs(other) do
+            tablevar[k] = v
+         end
       end
    end
+   return tablevar
+end
+function ItemTrig.assignDeep(tablevar, ...)
+   local others = {...}
+   for i = 1, table.getn(others) do
+      if others[i] then
+         others[i] = ItemTrig.deepCopy(others[i])
+      end
+   end
+   ItemTrig.assign(tablevar, unpack(others))
+   return tablevar
 end
 function ItemTrig.compact(tablevar)
    for i = 1, table.getn(tablevar) do
@@ -16,6 +29,19 @@ function ItemTrig.compact(tablevar)
          tablevar[i + 1] = nil
       end
    end
+end
+function ItemTrig.deepCopy(tablevar)
+   local result = {}
+   for k, _ in pairs(tablevar) do
+      local v = rawget(tablevar, k)
+      if type(v) == "table" then
+         result[k] = ItemTrig.deepCopy(v)
+      else
+         result[k] = v
+      end
+   end
+   setmetatable(result, getmetatable(tablevar))
+   return result
 end
 function ItemTrig.firstIn(tablevar)
    for i = 1, table.getn(tablevar) do

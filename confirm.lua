@@ -5,16 +5,16 @@ ItemTrig:registerWindow("genericConfirm", Cls)
 
 local FRAMES_NEEDED_FOR_THE_RESIZE_TO_BLOODY_WORK = 2
 --
--- If we're resizing down (i.e. we showed a long prompt and now we need 
--- to show a short one), then resizing on the first possible frame actually 
--- makes us slightly too small; the getters for text height are busted.
+-- If we're resizing down (i.e. we showed a long prompt and now we need to 
+-- show a short one), then resizing on the first possible frame actually 
+-- makes us slightly too small; seems the getters for text height are busted.
 
 function Cls:_construct()
    self.result = nil
    self.text   = GetControl(self:GetNamedChild("Body"), "Text")
    self.buttonYes = GetControl(self:GetNamedChild("Buttons"), "Y")
    self.buttonNo  = GetControl(self:GetNamedChild("Buttons"), "N")
-   do -- Set up onAfterShow (TODO: should we move this to WWindow?)
+   do -- Set up onAfterShow
       --
       -- We need to be able to resize the confirmation dialog to fit all of 
       -- its text, but we can only do that on the frame after it is shown.

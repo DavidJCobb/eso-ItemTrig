@@ -5,7 +5,10 @@
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
       >
          <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
+            <!-- <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" /> -->
+            <Texture name="$(parent)Bg" level="-1" color="282828" excludeFromResizeToFitExtents="true">
+               <AnchorFill />
+            </Texture>
             <Button inherits="ZO_CheckButton" name="$(parent)Enabled">
                <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
             </Button>
@@ -30,8 +33,8 @@
          <OnInitialized> ItemTrig:setupWindow("triggerList", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Body">
-               <Anchor point="TOPLEFT" offsetX="5" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
-               <Anchor offsetX="-5" offsetY="-5" point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" />
+               <Anchor point="TOPLEFT" offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" />
                <Controls>
                   <Control name="$(parent)Col1">
                      <Anchor point="TOPLEFT" />
@@ -89,6 +92,20 @@
                   <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_WScrollSelectList">
                      <Anchor point="TOPLEFT"     relativeTo="$(parent)Col1" relativePoint="TOPRIGHT"   offsetX="5" />
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Col3" relativePoint="BOTTOMLEFT" offsetX="-5" />
+                     <Controls>
+                        <Texture name="$(parent)Bg" level="-1" excludeFromResizeToFitExtents="true">
+                           <AnchorFill />
+                           <OnInitialized>
+                              --
+                              -- We can't make this a virtual control because ESO's parser 
+                              -- chokes -- it thinks that the scrollbar in our containing 
+                              -- scroll list is trying to use a virtual control that doesn't 
+                              -- exist -- so we have to settle for this:
+                              --
+                              ItemTrig.theming.listBackground(self)
+                           </OnInitialized>
+                        </Texture>
+                     </Controls>
                   </Control>
                </Controls>
             </Control>

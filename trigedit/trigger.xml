@@ -42,6 +42,12 @@
             <Control name="$(parent)List" inherits="ItemTrig_UITemplate_WScrollSelectList">
                <Anchor point="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons" relativePoint="BOTTOMLEFT" offsetX="-5" />
+               <Controls>
+                  <Texture name="$(parent)Bg" level="-1" excludeFromResizeToFitExtents="true">
+                     <AnchorFill />
+                     <OnInitialized> ItemTrig.theming.listBackground(self) </OnInitialized>
+                  </Texture>
+               </Controls>
             </Control>
          </Controls>
       </Control>
@@ -50,7 +56,10 @@
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
       >
          <Controls>
-            <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" />
+            <!-- <Backdrop name="$(parent)Bg" inherits="ZO_ThinBackdrop" /> -->
+            <Texture name="$(parent)Bg" level="-1" color="282828" excludeFromResizeToFitExtents="true">
+               <AnchorFill />
+            </Texture>
             <Label name="$(parent)Text" font="ZoFontChat" text="Opcode text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
             </Label>

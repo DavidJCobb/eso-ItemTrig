@@ -40,28 +40,27 @@ do -- helper class for trigger list entries
    function TriggerListEntry:setText(name, description)
       local cName  = self.name
       local cDesc  = self.desc
-      local height = 0
-      do
-         local _, _, _, _, paddingX, paddingY = cName:GetAnchor(1)
-         height = paddingY * 2
-      end
+      local paddingTop = 0
+      local height     = 0
+      local _, _, _, _, paddingX, paddingTop = cName:GetAnchor(1)
+      --
       if name then
          cName:SetText(name)
       end
-      height = height + cName:GetHeight()
+      height = ItemTrig.offsetBottom(cName)
       if description then
          cDesc:SetText(description)
          if description == "" then
             cDesc:SetHidden(true)
          else
             cDesc:SetHidden(false)
-            height = height + cDesc:GetHeight()
+            height = ItemTrig.offsetBottom(cDesc)
          end
       elseif not cDesc:GetHidden() then
-         height = height + cDesc:GetHeight()
+         height = ItemTrig.offsetBottom(cDesc)
       end
       if name or description then
-         self:asControl():SetHeight(height)
+         self:asControl():SetHeight(height + paddingTop)
       end
    end
 end

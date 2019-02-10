@@ -9,9 +9,27 @@ if not (ItemTrig and ItemTrig.UI) then return end
 --]]--
 
 ItemTrig.UI.WWindow = ItemTrig.UI.WidgetClass:makeSubclass("WWindow", "window")
-function ItemTrig.UI.WWindow:getDefaultOptions() -- override me, if you want
+local WWindow = ItemTrig.UI.WWindow
+
+WWindow.style = {
+   --
+   -- Default style options for a window. You can override this 
+   -- per-subclass by assigning a table to the subclass.
+   --
+   borderWidth        = 3,
+   borderDistance     = 7,
+   borderColor        = { 140/255, 140/255, 140/255, 255/255 },
+   fillColorTop       = { 0, 0, 0, 1 },
+   fillColorBottom    = { 0.1, 0.1, 0.1, 1 },
+   titleBarColorFocusStart = { 0.55, 0.07, 0.00, 1 },
+   titleBarColorFocusEnd   = { 0.70, 0.35, 0.15, 1 },
+   titleBarColorBlurStart  = { 0.30, 0.30, 0.30, 1 },
+   titleBarColorBlurEnd    = { 0.32, 0.32, 0.32, 1 },
+}
+
+function WWindow:getDefaultOptions() -- override me, if you want
 end
-function ItemTrig.UI.WWindow:_construct(options)
+function WWindow:_construct(options)
    if not options then
       options = self:getDefaultOptions() or {}
    end
@@ -23,15 +41,26 @@ function ItemTrig.UI.WWindow:_construct(options)
       titleExit = nil,
    }
    self.prefs = {
-      centerIfModal = options.centerIfModal or false, -- if true, then the modal opens at the center of the screen; if false, it opens relative to its creator
-      modalOnly     = options.modalOnly     or false, -- boolean OR the name of the only allowed opener
+      centerIfModal  = options.centerIfModal  or false, -- if true, then the modal opens at the center of the screen; if false, it opens relative to its creator
+      modalOnly      = options.modalOnly      or false, -- boolean OR the name of the only allowed opener
+      resizeThrottle = options.resizeThrottle or 1, -- onResize will be called every X frames
+   }
+   self.style = ItemTrig.assignDeep({}, self:getClass().style, WWindow.style) -- TODO: metatables
+   self.state = {
+      resizing         = false,
+      resizeFramecount = 0,
    }
    self.modalState = {
       child    = nil, -- WWindow: a modal that we've opened
       opener   = nil, -- WWindow: the window that has us open as a modal
       deferred = nil, -- Deferred to resolve when we're closed; allows opener to respond to our closing
    }
-   assert(self.controls.blocker ~= nil, "A WWindow control must have a child named \"$(parent)ModalUnderlay\".")
+   do -- Validation
+      if type(self.prefs.resizeThrottle) ~= "number" or self.prefs.resizeThrottle < 0 then
+         self.prefs.resizeThrottle = 1
+      end
+      assert(self.controls.blocker ~= nil, "A WWindow control must have a child named \"$(parent)ModalUnderlay\".")
+   end
    if self.controls.titleBar then
       self.controls.titleText = GetControl(self.controls.titleBar, "Title")
       self.controls.titleExit = GetControl(self.controls.titleBar, "Close")
@@ -48,8 +77,53 @@ function ItemTrig.UI.WWindow:_construct(options)
          end
       end
    )
+   ZO_PreHookHandler(control, "OnUpdate",
+      function(self) ItemTrig.UI.WWindow:cast(self):_onUpdate() end
+   )
+   self:refreshStyle()
 end
-function ItemTrig.UI.WWindow:shouldShowCloseButton(v)
+
+function WWindow:refreshStyle()
+   local edge  = self:GetNamedChild("Bg")
+   local fill  = GetControl(edge, "Fill")
+   local style = self.style
+   local vEdgeTop = VERTEX_POINTS_TOPLEFT    + VERTEX_POINTS_TOPRIGHT
+   local vEdgeBot = VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT
+   do -- edge
+      local offset = style.borderDistance + style.borderWidth
+      local parent = self:asControl()
+      edge:ClearAnchors()
+      edge:SetAnchor(TOPLEFT,     parent, TOPLEFT,     -offset, -offset)
+      edge:SetAnchor(BOTTOMRIGHT, parent, BOTTOMRIGHT,  offset,  offset)
+      edge:SetVertexColors(vEdgeTop, unpack(style.borderColor))
+      edge:SetVertexColors(vEdgeBot, unpack(style.borderColor))
+   end
+   do -- fill
+      local offset = style.borderWidth
+      fill:ClearAnchors()
+      fill:SetAnchor(TOPLEFT,     edge, TOPLEFT,      offset,  offset)
+      fill:SetAnchor(BOTTOMRIGHT, edge, BOTTOMRIGHT, -offset, -offset)
+      fill:SetVertexColors(vEdgeTop, unpack(style.fillColorTop))
+      fill:SetVertexColors(vEdgeBot, unpack(style.fillColorBottom))
+   end
+   do -- title bar
+      local edgeStart = VERTEX_POINTS_TOPLEFT  + VERTEX_POINTS_BOTTOMLEFT
+      local edgeEnd   = VERTEX_POINTS_TOPRIGHT + VERTEX_POINTS_BOTTOMRIGHT
+      local bar = self.controls.titleBar
+      if bar then
+         local back = GetControl(bar, "Bg")
+         local color1 = style.titleBarColorFocusStart
+         local color2 = style.titleBarColorFocusEnd
+         if self.modalState.child then
+            color1 = style.titleBarColorBlurStart
+            color2 = style.titleBarColorBlurEnd
+         end
+         back:SetVertexColors(edgeStart, unpack(color1))
+         back:SetVertexColors(edgeEnd,   unpack(color2))
+      end
+   end
+end
+function WWindow:shouldShowCloseButton(v)
    local button = self.controls.titleExit
    if v == nil then
       if not button then
@@ -60,13 +134,14 @@ function ItemTrig.UI.WWindow:shouldShowCloseButton(v)
    assert(button ~= nil, "Cannot modify visibility of this window's close button: it has no close button.")
    button:SetHidden(v)
 end
-function ItemTrig.UI.WWindow:onCloseClicked()
+
+function WWindow:onCloseClicked()
    --
    -- Subclasses can override this.
    --
    self:hide()
 end
-function ItemTrig.UI.WWindow:onBeforeShow(...)
+function WWindow:onBeforeShow(...)
    --
    -- Subclasses can override this. Returning false or nil cancels the show 
    -- operation.
@@ -76,19 +151,19 @@ function ItemTrig.UI.WWindow:onBeforeShow(...)
    --
    return true
 end
-function ItemTrig.UI.WWindow:onShow()
+function WWindow:onShow()
    --
    -- Subclasses can override this.
    --
 end
-function ItemTrig.UI.WWindow:onBeforeOpenBy(opener)
+function WWindow:onBeforeOpenBy(opener)
    --
    -- Subclasses can override this. Returning false or nil cancels the open 
    -- operation. The argument is a WWindow instance.
    --
    return true
 end
-function ItemTrig.UI.WWindow:_onChildModalHidden()
+function WWindow:_onChildModalHidden()
    --
    -- This method handles cleanup after a window's child modal is closed. An 
    -- alternate, non-underscore-prefixed, version is provided for you to over-
@@ -97,8 +172,9 @@ function ItemTrig.UI.WWindow:_onChildModalHidden()
    --
    self.modalState.child = nil
    self.controls.blocker:SetHidden(true)
+   self:refreshStyle()
 end
-function ItemTrig.UI.WWindow:onChildModalHidden()
+function WWindow:onChildModalHidden()
    --
    -- This event fires on a window when a modal that it has opened is closed. 
    -- This should be used to perform cleanup in the opener; the default function 
@@ -108,7 +184,7 @@ function ItemTrig.UI.WWindow:onChildModalHidden()
    -- Subclasses can override this.
    --
 end
-function ItemTrig.UI.WWindow:handleModalDeferredOnHide(deferred)
+function WWindow:handleModalDeferredOnHide(deferred)
    --
    -- If the window is opened as a modal, then it will have a Deferred that it can 
    -- use to:
@@ -123,7 +199,7 @@ function ItemTrig.UI.WWindow:handleModalDeferredOnHide(deferred)
    --
    deferred:resolve()
 end
-function ItemTrig.UI.WWindow:_onHide()
+function WWindow:_onHide()
    --
    -- This method handles cleanup after a window's child modal is closed. An 
    -- alternate, non-underscore-prefixed, version is provided for you to over-
@@ -137,15 +213,23 @@ function ItemTrig.UI.WWindow:_onHide()
    end
    self.modalState.opener = nil
 end
-function ItemTrig.UI.WWindow:onHide()
+function WWindow:onHide()
    --
    -- Subclasses can override this.
    --
 end
-function ItemTrig.UI.WWindow:getModalOpener()
+function WWindow:onResizeFrame()
+   --
+   -- Subclasses can override this.
+   --
+end
+function WWindow:_onUpdate()
+   self:_onResizeFrame()
+end
+function WWindow:getModalOpener()
    return self.modalState.opener
 end
-function ItemTrig.UI.WWindow:show(...)
+function WWindow:show(...)
    --
    -- The arguments are passed to the before-show handler.
    --
@@ -163,10 +247,36 @@ function ItemTrig.UI.WWindow:show(...)
    c:BringWindowToTop()
    self:onShow()
 end
-function ItemTrig.UI.WWindow:hide()
+function WWindow:hide()
    SCENE_MANAGER:HideTopLevel(self:asControl())
 end
-function ItemTrig.UI.WWindow:showModal(modal, ...)
+
+do -- Internals for window resizing
+   function WWindow:_onResizeStart()
+      self.state.resizing         = true
+      self.state.resizeFramecount = 0
+   end
+   function WWindow:_onResizeFrame()
+      --
+      -- Called by our _onUpdate handler
+      --
+      local s = self.state
+      if not s.resizing or self.onResizeFrame == WWindow.onResizeFrame then
+         return
+      end
+      s.resizeFramecount = s.resizeFramecount + 1
+      if s.resizeFramecount / self.prefs.resizeThrottle < 1 then
+         return
+      end
+      s.resizeFramecount = 0
+      self:onResizeFrame()
+   end
+   function WWindow:_onResizeStop()
+      self.state.resizing = false
+   end
+end
+
+function WWindow:showModal(modal, ...)
    --
    -- Makes this window show a child modal. If the modal is successfully opened, 
    -- this function returns a Deferred; if the modal fails to open, this function 
@@ -231,12 +341,13 @@ function ItemTrig.UI.WWindow:showModal(modal, ...)
       SCENE_MANAGER:ShowTopLevel(control)
       control:BringWindowToTop()
    end
+   self:refreshStyle()
    return deferred:promise()
 end
-function ItemTrig.UI.WWindow:getTitle()
+function WWindow:getTitle()
    return self.controls.titleText:GetText()
 end
-function ItemTrig.UI.WWindow:setTitle(text)
+function WWindow:setTitle(text)
    return self.controls.titleText:SetText(text)
 end
 
@@ -250,7 +361,7 @@ end
 
 local SINGLETON_WINDOW_KEY = " window"
 
-ItemTrig.UI.WSingletonWindow = ItemTrig.UI.WWindow:makeSubclass("WSingletonWindow")
+ItemTrig.UI.WSingletonWindow = WWindow:makeSubclass("WSingletonWindow")
 function ItemTrig.UI.WSingletonWindow:_construct()
    local class = self:getClass()
    assert(class ~= ItemTrig.UI.WSingletonWindow, "You're supposed to subclass this!")

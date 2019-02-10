@@ -19,12 +19,10 @@
                      <Anchor point="BOTTOM" />
                   </Control>
                   <Button inherits="ZO_DefaultButton" name="$(parent)Y" text="Yes">
-                     <!-- <Anchor point="BOTTOMRIGHT" /> -->
                      <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMRIGHT" offsetX="8" />
                      <OnClicked> ItemTrig.windows.genericConfirm:yes() </OnClicked>
                   </Button>
                   <Button inherits="ZO_DefaultButton" name="$(parent)N" text="No">
-                     <!-- <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Y" relativePoint="BOTTOMLEFT" offsetX="-8" /> -->
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked> ItemTrig.windows.genericConfirm:no() </OnClicked>
                   </Button>

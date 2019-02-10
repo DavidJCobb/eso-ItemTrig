@@ -1,13 +1,24 @@
 <GuiXml>
    <Controls>
+      <Texture name="ItemTrig_UITemplate_WindowBackdrop" virtual="true"
+         blendMode="ALPHA"
+         level="-2"
+      >
+         <Controls>
+            <Texture name="$(parent)Fill"
+               blendMode="ALPHA"
+               level="-1"
+            />
+         </Controls>
+      </Texture>
       <TopLevelControl name="ItemTrig_UITemplate_WWindow" virtual="true"
          movable="true"
          clampedToScreen="true"
          hidden="true"
       >
-         <OnInitialized>
-            ItemTrig.UI.WWindow:install(self)
-         </OnInitialized>
+         <OnInitialized> ItemTrig.UI.WWindow:install(self) </OnInitialized>
+         <OnResizeStart> ItemTrig.UI.WWindow:cast(self):_onResizeStart() </OnResizeStart>
+         <OnResizeStop> ItemTrig.UI.WWindow:cast(self):_onResizeStop() </OnResizeStop>
          <Controls>
             <Texture name="$(parent)ModalUnderlay"
                color="000000" alpha=".55" excludeFromResizeToFitExtents="true"
@@ -18,24 +29,31 @@
                <AnchorFill />
                <OnMouseWheel />
             </Texture>
-            <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop" />
+            <Texture name="$(parent)Bg" inherits="ItemTrig_UITemplate_WindowBackdrop" />
             <Control name="$(parent)TitleBar" resizeToFitDescendents="true">
                <Anchor point="TOPLEFT" />
                <Anchor point="TOPRIGHT" />
                <Controls>
+                  <Texture name="$(parent)Bg"
+                     excludeFromResizeToFitExtents="true"
+                     level="-1"
+                  >
+                     <AnchorFill />
+                  </Texture>
                   <Label name="$(parent)Title" text="Window title" font="ZoFontWinT1">
-                     <Anchor point="TOPLEFT" />
-                     <Anchor point="TOPRIGHT" />
+                     <Anchor point="TOPLEFT"  offsetX="4" />
+                     <Anchor point="TOPRIGHT" offsetX="-28" />
                   </Label>
                   <Button name="$(parent)Close" inherits="ZO_ButtonBehaviorClickSound">
-                     <Dimensions x="32" y="32" />
-                     <Anchor point="TOPRIGHT" offsetX="8" offsetY="0" />
+                     <Dimensions x="20" y="20" />
+                     <Anchor point="RIGHT" offsetX="-4" />
                      <Textures
                         normal="EsoUI/Art/Buttons/closebutton_up.dds"
                         pressed="EsoUI/Art/Buttons/closebutton_down.dds"
                         mouseOver="EsoUI/Art/Buttons/closebutton_mouseover.dds"
                         disabled="EsoUI/Art/Buttons/closebutton_disabled.dds"
                      />
+                     <TextureCoords left="0" top="0" right="0.625" bottom="0.625" />
                      <OnClicked>
                         local win = ItemTrig.UI.WWindow:cast(self:GetParent():GetParent())
                         if win then
@@ -43,11 +61,6 @@
                         end
                      </OnClicked>
                   </Button>
-                  <Texture name="$(parent)Rule" color="808080" tier="HIGH">
-                     <Dimensions y="1.5"/>
-                     <Anchor point="TOPLEFT"  relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
-                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" />
-                  </Texture>
                </Controls>
             </Control>
          </Controls>
