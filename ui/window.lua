@@ -145,7 +145,7 @@ function WWindow:shouldShowCloseButton(v)
       return not button:IsHidden()
    end
    assert(button ~= nil, "Cannot modify visibility of this window's close button: it has no close button.")
-   button:SetHidden(v)
+   button:SetHidden(not v)
 end
 
 function WWindow:onCloseClicked()

@@ -173,6 +173,11 @@ function ItemTrig.Opcode:clone(deep)
                else
                   result.args[i] = a
                end
+            elseif baseArgs[i].type == "quantity" then
+               result.args[i] = {
+                  qualifier = a.qualifier,
+                  number    = a.number,
+               }
             else
                d("ItemTrig WARNING: Problem encountered when cloning opcode: unhandled table type.")
             end
@@ -195,6 +200,11 @@ function ItemTrig.Opcode:copyAssign(other, deep)
          if type(a) == "table" then
             if self.base.args[i].type == "trigger" then
                self.args[i] = a:clone()
+            elseif self.base.args[i].type == "quantity" then
+               self.args[i] = {
+                  qualifier = a.qualifier,
+                  number    = a.number,
+               }
             else
                self.args[i] = a
             end

@@ -229,7 +229,7 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
    local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(editor, editor.opcode.working, argIndex)
-   self:redrawDescription({ highlightIndex = argIndex })
+   self:redrawDescription({ highlightIndex = argIndex }) -- highlight the arg we're editing
    deferred:done(
       function(context, deferred, result) -- user clicked OK
          local editor  = WinCls:getInstance()
@@ -239,6 +239,8 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
             working.args[index] = result.value
             editor.opcode.dirty = true
             editor:refresh()
+         else
+            self:redrawDescription() -- un-highlight the arg we just edited
          end
       end
    ):fail(

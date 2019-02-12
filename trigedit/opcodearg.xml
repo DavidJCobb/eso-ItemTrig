@@ -63,6 +63,23 @@
                         </EditBox>
                      </Controls>
                   </Control>
+                  <Control name="$(parent)Number">
+                     <Anchor point="TOPLEFT" />
+                     <Dimensions x="286" />
+                     <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
+                     <Controls>
+                        <EditBox name="$(parent)Value"
+                           multiLine="false"
+                           newLineEnabled="false"
+                           textType="TEXT_TYPE_NUMERIC"
+                           inherits="ItemTrig_UITemplate_ThemedEditbox"
+                        >
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="TOPRIGHT" />
+                           <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
+                        </EditBox>
+                     </Controls>
+                  </Control>
                   <Control name="$(parent)Quantity">
                      <Anchor point="TOPLEFT" />
                      <Dimensions x="286" />

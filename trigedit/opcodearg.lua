@@ -31,6 +31,15 @@ do -- helper classes for views
          end
       end
    end
+   do -- number
+      ViewCls.Number = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgNumberView")
+      function ViewCls.Number:_construct()
+         self.value = self:GetNamedChild("Value")
+      end
+      function ViewCls.Number:GetValue()
+         return tonumber(self.value:GetText())
+      end
+   end
    do -- quantity
       ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
       function ViewCls.Quantity:_construct()
@@ -111,6 +120,7 @@ function WinCls:_construct()
       self.ui.viewholder = viewholder
       self.ui.views.enum      = ViewCls.Enum:install(viewholder:GetNamedChild("Enum"))
       self.ui.views.multiline = ViewCls.String:install(viewholder:GetNamedChild("Multiline"))
+      self.ui.views.number    = ViewCls.Number:install(viewholder:GetNamedChild("Number"))
       self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
    end
@@ -169,9 +179,8 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view.value:SetText(val or "")
       elseif archetype == "number" then
          self.view = self.ui.views.number
-         --
-         -- TODO
-         --
+         self.view:show()
+         self.view.value:SetText(tostring(val))
       elseif archetype == "quantity" then
          self.view = self.ui.views.quantity
          self.view:show()
@@ -183,9 +192,7 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view:show()
          self.view.value:SetText(val or "")
       end
-      --
-      -- TODO: compress window size
-      --
+      assert(self.view ~= nil, "No view for this archetype: " .. tostring(archetype) .. "! Did you forget to make one?")
    end
    self:autoSize()
    self.dirty = false -- writing to UI controls may trigger "change" handlers, so set this here
