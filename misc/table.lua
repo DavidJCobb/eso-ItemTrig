@@ -31,6 +31,10 @@ function ItemTrig.compact(tablevar)
    end
 end
 function ItemTrig.deepCopy(tablevar)
+   assert(type(tablevar) ~= "userdata", "This function can't deep-copy a control.")
+   if type(tablevar) ~= "table" then
+      return tablevar
+   end
    local result = {}
    for k, _ in pairs(tablevar) do
       local v = rawget(tablevar, k)

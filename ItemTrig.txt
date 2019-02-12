@@ -9,6 +9,7 @@ lang/$(language).lua
 ItemTrig.lua
 misc/deferred.lua
 misc/math.lua
+misc/set.lua
 misc/string.lua
 misc/table.lua
 misc/timing.lua

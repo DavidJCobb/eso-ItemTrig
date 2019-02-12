@@ -1,5 +1,7 @@
 if not (ItemTrig and ItemTrig.UI) then return end
 
+local Set = ItemTrig.Set
+
 ItemTrig.UI.WScrollSelectList = ItemTrig.UI.WScrollList:makeSubclass("WScrollSelectList")
 local WScrollSelectList = ItemTrig.UI.WScrollSelectList
 function WScrollSelectList:_construct(options)
@@ -12,9 +14,10 @@ function WScrollSelectList:_construct(options)
    self.selection = {
       index = nil, -- number, or an array if multiselection is enabled
       multi = options.multiSelection or false,
+      _oldIndex = nil, -- used to fire events properly
    }
    if self.selection.multi then
-      self.selection.index = {}
+      self.selection.index = Set:new()
    end
    self.element.onSelect      = options.element.onSelect      or nil -- callback
    self.element.onDeselect    = options.element.onDeselect    or nil -- callback
@@ -33,73 +36,96 @@ do -- internal event handlers, not to be overridden
       if not callback then
          return
       end
-      local index = self:indexOf(control)
-      if not index then
+      local i = self:indexOfControl(control)
+      if not i then
          return
       end
-      callback(index, control, self)
+      callback(i, control, self)
    end
-   function WScrollSelectList:_onItemSelected(control)
-      local index = self:indexOf(control)
-      if not index then
+   function WScrollSelectList:_onItemClicked(control)
+      local i = self:indexOfControl(control)
+      if not i then
          return
       end
-      local shift = IsShiftKeyDown()
-      local s     = self.selection
+      local s = self.selection
       if s.multi then
-         if self:hasSelection() then
-            if not shift then
-               local callback = self.element.onDeselect
-               if callback then
-                  for i = 1, table.getn(s.index) do
-                     local old = self:controlByIndex(s.index[i])
-                     callback(s.index[i], old, self)
-                  end
-               end
-               s.index = {}
-            end
-         else
-            s.index = {}
+         if IsShiftKeyDown() then
+            self:toggle(i)
+            return
          end
-         table.insert(self.selection.index, index)
-         if self.element.onSelect then
-            self.element.onSelect(index, control, self)
-         end
-      else
-         if self:hasSelection() then
-            if index == s.index then
-               return
-            end
-            if self.element.onDeselect then
-               local old = self:controlByIndex(s.index)
-               self.element.onDeselect(s.index, old, self)
-            end
-         end
-         s.index = index
-         if self.element.onSelect then
-            self.element.onSelect(index, control, self)
-         end
+         self:select(i)
+         return
       end
-      self:onChange()
+      self:select(i)
    end
-   function WScrollSelectList:_onRemoved(index, data)
+   function WScrollSelectList:_onRemoved(index, data) -- overrides WScrollList
       if self.selection.multi then
-         ItemTrig.remove(self.selection.multi,
-            function(i, e)
-               return e == index
-            end
-         )
+         self.selection.multi:remove(index)
       else
          if self.selection.index == index then
             self.selection.index = nil
          end
       end
       if self.element.onDeselect then
-         local old = self:controlByIndex(index)
-         self.element.onDeselect(index, old, self)
+         local control = self:controlByIndex(index)
+         if control then
+            self.element.onDeselect(index, control, self)
+         end
+      end
+      self:_onSelectionChanged(false)
+   end
+   function WScrollSelectList:_onSelectionChanged(fireDeselection)
+      if fireDeselection == nil then
+         fireDeselection = true
+      end
+      local s   = self.selection
+      local old = s._oldIndex
+      local new = s.index
+      if s.multi then
+         local function _exec(a, b, call)
+            if not call then
+               return
+            end
+            a:complement(b):forEach(function(index)
+               local control = self:controlByIndex(index)
+               if control then
+                  call(i[j], control, self)
+               end
+            end)
+         end
+         --
+         if fireDeselection then
+            _exec(old, new, self.element.onDeselect)
+         end
+         _exec(new, old, self.element.onSelect)
+         --
+         s._oldIndex = new:clone()
+      else
+         local function _exec(index, call)
+            if index and call then
+               local control = self:controlByIndex(index)
+               if control then
+                  call(index, control, self)
+               end
+            end
+         end
+         --
+         if fireDeselection then
+            _exec(old, self.element.onDeselect)
+         end
+         _exec(new, self.element.onSelect)
+         --
+         s._oldIndex = new
       end
       self:onChange()
    end
+end
+function WScrollSelectList:addToSelection(index)
+   --
+   -- You can pass a function to iterate over all list 
+   -- items; return truthy to select.
+   --
+   self:_modifySelection(x, "select")
 end
 function WScrollSelectList:deselectAll()
    local s        = self.selection
@@ -124,8 +150,8 @@ function WScrollSelectList:hasSelection()
    if not i then
       return false
    end
-   if (type(i) == "table") and table.getn(i) == 0 then
-      return false
+   if self.selection.multi then
+      return not i:empty()
    end
    return true
 end
@@ -134,42 +160,19 @@ function WScrollSelectList:isIndexSelected(index)
    if not sel then
       return false
    end
-   if (type(sel) == "table") then
-      for j = 1, table.getn(sel) do
-         if sel[j] == index then
-            return true
-         end
-      end
+   if self.selection.multi then
+      return sel:has(index)
    end
    return sel == index
 end
 function WScrollSelectList:getFirstSelectedIndex()
-   local multi = self.selection.multi
    if not self:hasSelection() then
       return nil
    end
-   if multi then
-      return self.selection.index[1]
+   if self.selection.multi then
+      return self.selection.index:first()
    end
    return self.selection.index
-end
-function WScrollSelectList:getSelectedControls()
-   local multi = self.selection.multi
-   if not self:hasSelection() then
-      if multi then
-         return {}
-      end
-      return nil
-   end
-   if multi then
-      local results = {}
-      local list    = self.selection.index
-      for i = 1, table.getn(list) do
-         results[i] = self:controlByIndex(list[i])
-      end
-      return results
-   end
-   return self:controlByIndex(self.selection.index)
 end
 function WScrollSelectList:getSelectedItems()
    local multi = self.selection.multi
@@ -180,43 +183,134 @@ function WScrollSelectList:getSelectedItems()
       return nil
    end
    if multi then
-      local results = {}
-      local list    = self.selection.index
-      for i = 1, table.getn(list) do
-         results[i] = self:at(list[i])
-      end
-      return results
+      return self.selection.index:map(self.listItems)
    end
    return self:at(self.selection.index)
 end
-function WScrollSelectList:select(x)
-   if type(x) == "function" then
-      --
-      -- You can pass a function to iterate over all list 
-      -- items; return truthy to select.
-      --
-      for i, data in ipairs(self.listItems) do
-         if x(data) then
-            local c = self:controlByIndex(i)
-            if not c then
-               break
+function WScrollSelectList:_modifySelection(x, op)
+   assert((op == "select") or (op == "deselect"), "Invalid operation.")
+   local s = self.selection
+   if s.multi then
+      if type(x) == "function" then
+         local r = Set:new()
+         for i, data in ipairs(self.listItems) do
+            if x(data) then
+               r:insert(i)
             end
-            self:_onItemSelected(c)
-            return true
+         end
+         x = r
+      end
+      if type(x) ~= "number" and not Set:is(x) then
+         x = self:indexOf(x)
+      end
+      if not x then
+         return
+      end
+      if type(x) == "number" then
+         x = Set:new({ x })
+      end
+      local compareOp
+      local modifyOp
+      if op == "select" then
+         compareOp = "complement"
+         modifyOp  = "insert"
+      else
+         compareOp = "intersection"
+         modifyOp  = "remove"
+      end
+      if x:empty() or s.index[empty](s.index, x):empty() then
+         --
+         -- This call won't actually change the selection.
+         --
+         return
+      end
+      s.index[modifyOp](s.index, x)
+   else
+      if op == "select" then
+         if not s.index then
+            self:select(x)
+         end
+      else
+         if s.index == x then
+            self:select(nil)
          end
       end
-      return false
-   end
-   if type(x) == "userdata" then
-      x = self:indexOf(x)
-   elseif type(x) ~= "number" then
-      x = self:indexOfData(x)
-   end
-   local c = self:controlByIndex(x)
-   if not c then
       return
    end
-   self:_onItemSelected(c)
+   self:_onSelectionChanged()
+end
+function WScrollSelectList:removeFromSelection(x)
+   --
+   -- You can pass a function to iterate over all list 
+   -- items; return truthy to deselect.
+   --
+   self:_modifySelection(x, "deselect")
+end
+function WScrollSelectList:select(x)
+   --
+   -- You can pass a function to iterate over all list 
+   -- items; return truthy to select.
+   --
+   local s = self.selection
+   if s.multi then
+      if type(x) == "function" then
+         local r = Set:new()
+         for i, data in ipairs(self.listItems) do
+            if x(data) then
+               r:insert(i)
+            end
+         end
+         x = r
+      end
+      if type(x) ~= "number" and not Set:is(x) then
+         x = self:indexOf(x)
+      end
+      if type(x) == "number" or x == nil then
+         x = Set:new(x and { x } or nil)
+      end
+      if s.index:equal(x) then
+         return
+      end
+      s.index:assign(x)
+   else
+      if type(x) == "function" then
+         for i, data in ipairs(self.listItems) do
+            if x(data) then
+               self:select(i)
+               return true
+            end
+         end
+         return false
+      end
+      if type(x) ~= "number" then
+         x = self:indexOf(x)
+      end
+      if s.index == x then
+         return
+      end
+      s.index = x
+   end
+   self:_onSelectionChanged()
+end
+function WScrollSelectList:toggle(i)
+   assert(type(i) == "number", "This function must be passed an index.")
+   if self:isIndexSelected(i) then
+      if self.selection.multi then
+         self.selection.index:remove(i)
+      else
+         self.selection.index = nil
+      end
+   else
+      if self.selection.multi then
+         self.selection.index:insert(i)
+      else
+         if self.selection.index then
+            return
+         end
+         self.selection.index = i
+      end
+   end
+   self:_onSelectionChanged()
 end
 function WScrollSelectList:_getExtraConstructorParams(index)
    return {

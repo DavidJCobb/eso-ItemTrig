@@ -3,16 +3,12 @@
       <Control name="ItemTrig_UITemplate_WScrollSelectListItem" virtual="true" mouseEnabled="true">
          <OnMouseUp>
             if button == MOUSE_BUTTON_INDEX_LEFT and upInside then -- the mousedown event happened on this same control
-               local list   = self:GetParent():GetParent()
-               local widget = ItemTrig.UI.WScrollSelectList:cast(list)
-               widget:_onItemSelected(self)
+               ItemTrig.UI.WScrollSelectList:fromItem(self):_onItemClicked(self)
             end
          </OnMouseUp>
          <OnMouseDoubleClick>
             if button == MOUSE_BUTTON_INDEX_LEFT then
-               local list   = self:GetParent():GetParent()
-               local widget = ItemTrig.UI.WScrollSelectList:cast(list)
-               widget:_onDoubleClick(self)
+               ItemTrig.UI.WScrollSelectList:fromItem(self):_onDoubleClick(self)
             end
          </OnMouseDoubleClick>
       </Control>

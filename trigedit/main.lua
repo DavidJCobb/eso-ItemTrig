@@ -138,9 +138,6 @@ function WinCls:_construct()
          function(index, control, pane)
             ItemTrig.UI.TriggerListEntry:cast(control):setSelected(false)
          end
-         --
-         -- Should we also use INTERFACE_TEXT_COLOR_HIGHLIGHT on mouseover ?
-         --
       scrollPane.element.onDoubleClick =
          function(index, control, pane)
             local trigger = pane.listItems[index]
