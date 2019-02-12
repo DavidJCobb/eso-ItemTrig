@@ -210,7 +210,7 @@ function WinCls:addOpcode(type, insertAfterIndex)
          editor.trigger.dirty = true
          editor:refresh()
          pane:select(created)
-         pane:scrollToItem(pane:indexOfData(created), true, true)
+         pane:scrollToItem(pane:indexOf(created), true, true)
       end
    ):fail(
       function(context, deferred) -- user clicked Cancel
@@ -293,7 +293,7 @@ function WinCls:deleteOpcode(opcode)
          end
          w.trigger.dirty = true
          table.remove(list, index)
-         pane:remove(pane:indexOfData(opcode))
+         pane:remove(pane:indexOf(opcode))
       end,
       self
    )

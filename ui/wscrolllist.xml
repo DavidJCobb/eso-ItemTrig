@@ -26,8 +26,7 @@
                </OnMouseWheel>
                <OnValueChanged>
                   local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
-                  widget.scrollTop = value
-                  widget:repositionItems()
+                  widget:scrollTo(value, { fromSlider = true })
                </OnValueChanged>
             </Slider>
          </Controls>

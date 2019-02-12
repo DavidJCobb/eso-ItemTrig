@@ -101,7 +101,7 @@ function ItemTrig.WClassTestMenu:_construct()
          local data = { name = "Test element " .. i }
          list:push(data, false)
       end
-      list:redraw()
+      --list:redraw() -- moved to onShow
    end
    do -- WCombobox
       local combobox = self:GetNamedChild("vComboboxTest")
@@ -113,6 +113,11 @@ function ItemTrig.WClassTestMenu:_construct()
       end
       combobox:redraw()
    end
+end
+function ItemTrig.WClassTestMenu:onShow()
+   local pane = self:GetNamedChild("vScrollListTest")
+   local list = ItemTrig.UI.WScrollList:cast(pane)
+   list:redraw()
 end
 function ItemTrig.WClassTestMenu:popTestModal()
    local kid = ItemTrig.WClassTestConfirm:cast(ItemTrig_WClassTestConfirm)
