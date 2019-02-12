@@ -30,9 +30,13 @@
                   end
                </OnClicked>
             </Button>
+            <Control name="$(parent)vComboboxTest" inherits="ItemTrig_UITemplate_WCombobox">
+               <Anchor point="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" />
+            </Control>
             <Control name="$(parent)vScrollListTest" inherits="ItemTrig_UITemplate_WScrollList">
                <Anchor point="TOPLEFT"     relativeTo="$(parent)PopTest" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)vComboboxTest" relativePoint="TOPRIGHT" />
             </Control>
          </Controls>
       </TopLevelControl>

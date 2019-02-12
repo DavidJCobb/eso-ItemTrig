@@ -37,7 +37,7 @@
                   <Control name="$(parent)Enum">
                      <AnchorFill />
                      <Controls>
-                        <Control name="$(parent)Value" inherits="ZO_ScrollableComboBox">
+                        <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_ThemedCombobox">
                            <Anchor point="TOPLEFT" />
                            <Anchor point="TOPRIGHT" />
                         </Control>

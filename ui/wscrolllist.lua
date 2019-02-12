@@ -31,13 +31,11 @@ end
 --
 
 local function onScrollUpButton(self)
-   local list   = self:GetParent():GetParent()
-   local widget = list.widgets.scrollList
+   local widget = ItemTrig.UI.WScrollList:cast(self:GetParent():GetParent())
    widget:scrollBy(-widget.scrollStep)
 end
 local function onScrollDownButton(self)
-   local list   = self:GetParent():GetParent()
-   local widget = list.widgets.scrollList
+   local widget = ItemTrig.UI.WScrollList:cast(self:GetParent():GetParent())
    widget:scrollBy(widget.scrollStep)
 end
 
@@ -49,15 +47,14 @@ function ItemTrig.UI.WScrollList:_construct(options)
    if not options.element then
       options.element = {}
    end
-   local control   = self:asControl()
-   local scrollbar = GetControl(control, "ScrollBar")
+   local scrollbar = self:GetNamedChild("ScrollBar")
    self.element = {
       template    = options.element.template    or "",
       toConstruct = options.element.toConstruct or nil,
       toReset     = options.element.toReset     or nil,
       _pool       = nil,
    }
-   self.contents   = GetControl(control, "Contents")
+   self.contents   = self:GetNamedChild("Contents")
    self.scrollbar  = scrollbar
    self.scrollBtnU = GetControl(scrollbar, "Up")
    self.scrollBtnD = GetControl(scrollbar, "Down")
@@ -101,6 +98,12 @@ function ItemTrig.UI.WScrollList:controlByIndex(index)
       return nil
    end
    return contents:GetChild(index)
+end
+function ItemTrig.UI.WScrollList:count()
+   return table.getn(self.listItems)
+end
+function ItemTrig.UI.WScrollList:fromItem(control) -- static method
+   return self:cast(control:GetParent():GetParent())
 end
 function ItemTrig.UI.WScrollList:indexOf(control)
    local contents = self.contents

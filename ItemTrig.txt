@@ -29,6 +29,8 @@ ui/wscrolllist.xml
 ui/wscrollselectlist.lua
 ui/wscrollselectlist.xml
 ui/wscrollselectlistitem.xml
+ui/wcombobox.lua
+ui/wcombobox.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
 ui/testmenu.lua

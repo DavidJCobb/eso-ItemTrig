@@ -1,5 +1,7 @@
 if not ItemTrig then return end
 
+ItemTrig.PIXEL = GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth"))
+
 function ItemTrig.fitHeightToChildren(control, zeroIfNone)
    local count = control:GetNumChildren()
    if count < 1 then

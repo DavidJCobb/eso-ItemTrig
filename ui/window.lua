@@ -16,8 +16,8 @@ WWindow.style = {
    -- Default style options for a window. You can override this 
    -- per-subclass by assigning a table to the subclass.
    --
-   borderWidth        = 3,
-   borderDistance     = 7,
+   borderWidth        = 3 * ItemTrig.PIXEL,
+   borderDistance     = 7 * ItemTrig.PIXEL,
    borderColor        = ItemTrig.theme.WINDOW_BORDER_COLOR,
    fillColorTop       = ItemTrig.theme.WINDOW_BACKGROUND_TOP,
    fillColorBottom    = ItemTrig.theme.WINDOW_BACKGROUND_BOTTOM,
@@ -232,11 +232,14 @@ function WWindow:onHide()
    --
 end
 function WWindow:_onMoveStop()
+   if not self.prefs.forceIntegerCoords then
+      return
+   end
    local c = self:asControl()
    local x = c:GetLeft()
    local y = c:GetTop()
-   local rx = math.floor(x + 0.5)
-   local ry = math.floor(y + 0.5)
+   local rx = ItemTrig.round(x, ItemTrig.PIXEL)
+   local ry = ItemTrig.round(y, ItemTrig.PIXEL)
    if x ~= rx or y ~= ry then
       c:ClearAnchors()
       c:SetAnchor(TOPLEFT, GuiXml, TOPLEFT, rx, ry)
@@ -300,6 +303,9 @@ do -- Internals for window resizing
    end
 end
 
+function WWindow:setPosition(x, y)
+   self:asControl():SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
+end
 function WWindow:showModal(modal, ...)
    --
    -- Makes this window show a child modal. If the modal is successfully opened, 

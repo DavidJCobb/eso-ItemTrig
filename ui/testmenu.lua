@@ -85,22 +85,34 @@ function ItemTrig.WClassTestMenu:_construct()
    scene:AddFragment(fragment)
    SCENE_MANAGER:RegisterTopLevel(control, false)
    --
-   local pane = control:GetNamedChild("vScrollListTest")
-   local list = ItemTrig.UI.WScrollList:cast(pane)
-   list.element.template    = "ItemTrig_TestMenu_Template_ScrollListItem"
-   list.element.toConstruct =
-      function(control, data)
-         local text = GetControl(control, "Name")
-         text:SetText(data.name)
-         control:SetHeight(text:GetHeight())
+   do -- WScrollList
+      local pane = self:GetNamedChild("vScrollListTest")
+      local list = ItemTrig.UI.WScrollList:cast(pane)
+      list.element.template    = "ItemTrig_TestMenu_Template_ScrollListItem"
+      list.element.toConstruct =
+         function(control, data)
+            local text = GetControl(control, "Name")
+            text:SetText(data.name)
+            control:SetHeight(text:GetHeight())
+         end
+      --
+      list:clear(false)
+      for i = 1, 20 do
+         local data = { name = "Test element " .. i }
+         list:push(data, false)
       end
-   --
-   list:clear(false)
-   for i = 1, 20 do
-      local data = { name = "Test element " .. i }
-      list:push(data, false)
+      list:redraw()
    end
-   list:redraw()
+   do -- WCombobox
+      local combobox = self:GetNamedChild("vComboboxTest")
+      combobox = ItemTrig.UI.WCombobox:cast(combobox)
+      combobox:clear(false)
+      for i = 1, 20 do
+         local data = { name = "Test element " .. i }
+         combobox:push(data, true)
+      end
+      combobox:redraw()
+   end
 end
 function ItemTrig.WClassTestMenu:popTestModal()
    local kid = ItemTrig.WClassTestConfirm:cast(ItemTrig_WClassTestConfirm)
