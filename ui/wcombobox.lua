@@ -23,7 +23,8 @@ function WCombobox:_construct(options)
    self.controls = {
       edge     = self:GetNamedChild("Edge"),
       back     = self:controlByPath("Edge", "Back"),
-      dropBack = self:controlByPath("Contents", "Back"),
+      dropEdge = self:controlByPath("Contents", "Edge"),
+      dropBack = self:controlByPath("Contents", "Edge", "Back"),
       label    = self:GetNamedChild("SelectedItemText"),
       button   = self:GetNamedChild("OpenButton"),
       contents = self:GetNamedChild("Contents"),
@@ -44,10 +45,12 @@ function WCombobox:_construct(options)
    self.style = {
       focusRing = options.style.focusRing or ItemTrig.theme.COMBOBOX_FOCUS_RING,
       font      = options.style.font      or "ZoFontGame",
-      fontColorNormal = options.style.fontColorNormal or ItemTrig.theme.COMBOBOX_TEXT,
-      backColorNormal = options.style.backColorNormal or ItemTrig.theme.COMBOBOX_BACKGROUND,
-      fontColorFocus  = options.style.fontColorFocus  or ItemTrig.theme.COMBOBOX_MOUSEOVER_TEXT,
-      backColorFocus  = options.style.backColorFocus  or ItemTrig.theme.COMBOBOX_MOUSEOVER_BACK,
+      fontColorNormal  = options.style.fontColorNormal  or ItemTrig.theme.COMBOBOX_TEXT,
+      backColorNormal  = options.style.backColorNormal  or ItemTrig.theme.COMBOBOX_BACKGROUND,
+      fontColorFocus   = options.style.fontColorFocus   or ItemTrig.theme.COMBOBOX_MOUSEOVER_TEXT,
+      backColorFocus   = options.style.backColorFocus   or ItemTrig.theme.COMBOBOX_MOUSEOVER_BACK,
+      backBorderTop    = options.style.backBorderTop    or ItemTrig.theme.COMBOBOX_BODY_BORDER_TOP,
+      backBorderBottom = options.style.backBorderBottom or ItemTrig.theme.COMBOBOX_BODY_BORDER_BOTTOM,
    }
    do -- configure pane
       local pane = self.controls.pane
@@ -118,6 +121,9 @@ do -- internals
       else
          self.controls.label:SetText("")
       end
+      if self:isOpen() then
+         self:close()
+      end
    end
    function WCombobox:_onGlobalMouseUp(eventCode, button)
       if self:isOpen() then
@@ -134,19 +140,14 @@ do -- internals
          end
       end
    end
-   function WCombobox:_onItemClick(control)
-      --
-      -- TODO
-      --
-   end
    function WCombobox:_onItemMouseEnter(control)
-      local index = self.controls.pane:indexOf(control)
+      local index = self.controls.pane:indexOfControl(control)
       do -- mouseover colors
          local old = self.controls.pane:controlByIndex(self.state.lastMouseoverIndex)
          self.state.lastMouseoverIndex = index
          GetControl(control, "Text"):SetColor(unpack(self.style.fontColorFocus))
          GetControl(control, "Back"):SetColor(unpack(self.style.backColorFocus))
-         if old then
+         if old and old ~= control then
             GetControl(old, "Text"):SetColor(unpack(self.style.fontColorNormal))
             GetControl(old, "Back"):SetColor(unpack(self.style.backColorNormal))
          end
@@ -180,6 +181,7 @@ function WCombobox:close()
    self.controls.contents:UnregisterForEvent(EVENT_GLOBAL_MOUSE_UP)
    self.controls.contents:SetHidden(true)
    self.state.isOpen = false
+   self:refreshStyle() -- clear focus ring
 end
 function WCombobox:count()
    assert(self ~= WCombobox, "This method must be called on an instance.")
@@ -245,9 +247,11 @@ function WCombobox:open()
       local count = self.controls.pane:count()
       if count > 5 then
          count = 5
+      elseif count < 1 then
+         count = 1
       end
-      contents:SetHeight(self:asControl():GetHeight() * count)
-      self.controls.pane:redraw()
+      contents:SetHeight(self:asControl():GetHeight() * count + 2)
+      self:refreshStyle() -- also redraws the pane
       self.controls.pane:scrollToItem(self:getSelectedIndex(), true)
    end
 end
@@ -265,6 +269,7 @@ function WCombobox:refreshStyle()
    c.label:SetColor(unpack(self.style.fontColorNormal))
    c.back:SetColor(unpack(self.style.backColorNormal))
    c.dropBack:SetColor(unpack(self.style.backColorNormal))
+   ItemTrig.fadeToBottom(c.dropEdge, self.style.backBorderTop, self.style.backBorderBottom)
    do -- focus ring
       local color = self.style.backColorNormal
       if self:isOpen() then
@@ -272,7 +277,11 @@ function WCombobox:refreshStyle()
       end
       c.edge:SetColor(unpack(color))
    end
-   c.pane:redraw()
+   c.pane.paddingSides = 2 -- TODO: make configurable
+   c.pane.paddingEnd   = 2 -- TODO: make configurable
+   if self:isOpen() then
+      c.pane:redraw()
+   end
 end
 function WCombobox:select(x)
    assert(self ~= WCombobox, "This method must be called on an instance.")

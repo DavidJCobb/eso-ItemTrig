@@ -67,10 +67,12 @@ function Cls:onBeforeShow(options)
    return true
 end
 function Cls:onAfterShow()
-   local height  = self.text:GetTextHeight()
-   local avail   = self.text:GetParent():GetHeight()
    local control = self:asControl()
-   control:SetHeight(control:GetHeight() - avail + height + 30)
+   do -- height
+      local height  = self.text:GetTextHeight()
+      local avail   = self.text:GetParent():GetHeight()
+      control:SetHeight(control:GetHeight() - avail + height + 30)
+   end
 end
 function Cls:yes()
    self.result = true

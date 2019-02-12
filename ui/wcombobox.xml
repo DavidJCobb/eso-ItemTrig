@@ -55,12 +55,18 @@
                <Anchor point="TOPLEFT"  relativePoint="BOTTOMLEFT" />
                <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
                <Controls>
-                  <Texture name="$(parent)Back" excludeFromResizeToFitExtents="true">
+                  <Texture name="$(parent)Edge" excludeFromResizeToFitExtents="true">
                      <AnchorFill />
+                     <Controls>
+                        <Texture name="$(parent)Back" excludeFromResizeToFitExtents="true">
+                           <Anchor point="TOPLEFT"     offsetX="2" />
+                           <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                        </Texture>
+                     </Controls>
                   </Texture>
                   <Control name="$(parent)ScrollPane" inherits="ItemTrig_UITemplate_WScrollSelectList">
-                      <Anchor point="TOPLEFT"     offsetY="2" />
-                      <Anchor point="BOTTOMRIGHT" offsetY="-2" />
+                      <Anchor point="TOPLEFT" />
+                      <Anchor point="BOTTOMRIGHT" />
                   </Control>
                </Controls>
             </Control>

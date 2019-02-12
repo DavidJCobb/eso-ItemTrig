@@ -8,10 +8,17 @@ do -- helper classes for views
    do -- enum
       ViewCls.Enum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgEnumView")
       function ViewCls.Enum:_construct()
-         self.value = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Value"))
+         self.value = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Value"))
+         self.value.onChange =
+            function()
+               local win = ItemTrig.windows.opcodeArgEdit
+               if win then -- the view initializes before the window, so this can run early
+                  win:onArgumentEdited()
+               end
+            end
       end
       function ViewCls.Enum:GetValue()
-         local x = self.value:GetSelectedItemData()
+         local x = self.value:getSelectedData()
          if x then
             x = x.index
             if WinCls:getInstance().type == "boolean" then
@@ -28,18 +35,25 @@ do -- helper classes for views
       ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
       function ViewCls.Quantity:_construct()
          self.number    = self:GetNamedChild("Number")
-         self.qualifier = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Qualifier"))
+         self.qualifier = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Qualifier"))
          --
          local qualifier = self.qualifier
-         qualifier:ClearItems()
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE", callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE", callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:AddItem({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E",   callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end }, ZO_COMBOBOX_SUPRESS_UPDATE)
-         qualifier:UpdateItems()
+         qualifier.onChange =
+            function()
+               local win = ItemTrig.windows.opcodeArgEdit
+               if win then -- the view initializes before the window, so this can run early
+                  win:onArgumentEdited()
+               end
+            end
+         qualifier:clear()
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, false)
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, false)
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, false)
+         qualifier:redraw()
       end
       function ViewCls.Quantity:GetValue()
          local q = {
-            qualifier = self.qualifier:GetSelectedItemData(),
+            qualifier = self.qualifier:getSelectedData(),
             number    = tonumber(self.number:GetText() or 0)
          }
          if q.qualifier then
@@ -140,20 +154,13 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          end
          self.view:show()
          local combobox = self.view.value
-         combobox:ClearItems()
+         combobox:clear()
          for i = 1, table.getn(arg.enum) do
-            combobox:AddItem(
-               {
-                  name     = arg.enum[i],
-                  index    = i,
-                  callback = function() ItemTrig.windows.opcodeArgEdit:onArgumentEdited() end
-               },
-               ZO_COMBOBOX_SUPRESS_UPDATE
-            )
+            combobox:push({ name = arg.enum[i], index = i }, false)
          end
-         combobox:UpdateItems()
-         combobox:SelectItemByIndex(1, true) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
-         combobox:SetSelectedItemByEval(function(item) return item.index == tonumber(val) end)
+         combobox:redraw()
+         combobox:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
+         combobox:select(function(item) return item.index == tonumber(val) end)
       elseif archetype == "multiline" then
          self.view = self.ui.views.multiline
          self.view:show()
@@ -166,8 +173,8 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       elseif archetype == "quantity" then
          self.view = self.ui.views.quantity
          self.view:show()
-         self.view.qualifier:SelectItemByIndex(1, true) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
-         self.view.qualifier:SetSelectedItemByEval(function(item) return item.value == val.qualifier end)
+         self.view.qualifier:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
+         self.view.qualifier:select(function(item) return item.value == val.qualifier end)
          self.view.number:SetText(val.number or "0")
       elseif archetype == "string" then
          self.view = self.ui.views.string

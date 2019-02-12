@@ -40,7 +40,7 @@
                   >
                      <AnchorFill />
                   </Texture>
-                  <Label name="$(parent)Title" text="Window title" font="ITEMTRIG_FONT_TITLE_BAR">
+                  <Label name="$(parent)Title" text="Window title" font="ITEMTRIG_FONT_TITLE_BAR" wrapMode="ELLIPSIS" maxLineCount="1">
                      <Anchor point="TOPLEFT"  offsetX="4" />
                      <Anchor point="TOPRIGHT" offsetX="-28" />
                   </Label>

@@ -31,6 +31,7 @@ function WinCls:_construct()
          opcodeType = nil,
          opcodeBody = nil,
       },
+      settingUp = false,
       opcode = {
          target  = nil, -- the opcode we want to edit (i.e. Opcode* other)
          working = nil, -- a copy of that opcode; we make changes to it and then commit to (target) later
@@ -46,10 +47,20 @@ function WinCls:_construct()
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
       SCENE_MANAGER:RegisterTopLevel(control, false)
    end
-   self.ui.opcodeType = ZO_ComboBox_ObjectFromContainer(ItemTrig_OpcodeEdit_Opcode)
+   do -- combobox setup
+      self.ui.opcodeType = ItemTrig.UI.WCombobox:cast(ItemTrig_OpcodeEdit_Opcode)
+      local combobox = self.ui.opcodeType
+      combobox.onChange =
+         function(combobox)
+            local item = combobox:getSelectedData()
+            if item then -- this handler can fire when the combobox is cleared
+               WinCls:getInstance():_onTypeChanged(item.base)
+            end
+         end
+      --self.ui.opcodeType:SetSortsItems(true) -- TODO
+   end
    self.ui.opcodeBody = ItemTrig_OpcodeEdit_OpcodeBody
    --
-   self.ui.opcodeType:SetSortsItems(true)
 end
 function WinCls:handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
@@ -104,24 +115,28 @@ function WinCls:requestEdit(opener, opcode, dirty)
    if not deferred then
       return
    end
+   self.settingUp = true
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
    do
-      local function _onSelect(combobox, name, item, selectionChanged, oldItem)
-         if selectionChanged then
-            WinCls:getInstance():_onTypeChanged(item.base)
-         end
-      end
       local list
       if opcode.type == "condition" then
          list = ItemTrig.tableConditions
-         self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_C))
+         if dirty then
+            self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_C_NEW))
+         else
+            self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_C))
+         end
       else
          list = ItemTrig.tableActions
-         self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_A))
+         if dirty then
+            self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_A_NEW))
+         else
+            self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE_A))
+         end
       end
       local combobox = self.ui.opcodeType
-      combobox:ClearItems()
+      combobox:clear()
       for i = 1, table.getn(list) do
          local base = list[i]
          --
@@ -131,16 +146,20 @@ function WinCls:requestEdit(opener, opcode, dirty)
          -- to pass the OpcodeBase instances directly, as ZO_ScrollList tracks state 
          -- by storing it directly on the data items we push into it.)
          --
-         combobox:AddItem({ name = base.name, base = base, callback = _onSelect }, ZO_COMBOBOX_SUPRESS_UPDATE)
+         combobox:push({ name = base.name, base = base }, false)
       end
-      combobox:UpdateItems()
+      combobox:redraw()
    end
    self:refresh()
-   self.opcode.dirty = dirty or false -- writing to UI controls during the refresh may trigger "change" handlers, so set this here
+   self.opcode.dirty = dirty or false -- writing to UI controls during the above may trigger "change" handlers, so set this here
+   self.settingUp = false
    --
    return deferred
 end
 function WinCls:_onTypeChanged(opcodeBase)
+   if self.settingUp then
+      return
+   end
    local list
    if self.opcode.type == "condition" then
       list = ItemTrig.tableConditions
@@ -197,12 +216,15 @@ function WinCls:refresh(options) -- Render the opcode being edited.
    do -- opcode type
       local opcodeBase = self.opcode.working.base
       local combobox   = self.ui.opcodeType
-      combobox:SetSelectedItemByEval(function(item) return item.base == opcodeBase end, true)
+      combobox:select(function(item) return item.base == opcodeBase end)
    end
    self:redrawDescription(options)
 end
 
 function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
+   if self.settingUp then
+      return
+   end
    local editor   = ItemTrig.windows.opcodeEdit
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])

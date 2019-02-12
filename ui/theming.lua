@@ -65,4 +65,6 @@ ItemTrig.theme = {
    COMBOBOX_FOCUS_RING         = { 0.70, 0.25, 0.00, 1 },
    COMBOBOX_MOUSEOVER_TEXT     = { 1.00, 1.00, 1.00, 1 },
    COMBOBOX_MOUSEOVER_BACK     = { 0.70, 0.25, 0.00, 1 },
+   COMBOBOX_BODY_BORDER_TOP    = { 0.70, 0.25, 0.00, 1 },
+   COMBOBOX_BODY_BORDER_BOTTOM = { 0.00, 0.00, 0.00, 1 },
 }

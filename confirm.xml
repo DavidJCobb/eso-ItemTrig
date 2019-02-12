@@ -8,7 +8,8 @@
          inherits="ItemTrig_UITemplate_WWindow"
       >
          <Anchor point="CENTER" />
-         <Dimensions x="500" y="150" />
+         <!-- <Dimensions x="500" y="150" /> -->
+         <Dimensions x="625" y="300" />
          <OnInitialized> ItemTrig:setupWindow("genericConfirm", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Buttons" resizeToFitDescendents="true">
@@ -18,11 +19,11 @@
                   <Control name="$(parent)Positioner">
                      <Anchor point="BOTTOM" />
                   </Control>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)Y" text="Yes">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Y" text="Yes">
                      <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMRIGHT" offsetX="8" />
                      <OnClicked> ItemTrig.windows.genericConfirm:yes() </OnClicked>
                   </Button>
-                  <Button inherits="ZO_DefaultButton" name="$(parent)N" text="No">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)N" text="No">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked> ItemTrig.windows.genericConfirm:no() </OnClicked>
                   </Button>
@@ -33,12 +34,13 @@
                <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons"  relativePoint="TOPRIGHT" />
                <Controls>
                   <Label name="$(parent)Text" 
-                     font="ZoFontGameMedium"
+                     font="ITEMTRIG_FONT_BASIC"
                      horizontalAlignment="CENTER"
                      verticalAlignment="CENTER"
                   >
                      <Anchor point="TOPLEFT"  offsetY="15" />
                      <Anchor point="TOPRIGHT" offsetY="15" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                </Controls>
             </Control>

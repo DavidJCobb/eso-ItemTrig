@@ -37,7 +37,7 @@
                   <Control name="$(parent)Enum">
                      <AnchorFill />
                      <Controls>
-                        <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_ThemedCombobox">
+                        <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_WCombobox">
                            <Anchor point="TOPLEFT" />
                            <Anchor point="TOPRIGHT" />
                         </Control>
@@ -67,17 +67,13 @@
                            multiLine="false"
                            newLineEnabled="false"
                            textType="TEXT_TYPE_NUMERIC"
+                           inherits="ItemTrig_UITemplate_ThemedEditbox"
                         >
                            <Anchor point="TOPRIGHT" />
                            <Dimensions x="100" />
                            <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
-                           <Controls>
-                              <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
-                                 <AnchorFill/>
-                              </Backdrop>
-                           </Controls>
                         </EditBox>
-                        <Control name="$(parent)Qualifier" inherits="ZO_ScrollableComboBox">
+                        <Control name="$(parent)Qualifier" inherits="ItemTrig_UITemplate_WCombobox">
                            <Anchor point="TOPLEFT" />
                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Number" relativePoint="TOPLEFT" offsetX="-5" />
                         </Control>

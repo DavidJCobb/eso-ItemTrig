@@ -30,7 +30,7 @@
                      <Dimensions x="113" />
                      <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
-                  <Control name="ItemTrig_OpcodeEdit_Opcode" inherits="ItemTrig_UITemplate_ThemedCombobox">
+                  <Control name="ItemTrig_OpcodeEdit_Opcode" inherits="ItemTrig_UITemplate_WCombobox">
                      <Anchor point="TOPLEFT"  offsetX="120" />
                      <Anchor point="TOPRIGHT" />
                   </Control>
