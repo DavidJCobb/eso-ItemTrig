@@ -55,6 +55,7 @@ function ItemTrig.UI.WScrollList:_construct(options)
       _pool       = nil,
    }
    self.contents   = self:GetNamedChild("Contents")
+   self.dirty      = false -- list items have been added/removed and we haven't redrawn yet
    self.scrollbar  = scrollbar
    self.scrollBtnU = GetControl(scrollbar, "Up")
    self.scrollBtnD = GetControl(scrollbar, "Down")
@@ -66,6 +67,7 @@ function ItemTrig.UI.WScrollList:_construct(options)
    self.paddingBetween = options.paddingBetween or 0
    self.paddingEnd     = options.paddingEnd     or 0
    self.listItems      = {} -- data items
+   self.listItemStates = {} -- (TODO) states for list items, i.e. cached top/bottom edge offsets
    do
       local factoryFunction =
          function(objectPool)
@@ -87,6 +89,8 @@ function ItemTrig.UI.WScrollList:clear(update)
    ZO_ClearNumericallyIndexedTable(self.listItems)
    if (update == true) or (update == nil) then
       self:redraw()
+   else
+      self.dirty = true
    end
 end
 function ItemTrig.UI.WScrollList:controlByIndex(index)
@@ -127,6 +131,8 @@ function ItemTrig.UI.WScrollList:push(obj, update)
    table.insert(self.listItems, obj)
    if (update == true) or (update == nil) then
       self:redraw()
+   else
+      self.dirty = true
    end
 end
 function ItemTrig.UI.WScrollList:_onRemoved(index, data) -- for subclasses to override
@@ -153,6 +159,8 @@ function ItemTrig.UI.WScrollList:remove(x, update)
    self:_onRemoved(x, item)
    if (update == true) or (update == nil) then
       self:redraw()
+   else
+      self.dirty = true
    end
 end
 function ItemTrig.UI.WScrollList:resizeScrollbar(scrollMax)
@@ -247,6 +255,7 @@ function ItemTrig.UI.WScrollList:redraw()
       total = total - self.paddingBetween
    end
    self.scrollMax = total
+   self.dirty     = false
    self:resizeScrollbar(total)
    self:onRedrawOrReposition()
 end

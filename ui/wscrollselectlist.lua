@@ -220,6 +220,7 @@ function WScrollSelectList:select(x)
 end
 function WScrollSelectList:_getExtraConstructorParams(index)
    return {
+      index    = index,
       selected = self:isIndexSelected(index)
    }
 end

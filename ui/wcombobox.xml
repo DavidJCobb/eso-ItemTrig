@@ -24,21 +24,23 @@
             </Label>
          </Controls>
       </Control>
-      <Control name="ItemTrig_UITemplate_WCombobox" virtual="true">
+      <Control name="ItemTrig_UITemplate_WCombobox" virtual="true" mouseEnabled="true">
          <Dimensions x="140" y="42" />
          <OnInitialized> ItemTrig.UI.WCombobox:install(self) </OnInitialized>
          <OnMouseUp>
             local combobox = ItemTrig.UI.WCombobox:cast(self)
-            if combobox.state._preventBubble then
-               combobox.state._preventBubble = false
-               return
-            end
             PlaySound(SOUNDS.COMBO_CLICK)
             combobox:open()
          </OnMouseUp>
          <Controls>
-            <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
+            <Texture name="$(parent)Edge" excludeFromResizeToFitExtents="true">
                <AnchorFill />
+               <Controls>
+                  <Texture name="$(parent)Back" excludeFromResizeToFitExtents="true">
+                     <Anchor point="TOPLEFT"     offsetX="3"  offsetY="3" />
+                     <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-3" />
+                  </Texture>
+               </Controls>
             </Texture>
             <Label name="$(parent)SelectedItemText" font="ITEMTRIG_FONT_BASIC" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
                <Anchor point="TOPLEFT"     offsetX="7" />
@@ -47,17 +49,13 @@
             <Button name="$(parent)OpenButton" inherits="ZO_DropdownButton">
                <Dimensions x="16" y="16" />
                <Anchor point="RIGHT" offsetX="-3" />
-               <OnClicked>
-                  local combobox = ItemTrig.UI.WCombobox:cast(self:GetParent())
-                  combobox.state._preventBubble = true
-                  combobox:toggle()
-               </OnClicked>
+               <OnClicked> ItemTrig.UI.WCombobox:cast(self:GetParent()):toggle() </OnClicked>
             </Button>
             <Control name="$(parent)Contents" mouseEnabled="true" tier="HIGH" hidden="true">
                <Anchor point="TOPLEFT"  relativePoint="BOTTOMLEFT" />
                <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
                <Controls>
-                  <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
+                  <Texture name="$(parent)Back" excludeFromResizeToFitExtents="true">
                      <AnchorFill />
                   </Texture>
                   <Control name="$(parent)ScrollPane" inherits="ItemTrig_UITemplate_WScrollSelectList">

@@ -213,6 +213,17 @@ function WClass:cast(control) -- static method
    end
    assert(false, "Cannot cast a " .. type(control) .. " to " .. self[CLASSNAME_KEY_NAME] ..  ".")
 end
+function WClass:controlByPath(...)
+   local path    = {...}
+   local control = self:asControl()
+   for i = 1, table.getn(path) do
+      control = GetControl(control, path[i])
+      if not control then
+         break
+      end
+   end
+   return control
+end
 function WClass:GetNamedChild(name)
    return GetControl(self:asControl(), name)
 end

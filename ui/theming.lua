@@ -61,4 +61,8 @@ ItemTrig.theme = {
    TEXTEDIT_TEXT               = { 0, 0, 0, 1 },
    TEXTEDIT_SELECTION          = { 0.70, 0.25, 0.00, 1 },
    COMBOBOX_BACKGROUND         = { 1, 1, 1, 1 },
+   COMBOBOX_TEXT               = { 0, 0, 0, 1 },
+   COMBOBOX_FOCUS_RING         = { 0.70, 0.25, 0.00, 1 },
+   COMBOBOX_MOUSEOVER_TEXT     = { 1.00, 1.00, 1.00, 1 },
+   COMBOBOX_MOUSEOVER_BACK     = { 0.70, 0.25, 0.00, 1 },
 }
