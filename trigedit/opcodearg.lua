@@ -81,6 +81,7 @@ function WinCls:_construct()
    local control = self:asControl()
    ItemTrig.assign(self, {
       ui = {
+         viewholder = nil, -- WViewHolder
          views = {
             checkbox  = nil, -- TODO
             enum      = nil,
@@ -106,7 +107,8 @@ function WinCls:_construct()
       SCENE_MANAGER:RegisterTopLevel(control, false)
    end
    do
-      local viewholder = ItemTrig.UI.WViewHolder:cast(self:GetNamedChild("Body"))
+      local viewholder   = ItemTrig.UI.WViewHolder:cast(self:GetNamedChild("Body"))
+      self.ui.viewholder = viewholder
       self.ui.views.enum      = ViewCls.Enum:install(viewholder:GetNamedChild("Enum"))
       self.ui.views.multiline = ViewCls.String:install(viewholder:GetNamedChild("Multiline"))
       self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
@@ -185,8 +187,19 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       -- TODO: compress window size
       --
    end
+   self:autoSize()
    self.dirty = false -- writing to UI controls may trigger "change" handlers, so set this here
    return deferred
+end
+function WinCls:autoSize()
+   if not self.view then
+      return
+   end
+   local window   = self:asControl()
+   local viewhold = self.ui.viewholder:asControl()
+   local view     = self.view:asControl()
+   window:SetWidth (window:GetWidth()  - viewhold:GetWidth()  + view:GetWidth())
+   window:SetHeight(window:GetHeight() - viewhold:GetHeight() + view:GetHeight())
 end
 function WinCls:onArgumentEdited()
    self.dirty = true

@@ -369,6 +369,8 @@ function WinCls:requestEdit(opener, trigger, dirty)
       self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    end
    self.ui.triggerNameField:SetText(self.trigger.working.name)
+   self.ui.paneConditions:select(nil)
+   self.ui.paneActions:select(nil)
    self.trigger.dirty = dirty or false -- needed here since SetText fires a change handler
    self:refresh()
    return deferred

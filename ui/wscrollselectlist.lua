@@ -133,13 +133,19 @@ function WScrollSelectList:deselectAll()
    if s.multi then
       if callback then
          for i = 1, table.getn(s.index) do
-            callback(s.index[i], self:controlByIndex(s.index[i]), self)
+            local control = self:controlByIndex(s.index[i])
+            if control then
+               callback(s.index[i], control, self)
+            end
          end
       end
       s.index = {}
    elseif s.index then
       if callback then
-         callback(s.index, self:controlByIndex(s.index), self)
+         local control = self:controlByIndex(s.index)
+         if control then
+            callback(s.index, self:controlByIndex(s.index), self)
+         end
       end
       s.index = nil
    end
@@ -251,6 +257,10 @@ function WScrollSelectList:select(x)
    -- You can pass a function to iterate over all list 
    -- items; return truthy to select.
    --
+   if x == nil then
+      self:deselectAll()
+      return
+   end
    local s = self.selection
    if s.multi then
       if type(x) == "function" then

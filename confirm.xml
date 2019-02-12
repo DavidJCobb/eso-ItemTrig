@@ -19,13 +19,13 @@
                   <Control name="$(parent)Positioner">
                      <Anchor point="BOTTOM" />
                   </Control>
-                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Y" text="Yes">
-                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMRIGHT" offsetX="8" />
-                     <OnClicked> ItemTrig.windows.genericConfirm:yes() </OnClicked>
-                  </Button>
                   <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)N" text="No">
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked> ItemTrig.windows.genericConfirm:no() </OnClicked>
+                  </Button>
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Y" text="Yes">
+                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMRIGHT" offsetX="8" />
+                     <OnClicked> ItemTrig.windows.genericConfirm:yes() </OnClicked>
                   </Button>
                </Controls>
             </Control>

@@ -10,10 +10,10 @@ local FRAMES_NEEDED_FOR_THE_RESIZE_TO_BLOODY_WORK = 2
 -- makes us slightly too small; seems the getters for text height are busted.
 
 function Cls:_construct()
-   self.result = nil
-   self.text   = GetControl(self:GetNamedChild("Body"), "Text")
-   self.buttonYes = GetControl(self:GetNamedChild("Buttons"), "Y")
-   self.buttonNo  = GetControl(self:GetNamedChild("Buttons"), "N")
+   self.result    = nil
+   self.text      = self:controlByPath("Body", "Text")
+   self.buttonYes = self:controlByPath("Buttons", "Y")
+   self.buttonNo  = self:controlByPath("Buttons", "N")
    do -- Set up onAfterShow
       --
       -- We need to be able to resize the confirmation dialog to fit all of 

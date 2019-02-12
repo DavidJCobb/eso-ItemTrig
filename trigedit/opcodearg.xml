@@ -15,19 +15,22 @@
                <Anchor point="BOTTOMLEFT" />
                <Anchor point="BOTTOMRIGHT" />
                <Controls>
-                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_SAVE">
-                     <Anchor point="BOTTOMRIGHT" />
-                     <OnClicked> ItemTrig.windows.opcodeArgEdit:commit() </OnClicked>
-                  </Button>
+                  <Control name="$(parent)Positioner">
+                     <Anchor point="BOTTOM" />
+                  </Control>
                   <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Cancel" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_CANCEL">
-                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)OK" relativePoint="BOTTOMLEFT" offsetX="-8" />
+                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMLEFT" offsetX="-8" />
                      <OnClicked> ItemTrig.windows.opcodeArgEdit:cancel() </OnClicked>
+                  </Button>
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_SAVE">
+                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMRIGHT" offsetX="8" />
+                     <OnClicked> ItemTrig.windows.opcodeArgEdit:commit() </OnClicked>
                   </Button>
                </Controls>
             </Control>
             <Control name="$(parent)Body" inherits="ItemTrig_UITemplate_WViewHolder">
-               <Anchor point="TOPLEFT" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+               <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom"   relativePoint="TOPRIGHT" />
                <Controls>
                   <!-- START OF VIEWS
                      These controls are technically WViewHolderViews, but they're 
@@ -35,7 +38,9 @@
                      shouldn't inherit anything.
                   -->
                   <Control name="$(parent)Enum">
-                     <AnchorFill />
+                     <Anchor point="TOPLEFT" />
+                     <Dimensions x="286" />
+                     <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_WCombobox">
                            <Anchor point="TOPLEFT" />
@@ -44,24 +49,31 @@
                      </Controls>
                   </Control>
                   <Control name="$(parent)Multiline">
-                     <AnchorFill />
+                     <Anchor point="TOPLEFT" />
+                     <Dimensions x="400" y="168" />
                      <Controls>
                         <EditBox name="$(parent)Value"
-                           inherits="ZO_DefaultEditMultiLine"
+                           inherits="ItemTrig_UITemplate_ThemedEditbox"
+                           multiLine="true"
+                           newLineEnabled="true"
                         >
                            <Anchor point="TOPLEFT" />
                            <Anchor point="BOTTOMRIGHT" />
                            <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
-                           <Controls>
-                              <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
-                                 <AnchorFill/>
-                              </Backdrop>
-                           </Controls>
                         </EditBox>
                      </Controls>
                   </Control>
                   <Control name="$(parent)Quantity">
-                     <AnchorFill />
+                     <Anchor point="TOPLEFT" />
+                     <Dimensions x="286" />
+                     <OnInitialized>
+                        --
+                        -- We can't use resizeToFitDescendants, because that's a constant 
+                        -- thing; if you open the combobox, the container resizes to hold 
+                        -- the combobox's contents.
+                        --
+                        ItemTrig.fitHeightToChildren(self)
+                     </OnInitialized>
                      <Controls>
                         <EditBox name="$(parent)Number"
                            multiLine="false"
@@ -80,21 +92,18 @@
                      </Controls>
                   </Control>
                   <Control name="$(parent)String">
-                     <AnchorFill />
+                     <Anchor point="TOPLEFT" />
+                     <Dimensions x="400" />
+                     <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <EditBox name="$(parent)Value"
                            multiLine="false"
                            newLineEnabled="false"
-                           inherits="ZO_DefaultEdit"
+                           inherits="ItemTrig_UITemplate_ThemedEditbox"
                         >
                            <Anchor point="TOPLEFT" />
                            <Anchor point="TOPRIGHT" />
                            <OnTextChanged> ItemTrig.windows.opcodeArgEdit:onArgumentEdited() </OnTextChanged>
-                           <Controls>
-                              <Backdrop name="$(parent)Bg" inherits="ZO_EditBackdrop">
-                                 <AnchorFill/>
-                              </Backdrop>
-                           </Controls>
                         </EditBox>
                      </Controls>
                   </Control>
