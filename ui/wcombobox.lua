@@ -30,7 +30,6 @@ function WCombobox:_construct(options)
       contents = self:GetNamedChild("Contents"),
       pane     = WScrollSelectList:cast(self:controlByPath("Contents", "ScrollPane")),
    }
-   self.shouldSort = options.shouldSort or false
    self.element = {
       onSelect      = options.element.onSelect      or nil, -- callback
       onDeselect    = options.element.onDeselect    or nil, -- callback
@@ -54,6 +53,9 @@ function WCombobox:_construct(options)
    }
    do -- configure pane
       local pane = self.controls.pane
+      if options.shouldSort then
+         pane:setShouldSort(true)
+      end
       pane.element.template      = options.element.template      or "ItemTrig_UITemplate_WComboboxItem"
       pane.element.onSelect      = options.element.onSelect      or nil -- callback
       pane.element.onDeselect    = options.element.onDeselect    or nil -- callback
@@ -264,10 +266,11 @@ function WCombobox:open()
 end
 function WCombobox:push(...)
    assert(self ~= WCombobox, "This method must be called on an instance.")
-   local empty = self.controls.pane:count() == 0
-   self.controls.pane:push(...)
-   if empty and self.controls.pane:count() > 0 then
-      self.controls.pane:select(1)
+   local pane  = self.controls.pane
+   local empty = pane:count() == 0
+   pane:push(...)
+   if empty and pane:count() > 0 then
+      pane:select(1)
    end
 end
 function WCombobox:refreshStyle()
@@ -304,6 +307,12 @@ function WCombobox:setDisabled(setTo)
    if setTo and self:isOpen() then
       self:close()
    end
+end
+function WCombobox:setShouldSort(...)
+   self.controls.pane:setShouldSort(...)
+end
+function WCombobox:setSortFunction(...)
+   self.controls.pane:setSortFunction(...)
 end
 function WCombobox:toggle()
    assert(self ~= WCombobox, "This method must be called on an instance.")

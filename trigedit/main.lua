@@ -159,7 +159,7 @@ end
 function WinCls:newTrigger()
    local editor  = ItemTrig.windows.triggerEdit
    local trigger = ItemTrig.Trigger:new()
-   trigger.name = "Unnamed trigger"
+   trigger.name = GetString(ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME)
    editor:requestEdit(self, trigger, true):done(
       function()
          local win  = WinCls:getInstance()

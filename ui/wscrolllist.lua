@@ -55,6 +55,10 @@ local function onScrollDownButton(self)
    widget:scrollBy(widget.scrollStep)
 end
 
+local function _defaultSortFunction(itemA, itemB)
+   return tostring(itemA.name or itemA):lower() < tostring(itemB.name or itemB):lower()
+end
+
 ItemTrig.UI.WScrollList = ItemTrig.UI.WidgetClass:makeSubclass("WScrollList", "scrollList")
 local WScrollList = ItemTrig.UI.WScrollList
 function WScrollList:_construct(options)
@@ -83,6 +87,8 @@ function WScrollList:_construct(options)
    self.scrollStep = options.scrollStep or 40
    self.scrollTop      = 0
    self.scrollMax      = -1 -- height of all generated elements
+   self.shouldSort     = options.shouldSort     or false
+   self.sortFunction   = options.sortFunction   or _defaultSortFunction
    self.paddingSides   = options.paddingSides   or 0 -- padding (except paddingBetween) is applied as a side-effect of self:resizeScrollbar
    self.paddingStart   = options.paddingStart   or 0
    self.paddingBetween = options.paddingBetween or 0
@@ -213,6 +219,9 @@ function WScrollList:push(obj, update)
       offsetBottom = nil,
       controlIndex = nil,
    })
+   if self.shouldSort then
+      self:sort()
+   end
    if (update == true) or (update == nil) then
       self:redraw()
    else
@@ -521,4 +530,42 @@ function WScrollList:scrollTo(position, options) -- analogous to ZO_ScrollList_S
    if not options.fromSlider then
       self.scrollbar:SetValue(position)
    end
+end
+function WScrollList:setShouldSort(to, update)
+   self.shouldSort = to
+   if to then
+      self:sort()
+      if (update == true) or (update == nil) then
+         self:redraw()
+      end
+   end
+end
+function WScrollList:setSortFunction(f, update)
+   self.sortFunction = f or _defaultSortFunction
+   if self.shouldSort then
+      self:sort()
+      if (update == true) or (update == nil) then
+         self:redraw()
+      end
+   end
+end
+function WScrollList:sort()
+   local indices = {}
+   for k, _ in ipairs(self.listItems) do
+      table.insert(indices, k)
+   end
+   table.sort(indices, function(a, b)
+      local itemA = self.listItems[a]
+      local itemB = self.listItems[b]
+      return self.sortFunction(itemA, itemB)
+   end)
+   local replItems  = {}
+   local replStates = {}
+   for i = 1, table.getn(indices) do
+      replItems[i]  = self.listItems[indices[i]]
+      replStates[i] = self.listItemStates[indices[i]]
+   end
+   self.listItems      = replItems
+   self.listItemStates = replStates
+   self.dirty = true
 end

@@ -136,6 +136,7 @@ function WinCls:requestEdit(opener, opcode, dirty)
          end
       end
       local combobox = self.ui.opcodeType
+      combobox:setShouldSort(true, false)
       combobox:clear()
       for i = 1, table.getn(list) do
          local base = list[i]

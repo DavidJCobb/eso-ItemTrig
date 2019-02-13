@@ -5,7 +5,7 @@ ItemTrig.Trigger.__index = ItemTrig.Trigger
 function ItemTrig.Trigger:new()
    local result = {}
    setmetatable(result, self)
-   result.name        = ""
+   result.name        = GetString(ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME)
    result.enabled     = true
    result.entryPoints = {}
    result.conditions  = {} -- array

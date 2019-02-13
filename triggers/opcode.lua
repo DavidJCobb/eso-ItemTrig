@@ -60,6 +60,8 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
          return ItemTrig.firstIn(arg.enum) -- defined in /misc/table.lua
       end
       return ""
+   elseif t == "trigger" then
+      return ItemTrig.Trigger:new()
    end
    do -- log error
       local eIndex = tostring(tonumber(index))
@@ -68,7 +70,7 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
       end
       local eOpcode = self.name
       if type(self.opcode) == "number" then
-         eOpcode = string.format("%#%d (%s)", self.opcode, eOpcode)
+         eOpcode = "#" .. string.format("%d (%s)", self.opcode, eOpcode)
       end
       assert(false,
          string.format(
