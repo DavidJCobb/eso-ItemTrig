@@ -29,6 +29,20 @@ end
 --    widget:push(someData2, false)
 --    widget:redraw()
 --
+-- There are some limitations: list items must have a consistent 
+-- height, and should not change height unpredictably. Under the 
+-- hood, this widget only  maintains  controls  for  the visible 
+-- list items, and recycles those as the user scrolls; it caches 
+-- the heights of list items that are scrolled out of view. This 
+-- means that if list items change height unexpectedly, the list 
+-- may break. When in doubt, call redraw() again.
+--
+-- Related to that fact: the "toConstruct" callback, used to set 
+-- up a list item,  may be called multiple times for a list item 
+-- that already  exists;  and  element  callbacks on  subclasses 
+-- (e.g. onSelect/onDeselect for WScrollSelectList) may not fire 
+-- if those list items are scrolled out of view.
+--
 
 local function onScrollUpButton(self)
    local widget = ItemTrig.UI.WScrollList:cast(self:GetParent():GetParent())
@@ -76,6 +90,7 @@ function WScrollList:_construct(options)
    self.listItems      = {} -- data items
    self.listItemStates = {} -- states for list items, i.e. cached top/bottom edge offsets
    self.visibleItems   = {} -- array of indices
+   self.listItemMoused = nil -- last list item index to receive mouseover
    do
       local factoryFunction =
          function(objectPool)
@@ -134,6 +149,44 @@ do -- functions for working directly with controls
          end
       end
       return nil
+   end
+end
+do -- internal events
+   function WScrollList:_onItemMouseEnter(control)
+      self.listItemMoused = self:indexOfControl(control)
+   end
+   function WScrollList:_onItemMouseExit(control)
+      self.listItemMoused = nil
+   end
+   function WScrollList:_updateMouseoverStateOnScroll()
+      --
+      -- OnMouseEnter and OnMouseExit only fire when the mouse actively 
+      -- moves over or off of a control; if the control itself is moved 
+      -- under or out from under the mouse, by a script, then the event 
+      -- handlers will not fire. We want them to fire, so we'll do it 
+      -- ourselves.
+      --
+      local function _getListItemFromDescendant(c)
+         local p = c:GetParent()
+         while p and p ~= self.contents do
+            c = p
+            p = p:GetParent()
+         end
+         return c
+      end
+      --
+      local target   = WINDOW_MANAGER:GetMouseOverControl()
+      local previous = self:controlByIndex(self.listItemMoused)
+      if target ~= previous then
+         if previous then
+            ItemTrig.dispatchEvent(previous, "OnMouseExit")
+         end
+         if target and target:IsChildOf(self.contents) then
+            target = _getListItemFromDescendant(target)
+            assert(target ~= nil, "Unable to get the list item that contains " .. (WINDOW_MANAGER:GetMouseOverControl():GetName()) .. ".")
+            ItemTrig.dispatchEvent(target, "OnMouseEnter")
+         end
+      end
    end
 end
 
@@ -277,6 +330,9 @@ function WScrollList:redraw()
          local control, key = self.element._pool:AcquireObject()
          child   = control
          created = created + 1
+         --
+         ZO_PreHookHandler(child, "OnMouseEnter", function(self) WScrollList:fromItem(self):_onItemMouseEnter(self) end)
+         ZO_PreHookHandler(child, "OnMouseExit",  function(self) WScrollList:fromItem(self):_onItemMouseExit(self) end)
       end
       child:SetHidden(false)
       self.element.toConstruct(child, self.listItems[i], self:_getExtraConstructorParams(i))
@@ -456,6 +512,7 @@ function WScrollList:scrollTo(position, options) -- analogous to ZO_ScrollList_S
          self.scrollTop = position
          self:reposition()
       end
+      self:_updateMouseoverStateOnScroll()
    end
    if self.scrollbar:IsHidden() then
       self.scrollTop = position

@@ -83,6 +83,11 @@ function WCombobox:_construct(options)
                combobox:onChange()
             end
          end
+      pane.onItemClicked =
+         function(self, index)
+            local combobox = _comboboxFromPane(self)
+            combobox:_onItemClicked(index)
+         end
    end
    self:refreshStyle()
 end
@@ -121,9 +126,6 @@ do -- internals
       else
          self.controls.label:SetText("")
       end
-      if self:isOpen() then
-         self:close()
-      end
    end
    function WCombobox:_onGlobalMouseUp(eventCode, button)
       if self:isOpen() then
@@ -138,6 +140,11 @@ do -- internals
             contents:SetHidden(false)
             self:open()
          end
+      end
+   end
+   function WCombobox:_onItemClicked(index)
+      if self:isOpen() then
+         self:close()
       end
    end
    function WCombobox:_onItemMouseEnter(control)
@@ -290,6 +297,13 @@ function WCombobox:select(x)
       return self.controls.pane:select(x)
    end
    assert(false, "Invalid argument type passed to WCombobox:select(...).")
+end
+function WCombobox:setDisabled(setTo)
+   assert(self ~= WCombobox, "This method must be called on an instance.")
+   self.state.disabled = setTo
+   if setTo and self:isOpen() then
+      self:close()
+   end
 end
 function WCombobox:toggle()
    assert(self ~= WCombobox, "This method must be called on an instance.")

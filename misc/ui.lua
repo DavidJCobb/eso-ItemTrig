@@ -2,6 +2,13 @@ if not ItemTrig then return end
 
 ItemTrig.PIXEL = GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth"))
 
+function ItemTrig.dispatchEvent(control, eventName, ...)
+   assert(control ~= nil, "Cannot dispatch an event to a nil control.")
+   local f = control:GetHandler(eventName)
+   if f then
+      f(control, ...)
+   end
+end
 function ItemTrig.fitHeightToChildren(control, zeroIfNone)
    local count = control:GetNumChildren()
    if count < 1 then

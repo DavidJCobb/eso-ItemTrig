@@ -29,6 +29,11 @@ do -- event handlers provided for subclasses and instances to override
       -- Runs after element (de)select callbacks.
       --
    end
+   function WScrollSelectList:onItemClicked(index)
+      --
+      -- Runs before element (de)select callbacks.
+      --
+   end
 end
 do -- internal event handlers, not to be overridden
    function WScrollSelectList:_onDoubleClick(control)
@@ -47,6 +52,7 @@ do -- internal event handlers, not to be overridden
       if not i then
          return
       end
+      self:onItemClicked(i)
       local s = self.selection
       if s.multi then
          if IsShiftKeyDown() then
