@@ -45,7 +45,8 @@
                <AnchorFill />
             </Texture>
             <Label name="$(parent)Text" font="ITEMTRIG_FONT_LIST_ITEM" text="Opcode text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-               <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+               <Anchor point="TOPLEFT"  offsetX="7" />
+               <Anchor point="TOPRIGHT" offsetX="-7" />
             </Label>
          </Controls>
       </Control>

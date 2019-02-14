@@ -53,9 +53,10 @@
                      <Dimensions x="400" y="168" />
                      <Controls>
                         <EditBox name="$(parent)Value"
-                           inherits="ItemTrig_UITemplate_ThemedEditbox"
+                           maxInputCharacters="2048"
                            multiLine="true"
                            newLineEnabled="true"
+                           inherits="ItemTrig_UITemplate_ThemedEditbox"
                         >
                            <Anchor point="TOPLEFT" />
                            <Anchor point="BOTTOMRIGHT" />
@@ -114,6 +115,7 @@
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <EditBox name="$(parent)Value"
+                           maxInputCharacters="255"
                            multiLine="false"
                            newLineEnabled="false"
                            inherits="ItemTrig_UITemplate_ThemedEditbox"

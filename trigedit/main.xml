@@ -14,9 +14,11 @@
             </Button>
             <Label name="$(parent)Name" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="5" offsetY="-2" relativeTo="$(parent)Enabled" />
+               <Anchor point="TOPRIGHT" />
             </Label>
             <Label name="$(parent)Description" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-               <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
+               <Anchor point="TOPLEFT"  relativePoint="BOTTOMLEFT"  relativeTo="$(parent)Name" />
+               <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Name" />
             </Label>
          </Controls>
       </Control>

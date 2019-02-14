@@ -320,77 +320,88 @@ end
 function WScrollList:redraw()
    assert(self.element.toConstruct ~= nil, "You must supply a constructor callback before WScrollList can render list items.")
    assert(self.element.template    ~= "",  "You must supply a template to use for list items before WScrollList can render list items.")
-   self.visibleItems = {}
-   local contents  = self.contents
-   local existing  = contents:GetNumChildren()
-   local created   = 0
-   local count     = self:count()
-   local yOffset   = -self.scrollTop
-   local j         = 1
-   local viewStart = 0
-   local viewEnd   = contents:GetHeight()
-   for i = 1, count do
-      local child
-      if j <= existing + created then
-         child = contents:GetChild(j)
-      else
-         local control, key = self.element._pool:AcquireObject()
-         child   = control
-         created = created + 1
-         --
-         ZO_PreHookHandler(child, "OnMouseEnter", function(self) WScrollList:fromItem(self):_onItemMouseEnter(self) end)
-         ZO_PreHookHandler(child, "OnMouseExit",  function(self) WScrollList:fromItem(self):_onItemMouseExit(self) end)
-      end
-      child:SetHidden(false)
-      self.element.toConstruct(child, self.listItems[i], self:_getExtraConstructorParams(i))
-      child:ClearAnchors()
-      child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
-      child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
-      local top    = ItemTrig.offsetTop(child)
-      local bottom = ItemTrig.offsetBottom(child)
-      self.listItemStates[i].top          = top    + self.scrollTop
-      self.listItemStates[i].bottom       = bottom + self.scrollTop
-      self.listItemStates[i].offsetTop    = top
-      self.listItemStates[i].offsetBottom = bottom
-      self.listItemStates[i].controlIndex = nil
-      assert(bottom - top == child:GetHeight(), string.format("Child bounds don't match; [%d, %d] -> %d ~= %d", top, bottom, (bottom - top), child:GetHeight()))
-      local isVisible = (bottom > viewStart and top < viewEnd)
-      if isVisible or (not self.aggressiveRecycling) then
-         if isVisible then
-            table.insert(self.visibleItems, i)
+   --
+   -- We have to run this twice in order for list items to be able to properly 
+   -- compute their heights in certain cases, such as when a list item's height 
+   -- depends on the height of contained text that can word-wrap.
+   --
+   -- Yes, I know this is ugly, but as long as Zenimax refuses to document prec-
+   -- isely when, how, and why the UI reflows, we have to do stupid crap like 
+   -- this, because it's impossible to know what the better approaches even are.
+   --
+   for i = 1, 2 do
+      self.visibleItems = {}
+      local contents  = self.contents
+      local existing  = contents:GetNumChildren()
+      local created   = 0
+      local count     = self:count()
+      local yOffset   = -self.scrollTop
+      local j         = 1
+      local viewStart = 0
+      local viewEnd   = contents:GetHeight()
+      for i = 1, count do
+         local child
+         if j <= existing + created then
+            child = contents:GetChild(j)
+         else
+            local control, key = self.element._pool:AcquireObject()
+            child   = control
+            created = created + 1
+            --
+            ZO_PreHookHandler(child, "OnMouseEnter", function(self) WScrollList:fromItem(self):_onItemMouseEnter(self) end)
+            ZO_PreHookHandler(child, "OnMouseExit",  function(self) WScrollList:fromItem(self):_onItemMouseExit(self) end)
          end
-         --
-         -- This control is in the visible area, so we shouldn't recycle it. 
-         -- Alternatively, this list is configured not to recycle controls 
-         -- (i.e. all list items should always be rendered).
-         --
-         self.listItemStates[i].controlIndex = j
-         j = j + 1
-      else
-         child:SetHidden(true)
-      end
-      yOffset = yOffset + child:GetHeight() + self.paddingBetween
-   end
-   if j <= existing then
-      --
-      -- If there were more controls than list items, then hide the excess 
-      -- controls.
-      --
-      for i = j, existing do
-         local child = contents:GetChild(i)
-         if child then
+         child:SetHidden(false)
+         self.element.toConstruct(child, self.listItems[i], self:_getExtraConstructorParams(i))
+         child:ClearAnchors()
+         child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
+         child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
+         local top    = ItemTrig.offsetTop(child)
+         local bottom = ItemTrig.offsetBottom(child)
+         self.listItemStates[i].top          = top    + self.scrollTop
+         self.listItemStates[i].bottom       = bottom + self.scrollTop
+         self.listItemStates[i].offsetTop    = top
+         self.listItemStates[i].offsetBottom = bottom
+         self.listItemStates[i].controlIndex = nil
+         assert(bottom - top == child:GetHeight(), string.format("Child bounds don't match; [%d, %d] -> %d ~= %d", top, bottom, (bottom - top), child:GetHeight()))
+         local isVisible = (bottom > viewStart and top < viewEnd)
+         if isVisible or (not self.aggressiveRecycling) then
+            if isVisible then
+               table.insert(self.visibleItems, i)
+            end
+            --
+            -- This control is in the visible area, so we shouldn't recycle it. 
+            -- Alternatively, this list is configured not to recycle controls 
+            -- (i.e. all list items should always be rendered).
+            --
+            self.listItemStates[i].controlIndex = j
+            j = j + 1
+         else
             child:SetHidden(true)
          end
+         yOffset = yOffset + child:GetHeight() + self.paddingBetween
       end
+      if j <= existing then
+         --
+         -- If there were more controls than list items, then hide the excess 
+         -- controls.
+         --
+         for i = j, existing do
+            local child = contents:GetChild(i)
+            if child then
+               child:SetHidden(true)
+            end
+         end
+      end
+      local total = 0
+      if count > 0 then
+         total = self.listItemStates[count].bottom or 0
+      end
+      self.scrollMax = total
+      self.dirty     = false
+      self:resizeScrollbar(total)
+      self:onRedrawOrReposition()
    end
-   local total = 0
-   if count > 0 then
-      total = self.listItemStates[count].bottom or 0
-   end
-   self.scrollMax = total
-   self.dirty     = false
-   self:resizeScrollbar(total)
-   self:onRedrawOrReposition()
    return
 end
 function WScrollList:reposition()
