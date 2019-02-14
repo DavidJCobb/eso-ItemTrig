@@ -23,7 +23,7 @@ do -- helper class for trigger list entries
          function(self, checked)
             local control = self:GetParent()
             local pane    = WinCls:getInstance().ui.pane
-            local index   = pane:indexofControl(control)
+            local index   = pane:indexOfControl(control)
             if not index then
                return
             end
