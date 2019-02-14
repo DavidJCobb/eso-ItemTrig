@@ -17,7 +17,7 @@ WWindow.style = {
    -- per-subclass by assigning a table to the subclass.
    --
    borderWidth        = 3 * ItemTrig.PIXEL,
-   borderDistance     = 7 * ItemTrig.PIXEL,
+   borderDistance     = 7,
    borderColor        = ItemTrig.theme.WINDOW_BORDER_COLOR,
    fillColorTop       = ItemTrig.theme.WINDOW_BACKGROUND_TOP,
    fillColorBottom    = ItemTrig.theme.WINDOW_BACKGROUND_BOTTOM,

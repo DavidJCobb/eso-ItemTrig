@@ -61,6 +61,56 @@ function ItemTrig.indexOf(tablevar, e)
       end
    end
 end
+function ItemTrig.hasCyclicalReferences(tablevar, options)
+   --
+   -- NOTE: Function is not thread-safe.
+   --
+   local KEY_IS_WALKED = " cyclical check has walked here " -- spaces in the key name make it unlikely for anyone to use it
+   local function _cleanup()
+      if options.dontCleanWalked then
+         return
+      end
+      for _, v in pairs(options.walkedList) do
+         v[KEY_IS_WALKED] = nil
+      end
+      tablevar[KEY_IS_WALKED] = nil
+   end
+   options = ItemTrig.assign(
+      {
+         honorMetatables = true,  -- NOTE: even if this is true, we don't iterate over __index keys due to Lua limitations
+         walkedList      = {},    -- for removing the key
+         dontCleanWalked = false, -- for recursive calls, should be true
+      },
+      options or {}
+   )
+   local recurseOptions = {
+      honorMetatables = options.honorMetatables,
+      walkedList      = options.walkedList,
+      dontCleanWalked = true
+   }
+   tablevar[KEY_IS_WALKED] = true
+   for k,v in pairs(tablevar) do
+      if k ~= KEY_IS_WALKED then
+         if not options.honorMetatables then
+            v = rawget(tablevar, k)
+         end
+         if type(v) == "table" then
+            if v[KEY_IS_WALKED] then
+               _cleanup()
+               return true
+            end
+            v[KEY_IS_WALKED] = true
+            table.insert(options.walkedList, v)
+            if ItemTrig.hasCyclicalReferences(v, recurseOptions) then
+               _cleanup()
+               return true
+            end
+         end
+      end
+   end
+   _cleanup()
+   return false
+end
 function ItemTrig.remove(tablevar, x)
    if type(x) == "number" then -- remove at index
       tablevar[x] = nil

@@ -22,10 +22,13 @@ do -- helper class for trigger list entries
       self.enabled.toggleFunction =
          function(self, checked)
             local control = self:GetParent()
-            --
-            -- TODO: TOGGLE TRIGGER ENABLE STATE
-            --
-            d("Clicked a trigger's 'enabled' toggle. Checked flag is: " .. tostring(checked))
+            local pane    = WinCls:getInstance().ui.pane
+            local index   = pane:indexofControl(control)
+            if not index then
+               return
+            end
+            local trigger = pane:at(index)
+            trigger.enabled = checked
          end
    end
    function TriggerListEntry:getBaseBackgroundColor()
@@ -154,6 +157,7 @@ function WinCls:onShow()
 end
 function WinCls:onHide()
    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybinds)
+   ItemTrig.Savedata:save()
 end
 
 function WinCls:newTrigger()

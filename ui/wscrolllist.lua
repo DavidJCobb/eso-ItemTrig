@@ -239,10 +239,8 @@ function WScrollList:remove(x, update)
    if not x then
       return
    end
-   if type(x) == "userdata" then
+   if type(x) ~= "number" then
       x = self:indexOf(x)
-   elseif type(x) ~= "number" then
-      x = self:indexOfData(x)
    end
    if x < 1 then
       return
@@ -373,7 +371,7 @@ function WScrollList:redraw()
       end
       yOffset = yOffset + child:GetHeight() + self.paddingBetween
    end
-   if j < existing then
+   if j <= existing then
       --
       -- If there were more controls than list items, then hide the excess 
       -- controls.

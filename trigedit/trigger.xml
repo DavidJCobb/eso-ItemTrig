@@ -31,7 +31,7 @@
             </Control>
             <Control name="$(parent)List" inherits="ItemTrig_UITemplate_ThemedScrollSelectList">
                <Anchor point="TOPLEFT" />
-               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons" relativePoint="BOTTOMLEFT" offsetX="-5" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons" relativePoint="BOTTOMLEFT" offsetX="-7" />
             </Control>
          </Controls>
       </Control>
@@ -63,8 +63,8 @@
          <OnInitialized> ItemTrig:setupWindow("triggerEdit", self) </OnInitialized>
          <Controls>
             <Control name="$(parent)Bottom">
-               <Anchor point="BOTTOMLEFT"  offsetY="-5" />
-               <Anchor point="BOTTOMRIGHT" offsetY="-5" />
+               <Anchor point="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" />
                <Dimensions y="50" />
                <Controls>
                   <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)OK" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_SAVE">
@@ -78,8 +78,8 @@
                </Controls>
             </Control>
             <Control name="$(parent)NameBar">
-               <Anchor point="TOPLEFT"  offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="TOPRIGHT" offsetY="5" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+               <Anchor point="TOPLEFT"  offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPRIGHT" offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
                <Dimensions y="50" />
                <OnInitialized>
                   local text = GetControl(self, "Label")
@@ -104,7 +104,7 @@
                      inherits="ItemTrig_UITemplate_ThemedEditbox"
                   >
                      <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="8" />
-                     <Anchor point="TOPRIGHT" offsetX="-5" />
+                     <Anchor point="TOPRIGHT" />
                      <OnTextChanged> ItemTrig.windows.triggerEdit:onNameChanged() </OnTextChanged>
                   </EditBox>
                </Controls>

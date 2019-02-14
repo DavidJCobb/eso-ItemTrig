@@ -72,13 +72,7 @@ do -- internal event handlers, not to be overridden
             self.selection.index = nil
          end
       end
-      if self.element.onDeselect then
-         local control = self:controlByIndex(index)
-         if control then
-            self.element.onDeselect(index, control, self)
-         end
-      end
-      self:_onSelectionChanged(false)
+      --self:_onSelectionChanged(false)
    end
    function WScrollSelectList:_onSelectionChanged(fireDeselection)
       if fireDeselection == nil then
