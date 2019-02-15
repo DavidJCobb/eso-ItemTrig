@@ -310,6 +310,11 @@ function ItemTrig.Opcode:format(argTransform)
          else
             renderArgs[i] = tostring(a)
          end
+      elseif t == "trigger" then
+         renderArgs[i] = a.name
+         if not a.name or a.name == "" then
+            renderArgs[i] = GetString(ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME)
+         end
       else
          renderArgs[i] = tostring(a)
       end

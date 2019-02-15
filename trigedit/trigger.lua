@@ -18,6 +18,8 @@ if not ItemTrig then return end
       for this purpose: Trigger:copyAssign.
 --]]--
 
+ITEMTRIG_TRIGGER_EDIT_HAS_OPENED_NESTED_TRIGGER = 0x4E535444
+
 local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("TriggerEditWindow")
 ItemTrig:registerWindow("triggerEdit", WinCls)
 
@@ -146,6 +148,74 @@ do -- helper class for opcode lists
    end
 end
 
+local TriggerStack = {}
+do -- editor state
+   --
+   -- We need to be able to handle the editing of nested triggers; therefore, 
+   -- instead of simply storing editor state for one trigger at a time, we 
+   -- need to store a stack of editor states.
+   --
+   TriggerStack.__index = TriggerStack
+   function TriggerStack:new()
+      local result = setmetatable({}, self)
+      result.frames = {}
+      return result
+   end
+   function TriggerStack:clear()
+      self.frames = {}
+   end
+   function TriggerStack:count()
+      return table.getn(self.frames)
+   end
+   function TriggerStack:dirty(x)
+      local last = self:last()
+      if x ~= nil then
+         if last then
+            last.dirty = x
+         end
+         return
+      end
+      return last and last.dirty or false
+   end
+   function TriggerStack:first()
+      if self:count() > 0 then
+         return self.frames[1]
+      end
+   end
+   function TriggerStack:last()
+      local count = self:count()
+      if count > 0 then
+         return self.frames[count]
+      end
+   end
+   function TriggerStack:push(trigger, dirty)
+      local frame = {
+         target   = trigger, --------------- the trigger we want to edit
+         working  = trigger:clone(false), -- a copy, which we make changes to before committing them later
+         dirty    = dirty or false,
+         isNew    = dirty or false,
+         deferred = self:count() > 0 and ItemTrig.Deferred:new() or nil
+      }
+      table.insert(self.frames, frame)
+      return frame.deferred
+   end
+   function TriggerStack:pop(commit)
+      local count = self:count()
+      assert(count > 0, "No stack frame to pop.")
+      local last = self.frames[count]
+      assert(last ~= nil, "No stack frame to pop.")
+      self.frames[count] = nil
+      if commit then
+         last.target:copyAssign(last.working)
+         if last.deferred then
+            last.deferred:resolve()
+         end
+      elseif last.deferred then
+         last.deferred:reject()
+      end
+   end
+end
+
 function WinCls:_construct()
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    --
@@ -156,16 +226,8 @@ function WinCls:_construct()
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
       SCENE_MANAGER:RegisterTopLevel(control, false)
    end
-   self.trigger = {
-      --
-      -- TODO: In order to account for nested triggers, we'll probably want to 
-      -- redesign this just *slightly*, in order to function as a stack rather 
-      -- than just a single set of data.
-      --
-      target  = nil, -- the trigger we want to edit (reference to something elsewhere)
-      working = nil, -- a copy of that trigger, which we edit
-      dirty   = false,
-   }
+   self.stack      = TriggerStack:new() -- state of the trigger(s) we're editing; nested; "last" frame is the innermost edited trigger
+   self.refreshing = true
    self.pendingResults = {
       outcome = false,
       results = nil,
@@ -199,15 +261,17 @@ function WinCls:addOpcode(type, insertAfterIndex)
    deferred:done(
       function(context, deferred, dirty) -- user clicked OK
          local editor = WinCls:getInstance()
+         local trig   = editor.stack:last()
+         assert(trig ~= nil)
          local pane
          if created.type == "condition" then
-            editor.trigger.working:insertConditionAfter(created, insertAfterIndex)
+            trig.working:insertConditionAfter(created, insertAfterIndex)
             pane = editor.ui.paneConditions
          elseif created.type == "action" then
-            editor.trigger.working:insertActionAfter(created, insertAfterIndex)
+            trig.working:insertActionAfter(created, insertAfterIndex)
             pane = editor.ui.paneActions
          end
-         editor.trigger.dirty = true
+         trig.dirty = true
          editor:refresh()
          pane:select(created)
          pane:scrollToItem(pane:indexOf(created), true, true)
@@ -223,7 +287,9 @@ function WinCls:editOpcode(opcode)
       function(context, deferred, dirty) -- user clicked OK
          if dirty then
             local editor = WinCls:getInstance()
-            editor.trigger.dirty = true
+            local trig   = editor.stack:last()
+            assert(trig ~= nil)
+            trig.dirty = true
             editor:refresh()
          end
       end
@@ -235,11 +301,13 @@ end
 function WinCls:moveOpcode(opcode, direction)
    local list
    local pane
+   local trig = self.stack:last()
+   assert(trig ~= nil)
    if opcode.type == "condition" then
-      list = self.trigger.working.conditions
+      list = trig.working.conditions
       pane = self.ui.paneConditions
    else
-      list = self.trigger.working.actions
+      list = trig.working.actions
       pane = self.ui.paneActions
    end
    local i = ItemTrig.indexOf(list, opcode)
@@ -255,7 +323,7 @@ function WinCls:moveOpcode(opcode, direction)
          return -- opcode was already at the start of the list, and was not moved
       end
    end
-   self.trigger.dirty = true
+   trig.dirty = true
    self:refresh()
    pane:select(opcode)
 end
@@ -284,14 +352,16 @@ function WinCls:deleteOpcode(opcode)
       function(w)
          local pane
          local list
+         local trig = w.stack:last()
+         assert(trig ~= nil)
          if opcode.type == "condition" then
             pane = w.ui.paneConditions
-            list = w.trigger.working.conditions
+            list = trig.working.conditions
          else
             pane = w.ui.paneActions
-            list = w.trigger.working.actions
+            list = trig.working.actions
          end
-         w.trigger.dirty = true
+         trig.dirty = true
          table.remove(list, index)
          pane:remove(pane:indexOf(opcode))
       end,
@@ -300,9 +370,14 @@ function WinCls:deleteOpcode(opcode)
 end
 
 function WinCls:onNameChanged()
+   if self.refreshing then
+      return
+   end
    local edit = self.ui.triggerNameField
-   self.trigger.working.name = edit:GetText()
-   self.trigger.dirty = true
+   local trig = self.stack:last()
+   assert(trig ~= nil)
+   trig.working.name = edit:GetText()
+   trig.dirty = true
 end
 
 function WinCls:handleModalDeferredOnHide(deferred)
@@ -315,24 +390,41 @@ function WinCls:handleModalDeferredOnHide(deferred)
    self.pendingResults.results = nil
 end
 function WinCls:abandon()
-   self.pendingResults.outcome = false
-   self.pendingResults.results = nil
-   self:hide()
+   self.stack:pop(false)
+   if self.stack:count() == 0 then
+      --
+      -- We just finished editing the top-level trigger.
+      --
+      self.pendingResults.outcome = false
+      self.pendingResults.results = nil
+      self:hide()
+   else
+      self:refresh()
+   end
 end
 function WinCls:commit()
-   self.trigger.target:copyAssign(self.trigger.working)
-   --
-   -- TODO: In order to account for nested triggers, when we stop 
-   -- commit a nested trigger, we need to flag its parent as dirty.
-   --
-   self.pendingResults.outcome = true
-   self.pendingResults.results = nil
-   self:hide()
+   local alreadyDirty = self.stack:dirty()
+   self.stack:pop(true)
+   if self.stack:count() == 0 then
+      --
+      -- We just finished editing the top-level trigger.
+      --
+      self.pendingResults.outcome = true
+      self.pendingResults.results = nil
+      self:hide()
+   else
+      if alreadyDirty then
+         --
+         -- Committing changes to a nested trigger should count as changing 
+         -- the parent trigger.
+         --
+         self.stack:dirty(true)
+      end
+      self:refresh()
+   end
 end
 function WinCls:onHide()
-   self.trigger.target  = nil
-   self.trigger.working = nil
-   self.trigger.dirty   = false
+   self.stack:clear()
    self.ui.paneConditions:clear()
    self.ui.paneActions:clear()
 end
@@ -343,40 +435,54 @@ function WinCls:onCloseClicked()
    self:cancel()
 end
 function WinCls:requestExit()
-   if self.trigger.dirty then
+   if self.stack:dirty() then
       return self:showModal(ItemTrig.windows.genericConfirm, {
          text = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_ABANDON_UNSAVED_CHANGES),
          showCloseButton = false
       })
    end
-   local deferred = ItemTrig.Deferred:new()
-   deferred:resolve()
-   return deferred
+   return ItemTrig.Deferred:resolve()
 end
-function WinCls:requestEdit(opener, trigger, dirty)
+function WinCls:requestEdit(opener, trigger, dirty, mustBeTopLevel)
    assert(opener  ~= nil, "The trigger editor must be aware of its opener.")
    assert(trigger ~= nil, "No trigger.")
-   assert(self:getModalOpener() == nil, "The trigger editor is already showing!")
-   local deferred = opener:showModal(self)
-   if not deferred then
-      return
-   end
-   self.trigger.target  = trigger
-   self.trigger.working = trigger:clone(false) -- see documentation for this function
-   if dirty then
-      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW))
+   --assert(self:getModalOpener() == nil, "The trigger editor is already showing!")
+   local deferred
+   local sentinel
+   if self.stack:count() == 0 then
+      deferred = opener:showModal(self)
+      if not deferred then
+         return
+      end
+      self.stack:push(trigger, dirty)
    else
-      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
+      assert(not mustBeTopLevel, "A trigger is already being edited.")
+      deferred = self.stack:push(trigger, dirty)
+      sentinel = ITEMTRIG_TRIGGER_EDIT_HAS_OPENED_NESTED_TRIGGER
    end
-   self.ui.triggerNameField:SetText(self.trigger.working.name)
    self.ui.paneConditions:select(nil)
    self.ui.paneActions:select(nil)
-   self.trigger.dirty = dirty or false -- needed here since SetText fires a change handler
+   --self.stack:dirty(dirty or false) -- needed here since SetText fires a change handler
    self:refresh()
-   return deferred
+   return deferred, sentinel
 end
 function WinCls:refresh()
-   local trigger = self.trigger.working
+   self.refreshing = true
+   local trig    = self.stack:last()
+   assert(trig ~= nil)
+   local trigger = trig.working
+   if trig.isNew then
+      --
+      -- TODO: nested triggers should show the top-level name in the title bar
+      --
+      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW))
+   else
+      --
+      -- TODO: nested triggers should show the top-level name in the title bar
+      --
+      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
+   end
+   self.ui.triggerNameField:SetText(trigger.name)
    do -- render conditions
       local pane = self.ui.paneConditions
       pane:clear(false)
@@ -393,4 +499,5 @@ function WinCls:refresh()
       end
       pane:redraw()
    end
+   self.refreshing = false
 end

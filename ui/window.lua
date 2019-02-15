@@ -306,6 +306,10 @@ end
 function WWindow:setPosition(x, y)
    self:asControl():SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
 end
+function WWindow:setResizeThrottle(n)
+   assert(n >= 0, "Cannot use a negative number as the resize throttle.")
+   self.prefs.resizeThrottle = n
+end
 function WWindow:showModal(modal, ...)
    --
    -- Makes this window show a child modal. If the modal is successfully opened, 

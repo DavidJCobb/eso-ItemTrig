@@ -101,6 +101,10 @@ function ItemTrig.Trigger:getDescription()
    end
    return ""
 end
+function ItemTrig.Trigger:is(obj)
+   assert(self == ItemTrig.Trigger, "This method must be called on the class.")
+   return getmetatable(obj) == self
+end
 function ItemTrig.Trigger:debugDump()
    CHAT_SYSTEM:AddMessage("== Printing trigger " .. self.name .. "...")
    CHAT_SYSTEM:AddMessage("= Conditions")

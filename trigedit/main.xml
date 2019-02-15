@@ -27,6 +27,7 @@
          movable="true"
          clampedToScreen="true"
          hidden="true"
+         resizeHandleSize="8"
          inherits="ItemTrig_UITemplate_WWindow"
       >
          <Dimensions x="800" y="500" />

@@ -36,6 +36,7 @@ function WinCls:_construct()
          target  = nil, -- the opcode we want to edit (i.e. Opcode* other)
          working = nil, -- a copy of that opcode; we make changes to it and then commit to (target) later
          dirty   = false,
+         isNew   = false,
       },
       pendingResults = {
          outcome = false, -- true to resolve; false to reject
@@ -118,6 +119,7 @@ function WinCls:requestEdit(opener, opcode, dirty)
    self.settingUp = true
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
+   self.opcode.isNew   = dirty or false
    do
       local list
       if opcode.type == "condition" then
@@ -222,14 +224,50 @@ function WinCls:refresh(options) -- Render the opcode being edited.
    self:redrawDescription(options)
 end
 
+function WinCls:editNestedTriggerArgument(trigger)
+   local editor = ItemTrig.windows.triggerEdit
+   assert(editor.stack:count() > 0, "This is supposed to be a nested trigger!")
+   --
+   --
+   --
+   local state = {
+      working  = self.opcode.working,
+      target   = self.opcode.target,
+   }
+   self.pendingResults.outcome = nil
+   self.pendingResults.results = nil
+   self:hide()
+   local deferred, sentinel = editor:requestEdit(self, arg)
+   assert(sentinel == ITEMTRIG_TRIGGER_EDIT_HAS_OPENED_NESTED_TRIGGER, "Something went wrong.")
+   deferred:done(function()
+      target:copyAssign(working)
+   end)
+end
 function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
    if self.settingUp then
       return
    end
-   local editor   = ItemTrig.windows.opcodeEdit
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
-   local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(editor, editor.opcode.working, argIndex)
+   do -- Special-case: nested trigger options.
+      local arg = self.opcode.working.args[argIndex]
+      if arg and ItemTrig.Trigger:is(arg) then
+         local editor = ItemTrig.windows.triggerEdit
+         assert(editor.stack:count() > 0, "This is supposed to be a nested trigger!")
+         local target = self.opcode.target
+         --
+         -- Unfortunately, we have to commit the opcode; if the user clicked the 
+         -- "New" button and is making a new opcode, then this is the only way 
+         -- to signal to the trigger-edit window that the new opcode needs to be 
+         -- retained.
+         --
+         self:commit()
+         local deferred, sentinel = editor:requestEdit(self, target.args[argIndex])
+         assert(sentinel == ITEMTRIG_TRIGGER_EDIT_HAS_OPENED_NESTED_TRIGGER, "Something went wrong.")
+         return
+      end
+   end
+   local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(self, self.opcode.working, argIndex)
    self:redrawDescription({ highlightIndex = argIndex }) -- highlight the arg we're editing
    deferred:done(
       function(context, deferred, result) -- user clicked OK

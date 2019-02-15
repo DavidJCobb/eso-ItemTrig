@@ -363,7 +363,13 @@ function WScrollList:redraw()
          self.listItemStates[i].offsetTop    = top
          self.listItemStates[i].offsetBottom = bottom
          self.listItemStates[i].controlIndex = nil
-         assert(bottom - top == child:GetHeight(), string.format("Child bounds don't match; [%d, %d] -> %d ~= %d", top, bottom, (bottom - top), child:GetHeight()))
+         --[[do -- warn on bad bounds
+            local ch = bottom - top
+            local ah = child:GetHeight()
+            if math.abs(ch - ah) > 1.5 then
+               assert(false, string.format("Child bounds are off by more than 1.5px; [%d, %d] -> %d ~= %d", top, bottom, ch, ah))
+            end
+         end]]--
          local isVisible = (bottom > viewStart and top < viewEnd)
          if isVisible or (not self.aggressiveRecycling) then
             if isVisible then

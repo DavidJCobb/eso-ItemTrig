@@ -90,6 +90,7 @@ end
 
 function WinCls:_construct()
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_TITLE))
+   self:setResizeThrottle(5) -- throttle resize frame handler to every five frames
    --
    local control = self:asControl()
    ItemTrig.assign(self, {
@@ -159,12 +160,15 @@ function WinCls:onHide()
    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybinds)
    ItemTrig.Savedata:save()
 end
+function WinCls:onResizeFrame()
+   self.ui.pane:redraw()
+end
 
 function WinCls:newTrigger()
    local editor  = ItemTrig.windows.triggerEdit
    local trigger = ItemTrig.Trigger:new()
    trigger.name = GetString(ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME)
-   editor:requestEdit(self, trigger, true):done(
+   editor:requestEdit(self, trigger, true, true):done(
       function()
          local win  = WinCls:getInstance()
          local pane = win.ui.pane
@@ -176,7 +180,7 @@ function WinCls:newTrigger()
          end
          self:refresh()
          pane:select(trigger)
-         pane:scrollToItem(pane:indexOfData(trigger), true, true)
+         pane:scrollToItem(pane:indexOf(trigger), true, true)
       end
    )
 end
@@ -189,7 +193,7 @@ function WinCls:editTrigger(trigger)
          return
       end
    end
-   editor:requestEdit(self, trigger):done(self.refresh, self)
+   editor:requestEdit(self, trigger, false, true):done(self.refresh, self)
 end
 function WinCls:moveSelectedTrigger(direction)
    local list = self.lastTriggerList
