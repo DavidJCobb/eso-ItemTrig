@@ -1,0 +1,15 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_UITemplate_WBulletedList" virtual="true">
+         <OnInitialized> ItemTrig.UI.WBulletedList:install(self) </OnInitialized>
+      </Control>
+      <Control name="ItemTrig_UITemplate_WBulletedListItem" virtual="true">
+         <Controls>
+            <Texture name="$(parent)Bullet">
+               <Dimensions x="5" y="5" />
+            </Texture>
+            <Label   name="$(parent)Text" />
+         </Controls>
+      </Control>
+   </Controls>
+</GuiXml>

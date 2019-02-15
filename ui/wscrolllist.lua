@@ -1,7 +1,4 @@
-if not ItemTrig then return end
-if not ItemTrig.UI then
-   ItemTrig.UI = {}
-end
+if not (ItemTrig and ItemTrig.UI) then return end
 
 --
 -- A  helper class for creating a scrollable  list of variably-

@@ -471,16 +471,22 @@ function WinCls:refresh()
    local trig    = self.stack:last()
    assert(trig ~= nil)
    local trigger = trig.working
-   if trig.isNew then
-      --
-      -- TODO: nested triggers should show the top-level name in the title bar
-      --
-      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW))
-   else
-      --
-      -- TODO: nested triggers should show the top-level name in the title bar
-      --
-      self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
+   do -- window title
+      local baseTitle = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT)
+      local rootName  = ""
+      if self.stack:count() == 1 then
+         if trig.isNew then
+            baseTitle = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW)
+         end
+      else
+         rootName = self.stack:first().working.name
+         if trig.isNew then
+            baseTitle = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW_NESTED)
+         else
+            baseTitle = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT_NESTED)
+         end
+      end
+      self:setTitle(LocalizeString(baseTitle, rootName))
    end
    self.ui.triggerNameField:SetText(trigger.name)
    do -- render conditions

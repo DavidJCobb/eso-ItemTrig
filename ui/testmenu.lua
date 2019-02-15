@@ -164,3 +164,59 @@ function ItemTrig.WClassTestConfirm:no()
    self.result = false
    self:hide()
 end
+
+ItemTrig.BulletedListTestMenu = ItemTrig.UI.WSingletonWindow:makeSubclass("BulletedListTestMenu")
+SLASH_COMMANDS["/cobbshowbullettestmenu"] =
+   function()
+      ItemTrig.BulletedListTestMenu:getInstance():show()
+   end
+function ItemTrig.BulletedListTestMenu:_construct()
+   do -- scene
+      local control  = self:asControl()
+      local fragment = ZO_SimpleSceneFragment:New(control)
+      scene:AddFragment(fragment)
+      SCENE_MANAGER:RegisterTopLevel(control, false)
+   end
+   self.list = ItemTrig.UI.WBulletedList:cast(self:GetNamedChild("List"))
+   assert(self.list ~= nil, "Can't find the list to test with.")
+   self.list.style.topLevelHasBullet = false
+   self.list.listItems = {
+      [1] = { text = "List item 1" },
+      [2] = {
+         text = "List item 2",
+         children = {
+            [1] = { text = "List item 2.1" },
+            [2] = { text = "List item 2.2" },
+            [3] = { text = "List item 2.3" },
+         }
+      },
+      [3] = { text = "List item 3" },
+      [4] = {
+         text = "List item 4",
+         children = {
+            [1] = { text = "List item 4.1" },
+            [2] = { text = "List item 4.2" },
+            [3] = {
+               text = "List item 4.3",
+               children = {
+                  [1] = { text = "List item 4.3.1" },
+                  [2] = { text = "List item 4.3.2" },
+                  [3] = { text = "List item 4.3.3" },
+               }
+            },
+         }
+      },
+      [5] = { text = "List item 5" },
+      [6] = { text = "List item 6" },
+      [7] = { text = "EVERY MORNING I WAKE UP AND OPEN PALM SLAM A VHS INTO THE SLOT. IT'S CHRONICLES OF RIDDICK AND RIGHT THEN AND THERE I START DOING THE MOVES ALONGSIDE WITH THE MAIN CHARACTER, RIDDICK. I DO EVERY MOVE AND I DO EVERY MOVE HARD." },
+      [8] = { text = "List item 8" },
+   }
+end
+function ItemTrig.BulletedListTestMenu:onShow()
+   local control = self:asControl()
+   local listCon = self.list:asControl()
+   --local cHeight = control:GetHeight() - listCon:GetHeight()
+   local cHeight = ItemTrig.offsetTop(listCon)
+   self.list:redraw()
+   control:SetHeight(cHeight + listCon:GetHeight())
+end

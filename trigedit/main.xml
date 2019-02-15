@@ -30,8 +30,8 @@
          resizeHandleSize="8"
          inherits="ItemTrig_UITemplate_WWindow"
       >
-         <Dimensions x="800" y="500" />
-         <DimensionConstraints minX="600" minY="600" />
+         <Dimensions x="900" y="600" />
+         <DimensionConstraints minX="700" minY="500" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig:setupWindow("triggerList", self) </OnInitialized>
          <Controls>

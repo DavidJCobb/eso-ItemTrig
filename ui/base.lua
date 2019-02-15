@@ -179,6 +179,9 @@ function WClass:indexInParent() -- helper for controls
       end
    end
 end
+function WClass:isNativeObjectConstructed()
+   return type(self:asControl()) ~= "string"
+end
 function WClass:callSuper(methodName, ...)
    if methodName == "_construct" then
       --

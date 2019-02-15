@@ -26,6 +26,8 @@ ui/theming.xml
 ui/base.lua
 ui/window.xml
 ui/window.lua
+ui/wbulletedlist.lua
+ui/wbulletedlist.xml
 ui/wscrolllist.lua
 ui/wscrolllist.xml
 ui/wscrollselectlist.lua
