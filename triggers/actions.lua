@@ -63,4 +63,5 @@ for i = 1, ItemTrig.countActions do
    ItemTrig.tableActions[i].opcode = i
 end
 
-ItemTrig.TRIGGER_ACTION_COMMENT = ItemTrig.tableActions[4]
+ItemTrig.TRIGGER_ACTION_COMMENT    = ItemTrig.tableActions[4]
+ItemTrig.TRIGGER_ACTION_RUN_NESTED = ItemTrig.tableActions[3]

@@ -92,29 +92,39 @@ do -- helper class for trigger list entries
       end
    end
    function TriggerListEntry:renderContents(trigger)
-      local list = {
-         [1] = { text = "Conditions:" },
-         [2] = { text = "Actions:" },
-      }
-      if table.getn(trigger.conditions) == 0 then
-         list[1].children = { [1] = { text = "[None]" } }
-      else
-         local c = {}
-         for i = 1, table.getn(trigger.conditions) do
-            table.insert(c, { text = trigger.conditions[i]:format() })
+      local function _triggerToList(trigger)
+         local list = {
+            [1] = { text = "Conditions:" },
+            [2] = { text = "Actions:" },
+         }
+         if table.getn(trigger.conditions) == 0 then
+            list[1].children = { [1] = { text = "[None]" } }
+         else
+            local c = {}
+            for i = 1, table.getn(trigger.conditions) do
+               table.insert(c, { text = trigger.conditions[i]:format() })
+            end
+            list[1].children = c
          end
-         list[1].children = c
-      end
-      if table.getn(trigger.actions) == 0 then
-         list[2].children = { [1] = { text = "[None]" } }
-      else
-         local c = {}
-         for i = 1, table.getn(trigger.actions) do
-            table.insert(c, { text = trigger.actions[i]:format() })
+         if table.getn(trigger.actions) == 0 then
+            list[2].children = { [1] = { text = "[None]" } }
+         else
+            local c = {}
+            for i = 1, table.getn(trigger.actions) do
+               local action = trigger.actions[i]
+               if action.base == ItemTrig.TRIGGER_ACTION_RUN_NESTED then
+                  local item    = { text = trigger.actions[i]:format() }
+                  item.children = _triggerToList(action.args[1])
+                  table.insert(c, item)
+               else
+                  table.insert(c, { text = trigger.actions[i]:format() })
+               end
+            end
+            list[2].children = c
          end
-         list[2].children = c
+         return list
       end
-      self.contents.listItems = list
+      self.contents.listItems = _triggerToList(trigger)
       self.contents:redraw()
       do -- size
          local listControl = self.contents:asControl()
