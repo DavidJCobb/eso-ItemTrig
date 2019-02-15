@@ -16,10 +16,14 @@
                <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="5" offsetY="-2" relativeTo="$(parent)Enabled" />
                <Anchor point="TOPRIGHT" />
             </Label>
-            <Label name="$(parent)Description" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <Label hidden="true" name="$(parent)Description" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT"  relativePoint="BOTTOMLEFT"  relativeTo="$(parent)Name" />
                <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Name" />
             </Label>
+            <Control name="$(parent)Contents" inherits="ItemTrig_UITemplate_WBulletedList">
+               <Anchor point="TOPLEFT"  relativePoint="BOTTOMLEFT"  relativeTo="$(parent)Name" />
+               <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Name" />
+            </Control>
          </Controls>
       </Control>
       <TopLevelControl name="ItemTrig_TrigEdit"

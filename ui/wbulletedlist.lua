@@ -50,7 +50,7 @@ function WBulletedList:forEach(functor, _)
       end
    end
 end
-function WBulletedList:refreshStyle() -- doesn't reposition elements; changing the font face may require :redraw() to display properly
+function WBulletedList:refreshStyle()
    local root     = self:asControl()
    local existing = root:GetNumChildren()
    local bulletY  = nil
@@ -60,9 +60,8 @@ function WBulletedList:refreshStyle() -- doesn't reposition elements; changing t
          local bullet = GetControl(child, "Bullet")
          local text   = GetControl(child, "Text")
          do -- style
-            text:SetFont(self.style.font)
             text:SetColor(unpack(self.style.fontColor))
-            bullet:SetColor(unpack(self.stye.bulletColor))
+            bullet:SetColor(unpack(self.style.bulletColor))
          end
       end
    end

@@ -10,10 +10,12 @@ do -- helper class for trigger list entries
    local TriggerListEntry = ItemTrig.UI.TriggerListEntry
    function TriggerListEntry:_construct()
       local control = self:asControl()
-      self.back    = self:GetNamedChild("Bg")
-      self.enabled = self:GetNamedChild("Enabled")
-      self.name    = self:GetNamedChild("Name")
-      self.desc    = self:GetNamedChild("Description")
+      self.back     = self:GetNamedChild("Bg")
+      self.enabled  = self:GetNamedChild("Enabled")
+      self.name     = self:GetNamedChild("Name")
+      self.desc     = self:GetNamedChild("Description")
+      self.contents = ItemTrig.UI.WBulletedList:cast(self:GetNamedChild("Contents"))
+      self.contents.style.topLevelHasBullet = false
       do -- theming
          self.back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
          self.name:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
@@ -52,6 +54,9 @@ do -- helper class for trigger list entries
          end
          self.name:SetColor(unpack(color))
          self.desc:SetColor(unpack(color))
+         self.contents.style.fontColor   = color
+         self.contents.style.bulletColor = color
+         self.contents:refreshStyle()
       end
    end
    function TriggerListEntry:setEnabled(state)
@@ -71,7 +76,7 @@ do -- helper class for trigger list entries
          cName:SetText(name)
       end
       height = ItemTrig.offsetBottom(cName)
-      if description then
+      --[[if description then
          cDesc:SetText(description)
          if description == "" then
             cDesc:SetHidden(true)
@@ -81,9 +86,39 @@ do -- helper class for trigger list entries
          end
       elseif not cDesc:GetHidden() then
          height = ItemTrig.offsetBottom(cDesc)
-      end
+      end]]--
       if name or description then
          self:asControl():SetHeight(ItemTrig.round(height + paddingTop))
+      end
+   end
+   function TriggerListEntry:renderContents(trigger)
+      local list = {
+         [1] = { text = "Conditions:" },
+         [2] = { text = "Actions:" },
+      }
+      if table.getn(trigger.conditions) == 0 then
+         list[1].children = { [1] = { text = "[None]" } }
+      else
+         local c = {}
+         for i = 1, table.getn(trigger.conditions) do
+            table.insert(c, { text = trigger.conditions[i]:format() })
+         end
+         list[1].children = c
+      end
+      if table.getn(trigger.actions) == 0 then
+         list[2].children = { [1] = { text = "[None]" } }
+      else
+         local c = {}
+         for i = 1, table.getn(trigger.actions) do
+            table.insert(c, { text = trigger.actions[i]:format() })
+         end
+         list[2].children = c
+      end
+      self.contents.listItems = list
+      self.contents:redraw()
+      do -- size
+         local listControl = self.contents:asControl()
+         self:asControl():SetHeight(ItemTrig.offsetTop(listControl) + listControl:GetHeight())
       end
    end
 end
@@ -133,6 +168,7 @@ function WinCls:_construct()
             widget:setSelected(extra and extra.selected)
             widget:setText(data.name, data:getDescription())
             widget:setEnabled(data.enabled)
+            widget:renderContents(data)
          end
       scrollPane.element.onSelect =
          function(index, control, pane)
