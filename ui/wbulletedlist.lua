@@ -9,7 +9,9 @@ function WBulletedList:_construct(options)
    if not options.style then
       options.style = {}
    end
-   self.listItems = {}
+   self.listItems  = {}
+   self.depthLimit = options.depthLimit or nil -- if true, limit to 50% width; if a number, limit to that number
+   self.depthSpace = options.depthSpace or nil -- if depthLimit == true and this value isn't nil, then instead of limiting to 50% width, we require that this much width be available
    do
       self.element = {
          template = "ItemTrig_UITemplate_WBulletedListItem",
@@ -25,6 +27,7 @@ function WBulletedList:_construct(options)
    do
       local s = options.style
       self.style = {
+         tooDeepText = s.tooDeepText or nil, -- if this is a non-empty string, then the first too-deep list item will be rendered with this string
          font        = s.font        or "ITEMTRIG_FONT_BASIC",
          fontColor   = s.fontColor   or ItemTrig.theme.WINDOW_BARE_TEXT_COLOR,
          bulletColor = s.bulletColor or s.fontColor or ItemTrig.theme.WINDOW_BARE_TEXT_COLOR,
@@ -73,7 +76,43 @@ function WBulletedList:redraw()
    local count    = 1
    local offsetY  = 0
    local bulletY  = nil
+   local width    = root:GetWidth()
+   local badCount   = 0
+   local badAllowed = 0
+   if self.style.tooDeepText and self.style.tooDeepText ~= "" then
+      badAllowed = 1
+   end
    self:forEach(function(item, depth)
+      local currentIsBad = false
+      if type(self.depthLimit) == "number" and depth > self.depthLimit then
+         currentIsBad = true
+      end
+      local offsetX
+      if self.style.topLevelHasBullet then
+         offsetX = (self.style.indent * (depth - 1))
+      else
+         offsetX = (self.style.indent * (depth - 2))
+         if offsetX < 0 then
+            offsetX = 0
+         end
+      end
+      if self.depthLimit == true and depth > 1 then
+         if self.depthSpace ~= nil then
+            local space = self.depthSpace
+            currentIsBad = (width - offsetX) < self.depthSpace
+         elseif offsetX > (width / 2) then
+            currentIsBad = true
+         end
+      end
+      if currentIsBad then
+         badCount = badCount + 1
+         if badCount > badAllowed then
+            return
+         end
+      else
+         badCount = 0
+      end
+      --
       local child
       if count <= existing + created then
          child = root:GetChild(count)
@@ -87,15 +126,6 @@ function WBulletedList:redraw()
       child:SetHidden(false)
       local bullet  = GetControl(child, "Bullet")
       local text    = GetControl(child, "Text")
-      local offsetX
-      if self.style.topLevelHasBullet then
-         offsetX = (self.style.indent * (depth - 1))
-      else
-         offsetX = (self.style.indent * (depth - 2))
-         if offsetX < 0 then
-            offsetX = 0
-         end
-      end
       if depth > 1 or self.style.topLevelHasBullet then
          offsetX = offsetX + self.style.bulletSpaceBefore
          bullet:SetHidden(false)
@@ -124,7 +154,11 @@ function WBulletedList:redraw()
       text:ClearAnchors()
       text:SetAnchor(TOPLEFT,  child, TOPLEFT,  offsetX, 0)
       text:SetAnchor(TOPRIGHT, child, TOPRIGHT, 0, 0)
-      text:SetText(item.text)
+      if currentIsBad then
+         text:SetText(self.style.tooDeepText)
+      else
+         text:SetText(item.text)
+      end
       --
       child:SetHeight(text:GetHeight())
       offsetY = offsetY + child:GetHeight()

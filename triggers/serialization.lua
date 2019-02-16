@@ -259,11 +259,16 @@ function _Parser:parse(s)
          s = start .. cc_SUBST_TRIG_INDEX .. table.getn(self.triggerList) .. last
          start, mid, last = s:match("^(.*)(" .. pattern_TRIGGER .. ")(.*)$")
       end
+for i = 1, table.getn(self.triggerList) do
+   d(i)
+   d(self.triggerList[i])
+end
    end
    for i = 1, table.getn(self.triggerList) do
       self.triggers[i]    = self:_parseTrigger(self.triggerList[i])
       self.triggerList[i] = nil -- free strings as soon as possible to save on memory
    end
+   local finalCount = table.getn(self.triggers)
    for i = 1, table.getn(self.pendingOpcodesWithTriggerArgs) do
       local c = self.pendingOpcodesWithTriggerArgs[i]
       local baseArgs = c.base.args
@@ -295,7 +300,7 @@ function _Parser:parse(s)
       -- instead of appending them.
       --
       local final = {}
-      for i = 1, table.getn(self.triggers) do
+      for i = 1, finalCount do -- table.getn breaks if there are nils in the middle
          if self.triggers[i] ~= nil then
 --CHAT_SYSTEM:AddMessage("Parse operation completed; found non-nil trigger")
             table.insert(final, 1, self.triggers[i])

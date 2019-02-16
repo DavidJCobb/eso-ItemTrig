@@ -89,7 +89,7 @@ function ISavedataForAccount:new(globalName, namespace, version, account)
    })
    ItemTrig.assign(result, {
       defaults       = {},
-      version        = version,
+      version        = version or 0,
     --wrapped        = _G[globalName][namespace][account],
       updateRoutines = {},
    })
@@ -170,7 +170,7 @@ function ISavedataCharacter:new(root, id, struct)
       id      = id,
       name    = struct.name,
       root    = root,
-      version = struct.version,
+      version = struct.version or 0,
       wrapped = struct.data,
    })
    return result

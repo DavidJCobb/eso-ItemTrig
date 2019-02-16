@@ -15,6 +15,9 @@ do -- helper class for trigger list entries
       self.name     = self:GetNamedChild("Name")
       self.desc     = self:GetNamedChild("Description")
       self.contents = ItemTrig.UI.WBulletedList:cast(self:GetNamedChild("Contents"))
+      self.contents.depthLimit = true
+      self.contents.depthSpace = 200
+      self.contents.style.tooDeepText       = "..."
       self.contents.style.topLevelHasBullet = false
       do -- theming
          self.back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))

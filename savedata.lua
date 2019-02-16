@@ -77,10 +77,11 @@ function ItemTrig.Savedata:load(characterID)
 end
 
 function ItemTrig.Savedata:loadTriggersFor(characterID)
-   local success, interface = pcall(savedVars.character, savedVars, characterID)
+   --[[local success, interface = pcall(savedVars.character, savedVars, characterID)
    if not success then
       return {}
-   end
+   end]]--
+   local interface = savedVars:character(characterID)
    local s = table.concat(interface:data().serializedTriggers or {})
    if s:len() == 0 then
       return {}
