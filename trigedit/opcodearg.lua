@@ -207,8 +207,8 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view:show()
          local combobox = self.view.value
          combobox:clear()
-         for i = 1, table.getn(enum) do
-            combobox:push({ name = enum[i], index = i }, false)
+         for k, v in pairs(enum) do
+            combobox:push({ name = v, index = k }, false)
          end
          combobox:redraw()
          combobox:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback

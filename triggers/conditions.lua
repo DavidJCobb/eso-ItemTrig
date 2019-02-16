@@ -109,6 +109,97 @@ ItemTrig.tableConditions = {
          return ItemTrig.testQuantity(args[1], context.quality)
       end
    ),
+   [7] = ConditionBase:new( -- Base Type
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMTYPE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMTYPE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            default = ITEMTYPE_TREASURE,
+            enum = {
+               [ITEMTYPE_ADDITIVE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_ADDITIVE),
+               [ITEMTYPE_ARMOR]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR),
+               [ITEMTYPE_ARMOR_BOOSTER]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_BOOSTER),
+               [ITEMTYPE_ARMOR_TRAIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_TRAIT),
+               [ITEMTYPE_AVA_REPAIR]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_AVA_REPAIR),
+               [ITEMTYPE_BLACKSMITHING_BOOSTER]      = GetString(SI_ITEMTYPE0 + ITEMTYPE_BLACKSMITHING_BOOSTER),
+               [ITEMTYPE_BLACKSMITHING_MATERIAL]     = GetString(SI_ITEMTYPE0 + ITEMTYPE_BLACKSMITHING_MATERIAL),
+               [ITEMTYPE_BLACKSMITHING_RAW_MATERIAL] = GetString(SI_ITEMTYPE0 + ITEMTYPE_BLACKSMITHING_RAW_MATERIAL),
+               [ITEMTYPE_CLOTHIER_BOOSTER]           = GetString(SI_ITEMTYPE0 + ITEMTYPE_CLOTHIER_BOOSTER),
+               [ITEMTYPE_CLOTHIER_MATERIAL]          = GetString(SI_ITEMTYPE0 + ITEMTYPE_CLOTHIER_MATERIAL),
+               [ITEMTYPE_CLOTHIER_RAW_MATERIAL]      = GetString(SI_ITEMTYPE0 + ITEMTYPE_CLOTHIER_RAW_MATERIAL),
+               [ITEMTYPE_COLLECTIBLE]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_COLLECTIBLE),
+               [ITEMTYPE_CONTAINER]                  = GetString(SI_ITEMTYPE0 + ITEMTYPE_CONTAINER),
+               [ITEMTYPE_COSTUME]                    = GetString(SI_ITEMTYPE0 + ITEMTYPE_COSTUME),
+               [ITEMTYPE_CROWN_ITEM]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_CROWN_ITEM),
+               [ITEMTYPE_CROWN_REPAIR]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_CROWN_REPAIR),
+               [ITEMTYPE_DEPRECATED]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_DEPRECATED),
+               [ITEMTYPE_DISGUISE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_DISGUISE),
+               [ITEMTYPE_DRINK]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_DRINK),
+               [ITEMTYPE_DYE_STAMP]                  = GetString(SI_ITEMTYPE0 + ITEMTYPE_DYE_STAMP),
+               [ITEMTYPE_ENCHANTING_RUNE_ASPECT]     = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTING_RUNE_ASPECT),
+               [ITEMTYPE_ENCHANTING_RUNE_ESSENCE]    = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTING_RUNE_ESSENCE),
+               [ITEMTYPE_ENCHANTING_RUNE_POTENCY]    = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTING_RUNE_POTENCY),
+               [ITEMTYPE_ENCHANTMENT_BOOSTER]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTMENT_BOOSTER),
+               [ITEMTYPE_FISH]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_FISH),
+               [ITEMTYPE_FLAVORING]                  = GetString(SI_ITEMTYPE0 + ITEMTYPE_FLAVORING),
+               [ITEMTYPE_FOOD]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_FOOD),
+               [ITEMTYPE_FURNISHING]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_FURNISHING),
+               [ITEMTYPE_FURNISHING_MATERIAL]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_FURNISHING_MATERIAL),
+               [ITEMTYPE_GLYPH_ARMOR]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_GLYPH_ARMOR),
+               [ITEMTYPE_GLYPH_JEWELRY]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_GLYPH_JEWELRY),
+               [ITEMTYPE_GLYPH_WEAPON]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_GLYPH_WEAPON),
+               [ITEMTYPE_INGREDIENT]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_INGREDIENT),
+               [ITEMTYPE_LOCKPICK]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_LOCKPICK),
+               [ITEMTYPE_LURE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_LURE),
+               [ITEMTYPE_MASTER_WRIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_MASTER_WRIT),
+               [ITEMTYPE_MOUNT]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_MOUNT),
+               [ITEMTYPE_NONE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_NONE),
+               [ITEMTYPE_PLUG]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_PLUG),
+               [ITEMTYPE_POISON]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_POISON),
+               [ITEMTYPE_POISON_BASE]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_POISON_BASE),
+               [ITEMTYPE_POTION]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_POTION),
+               [ITEMTYPE_POTION_BASE]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_POTION_BASE),
+               [ITEMTYPE_RACIAL_STYLE_MOTIF]         = GetString(SI_ITEMTYPE0 + ITEMTYPE_RACIAL_STYLE_MOTIF),
+               [ITEMTYPE_RAW_MATERIAL]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_RAW_MATERIAL),
+               [ITEMTYPE_REAGENT]                    = GetString(SI_ITEMTYPE0 + ITEMTYPE_REAGENT),
+               [ITEMTYPE_RECIPE]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_RECIPE),
+               [ITEMTYPE_SIEGE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SIEGE),
+               [ITEMTYPE_SOUL_GEM]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_SOUL_GEM),
+               [ITEMTYPE_SPELLCRAFTING_TABLET]       = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPELLCRAFTING_TABLET),
+               [ITEMTYPE_SPICE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPICE),
+               [ITEMTYPE_STYLE_MATERIAL]             = GetString(SI_ITEMTYPE0 + ITEMTYPE_STYLE_MATERIAL),
+               [ITEMTYPE_TABARD]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TABARD),
+               [ITEMTYPE_TOOL]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_TOOL),
+               [ITEMTYPE_TRASH]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_TRASH),
+               [ITEMTYPE_TREASURE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_TREASURE),
+               [ITEMTYPE_TROPHY]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TROPHY),
+               [ITEMTYPE_WEAPON]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON),
+               [ITEMTYPE_WEAPON_BOOSTER]             = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON_BOOSTER),
+               [ITEMTYPE_WEAPON_TRAIT]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON_TRAIT),
+               [ITEMTYPE_WOODWORKING_BOOSTER]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_WOODWORKING_BOOSTER),
+               [ITEMTYPE_WOODWORKING_MATERIAL]       = GetString(SI_ITEMTYPE0 + ITEMTYPE_WOODWORKING_MATERIAL),
+               [ITEMTYPE_WOODWORKING_RAW_MATERIAL]   = GetString(SI_ITEMTYPE0 + ITEMTYPE_WOODWORKING_RAW_MATERIAL),
+            },
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if args[1] then
+            return context.itemType == args[2]
+         else
+            return context.itemType ~= args[2]
+         end
+      end
+   ),
 }
 ItemTrig.countConditions = table.getn(ItemTrig.tableConditions)
 for i = 1, ItemTrig.countConditions do

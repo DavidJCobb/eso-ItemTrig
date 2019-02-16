@@ -1,6 +1,8 @@
 if not ItemTrig then return end
 if not ItemTrig.OpcodeBase then return end
 
+local ItemInterface = ItemTrig.ItemInterface
+
 local _s = GetString
 
 local ActionBase = {}
@@ -31,7 +33,16 @@ ItemTrig.tableActions = {
          [1] = { type = "string", placeholder = _s(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT) },
       },
       function(state, context, args)
-         CHAT_SYSTEM:AddMessage(args[1])
+         local text = args[1] or ""
+         if ItemInterface:is(context) then -- transform text
+            --
+            -- TODO: Find a way to document this in the UI. We should add 
+            -- an "explanation" key to the arg, and the opcode-arg editor 
+            -- should show that as plain text below the textbox.
+            --
+            text = string.gsub(text, "$%(name%)", context.name)
+         end
+         CHAT_SYSTEM:AddMessage(text)
       end
    ),
    [3] = ActionBase:new( -- Run Nested Trigger
@@ -55,6 +66,17 @@ ItemTrig.tableActions = {
       },
       function(state, context, args)
          return nil
+      end
+   ),
+   [5] = ActionBase:new( -- Destroy Item
+      _s(ITEMTRIG_STRING_ACTIONNAME_DESTROYITEM),
+      _s(ITEMTRIG_STRING_ACTIONDESC_DESTROYITEM),
+      {},
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if not context:isInvalid() then
+            context:destroy()
+         end
       end
    ),
 }

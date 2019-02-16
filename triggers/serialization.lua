@@ -45,12 +45,12 @@ local format_OPCODEARG = cc_OPCODE_ARG_START .. "%s" .. cc_OPCODE_ARG_END
 local function toSafeString(s)
    return s:gsub("\\", "\\\\"):gsub("[" .. allControlCodes .. "]", 
       function(c)
-         return "\\" .. string.byte(c) .. "%%"
+         return "\\" .. string.byte(c) .. "%"
       end
    )
 end
 local function fromSafeString(s)
-   return s:gsub("\\(%d+)", function(substr) return string.char(0 + substr) end):gsub("\\\\", "\\")
+   return s:gsub("\\(%d+)%%", function(substr) return string.char(0 + substr) end):gsub("\\\\", "\\")
 end
 
 local function serializeOpcode(o)

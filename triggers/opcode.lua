@@ -301,6 +301,9 @@ function ItemTrig.Opcode:format(argTransform)
       elseif t == "number" then
          if b.enum then
             renderArgs[i] = b.enum[a]
+            if not renderArgs[i] then
+               renderArgs[i] = ZO_LocalizeDecimalNumber(a)
+            end
          else
             renderArgs[i] = ZO_LocalizeDecimalNumber(a)
          end
@@ -346,7 +349,7 @@ function ItemTrig.Opcode:format(argTransform)
          renderArgs[i] = tostring(a)
       end
       if argTransform then
-         renderArgs[i] = argTransform(renderArgs[i], i)
+         renderArgs[i] = argTransform(renderArgs[i] or "[error]", i)
       end
    end
    --

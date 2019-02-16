@@ -48,10 +48,22 @@ function ItemTrig.deepCopy(tablevar)
    return result
 end
 function ItemTrig.firstIn(tablevar)
-   for i = 1, table.getn(tablevar) do
-      if tablevar[i] ~= nil then
-         return tablevar[i]
+   if tablevar[1] then
+      return tablevar[1]
+   end
+   local lowest = nil
+   for k, v in pairs(tablevar) do
+      if tonumber(k) then
+         k = tonumber(k)
+         if lowest == nil then
+            lowest = k
+         elseif lowest > k then
+            lowest = k
+         end
       end
+   end
+   if lowest then
+      return tablevar[lowest]
    end
 end
 function ItemTrig.indexOf(tablevar, e)

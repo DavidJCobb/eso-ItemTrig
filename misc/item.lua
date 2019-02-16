@@ -33,6 +33,14 @@ function ItemInterface:new(bagIndex, slotIndex)
          name = GetItemLinkName(result.link),
       })
    end
+   do -- GetItemCraftingInfo
+      local craftingSkill, itemType, c1, c2, c3 = GetItemCraftingInfo(bagIndex, slotIndex)
+      ItemTrig.assign(result, {
+         craftingSkill = craftingSkill, -- CRAFTING_TYPE_ALCHEMY, CRAFTING_TYPE_BLACKSMITHING, CRAFTING_TYPE_CLOTHIER, CRAFTING_TYPE_ENCHANTING, CRAFTING_TYPE_INVALID, CRAFTING_TYPE_PROVISIONING, CRAFTING_TYPE_WOODWORKING
+         craftingType  = itemType,
+         craftingExtra = { [1] = c1, [2] = c2, [3] = c3 },
+      })
+   end
    do -- GetItemInfo
       local icon, stack, sellPrice, meetsUsageRequirement, locked, equipType, itemStyleId, quality = GetItemInfo(bagIndex, slotIndex)
       ItemTrig.assign(result, {
@@ -42,7 +50,7 @@ function ItemInterface:new(bagIndex, slotIndex)
          style     = itemStyleId,
          locked    = locked,
          meetsUsageRequirement = meetsUsageRequirement,
-         quality   = quality,
+         quality   = quality, -- this would be better described as "rarity"
          sellValue = sellPrice,
       })
    end
@@ -52,6 +60,14 @@ function ItemInterface:new(bagIndex, slotIndex)
       result.specType = specType
    end
    return result
+end
+function ItemInterface:destroy()
+   if self:isInvalid() then
+      return
+   end
+   DestroyItem(self.bag, self.slot)
+   self.destroyed = true
+   self.invalid   = true
 end
 function ItemInterface:is(instance)
    assert(self == ItemInterface, "This is a static method.")
@@ -65,6 +81,18 @@ function ItemInterface:isDestroyed()
 end
 function ItemInterface:isInvalid()
    return self.invalid
+end
+function ItemInterface:update()
+end
+function ItemInterface:use()
+   if self:isInvalid() then
+      return
+   end
+   UseItem(self.bag, self.slot) -- TODO: this only works out of combat; what happens if called while in combat? does it throw an error?
+   self.count = select(2, GetItemInfo(self.bag, self.slot))
+   if self.count == 0 then
+      self.invalid = true
+   end
 end
 function ItemInterface:validate()
    local link = GetItemLink(self.bag, self.slot)

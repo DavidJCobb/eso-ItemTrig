@@ -118,6 +118,9 @@ function ItemTrig.Trigger:debugDump()
 end
 function ItemTrig.Trigger:exec(context)
 --CHAT_SYSTEM:AddMessage("== Executing trigger " .. self.name .. "...") -- debug
+   if not self.enabled then
+      return false
+   end
    self.state.using_or   = false
    self.state.matched_or = false
    for i = 1, table.getn(self.conditions) do
