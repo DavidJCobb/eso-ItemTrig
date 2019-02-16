@@ -58,6 +58,7 @@ do -- helper classes for views
          qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, false)
          qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, false)
          qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, false)
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_NOTEQ),   value = "NE"  }, false)
          qualifier:redraw()
       end
       function ViewCls.Quantity:GetValue()
@@ -65,6 +66,42 @@ do -- helper classes for views
             qualifier = self.qualifier:getSelectedData(),
             number    = tonumber(self.number:GetText() or 0)
          }
+         if q.qualifier then
+            q.qualifier = q.qualifier.value
+         else
+            q.qualifier = "E"
+         end
+         return q
+      end
+   end
+   do -- quantity-enum
+      ViewCls.QuantityEnum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityEnumView")
+      function ViewCls.QuantityEnum:_construct()
+         self.enum      = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Number"))
+         self.qualifier = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Qualifier"))
+         --
+         local qualifier = self.qualifier
+         qualifier.onChange =
+            function()
+               local win = ItemTrig.windows.opcodeArgEdit
+               if win then -- the view initializes before the window, so this can run early
+                  win:onArgumentEdited()
+               end
+            end
+         self.enum.onChange = qualifier.onChange
+         qualifier:clear()
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATLEAST), value = "GTE" }, false)
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_ATMOST),  value = "LTE" }, false)
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY), value = "E"   }, false)
+         qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_NOTEQ),   value = "NE"  }, false)
+         qualifier:redraw()
+      end
+      function ViewCls.QuantityEnum:GetValue()
+         local q = { qualifier = self.qualifier:getSelectedData() }
+         local s = self.enum:getSelectedData()
+         if s then
+            q.number = s.value
+         end
          if q.qualifier then
             q.qualifier = q.qualifier.value
          else
@@ -97,6 +134,7 @@ function WinCls:_construct()
             multiline = nil,
             number    = nil, -- TODO
             quantity  = nil,
+            quantEnum = nil,
             string    = nil,
          },
       },
@@ -122,6 +160,7 @@ function WinCls:_construct()
       self.ui.views.multiline = ViewCls.String:install(viewholder:GetNamedChild("Multiline"))
       self.ui.views.number    = ViewCls.Number:install(viewholder:GetNamedChild("Number"))
       self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
+      self.ui.views.quantEnum = ViewCls.QuantityEnum:install(viewholder:GetNamedChild("QuantityEnum"))
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
    end
 end
@@ -152,6 +191,7 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       local base = opcode.base
       local val  = opcode.args[argIndex]
       local arg  = base.args[argIndex]
+      local enum = arg.enum
       local archetype = base:getArgumentArchetype(argIndex)
       self.type = arg.type
       if archetype == "checkbox" then
@@ -167,8 +207,8 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view:show()
          local combobox = self.view.value
          combobox:clear()
-         for i = 1, table.getn(arg.enum) do
-            combobox:push({ name = arg.enum[i], index = i }, false)
+         for i = 1, table.getn(enum) do
+            combobox:push({ name = enum[i], index = i }, false)
          end
          combobox:redraw()
          combobox:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
@@ -187,6 +227,18 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view.qualifier:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
          self.view.qualifier:select(function(item) return item.value == val.qualifier end)
          self.view.number:SetText(val.number or "0")
+      elseif archetype == "quantity-enum" then
+         self.view = self.ui.views.quantEnum
+         self.view:show()
+         self.view.qualifier:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
+         self.view.qualifier:select(function(item) return item.value == val.qualifier end)
+         self.view.enum:clear()
+         for k, v in pairs(enum) do
+            self.view.enum:push({ name = v, value = k })
+         end
+         self.view.enum:redraw()
+         self.view.enum:select(1) -- default
+         self.view.enum:select(function(item) return item.index == tonumber(val) end)
       elseif archetype == "string" then
          self.view = self.ui.views.string
          self.view:show()

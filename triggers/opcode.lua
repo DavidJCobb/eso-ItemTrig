@@ -1,5 +1,20 @@
 if not ItemTrig then return end
 
+function ItemTrig.testQuantity(quantity, number)
+   local q = quantity.qualifier
+   local n = quantity.number
+   if q == "E" then
+      return number == n
+   elseif q == "GTE" then -- at least
+      return number >= n
+   elseif q == "LTE" then -- at most
+      return number <= n
+   elseif q == "NE" then
+      return number ~= n
+   end
+   return false
+end
+
 ItemTrig.OpcodeBase = {}
 ItemTrig.OpcodeBase.__index = ItemTrig.OpcodeBase
 function ItemTrig.OpcodeBase:new(name, formatString, args, func)
@@ -29,10 +44,12 @@ function ItemTrig.OpcodeBase:getArgumentArchetype(index)
          return "enum"
       end
       return arg.type
+   elseif arg.type == "quantity" then
+      if arg.enum then
+         return "quantity-enum"
+      end
+      return arg.type
    else
-      --
-      -- "quantity"
-      --
       return arg.type
    end
 end
@@ -138,7 +155,7 @@ end
          ponding value in the enum is what is shown.
       
       quantity
-         This type cannot have an enum.
+         The enum limits the allowed "number" values.
       
       string
          This type cannot have an enum.
@@ -292,13 +309,23 @@ function ItemTrig.Opcode:format(argTransform)
             renderArgs[i] = GetString(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_QUANTITY)
          else
             local format
-            local number = ZO_LocalizeDecimalNumber(a.number)
+            local number
+            if b.enum then
+               number = b.enum[a.number]
+               if not number then
+                  number = ZO_LocalizeDecimalNumber(a.number)
+               end
+            else
+               number = ZO_LocalizeDecimalNumber(a.number)
+            end
             if a.qualifier == "GTE" then
                format = GetString(ITEMTRIG_STRING_QUALIFIER_ATLEAST)
             elseif a.qualifier == "LTE" then
                format = GetString(ITEMTRIG_STRING_QUALIFIER_ATMOST)
             elseif a.qualifier == "E" then
                format = GetString(ITEMTRIG_STRING_QUALIFIER_EXACTLY)
+            elseif a.qualifier == "NE" then
+               format = GetString(ITEMTRIG_STRING_QUALIFIER_NOTEQ)
             else
                format = GetString(ITEMTRIG_STRING_QUALIFIER_INVALID)
             end

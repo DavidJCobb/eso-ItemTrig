@@ -55,6 +55,7 @@ end
 
 local function serializeOpcode(o)
    local count = table.getn(o.args)
+   local bases = o.base.args
    if count > 0 then
       local safeArgs = {}
       --
@@ -68,10 +69,14 @@ local function serializeOpcode(o)
       --
       for i = 1, count do
          safeArgs[i] = o.args[i]
-         if type(safeArgs[i]) == "string" then
+         local rawType  = type(safeArgs[i])
+         local baseType = bases[i].type
+         if rawType == "string" then
             safeArgs[i] = toSafeString(tostring(o.args[i]))
-         elseif type(safeArgs[i]) == "boolean" then
+         elseif rawType == "boolean" then
             safeArgs[i] = tostring(o.args[i] and 1 or 0)
+         elseif baseType == "quantity" then
+            safeArgs[i] = safeArgs[i].qualifier .. "," .. safeArgs[i].number
          elseif getmetatable(safeArgs[i]) == ItemTrig.Trigger then
             safeArgs[i] = o.args[i]:serialize( )
          end
@@ -159,6 +164,12 @@ function _Parser:_parseOpcode(s, opcodeClass)
          end
       elseif aType == "number" then
          oCurrent.args[j] = 0 + arg
+      elseif aType == "quantity" then
+         local q = { qualifier = "E", number = 0 }
+         local s = ItemTrig.split(arg, ",")
+         q.qualifier = s[1] or "E"
+         q.number    = tonumber(s[2] or 0)
+         oCurrent.args[j] = q
       elseif aType == "trigger" then
          --
          -- See comments in _Parser:parse.
@@ -259,10 +270,6 @@ function _Parser:parse(s)
          s = start .. cc_SUBST_TRIG_INDEX .. table.getn(self.triggerList) .. last
          start, mid, last = s:match("^(.*)(" .. pattern_TRIGGER .. ")(.*)$")
       end
-for i = 1, table.getn(self.triggerList) do
-   d(i)
-   d(self.triggerList[i])
-end
    end
    for i = 1, table.getn(self.triggerList) do
       self.triggers[i]    = self:_parseTrigger(self.triggerList[i])
@@ -308,13 +315,7 @@ end
       end
       self.triggers = final
    end
-   if table.getn(self.triggers) == 1 then
---CHAT_SYSTEM:AddMessage("Parse operation completed; returning a single trigger")
-      return self.triggers[1]
-   else
---CHAT_SYSTEM:AddMessage("Parse operation completed; returning " .. table.getn(self.triggers) .. " triggers")
-      return self.triggers
-   end
+   return self.triggers
 end
 
 local function parseTrigger(s)

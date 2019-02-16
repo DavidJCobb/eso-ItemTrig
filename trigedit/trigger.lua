@@ -18,7 +18,7 @@ if not ItemTrig then return end
       for this purpose: Trigger:copyAssign.
 --]]--
 
-ITEMTRIG_TRIGGER_EDIT_HAS_OPENED_NESTED_TRIGGER = 0x4E535444
+ITEMTRIG_TRIGGER_EDIT_HAS_OPENED_NESTED_TRIGGER = 0x4E535444 -- "NSTD"
 
 local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("TriggerEditWindow")
 ItemTrig:registerWindow("triggerEdit", WinCls)

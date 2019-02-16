@@ -1,6 +1,8 @@
 if not ItemTrig then return end
 if not ItemTrig.OpcodeBase then return end
 
+local ItemInterface = ItemTrig.ItemInterface
+
 local _s = GetString
 
 local ConditionBase = {}
@@ -59,6 +61,52 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          return args[1]
+      end
+   ),
+   [4] = ConditionBase:new( -- Stolen
+      _s(ITEMTRIG_STRING_CONDITIONNAME_STOLEN),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_STOLEN),
+      {
+         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_STOLEN_NO), [2] = _s(ITEMTRIG_STRING_OPCODEARG_STOLEN_YES)} },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if args[1] then
+            return context.stolen
+         end
+         return not context.stolen
+      end
+   ),
+   [5] = ConditionBase:new( -- Level
+      _s(ITEMTRIG_STRING_CONDITIONNAME_LEVEL),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_LEVEL),
+      {
+         [1] = { type = "quantity" },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         return ItemTrig.testQuantity(args[1], context.level)
+      end
+   ),
+   [6] = ConditionBase:new( -- Rarity
+      _s(ITEMTRIG_STRING_CONDITIONNAME_RARITY),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_RARITY),
+      {
+         [1] = {
+            type = "quantity",
+            enum = {
+               [ITEM_QUALITY_TRASH]     = GetString(SI_ITEMQUALITY0),
+               [ITEM_QUALITY_NORMAL]    = GetString(SI_ITEMQUALITY1),
+               [ITEM_QUALITY_MAGIC]     = GetString(SI_ITEMQUALITY2),
+               [ITEM_QUALITY_ARCANE]    = GetString(SI_ITEMQUALITY3),
+               [ITEM_QUALITY_ARTIFACT]  = GetString(SI_ITEMQUALITY4),
+               [ITEM_QUALITY_LEGENDARY] = GetString(SI_ITEMQUALITY5),
+            },
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         return ItemTrig.testQuantity(args[1], context.quality)
       end
    ),
 }

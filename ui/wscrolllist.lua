@@ -122,7 +122,7 @@ end
 
 do -- functions for working directly with controls
    function WScrollList:controlByIndex(index)
-      if (not index) or index < 1 then
+      if (not index) or not self:boundsCheckIndex(index) then
          return nil
       end
       index = self.listItemStates[index].controlIndex
@@ -193,6 +193,12 @@ do -- internal events
    end
 end
 
+function WScrollList:boundsCheckIndex(index)
+   if index < 1 then
+      return false
+   end
+   return index <= table.getn(self.listItems)
+end
 function WScrollList:count()
    return table.getn(self.listItems)
 end

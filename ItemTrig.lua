@@ -75,10 +75,34 @@ local function ShowWin()
    ItemTrig.windows.triggerList:show()
 end
 
+local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
+   if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
+      return
+   end
+   local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
+   --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
+   --
+   local tList = ItemTrig.Savedata.triggers
+   for i = 1, table.getn(tList) do
+      local trigger = tList[i]
+      local result  = trigger:exec(item)
+      if item:isInvalid() then
+         break
+      end
+   end
+end
+
 local function Initialize()
    ItemTrig.Savedata:load()
    SLASH_COMMANDS["/cobbperftest"] = PerfTest
    SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
+   SLASH_COMMANDS["/cobbstartinvtest"] = InventoryFilterTest
+   --
+   do -- register item-added handler
+      EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
+      EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
+      EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+   end
 end
 local function OnAddonLoaded(eventCode, addonName)
    if addonName == ItemTrig.name then
