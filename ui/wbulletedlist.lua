@@ -1,5 +1,36 @@
 if not (ItemTrig and ItemTrig.UI) then return end
 
+--[[
+   WBULLETEDLIST
+   This class automates the process of showing a bulleted list, with nested 
+   list items allowed. There are no accessors to the list that an instance 
+   will display; for now, tamper with the (listItems) member directly. A 
+   nested list looks like this:
+   
+   {
+      [1] = { text = "List item 1" },
+      [2] = { text = "List item 2" },
+      [3] = {
+         text = "List item 3",
+         children = {
+            [1] = { text = "List item 3.1" },
+            [2] = { text = "List item 3.2" },
+         },
+      },
+   }
+   
+   Lists can be nested to any depth.
+   
+   WBulletedList can limit the depth to which it displays list items, with 
+   three options: don't show elements past a specified nesting level; stop 
+   showing elements once we've indented past half of the container's width; 
+   or stop showing elements once we have less than a specified amount of 
+   space remaining due to indentation. List items that are disqualified by 
+   these criteria are skipped when rendering, but there is also an option 
+   to show a placeholder string (e.g. "...") in place of the first list 
+   item to disqualify in a row.
+]]--
+
 ItemTrig.UI.WBulletedList = ItemTrig.UI.WidgetClass:makeSubclass("WBulletedList", "bulletedList")
 local WBulletedList = ItemTrig.UI.WBulletedList
 function WBulletedList:_construct(options)
@@ -54,6 +85,11 @@ function WBulletedList:forEach(functor, _)
    end
 end
 function WBulletedList:refreshStyle()
+   --
+   -- Use this when the list's style has changed in a way that won't 
+   -- affect the size or positioning of any elements; this should be 
+   -- cheaper than redrawing the list entirely.
+   --
    local root     = self:asControl()
    local existing = root:GetNumChildren()
    local bulletY  = nil

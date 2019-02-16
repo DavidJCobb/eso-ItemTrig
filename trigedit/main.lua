@@ -246,7 +246,8 @@ function WinCls:editTrigger(trigger)
 end
 function WinCls:moveSelectedTrigger(direction)
    local list = self.lastTriggerList
-   local i    = self.ui.pane:getFirstSelectedIndex()
+   local pane = self.ui.pane
+   local i    = pane:getFirstSelectedIndex()
    if (not i) or direction == 0 then
       return
    end
@@ -260,7 +261,8 @@ function WinCls:moveSelectedTrigger(direction)
       end
    end
    self:refresh()
-   self.ui.pane:select(i + direction)
+   pane:select(i + direction)
+   pane:scrollToItem(i + direction, false, true) -- when triggers are big, reordering them can move the selection out of view
 end
 function WinCls:deleteSelectedTrigger()
    local index = self.ui.pane:getFirstSelectedIndex()

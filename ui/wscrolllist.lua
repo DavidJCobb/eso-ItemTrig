@@ -360,13 +360,6 @@ function WScrollList:redraw()
          self.listItemStates[i].offsetTop    = top
          self.listItemStates[i].offsetBottom = bottom
          self.listItemStates[i].controlIndex = nil
-         --[[do -- warn on bad bounds
-            local ch = bottom - top
-            local ah = child:GetHeight()
-            if math.abs(ch - ah) > 1.5 then
-               assert(false, string.format("Child bounds are off by more than 1.5px; [%d, %d] -> %d ~= %d", top, bottom, ch, ah))
-            end
-         end]]--
          local isVisible = (bottom > viewStart and top < viewEnd)
          if isVisible or (not self.aggressiveRecycling) then
             if isVisible then
@@ -450,23 +443,20 @@ function WScrollList:scrollToItem(index, shouldBeCentered, lazy)
    end
    local state    = self.listItemStates[index]
    local position = state.top
-   if shouldBeCentered then
-      local listHeight  = self.contents:GetHeight()
-      local childHeight = state.bottom - state.top
-      if childHeight >= listHeight then
-         self:scrollTo(position)
-      else
-         if lazy then
-            if self.scrollTop < position and self.scrollTop + listHeight > position + childHeight then
-               return
-            end
+   local listHeight  = self.contents:GetHeight()
+   local childHeight = state.bottom - state.top
+   if childHeight < listHeight then
+      if lazy then
+         if self.scrollTop < position and self.scrollTop + listHeight > position + childHeight then
+            return
          end
-         local offset = (listHeight - childHeight) / 2
-         self:scrollTo(position - offset)
       end
-   else
-      self:scrollTo(position)
+      if shouldBeCentered then
+         local offset = (listHeight - childHeight) / 2
+         position = position - offset
+      end
    end
+   self:scrollTo(position)
 end
 function WScrollList:scrollTo(position, options) -- analogous to ZO_ScrollList_ScrollAbsolute
    assert(not self.dirty, "The drawn list items are out-of-date!")
