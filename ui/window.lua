@@ -221,8 +221,8 @@ function WWindow:_onHide()
    --
    local deferred = self.modalState.deferred
    if deferred then
-      self:handleModalDeferredOnHide(deferred)
       self.modalState.deferred = nil
+      self:handleModalDeferredOnHide(deferred)
    end
    self.modalState.opener = nil
 end
@@ -254,6 +254,13 @@ function WWindow:_onUpdate()
    self:_onResizeFrame()
 end
 function WWindow:getModalOpener()
+   if self:asControl():IsHidden() and not self.modalState.deferred then
+      --
+      -- If an error occurs in WWindow:_onHide, then the modal can be 
+      -- stuck, flagged as having an opener even after it's closed.
+      --
+      self.modalState.opener = nil
+   end
    return self.modalState.opener
 end
 function WWindow:show(...)

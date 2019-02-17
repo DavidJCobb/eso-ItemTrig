@@ -47,9 +47,9 @@ function ItemTrig.deepCopy(tablevar)
    setmetatable(result, getmetatable(tablevar))
    return result
 end
-function ItemTrig.firstIn(tablevar)
+function ItemTrig.firstKeyIn(tablevar)
    if tablevar[1] then
-      return tablevar[1]
+      return 1
    end
    local lowest = nil
    for k, v in pairs(tablevar) do
@@ -62,8 +62,12 @@ function ItemTrig.firstIn(tablevar)
          end
       end
    end
-   if lowest then
-      return tablevar[lowest]
+   return lowest
+end
+function ItemTrig.firstIn(tablevar)
+   local key = ItemTrig.firstKeyIn(tablevar)
+   if key then
+      return tablevar[key]
    end
 end
 function ItemTrig.indexOf(tablevar, e)

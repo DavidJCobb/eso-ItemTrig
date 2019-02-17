@@ -66,8 +66,8 @@
                      <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_BACKGROUND)) </OnInitialized>
                   </Texture>
                   <Label name="ItemTrig_OpcodeEdit_OpcodeBodyUnderlay" text="" font="ITEMTRIG_FONT_BASIC">
-                     <Anchor point="TOPLEFT"     offsetX="7" />
-                     <Anchor point="BOTTOMRIGHT" offsetX="-7" />
+                     <Anchor point="TOPLEFT"  offsetX="7" />
+                     <Anchor point="TOPRIGHT" offsetX="-7" />
                      <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT)) </OnInitialized>
                   </Label>
                   <Label name="ItemTrig_OpcodeEdit_OpcodeBody" text="" font="ITEMTRIG_FONT_BASIC"
@@ -75,8 +75,8 @@
                      linkEnabled="true"
                      alpha="0"
                   >
-                     <Anchor point="TOPLEFT"     offsetX="7" />
-                     <Anchor point="BOTTOMRIGHT" offsetX="-7" />
+                     <Anchor point="TOPLEFT"  offsetX="7" />
+                     <Anchor point="TOPRIGHT" offsetX="-7" />
                      <OnLinkMouseUp>
                         ItemTrig.windows.opcodeEdit:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
                      </OnLinkMouseUp>

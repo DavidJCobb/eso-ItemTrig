@@ -1,6 +1,14 @@
 ItemTrig.ItemInterface = {}
 local ItemInterface = ItemTrig.ItemInterface
 
+--[[
+   As of 2/17/2019, benchmarks suggest that when creating an item interface from 
+   the "item added" event, it takes an average of 11.5ms to create 400 interfaces, 
+   or an average of 0.02875ms to create a single interface. The longest time we 
+   observed in tests was (21 / 400) ms for an Alchemy Bottle picked up from the 
+   world; the shortest was (6 / 400) ms.
+]]--
+
 ItemInterface.__index = ItemInterface
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self)
@@ -9,6 +17,9 @@ function ItemInterface:new(bagIndex, slotIndex)
       slot = slotIndex,
       id   = GetItemId(bagIndex, slotIndex),
       link = GetItemLink(bagIndex, slotIndex),
+      --
+      entryPoint     = "none", -- for trigger processing
+      entryPointData = {},
       --
       armorType     = GetItemArmorType(bagIndex, slotIndex),
       creator       = GetItemCreatorName(bagIndex, slotIndex),

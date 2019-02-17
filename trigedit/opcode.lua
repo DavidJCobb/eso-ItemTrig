@@ -211,6 +211,14 @@ function WinCls:redrawDescription(options)
       end
    )
    ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
+   --
+   do -- resize the window to prevent overflow
+      local window     = self:asControl()
+      local wrapper    = self.ui.opcodeBody:GetParent()
+      local heightText = self.ui.opcodeBody:GetHeight()
+      local heightWrap = wrapper:GetHeight()
+      window:SetHeight(window:GetHeight() - heightWrap + heightText)
+   end
 end
 function WinCls:refresh(options) -- Render the opcode being edited.
    if not options then

@@ -8,7 +8,7 @@ if not ItemTrig then return end
    these exist just so I can easily look up the timing getter when I need it.
 --]]--
 local _perfteststart = nil
-function ItemTrig.pertTestStart()
+function ItemTrig.perfTestStart()
    assert(_perfteststart == nil, "A perf test is already in progress.")
    _perfteststart = GetGameTimeMilliseconds()
 end

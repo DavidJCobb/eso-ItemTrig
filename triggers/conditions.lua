@@ -194,11 +194,68 @@ ItemTrig.tableConditions = {
       function(state, context, args)
          assert(ItemInterface:is(context))
          if args[1] then
-            return context.itemType == args[2]
+            return context.type == args[2]
          else
-            return context.itemType ~= args[2]
+            return context.type ~= args[2]
          end
       end
+   ),
+   [8] = ConditionBase:new( -- Crafted
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CRAFTED),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CRAFTED),
+      {
+         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTED_NO), [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTED_YES)} },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local isCrafted = (type(context.creator) == "string" and context.creator ~= "")
+         if args[1] then
+            return isCrafted
+         end
+         return not isCrafted
+      end
+   ),
+   [9] = ConditionBase:new( -- Added Item Cause
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ADDEDITEMCAUSE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ADDEDITEMCAUSE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_PURCHASED),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_MAILGIFT),
+               [3] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_BANKWITHDRAWAL),
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if context.entryPoint ~= "item-added" then
+            return false
+         end
+         local result = false
+         if args[2] == 1 then
+            result = context.entryPointData.purchased or false
+         elseif args[2] == 2 then
+            result = context.entryPointData.takenFromMail or false
+         elseif args[2] == 3 then
+            result = context.entryPointData.withdrawn or false
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { "item-added" }
+      }
    ),
 }
 ItemTrig.countConditions = table.getn(ItemTrig.tableConditions)

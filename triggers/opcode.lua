@@ -17,7 +17,7 @@ end
 
 ItemTrig.OpcodeBase = {}
 ItemTrig.OpcodeBase.__index = ItemTrig.OpcodeBase
-function ItemTrig.OpcodeBase:new(name, formatString, args, func)
+function ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
    local result = {}
    setmetatable(result, self)
    result.opcode = nil -- number
@@ -25,6 +25,13 @@ function ItemTrig.OpcodeBase:new(name, formatString, args, func)
    result.format = formatString
    result.args   = args or {} -- array
    result.func   = func
+   do -- extra-data
+      if not extra then
+         extra = {}
+      end
+      result.allowedEntryPoints = extra.allowedEntryPoints or nil -- nil == no limit; else, array
+      result.explanation        = extra.explanation or nil
+   end
    return result
 end
 function ItemTrig.OpcodeBase:getArgumentArchetype(index)
@@ -64,7 +71,7 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
       return false
    elseif t == "number" then
       if arg.enum then
-         return ItemTrig.firstIn(arg.enum) -- defined in /misc/table.lua
+         return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
       end
       return 0
    elseif t == "quantity" then
@@ -74,7 +81,7 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
       }
    elseif t == "string" then
       if arg.enum then
-         return ItemTrig.firstIn(arg.enum) -- defined in /misc/table.lua
+         return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
       end
       return ""
    elseif t == "trigger" then
@@ -136,7 +143,9 @@ end
    Most arguments can have an additional field, "enum," which can be used 
    to restrict the range of available values and determine how those 
    values are displayed. When the user edits an enum option, they will be 
-   presented with a combobox. The "enum" field should be a table.
+   presented with a combobox. The "enum" field should be a table; the 
+   allowed values should be the keys, and the displayed values (i.e. 
+   friendly names) should be their values.
    
    Enum behavior varies for some types:
    

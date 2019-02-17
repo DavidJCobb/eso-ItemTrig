@@ -2,6 +2,12 @@ ItemTrig = {
    name    = "ItemTrig",
    windows = {},
    windowClasses = {},
+   eventState = {
+      isInBank      = false,
+      isInBarter    = false,
+      isInGuildBank = false,
+      isInMail      = false,
+   },
 }
 
 --[[--
@@ -80,6 +86,12 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
       return
    end
    local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
+   item.entryPoint = "item-added"
+   item.entryPointData = {
+      purchased     = ItemTrig.eventState.isInBarter,
+      takenFromMail = ItemTrig.eventState.isInMail,
+      withdrawn     = ItemTrig.eventState.isInBank or ItemTrig.eventState.isInGuildBank or false,
+   }
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
    --
    local tList = ItemTrig.Savedata.triggers
@@ -102,6 +114,22 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+   end
+   do -- register open/close handlers for menus that can give us items
+      local function _onOpenClose(eventCode)
+         ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK
+         ItemTrig.eventState.isInBarter    = eventCode == EVENT_OPEN_STORE
+         ItemTrig.eventState.isInGuildBank = eventCode == EVENT_OPEN_GUILD_BANK
+         ItemTrig.eventState.isInMail      = eventCode == EVENT_MAIL_OPEN_MAILBOX
+      end
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_BANK,          _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_BANK,         _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_STORE,         _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_STORE,        _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_GUILD_BANK,    _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_GUILD_BANK,   _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_OPEN_MAILBOX,  _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_CLOSE_MAILBOX, _onOpenClose)
    end
 end
 local function OnAddonLoaded(eventCode, addonName)
