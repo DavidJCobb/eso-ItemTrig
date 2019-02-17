@@ -192,22 +192,37 @@ function WinCls:redrawDescription(options)
    -- able links; and a visible one beneath it, with the exact same text, but 
    -- colored and underlined as appropriate.
    --
+   -- Another dumb obstacle: When a format code has a start and an end, it will 
+   -- also have an undocumented length limit; exceeding this length limit will 
+   -- cause the displayed text to fail to display properly (e.g. the displayed 
+   -- text will be truncated to just a couple characters, or similar problems).
+   --
    local rendered = self.opcode.working:format(
       function(s, i)
-         --return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i)
-         return ZO_LinkHandler_CreateLinkWithFormat(s, nil, "ItemTrigOpcodeEditArg", 0, "|H%d:%s|h%s|h", i) -- link without brackets
+         --return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i) -- can't use this; it inserts brackets
+         s = ItemTrig.splitByCount(s, 200)
+         local out = ""
+         for j = 1, table.getn(s) do
+            out = out .. ZO_LinkHandler_CreateLinkWithFormat(s[j], nil, "ItemTrigOpcodeEditArg", 0, "|H%d:%s|h%s|h", i) -- link without brackets
+         end
+         return out
       end
    )
    self.ui.opcodeBody:SetText(rendered)
    --
    rendered = self.opcode.working:format(
       function(s, i)
+         s = ItemTrig.splitByCount(s, 200)
+         local out   = ""
          local color = "70B0FF"
          if i == options.highlightIndex then
             color = "EE3333"
          end
          local fmt = string.format("|c%s|l0:1:1:3:1:%s|l", color, color)
-         return string.format(fmt .. "%s|l|r", s)
+         for j = 1, table.getn(s) do
+            out = out .. string.format(fmt .. "%s|l|r", s[j])
+         end
+         return out
       end
    )
    ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
@@ -255,6 +270,9 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
    if self.settingUp then
       return
    end
+d(linkData)
+d(linkText)
+d(linkText:len())
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
    do -- Special-case: nested trigger options.

@@ -71,7 +71,12 @@ do -- helper class for opcode lists
       self.pane = ItemTrig.UI.WScrollSelectList:cast(self:GetNamedChild("List"))
       do -- pane
          local function formatOpcodeArg(s)
-            return string.format("|c70B0FF%s|r", s)
+            s = ItemTrig.splitByCount(s, 200)
+            local out = ""
+            for j = 1, table.getn(s) do
+               out = out .. string.format("|c70B0FF%s|r", s[j])
+            end
+            return out
          end
          --
          local pane = self.pane
