@@ -430,9 +430,10 @@ function WinCls:deleteOpcode(opcode)
             pane = w.ui.paneActions
             list = trig.working.actions
          end
+         local index = pane:indexOf(opcode)
          trig.dirty = true
          table.remove(list, index)
-         pane:remove(pane:indexOf(opcode))
+         pane:remove(index)
       end,
       self
    )

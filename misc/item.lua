@@ -49,14 +49,42 @@ end
     - IsItemSoulGem(bag, slot)
 ]]--
 
-ItemInterface.__index = ItemInterface
+local _lazyGetterMappings = {
+   countTotal = function(i) return GetItemTotalCount(i.bag, i.slot) end,
+}
+
+ItemInterface.meta = {
+   --_index = ItemInterface,
+   __index =
+      function(interface, key)
+         local function _safe_thiscall(method, ...)
+            return ItemInterface[method](interface, ...)
+         end
+         --
+         local value = rawget(interface, key)
+         if value ~= nil then
+            return value
+         end
+         if _lazyGetterMappings[key] then
+            if _safe_thiscall("isInvalid") then
+               return nil
+            end
+            --
+            -- Handle properties that are only stored on demand.
+            --
+            interface[key] = _lazyGetterMappings[key](interface)
+            return rawget(interface, key)
+         end
+         return ItemInterface[key]
+      end,
+}
 do -- define failure reasons for member functions
    ItemInterface.FAILURE_CANNOT_SPLIT_STACK = 0x53504C54
    ItemInterface.FAILURE_ITEM_IS_INVALID    = 0x494E5641
    ItemInterface.FAILURE_ITEM_IS_LOCKED     = 0x4C4F434B
 end
 function ItemInterface:new(bagIndex, slotIndex)
-   local result = setmetatable({}, self)
+   local result = setmetatable({}, self.meta)
    ItemTrig.assign(result, {
       bag  = bagIndex,
       slot = slotIndex,
@@ -68,8 +96,10 @@ function ItemInterface:new(bagIndex, slotIndex)
       --
       armorType     = GetItemArmorType(bagIndex, slotIndex),
       bound         = IsItemBound(bagIndex, slotIndex),
+      countTotal    = nil, -- lazy getter, via metatable
       creator       = GetItemCreatorName(bagIndex, slotIndex),
       level         = GetItemLevel(bagIndex, slotIndex),
+      name          = GetItemName(bagIndex, slotIndex),
       --quality       = GetItemQuality(bagIndex, slotIndex),
       requiredChamp = GetItemRequiredChampionPoints(bagIndex, slotIndex),
       requiredLevel = GetItemRequiredLevel(bagIndex, slotIndex),
@@ -85,11 +115,19 @@ function ItemInterface:new(bagIndex, slotIndex)
          invalid   = false,
       })
    end
-   do -- link-dependent information
+   do -- bag totals
+      local bag, bank, craftBag = GetItemLinkStacks(result.link)
       ItemTrig.assign(result, {
-         name = GetItemLinkName(result.link),
+         totalBag      = bag,
+         totalBank     = bank,
+         totalCraftBag = craftBag,
       })
    end
+   --[[do -- link-dependent information
+      ItemTrig.assign(result, {
+         name = GetItemLinkName(result.link), -- returned value sometimes has weird codes on the end, e.g. "Iron Armor^n"
+      })
+   end]]--
    do -- GetItemCraftingInfo
       local craftingSkill, itemType, c1, c2, c3 = GetItemCraftingInfo(bagIndex, slotIndex)
       ItemTrig.assign(result, {
@@ -137,11 +175,14 @@ function ItemInterface:destroy(count)
    if self.locked then
       return false, self.FAILURE_ITEM_IS_LOCKED
    end
-   if count == nil or count > self.count then
+   if count == nil or count >= self.count then
       DestroyItem(self.bag, self.slot)
       self.destroyed = true
       self.invalid   = true
    else
+      if count == 0 then -- don't even bother, lol
+         return true
+      end
       --
       -- To destroy just some of the stack, we need to split the stack and 
       -- then destroy the new stack.
@@ -150,26 +191,16 @@ function ItemInterface:destroy(count)
       if not targetSlot then
          return false, self.FAILURE_CANNOT_SPLIT_STACK
       end
-      assert(false, "We don't currently have a way to implement this. The API is too limiting.")
-      --[[
-      RequestMoveItem(self.bag, self.slot, self.bag, targetSlot, count)
-      local targetID = GetItemId(self.bag, targetSlot)
-      if targetID ~= self.id then
-         return false, self.FAILURE_CANNOT_SPLIT_STACK
-      end
-      DestroyItem(self.bag, targetSlot)
-      self.count = GetSlotStackSize(self.bag, self.slot)
-      if self.count < 1 then
-         self.invalid = true
-      end
-      ]]--
+      CallSecureProtected("RequestMoveItem", self.bag, self.slot, self.bag, targetSlot, count)
+      ItemTrig:expectItemToDestroy(self.bag, targetSlot, count, self.id)
+      self.invalid = true
    end
    return true
 end
 function ItemInterface:is(instance)
    assert(self == ItemInterface, "This is a static method.")
    if instance then
-      return getmetatable(instance) == self
+      return getmetatable(instance) == self.meta
    end
    return false
 end
@@ -183,7 +214,11 @@ function ItemInterface:launder(count)
    if self:isInvalid() then
       return
    end
-   LaunderItem(self.bag, self.slot, count or self.count)
+   if not count then
+      count = self.count
+   end
+   LaunderItem(self.bag, self.slot, count)
+   self:updateCount(-count)
 end
 function ItemInterface:modifyJunkState(flag)
    if self:isInvalid() then
@@ -207,9 +242,33 @@ function ItemInterface:sell(count)
    if self:isInvalid() then
       return
    end
-   SellInventoryItem(self.bag, self.slot, count or self.count)
+   if not count then
+      count = self.count
+   end
+   SellInventoryItem(self.bag, self.slot, count)
+   self:updateCount(-count)
 end
-function ItemInterface:update()
+function ItemInterface:totalForBag(bag)
+   if self.bag == BAG_BACKPACK then
+      return self.totalBag
+   elseif self.bag == BAG_BANK then
+      return self.totalBank
+   elseif self.bag == BAG_SUBSCRIBER_BANK then
+      return self.totalCraftBag
+   end
+end
+function ItemInterface:updateCount(change)
+   if change < 0 and -change > self.count then
+      change = -self.count
+   end
+   self.count = self.count + change
+   if self.bag == BAG_BACKPACK then
+      self.totalBag = self.totalBag + change
+   elseif self.bag == BAG_BANK then
+      self.totalBank = self.totalBank + change
+   elseif self.bag == BAG_SUBSCRIBER_BANK then
+      self.totalCraftBag = self.totalCraftBag + change
+   end
 end
 function ItemInterface:use()
    if self:isInvalid() then

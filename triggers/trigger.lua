@@ -5,8 +5,13 @@ function ItemTrig.executeTriggerList(list, entryPoint, context)
       list = ItemTrig.filterTriggerList(list, entryPoint)
    end
    for i = 1, table.getn(list) do
-      local result = list[i]:exec(context, entryPoint)
-      if context:isInvalid() then
+      local result, extra = list[i]:exec(context, entryPoint)
+      if result == ItemTrig.OPCODE_FAILED then
+         d("Failed to execute an opcode.")
+         d(extra)
+         return result, extra
+      end
+      if context:isInvalid() then -- NOTE: Assumes context instanceof ItemInterface
          break
       end
    end
@@ -22,6 +27,27 @@ function ItemTrig.filterTriggerList(list, entryPoint)
       end
    end
    return filtered, mapping
+end
+
+local function _formatOpcodeEPMismatch(opcode)
+   local s = ""
+   if opcode.type == "action" then
+      s = GetString(ITEMTRIG_STRING_ERROR_ACTION_ENTRYPOINT_LIMIT)
+   elseif opcode.type == "condition" then
+      s = GetString(ITEMTRIG_STRING_ERROR_CONDITION_ENTRYPOINT_LIMIT)
+   end
+   local names = ""
+   do
+      local allowed = opcode.allowedEntryPoints
+      if allowed then
+         names = {}
+         for i = 1, table.getn(allowed) do
+            local name = ItemTrig.ENTRY_POINT_NAMES[allowed[i]] or "???"
+         end
+         names = table.concat(names, ", ")
+      end
+   end
+   return zo_strformat(s, names)
 end
 
 ItemTrig.Trigger = {}
@@ -151,6 +177,9 @@ function ItemTrig.Trigger:exec(context, entryPoint)
    self.state.entryPoint = entryPoint or nil
    for i = 1, table.getn(self.conditions) do
       local c = self.conditions[i]
+      if entryPoint and not c:allowsEntryPoint(entryPoint) then
+         return ItemTrig.OPCODE_FAILED, { opcode = c, why = _formatOpcodeEPMismatch(c) }
+      end
       if c.never_skip or not (self.state.using_or and self.state.matched_or) then
          --
          -- Short-circuit evaluation for ORs:
@@ -161,7 +190,7 @@ function ItemTrig.Trigger:exec(context, entryPoint)
          -- the "never skip" flag is to avoid skipping the condition that 
          -- switches us between OR and AND.
          --
-         local r = c:exec(self.state, context)
+         local r, extra = c:exec(self.state, context)
          if not (r == nil) then
             if r == ItemTrig.OPCODE_FAILED then
                --
@@ -171,7 +200,7 @@ function ItemTrig.Trigger:exec(context, entryPoint)
                -- clarification on why the opcode failed.
                --
                r = false
-               return r
+               return r, extra
             end
             --
             -- If a condition returns nil, then we don't treat it as true 
@@ -197,6 +226,9 @@ function ItemTrig.Trigger:exec(context, entryPoint)
    --
    for i = 1, table.getn(self.actions) do
       local a = self.actions[i]
+      if entryPoint and not a:allowsEntryPoint(entryPoint) then
+         return ItemTrig.OPCODE_FAILED, { opcode = a, why = _formatOpcodeEPMismatch(c) }
+      end
       local r, extra = a:exec(self.state, context)
       if r == ItemTrig.RETURN_FROM_TRIGGER then
          return r
@@ -208,7 +240,7 @@ function ItemTrig.Trigger:exec(context, entryPoint)
          -- field whose string value is a human-readable clarification on 
          -- why the opcode failed.
          --
-         return r
+         return r, extra
       end
    end
    return true

@@ -34,6 +34,13 @@ function ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
    end
    return result
 end
+function ItemTrig.OpcodeBase:allowsEntryPoint(entryPoint)
+   local allowed = self.allowedEntryPoints
+   if not allowed then
+      return true
+   end
+   return ItemTrig.indexOf(allowed, entryPoint) ~= nil
+end
 function ItemTrig.OpcodeBase:getArgumentArchetype(index)
    local arg = self.args[tonumber(index)]
    if arg.type == "string" then
@@ -200,6 +207,12 @@ function ItemTrig.Opcode:new(base, args, opTable, opType)
    result.args = args or {} -- array
    result.type = opType
    return result
+end
+function ItemTrig.Opcode:allowsEntryPoint(...)
+   if not self.base then
+      return false
+   end
+   return self.base:allowsEntryPoint(...)
 end
 function ItemTrig.Opcode:clone(deep)
    local result = {}

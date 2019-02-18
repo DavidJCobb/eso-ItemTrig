@@ -7,8 +7,8 @@ local _s = GetString
 
 local ActionBase = {}
 ActionBase.__index = ActionBase
-function ActionBase:new(name, formatString, args, func)
-   return ItemTrig.OpcodeBase:new(name, formatString, args, func)
+function ActionBase:new(name, formatString, args, func, extra)
+   return ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
 end
 
 ItemTrig.Action = {}
@@ -40,7 +40,8 @@ ItemTrig.tableActions = {
             -- an "explanation" key to the arg, and the opcode-arg editor 
             -- should show that as plain text below the textbox.
             --
-            text = string.gsub(text, "$%(name%)", context.name)
+            text = string.gsub(text, "$%(name%)",  context.name)
+            text = string.gsub(text, "$%(price%)", context.sellValue)
          end
          CHAT_SYSTEM:AddMessage(text)
       end
@@ -79,7 +80,7 @@ ItemTrig.tableActions = {
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_ONLYADDED),
             },
             default  = false,
-            disabled = true, -- until we get it working
+            --disabled = true, -- until we get it working
             allowedEntryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED },
          }
       },
@@ -143,14 +144,34 @@ ItemTrig.tableActions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         if state.entryPoint ~= ItemTrig.ENTRY_POINT_FENCE then
-            return ItemTrig.OPCODE_FAILED, { why = GetString(ITEMTRIG_STRING_ERROR_ACTION_ENTRYPOINT_MUST_BE_FENCE) }
-         end
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
          item:launder(args[1])
-      end
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }
+      }
+   ),
+   [8] = ActionBase:new( -- Sell Or Fence
+      _s(ITEMTRIG_STRING_ACTIONNAME_SELLORFENCE),
+      _s(ITEMTRIG_STRING_ACTIONDESC_SELLORFENCE),
+      {
+         [1] = {
+            type    = "number",
+            default = 9999,
+         }
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if context:isInvalid() then
+            return ItemTrig.OPCODE_FAILED, {}
+         end
+         item:sell(args[1])
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_BARTER, ItemTrig.ENTRY_POINT_FENCE }
+      }
    ),
 }
 ItemTrig.countActions = table.getn(ItemTrig.tableActions)

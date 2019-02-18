@@ -7,8 +7,8 @@ local _s = GetString
 
 local ConditionBase = {}
 ConditionBase.__index = ConditionBase
-function ConditionBase:new(name, formatString, args, func)
-   return ItemTrig.OpcodeBase:new(name, formatString, args, func)
+function ConditionBase:new(name, formatString, args, func, extra)
+   return ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
 end
 
 ItemTrig.Condition = {}
@@ -239,9 +239,6 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         if state.entryPoint ~= ItemTrig.ENTRY_POINT_ITEM_ADDED then
-            return false
-         end
          local result = false
          if args[2] == 1 then
             result = context.entryPointData.purchased or false
@@ -275,9 +272,6 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         if state.entryPoint ~= ItemTrig.ENTRY_POINT_ITEM_ADDED then
-            return false
-         end
          local result = context.entryPointData.countAdded == context.count
          if args[1] then
             return result
@@ -287,6 +281,29 @@ ItemTrig.tableConditions = {
       { -- extra data for this opcode
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
       }
+   ),
+   [11] = ConditionBase:new( -- Total Count
+      _s(ITEMTRIG_STRING_CONDITIONNAME_TOTALCOUNT),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_TOTALCOUNT),
+      {
+         [1] = {
+            type = "number",
+            enum = {
+               [BAG_BACKPACK]        = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_BACKPACK),
+               [BAG_BANK]            = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_BANK),
+               [BAG_SUBSCRIBER_BANK] = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_CRAFTBAG),
+            }
+         },
+         [2] = { type = "quantity" },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local count = context:totalForBag(args[1])
+         if not count then
+            return ItemTrig.OPCODE_FAILED, {}
+         end
+         return ItemTrig.testQuantity(args[2], count)
+      end
    ),
 }
 ItemTrig.countConditions = table.getn(ItemTrig.tableConditions)

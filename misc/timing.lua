@@ -19,3 +19,7 @@ function ItemTrig.perfTestEnd()
    _perfteststart = nil
    return done - start
 end
+function ItemTrig.wait(ms)
+   local final = GetGameTimeMilliseconds() + ms
+   while GetGameTimeMilliseconds() < final do end
+end

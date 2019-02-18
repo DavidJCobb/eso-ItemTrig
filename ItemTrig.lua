@@ -6,11 +6,22 @@ ItemTrig = {
       isInBank       = false,
       isInBarter     = false,
       isInCrafting   = false,
+      isInFence      = false,
       isInGuildBank  = false,
       isInMail       = false,
       inCraftingType = 0,
    },
+   pendingItemDestroyOperations = {},
 }
+
+function ItemTrig:expectItemToDestroy(bag, slot, count, id)
+   table.insert(self.pendingItemDestroyOperations, {
+      bag   = bag,
+      slot  = slot,
+      count = count,
+      id    = id,
+   })
+end
 
 --[[--
    System for handling windows such that the window classes don't need to 
@@ -91,6 +102,9 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
       return
    end
    local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
+   if item.locked then
+      return
+   end
    item.entryPointData = {
       countAdded    = stackCountChange,
       --
@@ -102,6 +116,20 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
    ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
 end
+local function _ActionDestroyFinalize(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
+   local stack   = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
+   local pending = ItemTrig.pendingItemDestroyOperations
+   for i = 1, table.getn(pending) do
+      local op = pending[i]
+      if op.bag == bagIndex and op.slot == slotIndex then
+         if op.id == stack.id and op.count == stack.count then
+            stack:destroy()
+            table.remove(pending, i)
+            return
+         end
+      end
+   end
+end
 
 local function Initialize()
    ItemTrig.Savedata:load()
@@ -109,6 +137,12 @@ local function Initialize()
    SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
    SLASH_COMMANDS["/cobbstartinvtest"] = InventoryFilterTest
    --
+   do -- register handler needed for the "Destroy" action
+      EVENT_MANAGER:RegisterForEvent ("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ActionDestroyFinalize)
+      EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, false)
+      EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+      EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
+   end
    do -- register item-added handler
       EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
@@ -125,11 +159,13 @@ local function Initialize()
    end
    do -- register open/close handlers for menus that can give us items
       local function _onOpenClose(eventCode, ...)
-         ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK
+         ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK -- TODO: IsBankOpen()
          ItemTrig.eventState.isInBarter    = eventCode == EVENT_OPEN_STORE
          ItemTrig.eventState.isInCrafting  = eventCode == EVENT_CRAFTING_STATION_INTERACT
-         ItemTrig.eventState.isInGuildBank = eventCode == EVENT_OPEN_GUILD_BANK
+         ItemTrig.eventState.isInFence     = eventCode == EVENT_OPEN_FENCE
+         ItemTrig.eventState.isInGuildBank = eventCode == EVENT_OPEN_GUILD_BANK -- TODO: IsGuildBankOpen()
          ItemTrig.eventState.isInMail      = eventCode == EVENT_MAIL_OPEN_MAILBOX
+         -- TODO: Can we check "trading" state via TRADE_WINDOW:IsTrading() ?
          --
          if eventCode == EVENT_CRAFTING_STATION_INTERACT then
             ItemTrig.eventState.inCraftingType = select(2, ...) or 0 -- craftSkill
@@ -140,6 +176,9 @@ local function Initialize()
          do -- trigger entry points
             local function _processInventory(entryPoint, entryPointData)
                ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
+                  if item.locked then
+                     return
+                  end
                   item.entryPointData = entryPointData
                   ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, entryPoint, item)
                end)
@@ -166,7 +205,7 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_CLOSE_MAILBOX, _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CRAFTING_STATION_INTERACT,     _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_END_CRAFTING_STATION_INTERACT, _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_FENCE,         _onOpenClose) -- TODO: There's no dedicated event for exiting a fence, but does that just fire another event e.g. CLOSE_STORE?
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_FENCE,         _onOpenClose) -- Closing the fence menu fires the EVENT_CLOSE_STORE event.
    end
 end
 local function OnAddonLoaded(eventCode, addonName)
