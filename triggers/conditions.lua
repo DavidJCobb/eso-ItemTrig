@@ -232,12 +232,13 @@ ItemTrig.tableConditions = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_PURCHASED),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_MAILGIFT),
                [3] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_BANKWITHDRAWAL),
+               [4] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_CRAFTING),
             }
          },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         if context.entryPoint ~= "item-added" then
+         if context.entryPoint ~= ItemTrig.ENTRY_POINT_ITEM_ADDED then
             return false
          end
          local result = false
@@ -247,6 +248,8 @@ ItemTrig.tableConditions = {
             result = context.entryPointData.takenFromMail or false
          elseif args[2] == 3 then
             result = context.entryPointData.withdrawn or false
+         elseif args[2] == 4 then
+            result = context.entryPointData.crafting or false
          end
          if args[1] then
             return result
@@ -254,7 +257,7 @@ ItemTrig.tableConditions = {
          return not result
       end,
       { -- extra data for this opcode
-         allowedEntryPoints = { "item-added" }
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
       }
    ),
 }

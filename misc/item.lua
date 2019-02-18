@@ -9,7 +9,21 @@ local ItemInterface = ItemTrig.ItemInterface
    world; the shortest was (6 / 400) ms.
 ]]--
 
+--[[
+   TODO: Potential lazy getters to implement:
+   
+    - GetItemLaunderPrice(bag, slot)
+    - IsItemFromCrownCrate(bag, slot)
+    - IsItemFromCrownStore(bag, slot)
+    - IsItemSoulGem(bag, slot)
+]]--
+
 ItemInterface.__index = ItemInterface
+do -- define failure reasons for member functions
+   ItemInterface.FAILURE_CANNOT_SPLIT_STACK = 0x53504C54
+   ItemInterface.FAILURE_ITEM_IS_INVALID    = 0x494E5641
+   ItemInterface.FAILURE_ITEM_IS_LOCKED     = 0x4C4F434B
+end
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self)
    ItemTrig.assign(result, {
@@ -22,6 +36,7 @@ function ItemInterface:new(bagIndex, slotIndex)
       entryPointData = {},
       --
       armorType     = GetItemArmorType(bagIndex, slotIndex),
+      bound         = IsItemBound(bagIndex, slotIndex),
       creator       = GetItemCreatorName(bagIndex, slotIndex),
       level         = GetItemLevel(bagIndex, slotIndex),
       --quality       = GetItemQuality(bagIndex, slotIndex),
@@ -70,15 +85,52 @@ function ItemInterface:new(bagIndex, slotIndex)
       result.type     = itemType
       result.specType = specType
    end
+   do -- runestones
+      --
+      -- TODO: only if runestone
+      --
+      result.runestoneName = GetRunestoneTranslatedName(bagIndex, slotIndex)
+   end
    return result
 end
-function ItemInterface:destroy()
-   if self:isInvalid() then
-      return
+function ItemInterface:canBeJunk()
+   if self.canBeJunk == nil then
+      self.canBeJunk = CanItemBeMarkedAsJunk(self.bag, self.slot)
    end
-   DestroyItem(self.bag, self.slot)
-   self.destroyed = true
-   self.invalid   = true
+   return self.canBeJunk
+end
+function ItemInterface:destroy(count)
+   if self:isInvalid() then
+      return false, self.FAILURE_ITEM_IS_INVALID
+   end
+   if self.locked then
+      return false, self.FAILURE_ITEM_IS_LOCKED
+   end
+   if count == nil or count > self.count then
+      DestroyItem(self.bag, self.slot)
+      self.destroyed = true
+      self.invalid   = true
+   else
+      --
+      -- To destroy just some of the stack, we need to split the stack and 
+      -- then destroy the new stack.
+      --
+      local targetSlot = FindFirstEmptySlotInBag(self.bag)
+      if not targetSlot then
+         return false, self.FAILURE_CANNOT_SPLIT_STACK
+      end
+      RequestMoveItem(self.bag, self.slot, self.bag, targetSlot, count)
+      local targetID = GetItemId(self.bag, targetSlot)
+      if targetID ~= self.id then
+         return false, self.FAILURE_CANNOT_SPLIT_STACK
+      end
+      DestroyItem(self.bag, targetSlot)
+      self.count = GetSlotStackSize(self.bag, self.slot)
+      if self.count < 1 then
+         self.invalid = true
+      end
+   end
+   return true
 end
 function ItemInterface:is(instance)
    assert(self == ItemInterface, "This is a static method.")
@@ -93,12 +145,45 @@ end
 function ItemInterface:isInvalid()
    return self.invalid
 end
+function ItemInterface:launder(count)
+   if self:isInvalid() then
+      return
+   end
+   LaunderItem(self.bag, self.slot, count or self.count)
+end
+function ItemInterface:modifyJunkState(flag)
+   if self:isInvalid() then
+      return false
+   end
+   if self:canBeJunk() then
+      SetItemIsJunk(self.bag, self.slot, flag)
+      self.locked = IsItemJunk(self.bag, self.slot)
+      return self.locked == flag
+   end
+   return false
+end
+function ItemInterface:modifyLockState(flag)
+   if self:isInvalid() then
+      return
+   end
+   SetItemIsPlayerLocked(self.bag, self.slot, flag)
+   self.locked = IsItemPlayerLocked(self.bag, self.slot)
+end
+function ItemInterface:sell(count)
+   if self:isInvalid() then
+      return
+   end
+   SellInventoryItem(self.bag, self.slot, count or self.count)
+end
 function ItemInterface:update()
 end
 function ItemInterface:use()
    if self:isInvalid() then
       return
    end
+   --
+   -- TODO: Should we check CanInteractWithItem first?
+   --
    UseItem(self.bag, self.slot) -- TODO: this only works out of combat; what happens if called while in combat? does it throw an error?
    self.count = select(2, GetItemInfo(self.bag, self.slot))
    if self.count == 0 then

@@ -94,6 +94,17 @@ local function serializeTrigger(t)
    local chunks = {
       _toChunk("e", t.enabled and "1" or "0"),
    }
+   do -- chunk: entry points
+      local count = table.getn(t.entryPoints)
+      if count > 0 then
+         local chunk = {}
+         for i = 1, count do
+            table.insert(chunk, string.format("%x", t.entryPoints[count]))
+         end
+         chunk = table.concat(chunk, ",")
+         table.insert(chunks, _toChunk("ep", chunk))
+      end
+   end
    do
       local c = {}
       local a = {}
@@ -219,6 +230,14 @@ function _Parser:_parseTrigger(s)
          t.enabled = false
          if body ~= "0" then
             t.enabled = true
+         end
+      elseif head == "ep" then -- Chunk: Entry Points
+         local list  = ItemTrig.split(body, ",")
+         local count = table.getn(list)
+         if count > 0 then
+            for i = 1, count do
+               table.insert(t.entryPoints, tonumber(list[i], 16))
+            end
          end
       else
          if head == nil then

@@ -70,21 +70,37 @@ do -- helper class for opcode lists
       self.type = type
       self.pane = ItemTrig.UI.WScrollSelectList:cast(self:GetNamedChild("List"))
       do -- pane
-         local function formatOpcodeArg(s)
-            s = ItemTrig.splitByCount(s, 200)
-            local out = ""
-            for j = 1, table.getn(s) do
-               out = out .. string.format("|c70B0FF%s|r", s[j])
-            end
-            return out
-         end
-         --
          local pane = self.pane
          pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
          pane.element.toConstruct =
-            function(control, data, extra)
+            function(control, data, extra, pane)
+               local baseArgs = data.base.args
+               local function _formatOpcodeArg(s, i)
+                  local function _validateEntryPoints(i)
+                     local triggerEP = WinCls:getInstance().stack:getEnabledEntryPoints()
+                     local opcodeEP  = baseArgs[i].allowedEntryPoints
+                     if not opcodeEP then
+                        return true
+                     end
+                     if not triggerEP then
+                        return false
+                     end
+                     return ItemTrig.valuesOverlap(triggerEP, opcodeEP)
+                  end
+                  if not _validateEntryPoints(i) then
+                     return s
+                  end
+                  --
+                  s = ItemTrig.splitByCount(s, 200)
+                  local out = ""
+                  for j = 1, table.getn(s) do
+                     out = out .. string.format("|c70B0FF%s|r", s[j])
+                  end
+                  return out
+               end
+               --
                local widget = ItemTrig.UI.OpcodeListEntry:cast(control)
-               widget:setText(data:format(formatOpcodeArg))
+               widget:setText(data:format(_formatOpcodeArg))
                widget:setSelected(extra and extra.selected)
             end
          pane.element.onSelect =
@@ -187,6 +203,13 @@ do -- editor state
          return self.frames[1]
       end
    end
+   function TriggerStack:getEnabledEntryPoints()
+      local first = self:first()
+      if not first then
+         return {}
+      end
+      return first.working.entryPoints
+   end
    function TriggerStack:last()
       local count = self:count()
       if count > 0 then
@@ -262,7 +285,9 @@ function WinCls:addOpcode(type, insertAfterIndex)
    elseif type == "action" then
       created = ItemTrig.Action:new(ItemTrig.TRIGGER_ACTION_COMMENT)
    end
-   local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, created, true)
+   local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, created, true, {
+      entryPoints = self.stack:getEnabledEntryPoints(),
+   })
    deferred:done(
       function(context, deferred, dirty) -- user clicked OK
          local editor = WinCls:getInstance()

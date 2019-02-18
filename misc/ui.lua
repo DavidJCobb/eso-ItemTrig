@@ -36,34 +36,42 @@ function ItemTrig.fadeToBottom(control, color1, color2)
    control:SetVertexColors(edge1, unpack(color1))
    control:SetVertexColors(edge2, unpack(color2))
 end
-function ItemTrig.offsetLeft(control)
-   local parent = control:GetParent()
-   if parent then
-      return control:GetLeft() - parent:GetLeft()
+function ItemTrig.offsetLeft(control, basis)
+   if not basis then
+      basis = control:GetParent()
+   end
+   if basis then
+      return control:GetLeft() - basis:GetLeft()
    else
       return control:GetLeft()
    end
 end
-function ItemTrig.offsetRight(control)
-   local parent = control:GetParent()
-   if parent then
-      return control:GetRight() - parent:GetLeft()
+function ItemTrig.offsetRight(control, basis)
+   if not basis then
+      basis = control:GetParent()
+   end
+   if basis then
+      return control:GetRight() - basis:GetLeft()
    else
       return control:GetRight()
    end
 end
-function ItemTrig.offsetTop(control)
-   local parent = control:GetParent()
-   if parent then
-      return control:GetTop() - parent:GetTop()
+function ItemTrig.offsetTop(control, basis)
+   if not basis then
+      basis = control:GetParent()
+   end
+   if basis then
+      return control:GetTop() - basis:GetTop()
    else
       return control:GetTop()
    end
 end
-function ItemTrig.offsetBottom(control)
-   local parent = control:GetParent()
-   if parent then
-      return control:GetBottom() - parent:GetTop()
+function ItemTrig.offsetBottom(control, basis)
+   if not basis then
+      basis = control:GetParent()
+   end
+   if basis then
+      return control:GetBottom() - basis:GetTop()
    else
       return control:GetBottom()
    end

@@ -31,7 +31,8 @@ function WinCls:_construct()
          opcodeType = nil,
          opcodeBody = nil,
       },
-      settingUp = false,
+      settingUp   = false,
+      entryPoints = {},
       opcode = {
          target  = nil, -- the opcode we want to edit (i.e. Opcode* other)
          working = nil, -- a copy of that opcode; we make changes to it and then commit to (target) later
@@ -107,7 +108,7 @@ function WinCls:requestExit()
    end
    return ItemTrig.Deferred:resolve()
 end
-function WinCls:requestEdit(opener, opcode, dirty)
+function WinCls:requestEdit(opener, opcode, dirty, extra)
    assert(opener        ~= nil, "The opcode editor must be aware of its opener.")
    assert(opcode        ~= nil, "No opcode.")
    assert(opcode.base   ~= nil, "Opcode is invalid.")
@@ -116,10 +117,14 @@ function WinCls:requestEdit(opener, opcode, dirty)
    if not deferred then
       return
    end
+   if not extra then
+      extra = {}
+   end
    self.settingUp = true
    self.opcode.target  = opcode
    self.opcode.working = opcode:clone(true)
    self.opcode.isNew   = dirty or false
+   self.entryPoints    = extra.entryPoints or {}
    do
       local list
       if opcode.type == "condition" then
@@ -185,6 +190,14 @@ function WinCls:redrawDescription(options)
    if not options then
       options = {}
    end
+   local baseArgs = self.opcode.working.base.args
+   local function _validateEntryPoints(i)
+      local ep = baseArgs[i].allowedEntryPoints
+      if not ep then
+         return true
+      end
+      return ItemTrig.valuesOverlap(ep, self.entryPoints)
+   end
    --
    -- It's impossible to combine formatting codes (i.e. color, underline) with 
    -- links, and custom links cannot have color. We "solve" this by using two 
@@ -200,6 +213,9 @@ function WinCls:redrawDescription(options)
    local rendered = self.opcode.working:format(
       function(s, i)
          --return ZO_LinkHandler_CreateLink(s, nil, "ItemTrigOpcodeEditArg", i) -- can't use this; it inserts brackets
+         if not _validateEntryPoints(i) then
+            return s
+         end
          s = ItemTrig.splitByCount(s, 200)
          local out = ""
          for j = 1, table.getn(s) do
@@ -212,6 +228,9 @@ function WinCls:redrawDescription(options)
    --
    rendered = self.opcode.working:format(
       function(s, i)
+         if not _validateEntryPoints(i) then
+            return s
+         end
          s = ItemTrig.splitByCount(s, 200)
          local out   = ""
          local color = "70B0FF"
@@ -270,9 +289,6 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
    if self.settingUp then
       return
    end
-d(linkData)
-d(linkText)
-d(linkText:len())
    local params   = ItemTrig.split(linkData, ":") -- includes the link style and type
    local argIndex = tonumber(params[3])
    do -- Special-case: nested trigger options.

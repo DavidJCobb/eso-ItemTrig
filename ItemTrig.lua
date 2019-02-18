@@ -3,10 +3,12 @@ ItemTrig = {
    windows = {},
    windowClasses = {},
    eventState = {
-      isInBank      = false,
-      isInBarter    = false,
-      isInGuildBank = false,
-      isInMail      = false,
+      isInBank       = false,
+      isInBarter     = false,
+      isInCrafting   = false,
+      isInGuildBank  = false,
+      isInMail       = false,
+      inCraftingType = 0,
    },
 }
 
@@ -85,9 +87,15 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
       return
    end
+   if stackCountChange < 1 then
+      return
+   end
    local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
-   item.entryPoint = "item-added"
+   item.entryPoint = ItemTrig.ENTRY_POINT_ITEM_ADDED
    item.entryPointData = {
+      countAdded    = stackCountChange,
+      --
+      crafting      = ItemTrig.eventState.isInCrafting,
       purchased     = ItemTrig.eventState.isInBarter,
       takenFromMail = ItemTrig.eventState.isInMail,
       withdrawn     = ItemTrig.eventState.isInBank or ItemTrig.eventState.isInGuildBank or false,
@@ -114,13 +122,29 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+      --
+      -- Some notes:
+      --
+      --  - I'm not sure whether splitting a stack normally fires this 
+      --    event, but it seems our filters are preventing us from 
+      --    responding to stacks being split, which is good. That's 
+      --    what we want: we only want to react to actual new items 
+      --    being added, as opposed to any slot change.
+      --
    end
    do -- register open/close handlers for menus that can give us items
-      local function _onOpenClose(eventCode)
+      local function _onOpenClose(eventCode, ...)
          ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK
          ItemTrig.eventState.isInBarter    = eventCode == EVENT_OPEN_STORE
+         ItemTrig.eventState.isInCrafting  = eventCode == EVENT_CRAFTING_STATION_INTERACT
          ItemTrig.eventState.isInGuildBank = eventCode == EVENT_OPEN_GUILD_BANK
          ItemTrig.eventState.isInMail      = eventCode == EVENT_MAIL_OPEN_MAILBOX
+         --
+         if eventCode == EVENT_CRAFTING_STATION_INTERACT then
+            ItemTrig.eventState.inCraftingType = select(2, ...) or 0 -- craftSkill
+         else
+            ItemTrig.eventState.inCraftingType = 0
+         end
       end
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_BANK,          _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_BANK,         _onOpenClose)
@@ -130,6 +154,8 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_GUILD_BANK,   _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_OPEN_MAILBOX,  _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_CLOSE_MAILBOX, _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CRAFTING_STATION_INTERACT,     _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_END_CRAFTING_STATION_INTERACT, _onOpenClose)
    end
 end
 local function OnAddonLoaded(eventCode, addonName)

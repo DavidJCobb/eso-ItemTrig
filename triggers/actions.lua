@@ -71,11 +71,37 @@ ItemTrig.tableActions = {
    [5] = ActionBase:new( -- Destroy Item
       _s(ITEMTRIG_STRING_ACTIONNAME_DESTROYITEM),
       _s(ITEMTRIG_STRING_ACTIONDESC_DESTROYITEM),
-      {},
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_WHOLESTACK),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_ONLYADDED),
+            },
+            default = false,
+            allowedEntryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED },
+         }
+      },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         if not context:isInvalid() then
-            context:destroy()
+         if context:isInvalid() then
+            return ItemTrig.OPCODE_FAILED, {}
+         end
+         local count = nil
+         if context.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
+            if args[1] then
+               count = context.entryPointData.countAdded or 0
+            end
+         end
+         local result, errorCode = context:destroy(count)
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_CANNOT_SPLIT_STACK then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_CANT_SPLIT)
+            elseif errorCode == ItemInterface.FAILURE_ITEM_IS_LOCKED then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_LOCKED)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
          end
       end
    ),

@@ -18,8 +18,8 @@
                </OnMouseWheel>
             </Scroll>
             <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
-               <Anchor point="TOPLEFT"    relativeTo="$(parent)Contents" relativePoint="TOPRIGHT"    offsetY="16" />
-               <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Contents" relativePoint="BOTTOMRIGHT" offsetY="-16" />
+               <Anchor point="TOPRIGHT" offsetY="16" />
+               <Anchor point="BOTTOMRIGHT" />
                <OnMouseWheel>
                   local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
                   widget:scrollBy(-delta * widget.scrollStep)

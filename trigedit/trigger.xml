@@ -40,6 +40,7 @@
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
       >
          <OnInitialized> ItemTrig.UI.OpcodeListEntry:install(self) </OnInitialized>
+         <ResizeToFitPadding width="7" />
          <Controls>
             <Texture name="$(parent)Bg" color="282828" excludeFromResizeToFitExtents="true">
                <AnchorFill />

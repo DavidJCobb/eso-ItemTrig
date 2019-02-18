@@ -162,3 +162,13 @@ end
 function ItemTrig.swapIndices(tablevar, i, j)
    tablevar[i], tablevar[j] = tablevar[j], tablevar[i]
 end
+function ItemTrig.valuesOverlap(a, b)
+   for k, v in pairs(a) do
+      for l, w in pairs(b) do
+         if v == w then
+            return true
+         end
+      end
+   end
+   return false
+end

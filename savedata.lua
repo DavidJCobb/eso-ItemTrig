@@ -27,36 +27,6 @@ do -- Define defaults
    local _defaults = {
       serializedTriggers = {}
    }
-   do -- Define default triggers (just testing, for now).
-      local tList = {}
-      do
-         local t = ItemTrig.Trigger:new()
-         t.name = "Test trigger 01"
-         table.insert(t.conditions, ItemTrig.Condition:new(3, {false}))  -- Always/Never
-         table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
-         --
-         table.insert(tList, t)
-      end
-      do
-         local t = ItemTrig.Trigger:new()
-         t.name = "Test trigger 02"
-         table.insert(t.conditions, ItemTrig.Condition:new(3, {false}))  -- Always/Never
-         table.insert(t.actions, ItemTrig.Action:new(2, {"Salutations, globe!"})) -- Log Message
-         --
-         table.insert(tList, t)
-      end
-      do
-         local t = ItemTrig.Trigger:new()
-         t.name    = "Test trigger 03"
-         t.enabled = false
-         table.insert(t.conditions, ItemTrig.Condition:new(3, {false}))  -- Always/Never
-         table.insert(t.actions, ItemTrig.Action:new(4, {"This is a comment action."})) -- Comment
-         table.insert(t.actions, ItemTrig.Action:new(2, {"'Sup, Nirn?"})) -- Log Message
-         --
-         table.insert(tList, t)
-      end
-      _defaults.serializedTriggers = _prepTriggersToSave(tList)
-   end
    savedVars.defaults = _defaults
 end
 

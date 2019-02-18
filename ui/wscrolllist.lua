@@ -66,9 +66,11 @@ function WScrollList:_construct(options)
       options.element = {}
    end
    local scrollbar = self:GetNamedChild("ScrollBar")
+   scrollbar.hideScrollBarOnDisabled = false
    self.element = {
       template    = options.element.template    or "",
       toConstruct = options.element.toConstruct or nil,
+      toFinalize  = options.element.toFinalize  or nil, -- called on visible elements after they're all drawn and the scrollbar is adjusted
       toReset     = options.element.toReset     or nil,
       _pool       = nil,
    }
@@ -213,6 +215,21 @@ function WScrollList:indexOf(data)
    end
    return 0
 end
+function WScrollList:isScrollbarVisible()
+   return not self.scrollbar:IsHidden()
+end
+function WScrollList:excessMarginForScrollbarArea()
+   --
+   -- The content area is always inset to make room for the scrollbar, even if the 
+   -- scrollbar isn't visible. If your list items have backgrounds and you want them 
+   -- to fill the unused space, then you can call this function to know by how much 
+   -- to expand the list item backgrounds.
+   --
+   if self:isScrollbarVisible() then
+      return 0
+   end
+   return self.paddingSides + ZO_SCROLL_BAR_WIDTH
+end
 function WScrollList:push(obj, update)
    table.insert(self.listItems, obj)
    table.insert(self.listItemStates, {
@@ -264,53 +281,44 @@ function WScrollList:resizeScrollbar(scrollMax)
    --
    -- a) Show or hide the scrollbar depending on whether scrolling is possible.
    --
-   -- b) Update the content area's anchors, so that when the scrollbar is hidden, the 
-   --    content area expands to fill the space that the scrollbar would've taken.
-   --
-   -- c) Since we're updating the content area's anchors anyway, also handle the outer 
-   --    padding values (start, sides, end) by insetting the content area.
-   --
-   -- TODO: Expanding the content area to fill the scrollbar's space could cause a 
-   -- reflow that changes the height of list items; this would cause our cached list 
-   -- item states (top and bottom edges) to become out of date. How should we handle 
-   -- this?
+   -- b) Update anchors for the scrollbar and the content area, based on our 
+   --    padding settings.
    --
    local scrollbar  = self.scrollbar
-   local listHeight = self.contents:GetHeight()
-   local barHeight  = scrollbar:GetHeight()
    if scrollMax == nil then
       scrollMax = self.scrollMax
    end
    if scrollMax < 0 then
       scrollMax = self:measureItems()
    end
+   do -- Update anchors to account for padding
+      local control  = self:asControl()
+      do -- scrollbar
+         local SCROLL_BUTTON_HEIGHT = 16 -- assumed; this is the constant ZOS uses to offset scrollbars downward
+         scrollbar:ClearAnchors()
+         scrollbar:SetAnchor(TOPRIGHT,    control, TOPRIGHT,    -self.paddingSides, SCROLL_BUTTON_HEIGHT + self.paddingStart)
+         scrollbar:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -self.paddingSides, -(SCROLL_BUTTON_HEIGHT + self.paddingEnd))
+      end
+      do -- content
+         local contents = self.contents
+         contents:ClearAnchors()
+         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,     self.paddingSides, self.paddingStart)
+         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -(self.paddingSides * 2 + ZO_SCROLL_BAR_WIDTH), -self.paddingEnd)
+      end
+   end
+   local listHeight = self.contents:GetHeight()
+   local barHeight  = scrollbar:GetHeight()
    if scrollMax > 0 and scrollMax > listHeight then
       scrollbar:SetEnabled(true)
       scrollbar:SetHidden(false)
       scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))
       scrollbar:SetMinMax(0, scrollMax - listHeight)
-      --
-      do
-         local control  = self:asControl()
-         local contents = self.contents
-         contents:ClearAnchors()
-         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,     self.paddingSides, self.paddingStart)
-         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -(self.paddingSides + ZO_SCROLL_BAR_WIDTH), -self.paddingEnd)
-      end
    else
       self.scrollTop = 0
       scrollbar:SetThumbTextureHeight(barHeight)
       scrollbar:SetMinMax(0, 0)
       scrollbar:SetEnabled(false)
-      scrollbar:SetHidden(true)
-      --
-      do
-         local control  = self:asControl()
-         local contents = self.contents
-         contents:ClearAnchors()
-         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,      self.paddingSides, self.paddingStart)
-         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -self.paddingSides, -self.paddingEnd)
-      end
+      scrollbar:SetHidden(scrollbar.hideScrollBarOnDisabled)
    end
 end
 function WScrollList:_getExtraConstructorParams(index)
@@ -320,9 +328,12 @@ function WScrollList:_getExtraConstructorParams(index)
    --
    return nil
 end
-function WScrollList:redraw()
+function WScrollList:redraw(options)
    assert(self.element.toConstruct ~= nil, "You must supply a constructor callback before WScrollList can render list items.")
    assert(self.element.template    ~= "",  "You must supply a template to use for list items before WScrollList can render list items.")
+   if not options then
+      options = { iterations = 2 }
+   end
    --
    -- We have to run this twice in order for list items to be able to properly 
    -- compute their heights in certain cases, such as when a list item's height 
@@ -332,16 +343,16 @@ function WScrollList:redraw()
    -- isely when, how, and why the UI reflows, we have to do stupid crap like 
    -- this, because it's impossible to know what the better approaches even are.
    --
-   for i = 1, 2 do
+   local contents  = self.contents
+   local count     = self:count()
+   local viewStart = 0
+   local viewEnd   = contents:GetHeight()
+   for i = 1, options.iterations do
       self.visibleItems = {}
-      local contents  = self.contents
       local existing  = contents:GetNumChildren()
       local created   = 0
-      local count     = self:count()
       local yOffset   = -self.scrollTop
       local j         = 1
-      local viewStart = 0
-      local viewEnd   = contents:GetHeight()
       for i = 1, count do
          local child
          if j <= existing + created then
@@ -355,7 +366,7 @@ function WScrollList:redraw()
             ZO_PreHookHandler(child, "OnMouseExit",  function(self) WScrollList:fromItem(self):_onItemMouseExit(self) end)
          end
          child:SetHidden(false)
-         self.element.toConstruct(child, self.listItems[i], self:_getExtraConstructorParams(i))
+         self.element.toConstruct(child, self.listItems[i], self:_getExtraConstructorParams(i), self)
          child:ClearAnchors()
          child:SetAnchor(TOPLEFT,  contents, TOPLEFT,  0, yOffset)
          child:SetAnchor(TOPRIGHT, contents, TOPRIGHT, 0, yOffset)
@@ -400,11 +411,19 @@ function WScrollList:redraw()
          total = self.listItemStates[count].bottom or 0
       end
       self.scrollMax = total
-      self.dirty     = false
-      self:resizeScrollbar(total)
-      self:onRedrawOrReposition()
    end
-   return
+   self.dirty     = false
+   self:resizeScrollbar(total)
+   if self.element.toFinalize then
+      for i = 1, table.getn(self.visibleItems) do
+         local index   = self.visibleItems[i]
+         local control = self:controlByIndex(index)
+         if control then
+            self.element.toFinalize(control, self.listItems[index], self)
+         end
+      end
+   end
+   self:onRedrawOrReposition()
 end
 function WScrollList:reposition()
    assert(not self.dirty, "The drawn list items are out-of-date!")

@@ -16,6 +16,7 @@ do -- helper classes for views
                   win:onArgumentEdited()
                end
             end
+         self.value:setShouldSort(true, false)
       end
       function ViewCls.Enum:GetValue()
          local x = self.value:getSelectedData()
