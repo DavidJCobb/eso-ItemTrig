@@ -187,6 +187,11 @@ function ItemTrig.Trigger:exec(context, entryPoint)
          end
       end
    end
+   if self.state.using_or then
+      if not self.state.matched_or then
+         return false
+      end
+   end
    --
    -- All conditions matched.
    --

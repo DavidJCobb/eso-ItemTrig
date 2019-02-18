@@ -106,6 +106,52 @@ ItemTrig.tableActions = {
          end
       end
    ),
+   [6] = ActionBase:new( -- Modify Junk Flag
+      _s(ITEMTRIG_STRING_ACTIONNAME_MODIFYJUNKFLAG),
+      _s(ITEMTRIG_STRING_ACTIONDESC_MODIFYJUNKFLAG),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_MODIFYJUNKFLAG_OFF),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_MODIFYJUNKFLAG_ON),
+            },
+            default  = true,
+         }
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if context:isInvalid() then
+            return ItemTrig.OPCODE_FAILED, {}
+         end
+         if not item:modifyJunkState(args[1]) then
+            --
+            -- TODO: alert if the item can't be junk.
+            --
+            return ItemTrig.OPCODE_FAILED, {}
+         end
+      end
+   ),
+   [7] = ActionBase:new( -- Launder
+      _s(ITEMTRIG_STRING_ACTIONNAME_LAUNDER),
+      _s(ITEMTRIG_STRING_ACTIONDESC_LAUNDER),
+      {
+         [1] = {
+            type    = "number",
+            default = 9999,
+         }
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if state.entryPoint ~= ItemTrig.ENTRY_POINT_FENCE then
+            return ItemTrig.OPCODE_FAILED, { why = GetString(ITEMTRIG_STRING_ERROR_ACTION_ENTRYPOINT_MUST_BE_FENCE) }
+         end
+         if context:isInvalid() then
+            return ItemTrig.OPCODE_FAILED, {}
+         end
+         item:launder(args[1])
+      end
+   ),
 }
 ItemTrig.countActions = table.getn(ItemTrig.tableActions)
 for i = 1, ItemTrig.countActions do

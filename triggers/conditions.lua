@@ -48,7 +48,8 @@ ItemTrig.tableConditions = {
                return false
             end
          else
-            state.using_or = true
+            state.using_or   = true
+            state.matched_or = false
          end
          return nil
       end
@@ -251,6 +252,33 @@ ItemTrig.tableConditions = {
          elseif args[2] == 4 then
             result = context.entryPointData.crafting or false
          end
+         if args[1] then
+            return result
+         end
+         return not result
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      }
+   ),
+   [10] = ConditionBase:new( -- Added Item Is New Stack
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ADDEDITEMISNEWSTACK),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ADDEDITEMISNEWSTACK),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMISNEWSTACK_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMISNEWSTACK_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if state.entryPoint ~= ItemTrig.ENTRY_POINT_ITEM_ADDED then
+            return false
+         end
+         local result = context.entryPointData.countAdded == context.count
          if args[1] then
             return result
          end
