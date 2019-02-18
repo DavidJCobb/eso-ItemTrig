@@ -16,6 +16,11 @@ function WScrollSelectList:_construct(options)
       multi = options.multiSelection or false,
       _oldIndex = nil, -- used to fire events properly
    }
+   if options.shiftToAdd == nil then
+      self.selection.shiftToAdd = true
+   else
+      self.selection.shiftToAdd = options.shiftToAdd
+   end
    if self.selection.multi then
       self.selection.index = Set:new()
    end
@@ -55,7 +60,7 @@ do -- internal event handlers, not to be overridden
       self:onItemClicked(i)
       local s = self.selection
       if s.multi then
-         if IsShiftKeyDown() then
+         if (not s.shiftToAdd) or IsShiftKeyDown() then
             self:toggle(i)
             return
          end
@@ -86,10 +91,18 @@ do -- internal event handlers, not to be overridden
             if not call then
                return
             end
-            a:complement(b):forEach(function(index)
+            local changed
+            if a and b then
+               changed = a:complement(b)
+            elseif a then
+               changed = a
+            else
+               return
+            end
+            changed:forEach(function(index)
                local control = self:controlByIndex(index)
                if control then
-                  call(i[j], control, self)
+                  call(index, control, self)
                end
             end)
          end
@@ -132,12 +145,12 @@ function WScrollSelectList:deselectAll()
    local callback = self.element.onDeselect
    if s.multi then
       if callback then
-         for i = 1, table.getn(s.index) do
-            local control = self:controlByIndex(s.index[i])
+         s.index:forEach(function(i)
+            local control = self:controlByIndex(i)
             if control then
-               callback(s.index[i], control, self)
+               callback(i, control, self)
             end
-         end
+         end)
       end
       s.index = {}
    elseif s.index then
@@ -244,6 +257,36 @@ function WScrollSelectList:_modifySelection(x, op)
       return
    end
    self:_onSelectionChanged()
+end
+function WScrollSelectList:multiSelect(flag) -- getter/setter
+   local s = self.selection
+   if flag == nil then
+      return s.multi
+   end
+   if flag == s.multi then
+      return flag
+   end
+   if flag then
+      s.multi = true
+      s.index = Set:new(s.index and { [1] = s.index } or nil)
+   else
+      local first = self:getFirstSelectedIndex()
+      local call  = self.element.onDeselect
+      if call then
+         s.index:forEach(function(i)
+            if i == first then
+               return
+            end
+            local control = self:controlByIndex(i)
+            if control then
+               call(i, control, self)
+            end
+         end)
+      end
+      s.multi = false
+      s.index = first
+   end
+   return flag
 end
 function WScrollSelectList:removeFromSelection(x)
    --

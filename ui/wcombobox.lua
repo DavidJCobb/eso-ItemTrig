@@ -41,6 +41,7 @@ function WCombobox:_construct(options)
       lastMouseoverIndex = nil,
       _lastSelectedIndex = nil,
    }
+   self.emptyText = options.emptyText or "" -- for multi-select, if there is no selection
    self.style = {
       focusRing = options.style.focusRing or ItemTrig.theme.COMBOBOX_FOCUS_RING,
       font      = options.style.font      or "ZoFontGame",
@@ -61,10 +62,11 @@ function WCombobox:_construct(options)
       pane.element.onDeselect    = options.element.onDeselect    or nil -- callback
       pane.element.onDoubleClick = options.element.onDoubleClick or nil -- callback
       pane.element.toConstruct =
-         function(control, data, extra)
+         function(control, data, extra, pane)
             assert(data.name ~= nil, "The list item doesn't have a name.")
-            GetControl(control, "Text"):SetText(tostring(data.name))
+            local text     = GetControl(control, "Text")
             local combobox = WCombobox:fromItem(control)
+            text:SetText(tostring(data.name))
             if combobox then
                if extra.index == combobox.state.lastMouseoverIndex then
                   GetControl(control, "Text"):SetColor(unpack(combobox.style.fontColorFocus))
@@ -73,6 +75,38 @@ function WCombobox:_construct(options)
                   GetControl(control, "Text"):SetColor(unpack(combobox.style.fontColorNormal))
                   GetControl(control, "Back"):SetColor(unpack(combobox.style.backColorNormal))
                end
+            end
+            local checkbox = GetControl(control, "Enabled")
+            if combobox:multiSelect() then
+               checkbox:SetHidden(false)
+               if extra.selected then
+                  ZO_CheckButton_SetChecked(checkbox)
+               else
+                  ZO_CheckButton_SetUnchecked(checkbox)
+               end
+               -- positioning
+               text:ClearAnchors()
+               text:SetAnchor(LEFT,  checkbox, RIGHT,  7, 0)
+               text:SetAnchor(RIGHT, control,  RIGHT, -7, 0)
+            else
+               checkbox:SetHidden(true)
+               ZO_CheckButton_SetUnchecked(checkbox)
+               --
+               text:ClearAnchors()
+               text:SetAnchor(LEFT,  control, LEFT,   7, 0)
+               text:SetAnchor(RIGHT, control, RIGHT, -7, 0)
+            end
+         end
+      pane.element.onSelect =
+         function(index, control, pane)
+            if pane:multiSelect() then
+               ZO_CheckButton_SetChecked(GetControl(control, "Enabled"))
+            end
+         end
+      pane.element.onDeselect =
+         function(index, control, pane)
+            if pane:multiSelect() then
+               ZO_CheckButton_SetUnchecked(GetControl(control, "Enabled"))
             end
          end
       pane.onChange =
@@ -88,8 +122,13 @@ function WCombobox:_construct(options)
       pane.onItemClicked =
          function(self, index)
             local combobox = _comboboxFromPane(self)
+            if combobox:multiSelect() then
+               PlaySound(SOUNDS.DEFAULT_CLICK) -- checkbox sound
+            end
             combobox:_onItemClicked(index)
          end
+      pane.selection.shiftToAdd = false
+      pane:multiSelect(options.multiSelect or false)
    end
    self:refreshStyle()
 end
@@ -122,11 +161,26 @@ do -- internals
    end
    --
    function WCombobox:_onChange()
-      local data = self:getSelectedData()
-      if data then
-         self.controls.label:SetText(tostring(data.name))
+      if self:multiSelect() then
+         local items = self:getSelectedItems()
+         local count = table.getn(items)
+         if count < 1 then
+            self.controls.label:SetText(self.emptyText or "")
+         else
+            local labels = {}
+            for i = 1, count do
+               table.insert(labels, tostring(items[i].name))
+            end
+            labels = table.concat(labels, ", ")
+            self.controls.label:SetText(labels)
+         end
       else
-         self.controls.label:SetText("")
+         local data = self:getSelectedData()
+         if data then
+            self.controls.label:SetText(tostring(data.name))
+         else
+            self.controls.label:SetText("")
+         end
       end
    end
    function WCombobox:_onGlobalMouseUp(eventCode, button)
@@ -146,7 +200,9 @@ do -- internals
    end
    function WCombobox:_onItemClicked(index)
       if self:isOpen() then
-         self:close()
+         if not self.controls.pane.selection.multi then
+            self:close()
+         end
       end
    end
    function WCombobox:_onItemMouseEnter(control)
@@ -168,6 +224,9 @@ do -- internals
    end
 end
 
+function WCombobox:at(...)
+   return self.controls.pane:at(...)
+end
 function WCombobox:clear(...)
    assert(self ~= WCombobox, "This method must be called on an instance.")
    local hadItems = self.controls.pane:count() > 0
@@ -197,12 +256,10 @@ function WCombobox:count()
    return self.controls.pane:count()
 end
 function WCombobox:forEach(functor)
-   assert(self ~= WCombobox, "This method must be called on an instance.")
-   for i, data in ipairs(self.controls.pane.listItems) do
-      if functor(i, data) then
-         break
-      end
-   end
+   return self.controls.pane:forEach(functor)
+end
+function WCombobox:getFirstSelectedIndex(...)
+   return self.controls.pane:getFirstSelectedIndex(...)
 end
 function WCombobox:getSelectedData()
    assert(self ~= WCombobox, "This method must be called on an instance.")
@@ -211,6 +268,16 @@ end
 function WCombobox:getSelectedIndex()
    assert(self ~= WCombobox, "This method must be called on an instance.")
    return self.controls.pane:getFirstSelectedIndex()
+end
+function WCombobox:getSelectedItems(...)
+   return self.controls.pane:getSelectedItems(...)
+end
+function WCombobox:multiSelect(flag)
+   local result = self.controls.pane:multiSelect(flag)
+   if (flag ~= nil) and (self:count() > 0) then
+      self:redraw()
+   end
+   return result
 end
 function WCombobox:isDisabled()
    assert(self ~= WCombobox, "This method must be called on an instance.")

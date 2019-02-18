@@ -107,9 +107,10 @@ function ItemTrig.WClassTestMenu:_construct()
       local combobox = self:GetNamedChild("vComboboxTest")
       combobox = ItemTrig.UI.WCombobox:cast(combobox)
       combobox:clear(false)
+      combobox:multiSelect(true)
       for i = 1, 20 do
          local data = { name = "Test element " .. i }
-         combobox:push(data, true)
+         combobox:push(data, false)
       end
       combobox:redraw()
    end

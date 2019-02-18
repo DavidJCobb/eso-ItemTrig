@@ -135,9 +135,17 @@ function ItemTrig.Trigger:exec(context)
          -- the "never skip" flag is to avoid skipping the condition that 
          -- switches us between OR and AND.
          --
---CHAT_SYSTEM:AddMessage(c:format()) -- debug
          local r = c:exec(self.state, context)
          if not (r == nil) then
+            if r == ItemTrig.OPCODE_FAILED then
+               --
+               -- TODO: option to log when a trigger halts due to a failed 
+               -- opcode. The (extra) variable should be a table that *may* 
+               -- have a "why" field whose string value is a human-readable 
+               -- clarification on why the opcode failed.
+               --
+               r = false
+            end
             --
             -- If a condition returns nil, then we don't treat it as true 
             -- or false, and we just continue down the condition list.
@@ -150,23 +158,27 @@ function ItemTrig.Trigger:exec(context)
                return false
             end
          end
---else CHAT_SYSTEM:AddMessage("Condition skipped, since the OR matched") -- debug
       end
    end
---CHAT_SYSTEM:AddMessage("== Trigger conditions matched.") -- debug
    --
    -- All conditions matched.
    --
    for i = 1, table.getn(self.actions) do
       local a = self.actions[i]
---CHAT_SYSTEM:AddMessage(a:format()) -- debug
-      local r = a:exec(self.state, context)
+      local r, extra = a:exec(self.state, context)
       if r == ItemTrig.RETURN_FROM_TRIGGER then
---CHAT_SYSTEM:AddMessage("== Early return from trigger " .. self.name .. ".") -- debug
+         return r
+      end
+      if r == ItemTrig.OPCODE_FAILED then
+         --
+         -- TODO: option to log when a trigger halts due to a failed opcode. 
+         -- The (extra) variable should be a table that *may* have a "why" 
+         -- field whose string value is a human-readable clarification on 
+         -- why the opcode failed.
+         --
          return r
       end
    end
---CHAT_SYSTEM:AddMessage("== All triggers executed.") -- debug
    return true
 end
 function ItemTrig.Trigger:insertActionAfter(opcode, index)

@@ -22,6 +22,9 @@
                <Anchor point="LEFT"  offsetX="7" />
                <Anchor point="RIGHT" offsetX="-7" />
             </Label>
+            <Button inherits="ZO_CheckButton" name="$(parent)Enabled" mouseEnabled="false">
+               <Anchor point="LEFT" offsetX="7" />
+            </Button>
          </Controls>
       </Control>
       <Control name="ItemTrig_UITemplate_WCombobox" virtual="true" mouseEnabled="true">

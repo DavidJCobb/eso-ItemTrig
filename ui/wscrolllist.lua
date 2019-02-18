@@ -107,20 +107,6 @@ function WScrollList:_construct(options)
    self.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
    self.scrollbar:SetEnabled(false)
 end
-function WScrollList:at(index)
-   if (not index) or index < 1 or index > table.getn(self.listItems) then
-      return nil
-   end
-   return self.listItems[index]
-end
-function WScrollList:clear(update)
-   ZO_ClearNumericallyIndexedTable(self.listItems)
-   if (update == true) or (update == nil) then
-      self:redraw()
-   else
-      self.dirty = true
-   end
-end
 
 do -- functions for working directly with controls
    function WScrollList:controlByIndex(index)
@@ -195,6 +181,20 @@ do -- internal events
    end
 end
 
+function WScrollList:at(index)
+   if (not index) or not self:boundsCheckIndex(index) then
+      return nil
+   end
+   return self.listItems[index]
+end
+function WScrollList:clear(update)
+   ZO_ClearNumericallyIndexedTable(self.listItems)
+   if (update == true) or (update == nil) then
+      self:redraw()
+   else
+      self.dirty = true
+   end
+end
 function WScrollList:boundsCheckIndex(index)
    if index < 1 then
       return false
@@ -203,6 +203,13 @@ function WScrollList:boundsCheckIndex(index)
 end
 function WScrollList:count()
    return table.getn(self.listItems)
+end
+function WScrollList:forEach(functor)
+   for i, data in ipairs(self.listItems) do
+      if functor(i, data) then
+         break
+      end
+   end
 end
 function WScrollList:fromItem(control) -- static method
    return self:cast(control:GetParent():GetParent())
@@ -217,18 +224,6 @@ function WScrollList:indexOf(data)
 end
 function WScrollList:isScrollbarVisible()
    return not self.scrollbar:IsHidden()
-end
-function WScrollList:excessMarginForScrollbarArea()
-   --
-   -- The content area is always inset to make room for the scrollbar, even if the 
-   -- scrollbar isn't visible. If your list items have backgrounds and you want them 
-   -- to fill the unused space, then you can call this function to know by how much 
-   -- to expand the list item backgrounds.
-   --
-   if self:isScrollbarVisible() then
-      return 0
-   end
-   return self.paddingSides + ZO_SCROLL_BAR_WIDTH
 end
 function WScrollList:push(obj, update)
    table.insert(self.listItems, obj)

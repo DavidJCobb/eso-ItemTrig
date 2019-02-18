@@ -9,6 +9,7 @@ Set.meta = {
          end
          return self:union(x)
       end,
+   __index = Set,
 }
 function Set:new(array)
    local result = {}
@@ -141,10 +142,10 @@ function Set:map(x, y)
       end)
       return results
    end
-   assert(type(array) ~= "table", "This method must be given an array or a function.")
+   assert(type(x) == "table", "This method must be given an array or a function.")
    local results = {}
    self:forEach(function(i)
-      table.insert(results, array[i])
+      table.insert(results, x[i])
    end)
    return results
 end
