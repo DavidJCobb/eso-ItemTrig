@@ -1,6 +1,33 @@
 ItemTrig.ItemInterface = {}
 local ItemInterface = ItemTrig.ItemInterface
 
+function ItemTrig.bagToInterfaceList(bag)
+   --
+   -- For most bags, iterating over every slot is as simple as incrementing 
+   -- a number from 0 to the bag size. However, there are some bags that 
+   -- require us to use API calls to iterate over them (I guess they have 
+   -- non-contiguous indices?). Zenimax wrote a helper function to automate 
+   -- this for us: ZO_GetNextBagSlotIndex.
+   --
+   local list = {}
+   local slot = ZO_GetNextBagSlotIndex(bag)
+   while slot do
+      table.insert(list, ItemInterface:new(bag, slot))
+      slot = ZO_GetNextBagSlotIndex(bag, slot)
+   end
+   return list
+end
+function ItemTrig.forEachBagSlot(bag, functor)
+   local slot = ZO_GetNextBagSlotIndex(bag)
+   while slot do
+      local interface = ItemInterface:new(bag, slot)
+      if functor(interface) then
+         return
+      end
+      slot = ZO_GetNextBagSlotIndex(bag, slot)
+   end
+end
+
 --[[
    As of 2/17/2019, benchmarks suggest that when creating an item interface from 
    the "item added" event, it takes an average of 11.5ms to create 400 interfaces, 

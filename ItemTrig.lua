@@ -91,7 +91,6 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
       return
    end
    local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
-   item.entryPoint = ItemTrig.ENTRY_POINT_ITEM_ADDED
    item.entryPointData = {
       countAdded    = stackCountChange,
       --
@@ -101,15 +100,7 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
       withdrawn     = ItemTrig.eventState.isInBank or ItemTrig.eventState.isInGuildBank or false,
    }
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
-   --
-   local tList = ItemTrig.filterTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED)
-   for i = 1, table.getn(tList) do
-      local trigger = tList[i]
-      local result  = trigger:exec(item, ItemTrig.ENTRY_POINT_ITEM_ADDED)
-      if item:isInvalid() then
-         break
-      end
-   end
+   ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
 end
 
 local function Initialize()
@@ -145,6 +136,25 @@ local function Initialize()
          else
             ItemTrig.eventState.inCraftingType = 0
          end
+         --
+         do -- trigger entry points
+            local function _processInventory(entryPoint, entryPointData)
+               ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
+                  item.entryPointData = entryPointData
+                  ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, entryPoint, item)
+               end)
+            end
+            --
+            if eventCode == EVENT_CRAFTING_STATION_INTERACT then
+               _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, {
+                  craftingSkill = select(2, ...) or 0,
+               })
+            elseif eventCode == EVENT_OPEN_STORE then
+               _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
+            elseif eventCode == EVENT_OPEN_FENCE then
+               _processInventory(ItemTrig.ENTRY_POINT_FENCE, {})
+            end
+         end
       end
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_BANK,          _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_BANK,         _onOpenClose)
@@ -156,6 +166,7 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_CLOSE_MAILBOX, _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CRAFTING_STATION_INTERACT,     _onOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_END_CRAFTING_STATION_INTERACT, _onOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_FENCE,         _onOpenClose) -- TODO: There's no dedicated event for exiting a fence, but does that just fire another event e.g. CLOSE_STORE?
    end
 end
 local function OnAddonLoaded(eventCode, addonName)

@@ -136,6 +136,9 @@
                      span = span - 8
                      cList:SetHeight(span / 2)
                      aList:SetHeight(span / 2)
+                     --
+                     ItemTrig.UI.WScrollList:cast(cList:GetNamedChild("List")):redraw()
+                     ItemTrig.UI.WScrollList:cast(aList:GetNamedChild("List")):redraw()
                   end
                   ZO_PreHookHandler(self, "OnUpdate", frameHandler)
                   frameHandler(self)

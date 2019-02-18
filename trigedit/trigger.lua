@@ -349,7 +349,9 @@ function WinCls:addOpcode(type, insertAfterIndex)
    )
 end
 function WinCls:editOpcode(opcode)
-   local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, opcode)
+   local deferred = ItemTrig.windows.opcodeEdit:requestEdit(self, opcode, false, {
+      entryPoints = self.stack:getEnabledEntryPoints(),
+   })
    deferred:done(
       function(context, deferred, dirty) -- user clicked OK
          if dirty then
@@ -589,6 +591,7 @@ function WinCls:refresh()
          for i = 1, table.getn(trigger.entryPoints) do
             combobox:addToSelection(function(data) return data.value == trigger.entryPoints[i] end)
          end
+         combobox:redraw()
       else
          combobox:close()
          combobox:deselectAll()

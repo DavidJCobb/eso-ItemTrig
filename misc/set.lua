@@ -135,7 +135,8 @@ function Set:map(x, y)
    --
    -- If (x) is a function, then for each index (i) in the set, call x(i); 
    -- if the result is non-nil or if (y) is truthy, then push the result 
-   -- onto a new array; return the new array.
+   -- onto a new array; return the new array. Here, (y) is a switch to 
+   -- control whether we want to save even a returned nil.
    --
    assert(self ~= Set, "This method must be called on an instance.")
    if type(x) == "function" then
@@ -151,7 +152,9 @@ function Set:map(x, y)
    assert(type(x) == "table", "This method must be given an array or a function.")
    local results = {}
    self:forEach(function(i)
-      table.insert(results, x[i])
+      if x[i] ~= nil then
+         table.insert(results, x[i])
+      end
    end)
    return results
 end

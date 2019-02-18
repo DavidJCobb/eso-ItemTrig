@@ -1,5 +1,17 @@
 if not ItemTrig then return end
 
+function ItemTrig.executeTriggerList(list, entryPoint, context)
+   if entryPoint then
+      list = ItemTrig.filterTriggerList(list, entryPoint)
+   end
+   for i = 1, table.getn(list) do
+      local trigger = list[i]
+      local result  = trigger:exec(context, entryPoint)
+      if item:isInvalid() then
+         break
+      end
+   end
+end
 function ItemTrig.filterTriggerList(list, entryPoint)
    local filtered = {}
    local mapping  = {} -- list[mapping[i]] == filtered[i]

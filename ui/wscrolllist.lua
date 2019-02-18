@@ -40,6 +40,10 @@ if not (ItemTrig and ItemTrig.UI) then return end
 -- (e.g. onSelect/onDeselect for WScrollSelectList) may not fire 
 -- if those list items are scrolled out of view.
 --
+-- The list control doesn't detect its own resize. If its height 
+-- changes, you need to call redraw. I may add an OnUpdate event 
+-- handler in the future to account for this.
+--
 
 local function onScrollUpButton(self)
    local widget = ItemTrig.UI.WScrollList:cast(self:GetParent():GetParent())
@@ -281,7 +285,10 @@ function WScrollList:redraw(options)
    assert(self.element.toConstruct ~= nil, "You must supply a constructor callback before WScrollList can render list items.")
    assert(self.element.template    ~= "",  "You must supply a template to use for list items before WScrollList can render list items.")
    if not options then
-      options = { iterations = 2 }
+      options = {
+         iterations       = 2,
+         waitingForHeight = false,
+      }
    end
    --
    -- We have to run this twice in order for list items to be able to properly 
@@ -293,6 +300,14 @@ function WScrollList:redraw(options)
    -- this, because it's impossible to know what the better approaches even are.
    --
    local contents  = self.contents
+   if contents:GetHeight() < 0 then
+      --
+      -- ESO's UI system is...
+      --
+      -- Okay, it's not *great*.
+      --
+      return
+   end
    local count     = self:count()
    local viewStart = 0
    local viewEnd   = contents:GetHeight()
@@ -460,6 +475,9 @@ function WScrollList:scrollTo(position, options) -- analogous to ZO_ScrollList_S
    end
    do -- Check whether any list items have been scrolled into or out of view
       local function _checkRedraw(self, oldPos, newPos)
+         if table.getn(self.visibleItems) < 1 then
+            return true
+         end
          local viewStart = 0
          local viewEnd   = self.contents:GetHeight()
          local function _visible(state)

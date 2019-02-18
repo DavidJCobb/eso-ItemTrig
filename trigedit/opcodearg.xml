@@ -39,7 +39,7 @@
                   -->
                   <Control name="$(parent)Enum">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="286" />
+                     <Dimensions x="336" />
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_WCombobox">
