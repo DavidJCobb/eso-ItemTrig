@@ -169,6 +169,23 @@ end
       string
          This type cannot have an enum.
    
+   ARGUMENT EXTRA FIELDS
+   
+      allowedEntryPoints
+         An array of entry points. If the opcode is used in a trigger 
+         that doesn't run on one of these entry points, then the argument 
+         will not be shown as configurable in the UI; it'll be plain-text 
+         and non-alterable.
+         
+         This is enforced by UI code.
+      
+      disabled
+         If this is truthy, then the argument will not be shown as config-
+         urable in the UI; it'll be plain-text and non-alterable. Useful 
+         for dummying out work-in-progress functionality.
+         
+         This is enforced by Opcode:format.
+   
 --]]--
 
 ItemTrig.Opcode = {}
@@ -357,7 +374,7 @@ function ItemTrig.Opcode:format(argTransform)
       else
          renderArgs[i] = tostring(a)
       end
-      if argTransform then
+      if argTransform and not b.disabled then
          renderArgs[i] = argTransform(renderArgs[i] or "[error]", i)
       end
    end

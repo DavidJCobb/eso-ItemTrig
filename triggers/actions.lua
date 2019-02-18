@@ -78,7 +78,8 @@ ItemTrig.tableActions = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_WHOLESTACK),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_ONLYADDED),
             },
-            default = false,
+            default  = false,
+            disabled = true, -- until we get it working
             allowedEntryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED },
          }
       },

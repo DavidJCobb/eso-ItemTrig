@@ -5,9 +5,8 @@ function ItemTrig.executeTriggerList(list, entryPoint, context)
       list = ItemTrig.filterTriggerList(list, entryPoint)
    end
    for i = 1, table.getn(list) do
-      local trigger = list[i]
-      local result  = trigger:exec(context, entryPoint)
-      if item:isInvalid() then
+      local result = list[i]:exec(context, entryPoint)
+      if context:isInvalid() then
          break
       end
    end

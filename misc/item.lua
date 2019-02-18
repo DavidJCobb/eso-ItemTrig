@@ -12,7 +12,9 @@ function ItemTrig.bagToInterfaceList(bag)
    local list = {}
    local slot = ZO_GetNextBagSlotIndex(bag)
    while slot do
-      table.insert(list, ItemInterface:new(bag, slot))
+      if HasItemInSlot(bag, slot) then
+         table.insert(list, ItemInterface:new(bag, slot))
+      end
       slot = ZO_GetNextBagSlotIndex(bag, slot)
    end
    return list
@@ -20,9 +22,11 @@ end
 function ItemTrig.forEachBagSlot(bag, functor)
    local slot = ZO_GetNextBagSlotIndex(bag)
    while slot do
-      local interface = ItemInterface:new(bag, slot)
-      if functor(interface) then
-         return
+      if HasItemInSlot(bag, slot) then
+         local interface = ItemInterface:new(bag, slot)
+         if functor(interface) then
+            return
+         end
       end
       slot = ZO_GetNextBagSlotIndex(bag, slot)
    end
@@ -146,6 +150,8 @@ function ItemInterface:destroy(count)
       if not targetSlot then
          return false, self.FAILURE_CANNOT_SPLIT_STACK
       end
+      assert(false, "We don't currently have a way to implement this. The API is too limiting.")
+      --[[
       RequestMoveItem(self.bag, self.slot, self.bag, targetSlot, count)
       local targetID = GetItemId(self.bag, targetSlot)
       if targetID ~= self.id then
@@ -156,6 +162,7 @@ function ItemInterface:destroy(count)
       if self.count < 1 then
          self.invalid = true
       end
+      ]]--
    end
    return true
 end
