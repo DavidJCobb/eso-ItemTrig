@@ -39,7 +39,6 @@ function WCombobox:_construct(options)
       disabled = false,
       isOpen   = false,
       lastMouseoverIndex = nil,
-      _lastSelectedIndex = nil,
    }
    self.emptyText = options.emptyText or "" -- for multi-select, if there is no selection
    self.style = {
@@ -113,11 +112,7 @@ function WCombobox:_construct(options)
          function(self)
             local combobox = _comboboxFromPane(self)
             combobox:_onChange()
-            local index = combobox:getSelectedIndex()
-            if index ~= combobox.state._lastSelectedIndex then
-               combobox.state._lastSelectedIndex = index
-               combobox:onChange()
-            end
+            combobox:onChange()
          end
       pane.onItemClicked =
          function(self, index)
@@ -224,6 +219,9 @@ do -- internals
    end
 end
 
+function WCombobox:addToSelection(...)
+   self.controls.pane:addToSelection(...)
+end
 function WCombobox:at(...)
    return self.controls.pane:at(...)
 end
@@ -254,6 +252,9 @@ end
 function WCombobox:count()
    assert(self ~= WCombobox, "This method must be called on an instance.")
    return self.controls.pane:count()
+end
+function WCombobox:deselectAll(...)
+   self.controls.pane:deselectAll(...)
 end
 function WCombobox:forEach(functor)
    return self.controls.pane:forEach(functor)
@@ -337,7 +338,7 @@ function WCombobox:push(...)
    local empty = pane:count() == 0
    pane:push(...)
    if empty and pane:count() > 0 then
-      pane:select(1)
+      self:select(1)
    end
 end
 function WCombobox:refreshStyle()
@@ -360,13 +361,12 @@ function WCombobox:refreshStyle()
       c.pane:redraw()
    end
 end
+function WCombobox:removeFromSelection(...)
+   self.controls.pane:removeFromSelection(...)
+end
 function WCombobox:select(x)
    assert(self ~= WCombobox, "This method must be called on an instance.")
-   if type(x) == "function" --
-   or type(x) == "number" then
-      return self.controls.pane:select(x)
-   end
-   assert(false, "Invalid argument type passed to WCombobox:select(...).")
+   return self.controls.pane:select(x)
 end
 function WCombobox:setDisabled(setTo)
    assert(self ~= WCombobox, "This method must be called on an instance.")

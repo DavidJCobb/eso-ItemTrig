@@ -63,6 +63,9 @@ function Set:empty()
 end
 function Set:equal(other)
    assert(self ~= Set,   "This method must be called on an instance.")
+   if other == nil then
+      return false
+   end
    assert(Set:is(other), "Cannot compare a Set to a non-Set.")
    for k in pairs(self) do
       if not other[k] then
@@ -101,8 +104,8 @@ end
 function Set:insert(item)
    assert(self ~= Set, "This method must be called on an instance.")
    if Set:is(item) then
-      for k in pairs(item) do
-         self[k] = true
+      for k, v in pairs(item) do
+         self[k] = v or nil
       end
       return
    end
@@ -113,8 +116,11 @@ function Set:intersection(other)
    assert(self ~= Set, "This method must be called on an instance.")
    assert(Set:is(other), "Cannot intersect a Set with a non-Set.")
    local result = Set:new()
-   for k in pairs(self) do
+   for k, _ in pairs(self) do
       result[k] = other[k]
+   end
+   for k, _ in pairs(other) do
+      result[k] = self[k]
    end
    return result
 end
@@ -152,7 +158,7 @@ end
 function Set:remove(item)
    assert(self ~= Set, "This method must be called on an instance.")
    if Set:is(item) then
-      for k in pairs(item) do
+      for k, v in pairs(item) do
          self[k] = nil
       end
       return

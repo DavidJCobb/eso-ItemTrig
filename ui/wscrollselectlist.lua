@@ -22,7 +22,8 @@ function WScrollSelectList:_construct(options)
       self.selection.shiftToAdd = options.shiftToAdd
    end
    if self.selection.multi then
-      self.selection.index = Set:new()
+      self.selection.index     = Set:new()
+      self.selection._oldIndex = Set:new()
    end
    self.element.onSelect      = options.element.onSelect      or nil -- callback
    self.element.onDeselect    = options.element.onDeselect    or nil -- callback
@@ -86,26 +87,20 @@ do -- internal event handlers, not to be overridden
       local s   = self.selection
       local old = s._oldIndex
       local new = s.index
+      local anyChanges = false
       if s.multi then
          local function _exec(a, b, call)
             if not call then
                return
             end
-            local changed
-            if a and b then
-               changed = a:complement(b)
-            elseif a then
-               changed = a
-            else
-               return
-            end
-            changed:forEach(function(index)
+            a:complement(b):forEach(function(index)
                local control = self:controlByIndex(index)
                if control then
                   call(index, control, self)
                end
             end)
          end
+         anyChanges = not new:equal(old)
          --
          if fireDeselection then
             _exec(old, new, self.element.onDeselect)
@@ -122,6 +117,7 @@ do -- internal event handlers, not to be overridden
                end
             end
          end
+         anyChanges = old ~= new
          --
          if fireDeselection then
             _exec(old, self.element.onDeselect)
@@ -130,10 +126,12 @@ do -- internal event handlers, not to be overridden
          --
          s._oldIndex = new
       end
-      self:onChange()
+      if anyChanges then
+         self:onChange()
+      end
    end
 end
-function WScrollSelectList:addToSelection(index)
+function WScrollSelectList:addToSelection(x)
    --
    -- You can pass a function to iterate over all list 
    -- items; return truthy to select.
@@ -152,7 +150,8 @@ function WScrollSelectList:deselectAll()
             end
          end)
       end
-      s.index = {}
+      s._oldIndex = s.index
+      s.index = Set:new()
    elseif s.index then
       if callback then
          local control = self:controlByIndex(s.index)
@@ -160,29 +159,10 @@ function WScrollSelectList:deselectAll()
             callback(s.index, self:controlByIndex(s.index), self)
          end
       end
+      s._oldIndex = s.index
       s.index = nil
    end
    self:onChange()
-end
-function WScrollSelectList:hasSelection()
-   local i = self.selection.index
-   if not i then
-      return false
-   end
-   if self.selection.multi then
-      return not i:empty()
-   end
-   return true
-end
-function WScrollSelectList:isIndexSelected(index)
-   local sel = self.selection.index
-   if not sel then
-      return false
-   end
-   if self.selection.multi then
-      return sel:has(index)
-   end
-   return sel == index
 end
 function WScrollSelectList:getFirstSelectedIndex()
    if not self:hasSelection() then
@@ -206,8 +186,31 @@ function WScrollSelectList:getSelectedItems()
    end
    return self:at(self.selection.index)
 end
+function WScrollSelectList:hasSelection()
+   local i = self.selection.index
+   if not i then
+      return false
+   end
+   if self.selection.multi then
+      return not i:empty()
+   end
+   return true
+end
+function WScrollSelectList:isIndexSelected(index)
+   local sel = self.selection.index
+   if not sel then
+      return false
+   end
+   if self.selection.multi then
+      return sel:has(index)
+   end
+   return sel == index
+end
 function WScrollSelectList:_modifySelection(x, op)
    assert((op == "select") or (op == "deselect"), "Invalid operation.")
+   if not x then
+      return
+   end
    local s = self.selection
    if s.multi then
       if type(x) == "function" then
@@ -218,43 +221,40 @@ function WScrollSelectList:_modifySelection(x, op)
             end
          end
          x = r
-      end
-      if type(x) ~= "number" and not Set:is(x) then
+      elseif type(x) ~= "number" and not Set:is(x) then
          x = self:indexOf(x)
+         if type(x) == "number" then
+            x = Set:new({ x })
+         else
+            return
+         end
       end
-      if not x then
-         return
+      if x:empty() then
+         return -- This call won't actually change the selection.
       end
-      if type(x) == "number" then
-         x = Set:new({ x })
-      end
-      local compareOp
-      local modifyOp
       if op == "select" then
-         compareOp = "complement"
-         modifyOp  = "insert"
+         if x:complement(s.index):empty() then
+            return -- This call won't actually change the selection.
+         end
+         s.index:insert(x)
       else
-         compareOp = "intersection"
-         modifyOp  = "remove"
+         if x:intersection(s.index):empty() then
+            return -- This call won't actually change the selection.
+         end
+         s.index:remove(x)
       end
-      if x:empty() or s.index[empty](s.index, x):empty() then
-         --
-         -- This call won't actually change the selection.
-         --
-         return
-      end
-      s.index[modifyOp](s.index, x)
    else
       if op == "select" then
-         if not s.index then
-            self:select(x)
+         if s.index then
+            return
          end
+         self:select(x)
       else
-         if s.index == x then
-            self:select(nil)
+         if s.index ~= x then
+            return
          end
+         self:select(nil)
       end
-      return
    end
    self:_onSelectionChanged()
 end
@@ -267,8 +267,9 @@ function WScrollSelectList:multiSelect(flag) -- getter/setter
       return flag
    end
    if flag then
-      s.multi = true
-      s.index = Set:new(s.index and { [1] = s.index } or nil)
+      s.multi     = true
+      s.index     = Set:new(s.index     and { s.index     } or nil)
+      s._oldIndex = Set:new(s._oldIndex and { s._oldIndex } or nil)
    else
       local first = self:getFirstSelectedIndex()
       local call  = self.element.onDeselect

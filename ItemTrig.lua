@@ -102,10 +102,10 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    }
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
    --
-   local tList = ItemTrig.Savedata.triggers
+   local tList = ItemTrig.filterTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED)
    for i = 1, table.getn(tList) do
       local trigger = tList[i]
-      local result  = trigger:exec(item)
+      local result  = trigger:exec(item, ItemTrig.ENTRY_POINT_ITEM_ADDED)
       if item:isInvalid() then
          break
       end

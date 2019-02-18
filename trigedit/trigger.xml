@@ -59,8 +59,8 @@
          inherits="ItemTrig_UITemplate_WWindow"
       >
          <!-- <Dimensions x="800" y="600" /> -->
-         <Dimensions x="1000" y="800" /> <!-- dimensions for large fonts -->
-         <DimensionConstraints minX="600" minY="600" />
+         <Dimensions x="1000" y="900" /> <!-- dimensions for large fonts -->
+         <DimensionConstraints minX="1000" minY="900" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig:setupWindow("triggerEdit", self) </OnInitialized>
          <Controls>
@@ -112,8 +112,8 @@
                </Controls>
             </Control>
             <Control name="$(parent)Col1">
-               <Anchor point="TOPLEFT"     offsetY="5" relativeTo="$(parent)NameBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" offsetY="-5" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+               <Anchor point="TOPLEFT"     offsetY="7" relativeTo="$(parent)NameBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
                <Dimensions x="200" />
                <OnInitialized>
                   --
@@ -121,34 +121,24 @@
                   -- the anchor system: I want the two opcode lists in this column to flex, each 
                   -- consuming half of the space not consumed by the text headers.
                   --
-                  local cHead    = self:GetNamedChild("ConditionsHeader")
-                  local cList    = self:GetNamedChild("Conditions")
-                  local aHead    = self:GetNamedChild("ActionsHeader")
-                  local aList    = self:GetNamedChild("Actions")
-                  local this     = self
-                  local resizing = true
-                  local function onResizeStart(control)
-                     resizing = true
-                  end
-                  local function onResizeFrame(control)
-                     if not resizing then
+                  local cHead = self:GetNamedChild("ConditionsHeader")
+                  local cList = self:GetNamedChild("Conditions")
+                  local aHead = self:GetNamedChild("ActionsHeader")
+                  local aList = self:GetNamedChild("Actions")
+                  local lastHeight = self:GetHeight()
+                  local function frameHandler(control)
+                     local span = control:GetHeight()
+                     if span == lastHeight then
                         return
                      end
-                     local span = control:GetHeight()
                      span = span - cHead:GetHeight()
                      span = span - aHead:GetHeight()
                      span = span - 8
                      cList:SetHeight(span / 2)
                      aList:SetHeight(span / 2)
                   end
-                  local function onResizeStop(control)
-                     resizing = false
-                  end
-                  ZO_PreHookHandler(self:GetOwningWindow(), "OnResizeStart", onResizeStart)
-                  ZO_PreHookHandler(self, "OnUpdate", onResizeFrame)
-                  resizing = true
-                  onResizeFrame(self)
-                  resizing = false
+                  ZO_PreHookHandler(self, "OnUpdate", frameHandler)
+                  frameHandler(self)
                </OnInitialized>
                <Controls>
                   <Label name="$(parent)ConditionsHeader" font="ITEMTRIG_FONT_BASIC" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS">
@@ -169,6 +159,48 @@
                      <Anchor point="TOPLEFT"     relativeTo="$(parent)ActionsHeader" relativePoint="BOTTOMLEFT" />
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)Bottom"   relativePoint="TOPRIGHT" offsetY="-8" />
                   </Control>
+               </Controls>
+            </Control>
+            <Control name="$(parent)EntryPointBar">
+               <Anchor point="TOPLEFT"  offsetY="7" relativeTo="$(parent)NameBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPRIGHT" offsetY="7" relativeTo="$(parent)NameBar" relativePoint="BOTTOMRIGHT" />
+               <Dimensions y="50" />
+               <OnInitialized>
+                  local text = GetControl(self, "Label")
+                  local edit = GetControl(self, "Value")
+                  local h1 = text:GetHeight()
+                  local h2 = edit:GetHeight()
+                  if h1 > h2 then
+                     self:SetHeight(h1)
+                  else
+                     self:SetHeight(h2)
+                  end
+                  --
+                  -- If the combobox is defined before the rest of the dialog, then 
+                  -- it can't get mouse focus when it covers up other parts of the 
+                  -- dialog, because ESO doesn't handle mouse focus properly. If 
+                  -- the combobox (and by necessity, its container) is defined 
+                  -- after the rest of the dialog, then the rest of the dialog 
+                  -- breaks, because when anchors reference controls by name, those 
+                  -- references are resolved as the XML elements are parsed (UGH!) 
+                  -- and so anchors can't refer to things defined later in the 
+                  -- document.
+                  --
+                  -- Fortunately, because we need to hide the entry point bar when 
+                  -- editing a nested trigger, we won't allow anything to refer 
+                  -- directly to it anyway -- or rather, anything that would refer 
+                  -- directly to it will have anchors overridden by the window code.
+                  --
+               </OnInitialized>
+               <Controls>
+                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_ENTRYPOINTS" font="ITEMTRIG_FONT_BASIC">
+                     <Anchor point="TOPLEFT" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
+                  </Label>
+                  <EditBox name="$(parent)Value" inherits="ItemTrig_UITemplate_WCombobox">
+                     <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="8" />
+                     <Anchor point="TOPRIGHT" />
+                  </EditBox>
                </Controls>
             </Control>
          </Controls>

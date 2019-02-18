@@ -261,6 +261,43 @@ function WinCls:_construct()
       results = nil,
    }
    do
+      local bar      = self:GetNamedChild("EntryPointBar")
+      local combobox = ItemTrig.UI.WCombobox:cast(GetControl(bar, "Value"))
+      self.ui.entryPointsBar      = bar
+      self.ui.entryPointsCombobox = combobox
+      --
+      combobox.onChange = function() WinCls:getInstance():onEntryPointsChanged() end
+      combobox:clear()
+      combobox:multiSelect(true)
+      combobox:setShouldSort(true, false)
+      combobox.emptyText = GetString(ITEMTRIG_STRING_ENTRYPOINT_NONE_SELECTED)
+      combobox:push(
+         {
+            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_BARTER),
+            value = ItemTrig.ENTRY_POINT_BARTER
+         }, false
+      )
+      combobox:push(
+         {
+            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_CRAFTING),
+            value = ItemTrig.ENTRY_POINT_CRAFTING
+         }, false
+      )
+      combobox:push(
+         {
+            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_FENCE),
+            value = ItemTrig.ENTRY_POINT_FENCE
+         }, false
+      )
+      combobox:push(
+         {
+            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_ITEM_ADDED),
+            value = ItemTrig.ENTRY_POINT_ITEM_ADDED
+         }, false
+      )
+      combobox:redraw()
+   end
+   do
       local col = self:GetNamedChild("Col1")
       local c = OpcodeListCls:install(GetControl(col, "Conditions"), "condition")
       local a = OpcodeListCls:install(GetControl(col, "Actions"),    "action")
@@ -409,6 +446,21 @@ function WinCls:onNameChanged()
    trig.working.name = edit:GetText()
    trig.dirty = true
 end
+function WinCls:onEntryPointsChanged()
+   if self.refreshing then
+      return
+   end
+   local combobox = self.ui.entryPointsCombobox
+   local trig     = self.stack:first()
+   assert(trig ~= nil)
+   local result = {}
+   local points = combobox:getSelectedItems()
+   for i = 1, table.getn(points) do
+      table.insert(result, points[i].value)
+   end
+   trig.working.entryPoints = result
+   trig.dirty = true
+end
 
 function WinCls:handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
@@ -500,11 +552,12 @@ function WinCls:refresh()
    self.refreshing = true
    local trig    = self.stack:last()
    assert(trig ~= nil)
-   local trigger = trig.working
+   local trigger    = trig.working
+   local isTopLevel = self.stack:count() == 1
    do -- window title
       local baseTitle = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT)
       local rootName  = ""
-      if self.stack:count() == 1 then
+      if isTopLevel then
          if trig.isNew then
             baseTitle = GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW)
          end
@@ -519,6 +572,32 @@ function WinCls:refresh()
       self:setTitle(LocalizeString(baseTitle, rootName))
    end
    self.ui.triggerNameField:SetText(trigger.name)
+   do -- render entry points
+      local nameBar  = self:GetNamedChild("NameBar")
+      local bar      = self.ui.entryPointsBar
+      local combobox = self.ui.entryPointsCombobox
+      local body     = self:GetNamedChild("Col1")
+      local bottom   = self:GetNamedChild("Bottom")
+      if isTopLevel then
+         bar:SetHidden(false)
+         body:ClearAnchors()
+         body:SetAnchor(TOPLEFT,     bar,    BOTTOMLEFT, 0, 7)
+         body:SetAnchor(BOTTOMRIGHT, bottom, TOPRIGHT,   0, -7)
+         --
+         combobox:close()
+         combobox:deselectAll()
+         for i = 1, table.getn(trigger.entryPoints) do
+            combobox:addToSelection(function(data) return data.value == trigger.entryPoints[i] end)
+         end
+      else
+         combobox:close()
+         combobox:deselectAll()
+         --
+         bar:SetHidden(true)
+         body:SetAnchor(TOPLEFT,     nameBar, BOTTOMLEFT, 0, 7)
+         body:SetAnchor(BOTTOMRIGHT, bottom,  TOPRIGHT,   0, -7)
+      end
+   end
    do -- render conditions
       local pane = self.ui.paneConditions
       pane:clear(false)

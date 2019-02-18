@@ -88,7 +88,7 @@ ItemTrig.tableActions = {
             return ItemTrig.OPCODE_FAILED, {}
          end
          local count = nil
-         if context.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
+         if state.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
             if args[1] then
                count = context.entryPointData.countAdded or 0
             end

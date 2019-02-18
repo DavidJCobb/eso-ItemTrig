@@ -88,7 +88,7 @@ function WScrollList:_construct(options)
    self.scrollMax      = -1 -- height of all generated elements
    self.shouldSort     = options.shouldSort     or false
    self.sortFunction   = options.sortFunction   or _defaultSortFunction
-   self.paddingSides   = options.paddingSides   or 0 -- padding (except paddingBetween) is applied as a side-effect of self:resizeScrollbar
+   self.paddingSides   = options.paddingSides   or 0 -- padding (except paddingBetween) is applied as a side-effect of self:_updateScrollbar
    self.paddingStart   = options.paddingStart   or 0
    self.paddingBetween = options.paddingBetween or 0
    self.paddingEnd     = options.paddingEnd     or 0
@@ -270,52 +270,6 @@ function WScrollList:remove(x, update)
       self.dirty = true
    end
 end
-function WScrollList:resizeScrollbar(scrollMax)
-   --
-   -- This function handles the following tasks:
-   --
-   -- a) Show or hide the scrollbar depending on whether scrolling is possible.
-   --
-   -- b) Update anchors for the scrollbar and the content area, based on our 
-   --    padding settings.
-   --
-   local scrollbar  = self.scrollbar
-   if scrollMax == nil then
-      scrollMax = self.scrollMax
-   end
-   if scrollMax < 0 then
-      scrollMax = self:measureItems()
-   end
-   do -- Update anchors to account for padding
-      local control  = self:asControl()
-      do -- scrollbar
-         local SCROLL_BUTTON_HEIGHT = 16 -- assumed; this is the constant ZOS uses to offset scrollbars downward
-         scrollbar:ClearAnchors()
-         scrollbar:SetAnchor(TOPRIGHT,    control, TOPRIGHT,    -self.paddingSides, SCROLL_BUTTON_HEIGHT + self.paddingStart)
-         scrollbar:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -self.paddingSides, -(SCROLL_BUTTON_HEIGHT + self.paddingEnd))
-      end
-      do -- content
-         local contents = self.contents
-         contents:ClearAnchors()
-         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,     self.paddingSides, self.paddingStart)
-         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -(self.paddingSides * 2 + ZO_SCROLL_BAR_WIDTH), -self.paddingEnd)
-      end
-   end
-   local listHeight = self.contents:GetHeight()
-   local barHeight  = scrollbar:GetHeight()
-   if scrollMax > 0 and scrollMax > listHeight then
-      scrollbar:SetEnabled(true)
-      scrollbar:SetHidden(false)
-      scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))
-      scrollbar:SetMinMax(0, scrollMax - listHeight)
-   else
-      self.scrollTop = 0
-      scrollbar:SetThumbTextureHeight(barHeight)
-      scrollbar:SetMinMax(0, 0)
-      scrollbar:SetEnabled(false)
-      scrollbar:SetHidden(scrollbar.hideScrollBarOnDisabled)
-   end
-end
 function WScrollList:_getExtraConstructorParams(index)
    --
    -- Subclasses can override this in order to provide additional 
@@ -408,7 +362,7 @@ function WScrollList:redraw(options)
       self.scrollMax = total
    end
    self.dirty     = false
-   self:resizeScrollbar(total)
+   self:_updateScrollbar(total)
    if self.element.toFinalize then
       for i = 1, table.getn(self.visibleItems) do
          local index   = self.visibleItems[i]
@@ -590,4 +544,51 @@ function WScrollList:sort()
    self.listItems      = replItems
    self.listItemStates = replStates
    self.dirty = true
+end
+function WScrollList:_updateScrollbar(scrollMax)
+   --
+   -- This function handles the following tasks:
+   --
+   -- a) Show or hide the scrollbar depending on whether scrolling is possible.
+   --
+   -- b) Update anchors for the scrollbar and the content area, based on our 
+   --    padding settings.
+   --
+   local scrollbar  = self.scrollbar
+   if scrollMax == nil then
+      scrollMax = self.scrollMax
+   end
+   if scrollMax < 0 then
+      scrollMax = self:measureItems()
+   end
+   do -- Update anchors to account for padding
+      local control  = self:asControl()
+      do -- scrollbar
+         local SCROLL_BUTTON_HEIGHT = 16 -- assumed; this is the constant ZOS uses to offset scrollbars downward
+         scrollbar:ClearAnchors()
+         scrollbar:SetAnchor(TOPRIGHT,    control, TOPRIGHT,    -self.paddingSides, SCROLL_BUTTON_HEIGHT + self.paddingStart)
+         scrollbar:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -self.paddingSides, -(SCROLL_BUTTON_HEIGHT + self.paddingEnd))
+      end
+      do -- content
+         local contents = self.contents
+         contents:ClearAnchors()
+         contents:SetAnchor(TOPLEFT,     control, TOPLEFT,     self.paddingSides, self.paddingStart)
+         contents:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -(self.paddingSides * 2 + ZO_SCROLL_BAR_WIDTH), -self.paddingEnd)
+      end
+   end
+   local listHeight = self.contents:GetHeight()
+   local barHeight  = scrollbar:GetHeight()
+   if scrollMax > 0 and scrollMax > listHeight then
+      scrollbar:SetEnabled(true)
+      scrollbar:SetHidden(false)
+      scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))
+      scrollbar:SetMinMax(0, scrollMax - listHeight)
+   else
+      self.scrollTop = 0
+      --scrollbar:SetThumbTextureHeight(barHeight)
+      scrollbar:SetThumbTextureHeight(0)
+      scrollbar:SetMinMax(0, 0)
+      scrollbar:SetEnabled(false)
+      scrollbar:SetHidden(scrollbar.hideScrollBarOnDisabled)
+   end
 end

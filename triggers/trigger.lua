@@ -1,5 +1,18 @@
 if not ItemTrig then return end
 
+function ItemTrig.filterTriggerList(list, entryPoint)
+   local filtered = {}
+   local mapping  = {} -- list[mapping[i]] == filtered[i]
+   for i = 1, table.getn(list) do
+      local trigger = list[i]
+      if ItemTrig.indexOf(trigger.entryPoints, entryPoint) then
+         table.insert(filtered, trigger)
+         table.insert(mapping,  i)
+      end
+   end
+   return filtered, mapping
+end
+
 ItemTrig.Trigger = {}
 ItemTrig.Trigger.__index = ItemTrig.Trigger
 function ItemTrig.Trigger:new()
@@ -36,12 +49,13 @@ function ItemTrig.Trigger:clone(deep)
    setmetatable(result, getmetatable(self))
    result.name        = self.name
    result.enabled     = self.enabled
-   result.entryPoints = {}
+   result.entryPoints = self.entryPoints
    result.conditions  = {} -- array
    result.actions     = {} -- array
    result.state = {
       using_or   = false,
-      matched_or = false
+      matched_or = false,
+      entryPoint = nil,
    }
    for i = 1, table.getn(self.conditions) do
       result.conditions[i] = self.conditions[i]:clone(deep)
@@ -60,7 +74,8 @@ function ItemTrig.Trigger:copyAssign(other, deep)
    -- pointed to).
    --
    self.name        = other.name
-   self.enabled     = other.enabled
+   self.enabled     = other.enabled or false
+   self.entryPoints = other.entryPoints or {}
    if deep then
       ZO_ClearNumericallyIndexedTable(self.conditions)
       ZO_ClearNumericallyIndexedTable(self.actions)
@@ -72,10 +87,9 @@ function ItemTrig.Trigger:copyAssign(other, deep)
          self.actions[i] = other.actions[i]:clone(deep)
       end
    else
-      self.entryPoints = other.entryPoints
-      self.conditions  = other.conditions
-      self.actions     = other.actions
-      self.state       = other.state
+      self.conditions = other.conditions
+      self.actions    = other.actions
+      self.state      = other.state
    end
 end
 function ItemTrig.Trigger:getDescription()
@@ -116,13 +130,14 @@ function ItemTrig.Trigger:debugDump()
       CHAT_SYSTEM:AddMessage("   " .. self.actions[i]:format())
    end
 end
-function ItemTrig.Trigger:exec(context)
+function ItemTrig.Trigger:exec(context, entryPoint)
 --CHAT_SYSTEM:AddMessage("== Executing trigger " .. self.name .. "...") -- debug
    if not self.enabled then
       return false
    end
    self.state.using_or   = false
    self.state.matched_or = false
+   self.state.entryPoint = entryPoint or nil
    for i = 1, table.getn(self.conditions) do
       local c = self.conditions[i]
       if c.never_skip or not (self.state.using_or and self.state.matched_or) then
@@ -145,6 +160,7 @@ function ItemTrig.Trigger:exec(context)
                -- clarification on why the opcode failed.
                --
                r = false
+               return r
             end
             --
             -- If a condition returns nil, then we don't treat it as true 

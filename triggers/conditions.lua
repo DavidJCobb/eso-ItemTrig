@@ -238,7 +238,7 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         if context.entryPoint ~= ItemTrig.ENTRY_POINT_ITEM_ADDED then
+         if state.entryPoint ~= ItemTrig.ENTRY_POINT_ITEM_ADDED then
             return false
          end
          local result = false

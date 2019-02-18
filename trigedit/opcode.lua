@@ -59,7 +59,7 @@ function WinCls:_construct()
                WinCls:getInstance():_onTypeChanged(item.base)
             end
          end
-      --self.ui.opcodeType:SetSortsItems(true) -- TODO
+      self.ui.opcodeType:setShouldSort(true, false)
    end
    self.ui.opcodeBody = ItemTrig_OpcodeEdit_OpcodeBody
    --
@@ -143,7 +143,6 @@ function WinCls:requestEdit(opener, opcode, dirty, extra)
          end
       end
       local combobox = self.ui.opcodeType
-      combobox:setShouldSort(true, false)
       combobox:clear()
       for i = 1, table.getn(list) do
          local base = list[i]
