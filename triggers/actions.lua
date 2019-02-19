@@ -40,7 +40,7 @@ ItemTrig.tableActions = {
             -- an "explanation" key to the arg, and the opcode-arg editor 
             -- should show that as plain text below the textbox.
             --
-            text = string.gsub(text, "$%(name%)",  context.name)
+            text = string.gsub(text, "$%(name%)",  zo_strformat("<<1>>", context.name))
             text = string.gsub(text, "$%(price%)", context.sellValue)
          end
          CHAT_SYSTEM:AddMessage(text)

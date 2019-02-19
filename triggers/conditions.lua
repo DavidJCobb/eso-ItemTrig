@@ -309,6 +309,30 @@ ItemTrig.tableConditions = {
          return ItemTrig.testQuantity(args[2], count)
       end
    ),
+   [12] = ConditionBase:new( -- Item Name
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMNAME),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMNAME),
+      {
+         [1] = { type = "string", placeholder = "name" },
+         [2] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMNAME_WHOLE),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMNAME_SUBSTRING)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local name = tostring(context.name)
+         local stub = tostring(args[1] or "")
+         if args[2] then
+            return name:find(stub) ~= nil
+         else
+            return name:lower() == stub:lower()
+         end
+      end
+   ),
 }
 ItemTrig.countConditions = table.getn(ItemTrig.tableConditions)
 for i = 1, ItemTrig.countConditions do
