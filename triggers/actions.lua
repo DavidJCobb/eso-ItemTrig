@@ -147,7 +147,14 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
-         item:launder(args[1])
+         local result, errorCode = context:launder(args[1])
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
+         end
       end,
       { -- extra data for this opcode
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }

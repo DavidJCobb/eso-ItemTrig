@@ -13,6 +13,18 @@ if not ItemTrig then return end
    can attach callbacks for each.
    
    A Promise is a read-only Deferred.
+   
+   Callbacks receive whatever arguments the Deferred is resolved or 
+   rejected with. If you specify a "context" when registering a callback, 
+   then that will be passed as the first argument (before the resolve/
+   reject arguments); this is intended to allow the use of instance 
+   methods that need to be thiscall'd as callbacks:
+   
+      MyThing = {}
+      function MyThing:method()
+      end
+      
+      myDeferred:done(MyThing.method, MyThing)
 --]]--
 
 local DEFERRED_STATE_PENDING  = 0
@@ -44,6 +56,10 @@ do -- Class definition
    function Promise:always(...)
       assert(self ~= Promise, "This method must be called on an instance.")
       return self.deferred:always(...)
+   end
+   function Promise:isPending(...)
+      assert(self ~= Promise, "This method must be called on an instance.")
+      return self.deferred:isPending(...)
    end
    function Promise:promise()
       assert(false, "This method must be called on a Deferred, not a Promise.")
@@ -111,6 +127,10 @@ function Deferred:always(callback, context)
    table.insert(self.rejectCallbacks,  { func = callback, context = context })
    return self
 end
+function Deferred:isPending()
+   assert(self ~= Deferred, "This method must be called on an instance.")
+   return self.state == DEFERRED_STATE_PENDING
+end
 function Deferred:resolve(...)
    if self == Deferred then
       --
@@ -127,7 +147,11 @@ function Deferred:resolve(...)
    self.state = DEFERRED_STATE_RESOLVED
    for i = 1, table.getn(self.resolveCallbacks) do
       local meta = self.resolveCallbacks[i]
-      meta.func(meta.context, self, ...)
+      if meta.context == nil then
+         meta.func(...)
+      else
+         meta.func(meta.context, ...)
+      end
    end
    self.resolveCallbacks = {}
    self.rejectCallbacks  = {}
@@ -148,7 +172,11 @@ function Deferred:reject(...)
    self.state = DEFERRED_STATE_REJECTED
    for i = 1, table.getn(self.rejectCallbacks) do
       local meta = self.rejectCallbacks[i]
-      meta.func(meta.context, self, ...)
+      if meta.context == nil then
+         meta.func(...)
+      else
+         meta.func(meta.context, ...)
+      end
    end
    self.resolveCallbacks = {}
    self.rejectCallbacks  = {}

@@ -326,7 +326,7 @@ function WinCls:addOpcode(type, insertAfterIndex)
       entryPoints = self.stack:getEnabledEntryPoints(),
    })
    deferred:done(
-      function(context, deferred, dirty) -- user clicked OK
+      function(dirty) -- user clicked OK
          local editor = WinCls:getInstance()
          local trig   = editor.stack:last()
          assert(trig ~= nil)
@@ -344,7 +344,7 @@ function WinCls:addOpcode(type, insertAfterIndex)
          pane:scrollToItem(pane:indexOf(created), true, true)
       end
    ):fail(
-      function(context, deferred) -- user clicked Cancel
+      function() -- user clicked Cancel
       end
    )
 end
@@ -353,7 +353,7 @@ function WinCls:editOpcode(opcode)
       entryPoints = self.stack:getEnabledEntryPoints(),
    })
    deferred:done(
-      function(context, deferred, dirty) -- user clicked OK
+      function(dirty) -- user clicked OK
          if dirty then
             local editor = WinCls:getInstance()
             local trig   = editor.stack:last()
@@ -363,7 +363,7 @@ function WinCls:editOpcode(opcode)
          end
       end
    ):fail(
-      function(context, deferred) -- user clicked Cancel
+      function() -- user clicked Cancel
       end
    )
 end

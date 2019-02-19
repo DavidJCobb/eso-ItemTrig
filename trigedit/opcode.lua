@@ -311,7 +311,7 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
    local deferred = ItemTrig.windows.opcodeArgEdit:requestEdit(self, self.opcode.working, argIndex)
    self:redrawDescription({ highlightIndex = argIndex }) -- highlight the arg we're editing
    deferred:done(
-      function(context, deferred, result) -- user clicked OK
+      function(result) -- user clicked OK
          local editor  = WinCls:getInstance()
          local working = editor.opcode.working
          local index   = result.argIndex
@@ -324,7 +324,7 @@ function WinCls:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift,
          end
       end
    ):fail(
-      function(context, deferred) -- user clicked Cancel
+      function() -- user clicked Cancel
          WinCls:getInstance():redrawDescription()
       end
    )

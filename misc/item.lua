@@ -32,6 +32,156 @@ function ItemTrig.forEachBagSlot(bag, functor)
    end
 end
 
+local StackTools = {
+   eventPrefix   = nil,
+   listening     = false,
+   pendingSplits = {},
+}
+ItemTrig.ItemStackTools = StackTools
+do
+   --
+   -- Some of the operations we're able to perform require us to split a stack 
+   -- of items. However, there is no synchronous function to split an item 
+   -- stack; we can request a stack split, but that request will be carried out 
+   -- asynchronously. As such, we need to use an event listener to know when the 
+   -- request has been completed.
+   --
+   -- There's another wrinkle: if we want to split multiple stacks on the same 
+   -- frame, then a naive approach will cause these operations to conflict: both 
+   -- operations will try to use the same slot as a destination, because:
+   --
+   --    1. Operation A requests a stack split:
+   --
+   --        * We search for a free bag slot, and find one.
+   --
+   --        * We queue a move to that slot.
+   --
+   --        * Until that move completes, after our code has finished, the slot 
+   --          will continue to read as free.
+   --
+   --    2. Operation B requests a stack split:
+   --
+   --        * We search for a free bag slot. Because Operation A has been queued 
+   --          but not actually carried out yet, we find the slot that it already 
+   --          asked to move to.
+   --
+   --        * CONFLICT!
+   --
+   -- The StackTools singleton is designed to prevent this. If anything in this 
+   -- file needs to split a stack or even just find an empty bag slot, it should 
+   -- rely on StackTools:split(...) and StackTools:findFreeSlot(...).
+   --
+   local function _listener(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
+      local bagData = StackTools.pendingSplits[bagIndex]
+      if not bagData then
+         return
+      end
+      local slotData = bagData[slotIndex]
+      if not slotData then
+         return
+      end
+      local deferred = slotData.deferred
+      if slotData.id == GetItemId(bagIndex, slotIndex) then
+         if slotData.count == GetSlotStackSize(bagIndex, slotIndex) then
+            --
+            -- If the item slot is what we expect -- same ID as the original 
+            -- item, and same count as was queued to split -- then signal a 
+            -- successful stack split.
+            --
+            deferred:resolve(bagIndex, slotIndex)
+         end
+      end
+      bagData[slotIndex] = nil
+      if deferred:isPending() then
+         --
+         -- The item slot wasn't what we expected. Signal an invalid stack 
+         -- state suggesting a failed stack split.
+         --
+         deferred:reject(bagIndex, slotIndex)
+      end
+   end
+   --
+   function StackTools:earmarkSlot(bag, slot, id, count)
+      if not self.pendingSplits[bag] then
+         self.pendingSplits[bag] = {}
+      end
+      local registration = {
+         id       = id,
+         count    = count,
+         deferred = ItemTrig.Deferred:new(),
+      }
+      self.pendingSplits[bag][slot] = registration
+      return registration.deferred
+   end
+   function StackTools:findFreeSlot(bag)
+      --
+      -- Returns the first slot in (bag) that is both currently free and 
+      -- not being used as the destination for a pending "split stack" op-
+      -- eration. If there are no free slots, returns nil.
+      --
+      local slot = FindFirstEmptySlotInBag(bag)
+      if not slot then
+         return
+      end
+      local pending = self.pendingSplits[bag]
+      if not pending then
+         return slot
+      end
+      while slot and (pending[slot] or HasItemInSlot(bag, slot)) do
+         slot = ZO_GetNextBagSlotIndex(bag, slot)
+      end
+      return slot
+   end
+   function StackTools:setup(eventPrefix)
+      if self.listening then
+         self:teardown()
+      end
+      self.eventPrefix = eventPrefix
+      local namespace = eventPrefix .. "SplitStackListener"
+      EVENT_MANAGER:RegisterForEvent (namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _listener)
+      EVENT_MANAGER:AddFilterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, false)
+      --EVENT_MANAGER:AddFilterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+      EVENT_MANAGER:AddFilterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
+      self.listening = true
+   end
+   function StackTools:slotIsEarmarked(bag, slot)
+      local pending = self.pendingSplits[bag]
+      if not pending then
+         return false
+      end
+      return pending[slot] ~= nil
+   end
+   function StackTools:split(interface, count)
+      --
+      -- Attempt to split the stack represented by an ItemInterface. If this 
+      -- function fails, it returns a boolean and an error code. If it works, 
+      -- it returns a Deferred.
+      --
+      -- If the stack split succeeds and is detected by our system, then the 
+      -- deferred will be resolved with the destination bag index and slot 
+      -- index. If the stack split appears to be invalid (i.e. we detect a 
+      -- different item, or the wrong quantity of item, in the destination 
+      -- bag slot), then the deferred will be rejected with the destination 
+      -- bag index and slot index.
+      --
+      if not self.listening then
+         return false, ItemInterface.FAILURE_MOD_NOT_SETUP
+      end
+      local bag  = interface.bag
+      local free = self:findFreeSlot(interface.bag)
+      if not free then
+         return false, ItemInterface.FAILURE_CANNOT_SPLIT_STACK
+      end
+      CallSecureProtected("RequestMoveItem", bag, interface.slot, bag, free, count)
+      return self:earmarkSlot(bag, free, interface.id, count):promise()
+   end
+   function StackTools:teardown()
+      local namespace = self.eventPrefix .. "SplitStackListener"
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+      self.listening = false
+   end
+end
+
 --[[
    As of 2/17/2019, benchmarks suggest that when creating an item interface from 
    the "item added" event, it takes an average of 11.5ms to create 400 interfaces, 
@@ -79,9 +229,11 @@ ItemInterface.meta = {
       end,
 }
 do -- define failure reasons for member functions
-   ItemInterface.FAILURE_CANNOT_SPLIT_STACK = 0x53504C54
-   ItemInterface.FAILURE_ITEM_IS_INVALID    = 0x494E5641
-   ItemInterface.FAILURE_ITEM_IS_LOCKED     = 0x4C4F434B
+   ItemInterface.FAILURE_CANNOT_SPLIT_STACK    = 0x53504C54 -- "SPLT"
+   ItemInterface.FAILURE_ITEM_IS_INVALID       = 0x494E5641 -- "INVA"
+   ItemInterface.FAILURE_ITEM_IS_LOCKED        = 0x4C4F434B -- "LOCK"
+   ItemInterface.FAILURE_MOD_NOT_SETUP         = 0x4E4F5045 -- "NOPE"
+   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT = 0x5A4C4E44 -- "ZLND"
 end
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self.meta)
@@ -146,7 +298,7 @@ function ItemInterface:new(bagIndex, slotIndex)
          locked    = locked,
          meetsUsageRequirement = meetsUsageRequirement,
          quality   = quality, -- this would be better described as "rarity"
-         sellValue = sellPrice,
+         sellValue = sellPrice or 0,
       })
    end
    do -- GetItemType
@@ -183,17 +335,12 @@ function ItemInterface:destroy(count)
       if count == 0 then -- don't even bother, lol
          return true
       end
-      --
-      -- To destroy just some of the stack, we need to split the stack and 
-      -- then destroy the new stack.
-      --
-      local targetSlot = FindFirstEmptySlotInBag(self.bag)
-      if not targetSlot then
-         return false, self.FAILURE_CANNOT_SPLIT_STACK
+      local result, code = StackTools:split(self, count)
+      if not result then
+         return false, code
       end
-      CallSecureProtected("RequestMoveItem", self.bag, self.slot, self.bag, targetSlot, count)
-      ItemTrig:expectItemToDestroy(self.bag, targetSlot, count, self.id)
       self.invalid = true
+      result:done(function(bag, slot) DestroyItem(bag, slot) end)
    end
    return true
 end
@@ -212,13 +359,21 @@ function ItemInterface:isInvalid()
 end
 function ItemInterface:launder(count)
    if self:isInvalid() then
-      return
+      return false, self.FAILURE_ITEM_IS_INVALID
    end
    if not count then
       count = self.count
    end
+   if count > self.count then
+      count = self.count
+   end
+   count = ItemInterface.validateLaunderOperation(count)
+   if count < 1 then
+      return false, self.FAILURE_ZENIMAX_LAUNDER_LIMIT
+   end
    LaunderItem(self.bag, self.slot, count)
    self:updateCount(-count)
+   return true
 end
 function ItemInterface:modifyJunkState(flag)
    if self:isInvalid() then
@@ -243,6 +398,9 @@ function ItemInterface:sell(count)
       return
    end
    if not count then
+      count = self.count
+   end
+   if count > self.count then
       count = self.count
    end
    SellInventoryItem(self.bag, self.slot, count)
@@ -289,4 +447,13 @@ function ItemInterface:validate()
       self.invalid = true
    end
    return not self:isInvalid()
+end
+function ItemInterface.validateLaunderOperation(count) -- static method; uses stdcall, not thiscall
+   --
+   -- The environment -- the broader add-on that this system is being 
+   -- used in -- should override this function on the class, to check 
+   -- whether a launder operation is possible. Zenimax only allows 98 
+   -- automated launders every time the fence window is opened.
+   --
+   return count
 end

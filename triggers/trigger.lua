@@ -7,7 +7,13 @@ function ItemTrig.executeTriggerList(list, entryPoint, context)
    for i = 1, table.getn(list) do
       local result, extra = list[i]:exec(context, entryPoint)
       if result == ItemTrig.OPCODE_FAILED then
-         d("Failed to execute an opcode.")
+         --
+         -- TODO: Present this information in a better manner.
+         --
+         d("Failed to execute an opcode in top-level trigger " .. list[i].name .. ".")
+         if extra.opcode then
+            d(string.sub(extra.opcode:format(), 1, 240))
+         end
          d(extra)
          return result, extra
       end

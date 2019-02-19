@@ -10,18 +10,20 @@ ItemTrig = {
       isInGuildBank  = false,
       isInMail       = false,
       inCraftingType = 0,
+      fenceAutoLaunderCount = 0,
+      fenceAutoFenceCount   = 0,
    },
-   pendingItemDestroyOperations = {},
+   --[[pendingItemDestroyOperations = {},]]--
 }
 
-function ItemTrig:expectItemToDestroy(bag, slot, count, id)
+--[[function ItemTrig:expectItemToDestroy(bag, slot, count, id)
    table.insert(self.pendingItemDestroyOperations, {
       bag   = bag,
       slot  = slot,
       count = count,
       id    = id,
    })
-end
+end]]--
 
 --[[--
    System for handling windows such that the window classes don't need to 
@@ -116,7 +118,7 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
    ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
 end
-local function _ActionDestroyFinalize(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
+--[[local function _ActionDestroyFinalize(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
    local stack   = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
    local pending = ItemTrig.pendingItemDestroyOperations
    for i = 1, table.getn(pending) do
@@ -124,12 +126,12 @@ local function _ActionDestroyFinalize(eventCode, bagIndex, slotIndex, isNewItem,
       if op.bag == bagIndex and op.slot == slotIndex then
          if op.id == stack.id and op.count == stack.count then
             stack:destroy()
-            table.remove(pending, i)
             return
          end
+         table.remove(pending, i)
       end
    end
-end
+end]]--
 
 local function Initialize()
    ItemTrig.Savedata:load()
@@ -137,12 +139,24 @@ local function Initialize()
    SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
    SLASH_COMMANDS["/cobbstartinvtest"] = InventoryFilterTest
    --
-   do -- register handler needed for the "Destroy" action
+   ItemTrig.ItemStackTools:setup("ItemTrig")
+   ItemTrig.ItemInterface.validateLaunderOperation =
+      function(count)
+         local state     = ItemTrig.eventState
+         local remaining = 98 - state.fenceAutoLaunderCount
+         if remaining < count then
+            count = remaining
+         end
+         state.fenceAutoLaunderCount = state.fenceAutoLaunderCount + count
+         return count
+      end
+   --
+   --[[do -- register handler needed for the "Destroy" action
       EVENT_MANAGER:RegisterForEvent ("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ActionDestroyFinalize)
       EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, false)
       EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
       EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
-   end
+   end]]--
    do -- register item-added handler
       EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
@@ -172,6 +186,10 @@ local function Initialize()
          else
             ItemTrig.eventState.inCraftingType = 0
          end
+         if eventCode == EVENT_OPEN_FENCE then
+            ItemTrig.eventState.fenceAutoLaunderCount = 0
+            ItemTrig.eventState.fenceAutoFenceCount   = 0
+         end
          --
          do -- trigger entry points
             local function _processInventory(entryPoint, entryPointData)
@@ -191,7 +209,25 @@ local function Initialize()
             elseif eventCode == EVENT_OPEN_STORE then
                _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
             elseif eventCode == EVENT_OPEN_FENCE then
-               _processInventory(ItemTrig.ENTRY_POINT_FENCE, {})
+               if true then -- TODO: Make this a pref: Robust Fencing
+                  --
+                  -- Sort the items to be processed by their sale value, so that 
+                  -- we always launder and fence the most valuable items first.
+                  --
+                  local list = ItemTrig.bagToInterfaceList(BAG_BACKPACK)
+                  table.sort(list, function(a, b)
+                     return b.sellValue < a.sellValue
+                  end)
+                  for i = 1, table.getn(list) do
+                     local item = list[i]
+                     if not item.locked then
+                        item.entryPointData = {}
+                        ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_FENCE, item)
+                     end
+                  end
+               else
+                  _processInventory(ItemTrig.ENTRY_POINT_FENCE, {})
+               end
             end
          end
       end
