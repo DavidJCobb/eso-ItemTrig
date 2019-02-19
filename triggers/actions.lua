@@ -35,13 +35,28 @@ ItemTrig.tableActions = {
       function(state, context, args)
          local text = args[1] or ""
          if ItemInterface:is(context) then -- transform text
+            local substitutions = {
+               countTotalBag = context.totalBag,
+               creator       = context.creator,
+               level         = context.level,
+               name          = context.formattedName,
+               price         = context.sellValue,
+            }
+            if state.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
+               substitutions.countAdded = context.entryPointData.countAdded or 0
+            end
+            local function _substitute(token)
+               if substitutions[token] ~= nil then
+                  return tostring(substitutions[token])
+               end
+               return "$(" .. token .. ")"
+            end
             --
             -- TODO: Find a way to document this in the UI. We should add 
             -- an "explanation" key to the arg, and the opcode-arg editor 
             -- should show that as plain text below the textbox.
             --
-            text = string.gsub(text, "$%(name%)",  zo_strformat("<<1>>", context.name))
-            text = string.gsub(text, "$%(price%)", context.sellValue)
+            text = text:gsub("$%((%a+)%)", _substitute)
          end
          CHAT_SYSTEM:AddMessage(text)
       end

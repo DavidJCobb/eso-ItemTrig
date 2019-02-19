@@ -156,8 +156,8 @@ function WScrollSelectList:deselectAll()
             end
          end)
       end
-      s._oldIndex = s.index
-      s.index = Set:new()
+      s._oldIndex = Set:new()
+      s.index     = Set:new()
    elseif s.index then
       if callback then
          local control = self:controlByIndex(s.index)
@@ -165,8 +165,8 @@ function WScrollSelectList:deselectAll()
             callback(s.index, self:controlByIndex(s.index), self)
          end
       end
-      s._oldIndex = s.index
-      s.index = nil
+      s._oldIndex = nil
+      s.index     = nil
    end
    self:onChange()
 end
@@ -230,7 +230,7 @@ function WScrollSelectList:isIndexSelected(index)
    return sel == index
 end
 function WScrollSelectList:_modifySelection(x, op)
-   assert((op == "select") or (op == "deselect"), "Invalid operation.")
+   assert((op == "select") or (op == "deselect") or (op == "replace"), "Invalid operation.")
    if not x then
       return
    end
@@ -244,13 +244,14 @@ function WScrollSelectList:_modifySelection(x, op)
             end
          end
          x = r
-      elseif type(x) ~= "number" and not Set:is(x) then
-         x = self:indexOf(x)
-         if type(x) == "number" then
-            x = Set:new({ x })
-         else
+      else
+         if type(x) ~= "number" and not Set:is(x) then
+            x = self:indexOf(x)
+         end
+         if not x then
             return
          end
+         x = Set:new({ x })
       end
       if x:empty() then
          return -- This call won't actually change the selection.
@@ -260,23 +261,46 @@ function WScrollSelectList:_modifySelection(x, op)
             return -- This call won't actually change the selection.
          end
          s.index:insert(x)
-      else
+      elseif op == "deselect" then
          if x:intersection(s.index):empty() then
             return -- This call won't actually change the selection.
          end
          s.index:remove(x)
+      elseif op == "replace" then
+         if s.index:equal(x) then
+            return
+         end
+         s.index = x
       end
    else
+      if type(x) == "function" then
+         for i, data in ipairs(self.listItems) do
+            if x(data) then
+               s.index = i
+               self:_onSelectionChanged()
+               return true
+            end
+         end
+         return false
+      end
+      if type(x) ~= "number" then
+         x = self:indexOf(x)
+      end
       if op == "select" then
          if s.index then
             return
          end
-         self:select(x)
-      else
+         s.index = x
+      elseif op == "deselect" then
          if s.index ~= x then
             return
          end
-         self:select(nil)
+         s.index = nil
+      elseif op == "replace" then
+         if s.index == x then
+            return
+         end
+         s.index = x
       end
    end
    self:_onSelectionChanged()
@@ -328,46 +352,7 @@ function WScrollSelectList:select(x)
       self:deselectAll()
       return
    end
-   local s = self.selection
-   if s.multi then
-      if type(x) == "function" then
-         local r = Set:new()
-         for i, data in ipairs(self.listItems) do
-            if x(data) then
-               r:insert(i)
-            end
-         end
-         x = r
-      end
-      if type(x) ~= "number" and not Set:is(x) then
-         x = self:indexOf(x)
-      end
-      if type(x) == "number" or x == nil then
-         x = Set:new(x and { x } or nil)
-      end
-      if s.index:equal(x) then
-         return
-      end
-      s.index:assign(x)
-   else
-      if type(x) == "function" then
-         for i, data in ipairs(self.listItems) do
-            if x(data) then
-               self:select(i)
-               return true
-            end
-         end
-         return false
-      end
-      if type(x) ~= "number" then
-         x = self:indexOf(x)
-      end
-      if s.index == x then
-         return
-      end
-      s.index = x
-   end
-   self:_onSelectionChanged()
+   return self:_modifySelection(x, "replace")
 end
 function WScrollSelectList:toggle(i)
    assert(type(i) == "number", "This function must be passed an index.")

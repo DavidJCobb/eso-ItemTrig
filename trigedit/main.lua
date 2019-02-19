@@ -405,7 +405,7 @@ function WinCls:moveSelectedTrigger(direction)
 end
 function WinCls:deleteSelectedTrigger()
    local paneIndex          = self.ui.pane:getFirstSelectedIndex()
-   local trigger, listIndex = self:getPaneIndexForTrigger(trigger)
+   local trigger, listIndex = self:getTriggerByPaneIndex(paneIndex)
    deferred = self:showModal(ItemTrig.windows.genericConfirm, {
       text = GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_CONFIRM_DELETE),
       showCloseButton = false

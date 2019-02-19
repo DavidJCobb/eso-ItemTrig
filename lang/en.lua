@@ -156,6 +156,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMNAME", "The item's name <<2
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMNAME_WHOLE",     "is")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMNAME_SUBSTRING", "contains")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANBERESEARCHED", "Can Be Researched")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANBERESEARCHED", "The item <<1>> be researched.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANBERESEARCHED_NO",  "can't")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANBERESEARCHED_YES", "can")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -193,3 +198,16 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT", "
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_SELLORFENCE", "Sell or Fence")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_SELLORFENCE", "Sell <<1>> of the item.")
+--
+--
+-- GALLERY
+-- Strings used by pre-made triggers that the player can copy.
+--
+-- Some of these strings are passed to the "Log Message" trigger action. That 
+-- action allows you to specify format codes, like $(name), which will be 
+-- replaced with data about the item being acted on. When translating these 
+-- messages, leave those strings intact.
+--
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME",    "Destroy style materials past one stack, unless withdrawn or purchased")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_MESSAGE", "You have a full stack of $(name) already. Destroying the $(countAdded) that were added.")

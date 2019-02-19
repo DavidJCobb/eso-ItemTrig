@@ -99,7 +99,7 @@ local function serializeTrigger(t)
       if count > 0 then
          local chunk = {}
          for i = 1, count do
-            table.insert(chunk, string.format("%x", t.entryPoints[count]))
+            table.insert(chunk, t.entryPoints[count])
          end
          chunk = table.concat(chunk, ",")
          table.insert(chunks, _toChunk("ep", chunk))
@@ -236,7 +236,7 @@ function _Parser:_parseTrigger(s)
          local count = table.getn(list)
          if count > 0 then
             for i = 1, count do
-               table.insert(t.entryPoints, tonumber(list[i], 16))
+               table.insert(t.entryPoints, list[i])
             end
          end
       else

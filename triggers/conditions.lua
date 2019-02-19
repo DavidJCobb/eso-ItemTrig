@@ -324,13 +324,35 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local name = tostring(context.name)
+         local name = zo_strformat("<<1>>", tostring(context.name))
          local stub = tostring(args[1] or "")
          if args[2] then
             return name:find(stub) ~= nil
          else
             return name:lower() == stub:lower()
          end
+      end
+   ),
+   [13] = ConditionBase:new( -- Can Be Researched
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CANBERESEARCHED),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CANBERESEARCHED),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CANBERESEARCHED_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CANBERESEARCHED_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local researchable = context.isResearchable
+         if args[1] then
+            return researchable
+         end
+         return not researchable
       end
    ),
 }

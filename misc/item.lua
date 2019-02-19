@@ -204,7 +204,9 @@ end
 ]]--
 
 local _lazyGetterMappings = {
-   countTotal = function(i) return GetItemTotalCount(i.bag, i.slot) end,
+   countTotal     = function(i) return i.invalid and nil or GetItemTotalCount(i.bag, i.slot) end,
+   formattedName  = function(i) return LocalizeString("<<1>>", i.name) end,
+   isResearchable = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
 }
 
 ItemInterface.meta = {
@@ -220,9 +222,6 @@ ItemInterface.meta = {
             return value
          end
          if _lazyGetterMappings[key] then
-            if _safe_thiscall("isInvalid") then
-               return nil
-            end
             --
             -- Handle properties that are only stored on demand.
             --
@@ -233,11 +232,12 @@ ItemInterface.meta = {
       end,
 }
 do -- define failure reasons for member functions
-   ItemInterface.FAILURE_CANNOT_SPLIT_STACK    = 0x53504C54 -- "SPLT"
-   ItemInterface.FAILURE_ITEM_IS_INVALID       = 0x494E5641 -- "INVA"
-   ItemInterface.FAILURE_ITEM_IS_LOCKED        = 0x4C4F434B -- "LOCK"
-   ItemInterface.FAILURE_MOD_NOT_SETUP         = 0x4E4F5045 -- "NOPE"
-   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT = 0x5A4C4E44 -- "ZLND"
+   ItemInterface.FAILURE_CANNOT_DECONSTRUCT    = "DCON"
+   ItemInterface.FAILURE_CANNOT_SPLIT_STACK    = "SPLT"
+   ItemInterface.FAILURE_ITEM_IS_INVALID       = "INVA"
+   ItemInterface.FAILURE_ITEM_IS_LOCKED        = "LOCK"
+   ItemInterface.FAILURE_MOD_NOT_SETUP         = "NOPE"
+   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT = "ZLND"
 end
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self.meta)
@@ -255,7 +255,7 @@ function ItemInterface:new(bagIndex, slotIndex)
       countTotal    = nil, -- lazy getter, via metatable
       creator       = GetItemCreatorName(bagIndex, slotIndex),
       level         = GetItemLevel(bagIndex, slotIndex),
-      name          = GetItemName(bagIndex, slotIndex),
+      name          = GetItemName(bagIndex, slotIndex), -- NOTE: This is a raw value and may have LocalizeString-intended format codes on the end.
       --quality       = GetItemQuality(bagIndex, slotIndex),
       requiredChamp = GetItemRequiredChampionPoints(bagIndex, slotIndex),
       requiredLevel = GetItemRequiredLevel(bagIndex, slotIndex),
@@ -279,11 +279,6 @@ function ItemInterface:new(bagIndex, slotIndex)
          totalCraftBag = craftBag,
       })
    end
-   --[[do -- link-dependent information
-      ItemTrig.assign(result, {
-         name = GetItemLinkName(result.link), -- returned value sometimes has weird codes on the end, e.g. "Iron Armor^n"
-      })
-   end]]--
    do -- GetItemCraftingInfo
       local craftingSkill, itemType, c1, c2, c3 = GetItemCraftingInfo(bagIndex, slotIndex)
       ItemTrig.assign(result, {
@@ -324,6 +319,23 @@ function ItemInterface:canBeJunk()
    end
    return self.canBeJunk
 end
+function ItemInterface:deconstruct()
+   do -- fail if this item can't be deconstructed
+      local canDecon = {
+         CRAFTING_TYPE_BLACKSMITHING,
+         CRAFTING_TYPE_CLOTHIER,
+         CRAFTING_TYPE_ENCHANTING,
+         CRAFTING_TYPE_JEWELRYCRAFTING,
+         CRAFTING_TYPE_WOODWORKING,
+      }
+      if not ItemTrig.indexOf(canDecon, self.craftingSkill) then
+         return
+      end
+   end
+   ExtractOrRefineSmithingItem(self.bag, self.slot)
+   self.invalid   = true
+   self.destroyed = true
+end
 function ItemInterface:destroy(count)
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
@@ -335,6 +347,7 @@ function ItemInterface:destroy(count)
       DestroyItem(self.bag, self.slot)
       self.destroyed = true
       self.invalid   = true
+      self:updateCount(-self.count)
    else
       if count == 0 then -- don't even bother, lol
          return true
