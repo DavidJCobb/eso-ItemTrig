@@ -1,6 +1,6 @@
 if not ItemTrig then return end
 
--- Dark theme
+-- Dark theme (out of date; missing needed fields)
 --
 ItemTrig.theme = {
    WINDOW_BORDER_COLOR         = { 140/255, 140/255, 140/255, 1 },

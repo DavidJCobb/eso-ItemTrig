@@ -19,7 +19,18 @@ function ItemTrig.perfTestEnd()
    _perfteststart = nil
    return done - start
 end
+
 function ItemTrig.wait(ms)
+   --
+   -- There isn't *much* utility to this function. The UI will hang for however 
+   -- long you force a wait; the game doesn't continue "underneath" the wait. 
+   -- If you want to have something run later without jamming up the game, use 
+   -- zo_callLater.
+   --
+   -- I guess if you were to find a good event to use, you could call this 
+   -- function to create a hitstop effect? I'm mainly just keeping it here as 
+   -- an excuse to document why it's not terribly useful.
+   --
    local final = GetGameTimeMilliseconds() + ms
    while GetGameTimeMilliseconds() < final do end
 end

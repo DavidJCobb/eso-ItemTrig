@@ -146,7 +146,10 @@ function WinCls:_construct()
          fragment = nil,
          pane     = nil,
       },
-      lastTriggerList = nil,
+      filters = {
+         entryPoints = {},
+      },
+      currentTriggerList = nil,
       keybinds = {
          alignment = KEYBIND_STRIP_ALIGN_CENTER,
          {
@@ -164,24 +167,78 @@ function WinCls:_construct()
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
       SCENE_MANAGER:RegisterTopLevel(control, false)
    end
+   do -- entry point filter list
+      local pane = ItemTrig.UI.WScrollSelectList:cast(self:controlByPath("Body", "Col1"))
+      self.ui.entryPointFilterPane = pane
+      --
+      do -- config
+         pane.onChange =
+            function(pane)
+               WinCls:getInstance():onEntryPointFilterChange()
+            end
+         --
+         pane:setShouldSort(true, false)
+         pane:setSortFunction(function(a, b)
+            if not a.entryPoint then
+               return true
+            end
+            if not b.entryPoint then
+               return false
+            end
+            return tostring(a.name or a):lower() < tostring(b.name or b):lower()
+         end, false)
+         --
+         pane.element.template = "ItemTrig_TrigEdit_Template_EntryPointFilterItem"
+         pane.element.toConstruct =
+            function(control, data, extra)
+               local text = GetControl(control, "Text")
+               local back = GetControl(control, "Bg")
+               text:SetText(data.name)
+               if extra and extra.selected then
+                  back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT))
+                  text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_SELECTED))
+               else
+                  back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
+                  text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+               end
+            end
+         pane.element.onSelect =
+            function(index, control, pane)
+               local text = GetControl(control, "Text")
+               local back = GetControl(control, "Bg")
+               back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT))
+               text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_SELECTED))
+            end
+         pane.element.onDeselect =
+            function(index, control, pane)
+               local text = GetControl(control, "Text")
+               local back = GetControl(control, "Bg")
+               back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
+               text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+            end
+      end
+      do -- items
+         for k, v in pairs(ItemTrig.ENTRY_POINT_NAMES) do
+            pane:push({ name = v, entryPoint = k }, false)
+         end
+         pane:push({ name = GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_FILTER_SHOW_ALL), entryPoint = nil }, false)
+         pane:sort()
+         pane:redraw()
+      end
+   end
    do -- Set up trigger list view
-      local scrollPane = self:GetNamedChild("Body"):GetNamedChild("Col2")
+      local scrollPane = self:controlByPath("Body", "Col2")
       scrollPane = ItemTrig.UI.WScrollSelectList:cast(scrollPane)
       self.ui.pane = scrollPane
-      --[[--
-      scrollPane.paddingSides        = 7
-      scrollPane.paddingStart        = 7
-      scrollPane.paddingBetween      = 7
-      scrollPane.paddingEnd          = 7
-      --]]--
       scrollPane.element.template    = "ItemTrig_TrigEdit_Template_TriggerOuter"
       scrollPane.element.toConstruct =
          function(control, data, extra)
-            local widget = ItemTrig.UI.TriggerListEntry:cast(control)
+            local widget =  ItemTrig.UI.TriggerListEntry:cast(control)
+            local trigger = data.trigger
             widget:setSelected(extra and extra.selected)
-            widget:setText(data.name, data:getDescription())
-            widget:setEnabled(data.enabled)
-            widget:renderContents(data)
+            widget:setText(trigger.name, trigger:getDescription())
+            widget:setEnabled(trigger.enabled)
+            widget:renderContents(trigger)
          end
       scrollPane.element.onSelect =
          function(index, control, pane)
@@ -193,9 +250,10 @@ function WinCls:_construct()
          end
       scrollPane.element.onDoubleClick =
          function(index, control, pane)
-            local trigger = pane.listItems[index]
+            local editor  = WinCls:getInstance()
+            local trigger = editor:getTriggerByPaneIndex(index)
             if trigger then
-               WinCls:getInstance():editTrigger(trigger)
+               editor:editTrigger(trigger)
             end
          end
    end
@@ -203,6 +261,7 @@ end
 
 function WinCls:onShow()
    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybinds)
+   self.ui.entryPointFilterPane:select(1)
    self:renderTriggers(ItemTrig.Savedata.triggers)
 end
 function WinCls:onHide()
@@ -213,6 +272,64 @@ function WinCls:onResizeFrame()
    self.ui.pane:redraw()
 end
 
+function WinCls:onEntryPointFilterChange()
+   local selectedTrigger = self:getTriggerByPaneIndex()
+   --
+   local pane = self.ui.entryPointFilterPane
+   self.filters.entryPoints = {}
+   local data = pane:getSelectedItems()
+   if data.entryPoint then
+      self.filters.entryPoints = { data.entryPoint }
+   end
+   self:refresh()
+   --
+   local triggerIndex = self:getPaneIndexForTrigger(selectedTrigger)
+   if triggerIndex then
+      pane:select(triggerIndex)
+      pane:scrollToItem(triggerIndex, false, true)
+   end
+end
+
+--
+-- The trigger list can be filtered, which means that not all triggers 
+-- in the current trigger list will be visible, and the indices of data 
+-- items in the list pane will not match the indices of triggers in the 
+-- current trigger list.
+--
+-- To work around this, the list pane no longer stores the triggers dir-
+-- ectly; instead, it stores data objects that look like this:
+--
+--    { trigger = ..., triggerIndex = ... }
+--
+-- This means that in order to retrieve a trigger from the list pane, or 
+-- find a trigger's index in the list pane, we need helper functions.
+--
+function WinCls:getTriggerByPaneIndex(index)
+   local pane = self.ui.pane
+   if not index then
+      index = pane:getFirstSelectedIndex()
+      if not index then
+         return nil
+      end
+   end
+   local data = pane:at(index)
+   if not data then
+      return nil
+   end
+   return data.trigger, data.triggerIndex
+end
+function WinCls:getPaneIndexForTrigger(trigger)
+   local pane  = self.ui.pane
+   local index = nil
+   pane:forEach(function(i, data)
+      if data.trigger == trigger then
+         index = i
+         return true
+      end
+   end)
+   return index
+end
+
 function WinCls:newTrigger()
    local editor  = ItemTrig.windows.triggerEdit
    local trigger = ItemTrig.Trigger:new()
@@ -221,23 +338,31 @@ function WinCls:newTrigger()
       function()
          local win  = WinCls:getInstance()
          local pane = win.ui.pane
-         local i    = pane:getFirstSelectedIndex()
+         local _, i = self:getTriggerByPaneIndex()
          if i == nil then
-            table.insert(self.lastTriggerList, trigger)
+            table.insert(self.currentTriggerList, trigger)
          else
-            table.insert(self.lastTriggerList, i + 1, trigger)
+            table.insert(self.currentTriggerList, i + 1, trigger)
          end
          self:refresh()
-         pane:select(trigger)
-         pane:scrollToItem(pane:indexOf(trigger), true, true)
+         do
+            local paneIndex = self:getPaneIndexForTrigger(trigger)
+            --
+            -- If the trigger's entry points don't match our filter, then 
+            -- it may not be visible.
+            --
+            if paneIndex then
+               pane:select(paneIndex)
+               pane:scrollToItem(paneIndex, true, true)
+            end
+         end
       end
    )
 end
 function WinCls:editTrigger(trigger)
    local editor = ItemTrig.windows.triggerEdit
    if not trigger then
-      local pane = self.ui.pane
-      trigger = pane:at(pane:getFirstSelectedIndex())
+      trigger = self:getTriggerByPaneIndex()
       if not trigger then
          return
       end
@@ -245,49 +370,80 @@ function WinCls:editTrigger(trigger)
    editor:requestEdit(self, trigger, false, true):done(self.refresh, self)
 end
 function WinCls:moveSelectedTrigger(direction)
-   local list = self.lastTriggerList
-   local pane = self.ui.pane
-   local i    = pane:getFirstSelectedIndex()
-   if (not i) or direction == 0 then
+   if direction == 0 then
       return
    end
+   local list      = self.currentTriggerList
+   local pane      = self.ui.pane
+   local paneIndex = pane:getFirstSelectedIndex()
+   --
+   local trigger, i = self:getTriggerByPaneIndex(paneIndex)
+   if not i then
+      return
+   end
+   local _, j = self:getTriggerByPaneIndex(paneIndex + direction)
+   if not j then
+      return
+   end
+   --
    if direction > 0 then
-      if not ItemTrig.swapForward(list, i) then
-         return -- trigger was already at the end of the list, and was not moved
+      if not ItemTrig.moveToAfter(list, i, j) then
+         return
       end
    elseif direction < 0 then
-      if not ItemTrig.swapBackward(list, i) then
-         return -- trigger was already at the start of the list, and was not moved
+      if not ItemTrig.moveToBefore(list, i, j) then
+         return
       end
    end
+   --
    self:refresh()
-   pane:select(i + direction)
-   pane:scrollToItem(i + direction, false, true) -- when triggers are big, reordering them can move the selection out of view
+   local final = self:getPaneIndexForTrigger(trigger)
+   if final then
+      pane:select(final)
+      pane:scrollToItem(final, false, true) -- when triggers are big, reordering them can move the selection out of view
+   end
 end
 function WinCls:deleteSelectedTrigger()
-   local index = self.ui.pane:getFirstSelectedIndex()
+   local paneIndex          = self.ui.pane:getFirstSelectedIndex()
+   local trigger, listIndex = self:getPaneIndexForTrigger(trigger)
    deferred = self:showModal(ItemTrig.windows.genericConfirm, {
       text = GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_CONFIRM_DELETE),
       showCloseButton = false
    }):done(
       function(w)
-         table.remove(w.lastTriggerList, index)
-         w.ui.pane:remove(index)
+         table.remove(w.currentTriggerList, listIndex)
+         w.ui.pane:remove(paneIndex)
       end,
       self
    )
 end
 
+function WinCls:shouldShowTrigger(trigger)
+   local filters = self.filters.entryPoints
+   local count   = table.getn(filters)
+   if count < 1 then
+      return true
+   end
+   for i = 1, count do
+      if trigger:allowsEntryPoint(filters[i]) then
+         return true
+      end
+   end
+   return false
+end
 function WinCls:renderTriggers(tList)
-   self.lastTriggerList = tList
+   self.currentTriggerList = tList
    self:refresh()
 end
 function WinCls:refresh()
-   local tList = self.lastTriggerList or {}
+   local tList = self.currentTriggerList or {}
    local scrollPane = self.ui.pane
    scrollPane:clear(false)
    for i = 1, table.getn(tList) do
-      scrollPane:push(tList[i], false)
+      local trigger = tList[i]
+      if self:shouldShowTrigger(trigger) then
+         scrollPane:push({ trigger = trigger, triggerIndex = i }, false)
+      end
    end
    scrollPane:redraw()
 end

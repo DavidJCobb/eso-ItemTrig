@@ -192,9 +192,22 @@ local function Initialize()
          end
          --
          do -- trigger entry points
+            local function _itemShouldRunTriggers(item)
+               --
+               -- TODO: Return false for quest items.
+               --
+               if item.locked then -- TODO: Make this a pref.
+                  return false
+               end
+               --
+               -- TODO: Pref to return false for Crown Store and Crown Crate items, 
+               -- to exclude them from triggers.
+               --
+               return true
+            end
             local function _processInventory(entryPoint, entryPointData)
                ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
-                  if item.locked then
+                  if not _itemShouldRunTriggers(item) then
                      return
                   end
                   item.entryPointData = entryPointData
@@ -220,7 +233,7 @@ local function Initialize()
                   end)
                   for i = 1, table.getn(list) do
                      local item = list[i]
-                     if not item.locked then
+                     if _itemShouldRunTriggers(item) then
                         item.entryPointData = {}
                         ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_FENCE, item)
                      end

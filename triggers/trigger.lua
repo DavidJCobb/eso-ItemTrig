@@ -27,7 +27,7 @@ function ItemTrig.filterTriggerList(list, entryPoint)
    local mapping  = {} -- list[mapping[i]] == filtered[i]
    for i = 1, table.getn(list) do
       local trigger = list[i]
-      if ItemTrig.indexOf(trigger.entryPoints, entryPoint) then
+      if trigger:allowsEntryPoint(entryPoint) then
          table.insert(filtered, trigger)
          table.insert(mapping,  i)
       end
@@ -135,6 +135,9 @@ function ItemTrig.Trigger:copyAssign(other, deep)
       self.state      = other.state
    end
 end
+function ItemTrig.Trigger:allowsEntryPoint(entryPoint)
+   return not not ItemTrig.indexOf(self.entryPoints, entryPoint)
+end
 function ItemTrig.Trigger:getDescription()
    --
    -- If a trigger's first condition or action is a comment, then 
@@ -240,12 +243,6 @@ function ItemTrig.Trigger:exec(context, entryPoint)
          return r
       end
       if r == ItemTrig.OPCODE_FAILED then
-         --
-         -- TODO: option to log when a trigger halts due to a failed opcode. 
-         -- The (extra) variable should be a table that *may* have a "why" 
-         -- field whose string value is a human-readable clarification on 
-         -- why the opcode failed.
-         --
          return r, extra
       end
    end

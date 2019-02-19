@@ -271,30 +271,9 @@ function WinCls:_construct()
       combobox:multiSelect(true)
       combobox:setShouldSort(true, false)
       combobox.emptyText = GetString(ITEMTRIG_STRING_ENTRYPOINT_NONE_SELECTED)
-      combobox:push(
-         {
-            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_BARTER),
-            value = ItemTrig.ENTRY_POINT_BARTER
-         }, false
-      )
-      combobox:push(
-         {
-            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_CRAFTING),
-            value = ItemTrig.ENTRY_POINT_CRAFTING
-         }, false
-      )
-      combobox:push(
-         {
-            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_FENCE),
-            value = ItemTrig.ENTRY_POINT_FENCE
-         }, false
-      )
-      combobox:push(
-         {
-            name  = GetString(ITEMTRIG_STRING_ENTRYPOINT_ITEM_ADDED),
-            value = ItemTrig.ENTRY_POINT_ITEM_ADDED
-         }, false
-      )
+      for k, v in pairs(ItemTrig.ENTRY_POINT_NAMES) do
+         combobox:push({ name  = v, value = k }, false)
+      end
       combobox:redraw()
    end
    do

@@ -71,6 +71,10 @@ do
    -- file needs to split a stack or even just find an empty bag slot, it should 
    -- rely on StackTools:split(...) and StackTools:findFreeSlot(...).
    --
+   -- An add-on using this system must call the setup(...) method once loaded, so 
+   -- that this system registers the events it needs in order to function. If the 
+   -- add-on has teardown routines, it can likewise call the teardown() method.
+   --
    local function _listener(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
       local bagData = StackTools.pendingSplits[bagIndex]
       if not bagData then

@@ -127,6 +127,34 @@ function ItemTrig.hasCyclicalReferences(tablevar, options)
    _cleanup()
    return false
 end
+function ItemTrig.moveToAfter(tablevar, i, target)
+   if i > target then
+      target = target + 1
+   end
+   if target > table.getn(tablevar) then
+      return nil
+   end
+   local element = tablevar[i]
+   table.remove(tablevar, i)
+   table.insert(tablevar, target, element)
+   return target + 1
+end
+function ItemTrig.moveToBefore(tablevar, i, target)
+   if target < 1 then
+      return nil
+   end
+   local element = tablevar[i]
+   if i < target then
+      table.remove(tablevar, i)
+      table.insert(tablevar, target - 1, element)
+      return target - 1
+   elseif i > target then
+      table.remove(tablevar, i)
+      table.insert(tablevar, target, element)
+      return target
+   end
+   return nil
+end
 function ItemTrig.remove(tablevar, x)
    if type(x) == "number" then -- remove at index
       tablevar[x] = nil

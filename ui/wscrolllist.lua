@@ -375,6 +375,9 @@ function WScrollList:redraw(options)
          total = self.listItemStates[count].bottom or 0
       end
       self.scrollMax = total
+      if self.scrollTop + viewEnd > self.scrollMax then
+         self.scrollTop = 0
+      end
    end
    self.dirty     = false
    self:_updateScrollbar(total)

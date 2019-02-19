@@ -164,6 +164,23 @@ function WScrollSelectList:deselectAll()
    end
    self:onChange()
 end
+function WScrollSelectList:forEachSelected(functor)
+   local s = self.selection
+   if s.multi then
+      s.index:forEach(function(i)
+         local data = self.listItems[i]
+         if functor(i, data) then
+            return true
+         end
+      end)
+   else
+      local i = s.index
+      if not i then
+         return
+      end
+      functor(i, self.listItems[i])
+   end
+end
 function WScrollSelectList:getFirstSelectedIndex()
    if not self:hasSelection() then
       return nil

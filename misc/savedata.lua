@@ -27,7 +27,13 @@ ItemTrig.ISavedata = ISavedataForAccount
    
    A usage example:
    
+      --
+      -- Declare our savedata variable, an optional namespace to nest things 
+      -- under (insert "yo dawg" meme for variables here), and the current 
+      -- data version.
+      --
       local savedata = ISavedataForAccount("MyVarName", nil, 3)
+      
       savedVars:addUpdateRoutine(function(cdata, version)
          if version < 2 then
             -- do your updates here
@@ -43,12 +49,21 @@ ItemTrig.ISavedata = ISavedataForAccount
       
       savedata.defaults = { foo = "bar" }
       
+      --
+      -- Let's operate on the saved data for a character!
+      --
       local cdata = savedata:character() -- no arg means current character ID
+      cdata:tryUpdateRoutine() -- if it's out of date, update it!
       d(cdata:data().foo) -- "bar"
+      d(cdata.name) -- "John Zenimax"
       
       local allChars = savedata:characterIDs() -- returns an array
       
+      --
+      -- You can store account-wide data, too.
+      --
       local adata = savedata:accountWide()
+      adata:tryUpdateRoutine() -- if it's out of date, update it!
       d(adata:data().foo) -- "bar"
 --]]--
 
