@@ -79,7 +79,10 @@ function ItemTrig.indexOf(tablevar, e)
 end
 function ItemTrig.hasCyclicalReferences(tablevar, options)
    --
-   -- NOTE: Function is not thread-safe.
+   -- NOTE: Function is not thread-safe (shouldn't be a concern in 
+   -- ESO UI, unless maybe when zo_callLater enters the picture).
+   --
+   -- NOTE: Function is untested.
    --
    local KEY_IS_WALKED = " cyclical check has walked here " -- spaces in the key name make it unlikely for anyone to use it
    local function _cleanup()

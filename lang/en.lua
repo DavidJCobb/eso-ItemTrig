@@ -46,6 +46,24 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_CANCEL", "Cancel")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES", "Are you sure you want to discard your unsaved changes?")
 --
 --
+-- GAME
+--
+-- Some of Zenimax's localized strings are confusable. For example, in 
+-- the English localization, the string "Raw Material" is used to refer 
+-- to raw materials in general, but also to specific raw material types 
+-- that exist for each crafting skill.
+--
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATCLOTHING",    "Raw Material, Clothier")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATJEWELRY",     "Raw Material, Jewelry")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATSMITHING",    "Raw Material, Blacksmithing")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATWOODWORKING", "Raw Material, Woodworking")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATCLOTHING",    "Refined Material, Clothier")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATJEWELRY",     "Refined Material, Jewelry")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATSMITHING",    "Refined Material, Blacksmithing")
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATWOODWORKING", "Refined Material, Woodworking")
+--
+--
 -- SYSTEM
 --
 --
