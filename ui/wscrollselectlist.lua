@@ -2,6 +2,12 @@ if not (ItemTrig and ItemTrig.UI) then return end
 
 local Set = ItemTrig.Set
 
+--
+-- A variation on WScrollList that allows you to select and 
+-- deselect the list items. An option is provided for multi-
+-- selection.
+--
+
 ItemTrig.UI.WScrollSelectList = ItemTrig.UI.WScrollList:makeSubclass("WScrollSelectList")
 local WScrollSelectList = ItemTrig.UI.WScrollSelectList
 function WScrollSelectList:_construct(options)

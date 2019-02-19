@@ -11,6 +11,10 @@ if not (ItemTrig and ItemTrig.UI) then return end
 -- reference  to the wrapper, you can quickly  and easily  call 
 -- its methods.
 --
+-- Moreover, this class differs from Zenimax's "scrolling list" 
+-- control in that it lets list items have varying heights, and 
+-- it scrolls by pixels instead of by whole list items.
+--
 -- Call this to set up a control:
 --
 --    local widget = ItemTrig.UI.WScrollList:install(control)

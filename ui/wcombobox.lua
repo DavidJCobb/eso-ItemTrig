@@ -1,5 +1,11 @@
 if not (ItemTrig and ItemTrig.UI) then return end
 
+--
+-- A class for drop-down menus. Under the hood, this relies on 
+-- WScrollSelectList both to store list items and for the bulk 
+-- of its other functionality.
+--
+
 local function _comboboxFromPane(pane)
    if type(pane) == "table" then
       pane = pane:asControl()
