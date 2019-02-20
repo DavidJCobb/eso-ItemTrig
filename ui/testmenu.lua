@@ -78,7 +78,6 @@ SLASH_COMMANDS["/cobbshowtestmenu"] =
       ItemTrig.WClassTestMenu:getInstance():show()
    end
 function ItemTrig.WClassTestMenu:_construct()
-   self:callSuper("_construct")
    local control  = self:asControl()
    self:setTitle("Test menu for WClass and WWindow")
    local fragment = ZO_SimpleSceneFragment:New(control)
@@ -138,7 +137,6 @@ end
 
 ItemTrig.WClassTestConfirm = ItemTrig.UI.WWindow:makeSubclass("WClassTestMenu")
 function ItemTrig.WClassTestConfirm:_construct()
-   self:callSuper("_construct")
    self:setTitle("Confirmation dialog example")
    self.result = nil
    local control  = self:asControl()

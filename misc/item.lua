@@ -205,12 +205,27 @@ end
 
 local _lazyGetterMappings = {
    countTotal     = function(i) return i.invalid and nil or GetItemTotalCount(i.bag, i.slot) end,
+   forcedNonDeconstructable =
+      function(i)
+         if i.invalid then
+            return nil
+         end
+         --
+         -- This is the check used to show the "this item cannot be 
+         -- deconstructed" message in item tooltips -- most relevant 
+         -- to jewelry that existed prior to the Summerset update, I 
+         -- think. This check was, as of this writing, found at:
+         --
+         -- esoui/publicallingames/tooltip/itemtooltips.lua
+         --
+         return IsItemLinkForcedNotDeconstructable(i.link) and not IsItemLinkContainer(i.link)
+      end,
    formattedName  = function(i) return LocalizeString("<<1>>", i.name) end,
    isResearchable = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
+   itemFilters    = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
 }
 
 ItemInterface.meta = {
-   --_index = ItemInterface,
    __index =
       function(interface, key)
          local function _safe_thiscall(method, ...)
@@ -253,7 +268,7 @@ function ItemInterface:new(bagIndex, slotIndex)
       armorType     = GetItemArmorType(bagIndex, slotIndex),
       bound         = IsItemBound(bagIndex, slotIndex),
       countTotal    = nil, -- lazy getter, via metatable
-      creator       = GetItemCreatorName(bagIndex, slotIndex),
+      creator       = GetItemCreatorName(bagIndex, slotIndex) or "",
       level         = GetItemLevel(bagIndex, slotIndex),
       name          = GetItemName(bagIndex, slotIndex), -- NOTE: This is a raw value and may have LocalizeString-intended format codes on the end.
       --quality       = GetItemQuality(bagIndex, slotIndex),
@@ -319,22 +334,56 @@ function ItemInterface:canBeJunk()
    end
    return self.canBeJunk
 end
-function ItemInterface:deconstruct()
-   do -- fail if this item can't be deconstructed
-      local canDecon = {
-         CRAFTING_TYPE_BLACKSMITHING,
-         CRAFTING_TYPE_CLOTHIER,
-         CRAFTING_TYPE_ENCHANTING,
-         CRAFTING_TYPE_JEWELRYCRAFTING,
-         CRAFTING_TYPE_WOODWORKING,
-      }
-      if not ItemTrig.indexOf(canDecon, self.craftingSkill) then
-         return
+function ItemInterface:canDeconstruct()
+   if self.craftingType == ITEMTYPE_GLYPH_WEAPON
+   or self.craftingType == ITEMTYPE_GLYPH_ARMOR
+   or self.craftingType == ITEMTYPE_GLYPH_JEWELRY
+   then
+      --
+      -- As of this writing, the item types eligible for enchanting 
+      -- deconstruction can be found at:
+      --
+      -- esoui/ingame/crafting/keyboard/enchanting_keyboard.lua
+      --
+      -- in the file-local function DoesEnchantingItemPassFilter.
+      --
+      return not self.forcedNonDeconstructable -- deconstructable glyph
+   end
+   local filters = self.itemFilters
+   for i = 1, #filters do
+      local f = filters[i]
+      if f == ITEMFILTERTYPE_WEAPONS
+      or f == ITEMFILTERTYPE_ARMOR
+      or f == ITEMFILTERTYPE_JEWELRY
+      then
+         --
+         -- As of this writing, the filters that make an item eligible for 
+         -- being listed in the "smithing" menu can be found at:
+         --
+         -- esoui/ingame/crafting/craftingutils.lua
+         --
+         -- It's worth noting that internally, "smithing" covers blacksmith-
+         -- ing, clothier work, jeweling, and woodworking.
+         --
+         return not self.forcedNonDeconstructable
       end
+   end
+   return false
+end
+function ItemInterface:deconstruct()
+   if self:isInvalid() then
+      return false, self.FAILURE_ITEM_IS_INVALID
+   end
+   if self.locked then
+      return false, self.FAILURE_ITEM_IS_LOCKED
+   end
+   if not self:canDeconstruct() then
+      return false, self.FAILURE_CANNOT_DECONSTRUCT
    end
    ExtractOrRefineSmithingItem(self.bag, self.slot)
    self.invalid   = true
    self.destroyed = true
+   return true
 end
 function ItemInterface:destroy(count)
    if self:isInvalid() then

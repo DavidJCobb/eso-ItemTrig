@@ -222,7 +222,7 @@ function ItemTrig.Opcode:clone(deep)
    result.type = self.type
    do -- clone args
       local baseArgs = self.base.args
-      for i = 1, table.getn(self.args) do
+      for i = 1, #self.args do
          local a = self.args[i]
          if type(a) == "table" then
             if baseArgs[i].type == "trigger" then
@@ -253,7 +253,7 @@ function ItemTrig.Opcode:copyAssign(other, deep)
    if deep then
       ZO_ClearNumericallyIndexedTable(self.args)
       --
-      for i = 1, table.getn(other.args) do
+      for i = 1, #other.args do
          local a = other.args[i]
          if type(a) == "table" then
             if self.base.args[i].type == "trigger" then
@@ -300,7 +300,7 @@ function ItemTrig.Opcode:isArgumentEffortful(i, change)
    return false
 end
 function ItemTrig.Opcode:isEffortful()
-   for i = 1, table.getn(self.base.args) do
+   for i = 1, #self.base.args do
       if self:isArgumentEffortful(i) then
          return true
       end
@@ -314,7 +314,7 @@ function ItemTrig.Opcode:resetArgs()
    end
    self.args = {}
    local baseArgs = self.base.args
-   for i = 1, table.getn(baseArgs) do
+   for i = 1, #baseArgs do
       self.args[i] = self.base:getArgumentDefaultValue(i)
    end
 end
@@ -322,7 +322,7 @@ function ItemTrig.Opcode:exec(state, context)
    return self.base.func(state, context, self.args)
 end
 function ItemTrig.Opcode:format(argTransform)
-   local count = table.getn(self.base.args)
+   local count = #self.base.args
    if count == 0 then
       return self.base.format
    end

@@ -324,7 +324,7 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local name = zo_strformat("<<1>>", tostring(context.name))
+         local name = context.formattedName
          local stub = tostring(args[1] or "")
          if args[2] then
             return name:find(stub) ~= nil
@@ -355,8 +355,38 @@ ItemTrig.tableConditions = {
          return not researchable
       end
    ),
+   [14] = ConditionBase:new( -- Creator Name
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CREATORNAME),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CREATORNAME),
+      {
+         [1] = { type = "string", placeholder = "name" },
+         [2] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CREATORNAME_WHOLE),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CREATORNAME_SUBSTRING)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local name = context.creator
+         local stub = tostring(args[1] or "")
+         if args[2] then
+            return name:find(stub) ~= nil
+         else
+            if stub == "$(player)" then
+               --
+               -- TODO: Document this.
+               --
+               stub = GetUnitName("player")
+            end
+            return name:lower() == stub:lower()
+         end
+      end
+   ),
 }
-ItemTrig.countConditions = table.getn(ItemTrig.tableConditions)
+ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do
    ItemTrig.tableConditions[i].opcode = i
 end

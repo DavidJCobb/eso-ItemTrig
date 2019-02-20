@@ -53,7 +53,6 @@ ItemTrig.ISavedata = ISavedataForAccount
       -- Let's operate on the saved data for a character!
       --
       local cdata = savedata:character() -- no arg means current character ID
-      cdata:tryUpdateRoutine() -- if it's out of date, update it!
       d(cdata:data().foo) -- "bar"
       d(cdata.name) -- "John Zenimax"
       
@@ -63,7 +62,6 @@ ItemTrig.ISavedata = ISavedataForAccount
       -- You can store account-wide data, too.
       --
       local adata = savedata:accountWide()
-      adata:tryUpdateRoutine() -- if it's out of date, update it!
       d(adata:data().foo) -- "bar"
 --]]--
 

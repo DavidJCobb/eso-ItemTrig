@@ -13,17 +13,7 @@ ItemTrig = {
       fenceAutoLaunderCount = 0,
       fenceAutoFenceCount   = 0,
    },
-   --[[pendingItemDestroyOperations = {},]]--
 }
-
---[[function ItemTrig:expectItemToDestroy(bag, slot, count, id)
-   table.insert(self.pendingItemDestroyOperations, {
-      bag   = bag,
-      slot  = slot,
-      count = count,
-      id    = id,
-   })
-end]]--
 
 --[[--
    System for handling windows such that the window classes don't need to 
@@ -40,17 +30,7 @@ function ItemTrig:setupWindow(name, control)
 end
 
 local function PerfTest(extra)
-   local testcount = 100
-   if extra ~= "" and extra ~= " " then
-      if tonumber(extra) then
-         testcount = tonumber(extra)
-         if testcount > 1000000 then
-            testcount = 1000000
-         elseif testcount < 0 then
-            testcount = 10
-         end
-      end
-   end
+   local testcount = math.max(1000000, math.min(10, (tonumber(extra) or 100)))
    
    -------------
    
@@ -118,20 +98,6 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
    ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
 end
---[[local function _ActionDestroyFinalize(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
-   local stack   = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
-   local pending = ItemTrig.pendingItemDestroyOperations
-   for i = 1, table.getn(pending) do
-      local op = pending[i]
-      if op.bag == bagIndex and op.slot == slotIndex then
-         if op.id == stack.id and op.count == stack.count then
-            stack:destroy()
-            return
-         end
-         table.remove(pending, i)
-      end
-   end
-end]]--
 
 local function Initialize()
    ItemTrig.Savedata:load()
@@ -151,24 +117,13 @@ local function Initialize()
          return count
       end
    --
-   --[[do -- register handler needed for the "Destroy" action
-      EVENT_MANAGER:RegisterForEvent ("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ActionDestroyFinalize)
-      EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, false)
-      EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
-      EVENT_MANAGER:AddFilterForEvent("ItemTrigActionDestroyCommit", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
-   end]]--
    do -- register item-added handler
       EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
       --
-      -- Some notes:
-      --
-      --  - I'm not sure whether splitting a stack normally fires this 
-      --    event, but it seems our filters are preventing us from 
-      --    responding to stacks being split, which is good. That's 
-      --    what we want: we only want to react to actual new items 
-      --    being added, as opposed to any slot change.
+      -- This event will only fire if an item is added, and splitting a stack 
+      -- doesn't count. Good.
       --
    end
    do -- register open/close handlers for menus that can give us items

@@ -24,7 +24,6 @@ end
    
       ScrollList = ItemTrig.UI.WidgetClass:makeSubclass("ScrollList", "scrollList")
       function ScrollList:_construct()
-         self:callSuper("_construct")
          --
          -- ...
          --
@@ -41,7 +40,6 @@ end
       
       ScrollSelectList = ScrollList:makeSubclass("ScrollSelectList")
       function ScrollSelectList:_construct()
-         self:callSuper("_construct")
          --
          -- ...
          --
@@ -110,6 +108,9 @@ function WClass:install(control, ...)
       -- the metatable; this ensures that if a superclass doesn't define 
       -- its own constructor, we don't call its superclass's constructor 
       -- multiple times.
+      --
+      -- On a related note, you shouldn't call-super constructors, and 
+      -- in fact, we assert if you try.
       --
       local superclasses = {}
       local class = self:getSuperclass()
@@ -183,13 +184,7 @@ function WClass:isNativeObjectConstructed()
    return type(self:asControl()) ~= "string"
 end
 function WClass:callSuper(methodName, ...)
-   if methodName == "_construct" then
-      --
-      -- TODO: log a warning somewhere so we can go and clean this up; 
-      -- older code required you to manually call-super in constructors
-      --
-      return
-   end
+   assert(methodName ~= "_construct", "Don't try to call superclass constructors!")
    local super = self:getInstanceSuperclass()[methodName]
    assert(type(super) == "function", "This method does not exist, or was overridden with a non-function, on the superclass.")
    return super(self, ...)

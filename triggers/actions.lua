@@ -189,14 +189,35 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
-         item:sell(args[1])
+         context:sell(args[1])
       end,
       { -- extra data for this opcode
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_BARTER, ItemTrig.ENTRY_POINT_FENCE }
       }
    ),
+   [9] = ActionBase:new( -- Deconstruct
+      _s(ITEMTRIG_STRING_ACTIONNAME_DECONSTRUCT),
+      _s(ITEMTRIG_STRING_ACTIONDESC_DECONSTRUCT),
+      {},
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result, errorCode = context:deconstruct()
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_ITEM_IS_LOCKED then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED)
+            elseif errorCode == ItemInterface.FAILURE_CANNOT_DECONSTRUCT then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
+         end
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+      }
+   ),
 }
-ItemTrig.countActions = table.getn(ItemTrig.tableActions)
+ItemTrig.countActions = #ItemTrig.tableActions
 for i = 1, ItemTrig.countActions do
    ItemTrig.tableActions[i].opcode = i
 end

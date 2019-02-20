@@ -1,9 +1,8 @@
 if not ItemTrig then return end
 
 function ItemTrig.assign(tablevar, ...)
-   local others = {...}
-   for i = 1, table.getn(others) do
-      local other = others[i]
+   for i = 1, select("#", ...) do
+      local other = select(i, ...)
       if other then
          for k, v in pairs(other) do
             tablevar[k] = v
@@ -13,17 +12,20 @@ function ItemTrig.assign(tablevar, ...)
    return tablevar
 end
 function ItemTrig.assignDeep(tablevar, ...)
-   local others = {...}
-   for i = 1, table.getn(others) do
-      if others[i] then
-         others[i] = ItemTrig.deepCopy(others[i])
+   local others = {}
+   local count  = 1
+   for i = 1, select("#", ...) do
+      local other = select(i, ...)
+      if other then
+         others[count] = ItemTrig.deepCopy(other)
+         count = count + 1
       end
    end
    ItemTrig.assign(tablevar, unpack(others))
    return tablevar
 end
 function ItemTrig.compact(tablevar)
-   for i = 1, table.getn(tablevar) do
+   for i = 1, #tablevar do
       if tablevar[i] == nil then
          tablevar[i] = tablevar[i + 1]
          tablevar[i + 1] = nil
@@ -71,16 +73,13 @@ function ItemTrig.firstIn(tablevar)
    end
 end
 function ItemTrig.indexOf(tablevar, e)
-   for i = 1, table.getn(tablevar) do
+   for i = 1, #tablevar do
       if tablevar[i] == e then
          return i
       end
    end
 end
 function ItemTrig.hasCyclicalReferences(tablevar, options)
-   --
-   -- NOTE: Function is not thread-safe (shouldn't be a concern in 
-   -- ESO UI, unless maybe when zo_callLater enters the picture).
    --
    -- NOTE: Function is untested.
    --
@@ -134,7 +133,7 @@ function ItemTrig.moveToAfter(tablevar, i, target)
    if i > target then
       target = target + 1
    end
-   if target > table.getn(tablevar) then
+   if target > #tablevar then
       return nil
    end
    local element = tablevar[i]
@@ -164,7 +163,7 @@ function ItemTrig.remove(tablevar, x)
       ItemTrig.compact(tablevar)
    elseif type(x) == "function" then
       local changed = false
-      for i = 1, table.getn(tablevar) do
+      for i = 1, #tablevar do
          local test = x(i, tablevar[i])
          if test then
             changed = true
@@ -184,7 +183,7 @@ function ItemTrig.swapBackward(tablevar, i)
    return false
 end
 function ItemTrig.swapForward(tablevar, i)
-   if i + 1 <= table.getn(tablevar) then
+   if i + 1 <= #tablevar then
       ItemTrig.swapIndices(tablevar, i, i + 1)
       return true
    end
