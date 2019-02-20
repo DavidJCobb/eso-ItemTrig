@@ -29,6 +29,15 @@ if not (ItemTrig and ItemTrig.UI) then return end
    these criteria are skipped when rendering, but there is also an option 
    to show a placeholder string (e.g. "...") in place of the first list 
    item to disqualify in a row.
+   
+   Additional allowed keys on list items:
+   
+    - color
+    
+      An array of up to four color components, which can override the normal 
+      list text and bullet colors. If a color component is nil, then the 
+      same component from the default color is used. This allows for selective 
+      overrides, e.g. {nil, nil, nil, 0.8} to override just the alpha.
 ]]--
 
 ItemTrig.UI.WBulletedList = ItemTrig.UI.WidgetClass:makeSubclass("WBulletedList", "bulletedList")
@@ -90,6 +99,9 @@ function WBulletedList:refreshStyle()
    -- affect the size or positioning of any elements; this should be 
    -- cheaper than redrawing the list entirely.
    --
+   -- Note that if any list items have color overrides, those won't 
+   -- be applied here; you need to use redraw() in those cases.
+   --
    local root     = self:asControl()
    local existing = root:GetNumChildren()
    local bulletY  = nil
@@ -124,29 +136,31 @@ function WBulletedList:redraw()
          currentIsBad = true
       end
       local offsetX
-      if self.style.topLevelHasBullet then
-         offsetX = (self.style.indent * (depth - 1))
-      else
-         offsetX = (self.style.indent * (depth - 2))
-         if offsetX < 0 then
-            offsetX = 0
+      do -- Compute list item X-offset, and skip the list item if it's too deep.
+         if self.style.topLevelHasBullet then
+            offsetX = (self.style.indent * (depth - 1))
+         else
+            offsetX = (self.style.indent * (depth - 2))
+            if offsetX < 0 then
+               offsetX = 0
+            end
          end
-      end
-      if self.depthLimit == true and depth > 1 then
-         if self.depthSpace ~= nil then
-            local space = self.depthSpace
-            currentIsBad = (width - offsetX) < self.depthSpace
-         elseif offsetX > (width / 2) then
-            currentIsBad = true
+         if self.depthLimit == true and depth > 1 then
+            if self.depthSpace ~= nil then
+               local space = self.depthSpace
+               currentIsBad = (width - offsetX) < self.depthSpace
+            elseif offsetX > (width / 2) then
+               currentIsBad = true
+            end
          end
-      end
-      if currentIsBad then
-         badCount = badCount + 1
-         if badCount > badAllowed then
-            return
+         if currentIsBad then
+            badCount = badCount + 1
+            if badCount > badAllowed then
+               return
+            end
+         else
+            badCount = 0
          end
-      else
-         badCount = 0
       end
       --
       local child
@@ -174,8 +188,20 @@ function WBulletedList:redraw()
       --
       do -- style
          text:SetFont(self.style.font)
-         text:SetColor(unpack(self.style.fontColor))
-         bullet:SetColor(unpack(self.style.bulletColor))
+         do
+            local fColor = self.style.fontColor
+            local bColor = self.style.bulletColor
+            if item.color and type(item.color) == "table" then
+               fColor = {unpack(fColor)}
+               bColor = {unpack(bColor)}
+               for i = 1, 4 do
+                  fColor[i] = item.color[i] or fColor[i]
+                  bColor[i] = item.color[i] or bColor[i]
+               end
+            end
+            text:SetColor(unpack(fColor))
+            bullet:SetColor(unpack(bColor))
+         end
          if bulletY == nil then
             local lineHeight = text:GetFontHeight()
             local bullHeight = bullet:GetHeight()

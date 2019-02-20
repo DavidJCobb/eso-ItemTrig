@@ -99,7 +99,7 @@ local function serializeTrigger(t)
       if count > 0 then
          local chunk = {}
          for i = 1, count do
-            table.insert(chunk, t.entryPoints[count])
+            chunk[i] = t.entryPoints[count]
          end
          chunk = table.concat(chunk, ",")
          table.insert(chunks, _toChunk("ep", chunk))
@@ -109,10 +109,10 @@ local function serializeTrigger(t)
       local c = {}
       local a = {}
       for i = 1, #t.conditions do
-         table.insert(c, t.conditions[i]:serialize())
+         c[i] = t.conditions[i]:serialize()
       end
       for i = 1, #t.actions do
-         table.insert(a, t.actions[i]:serialize())
+         a[i] = t.actions[i]:serialize()
       end
       table.insert(chunks, _toChunk("c", table.concat(c, "")))
       table.insert(chunks, _toChunk("a", table.concat(a, "")))

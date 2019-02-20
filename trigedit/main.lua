@@ -95,32 +95,36 @@ do -- helper class for trigger list entries
       end
    end
    function TriggerListEntry:renderContents(trigger)
-      local function _triggerToList(trigger)
+      local function _triggerToList(trigger, isNested, color)
          local list = {
-            [1] = { text = "Conditions:" },
-            [2] = { text = "Actions:" },
+            [1] = { color = color, text = "Conditions:" },
+            [2] = { color = color, text = "Actions:" },
          }
          if #trigger.conditions == 0 then
-            list[1].children = { [1] = { text = "[None]" } }
+            list[1].children = { [1] = { color = color, text = "[None]" } }
          else
             local c = {}
             for i = 1, #trigger.conditions do
-               c[i] = { text = trigger.conditions[i]:format() }
+               c[i] = { color = color, text = trigger.conditions[i]:format() }
             end
             list[1].children = c
          end
          if #trigger.actions == 0 then
-            list[2].children = { [1] = { text = "[None]" } }
+            list[2].children = { [1] = { color = color, text = "[None]" } }
          else
             local c = {}
             for i = 1, #trigger.actions do
                local action = trigger.actions[i]
                if action.base == ItemTrig.TRIGGER_ACTION_RUN_NESTED then
-                  local item    = { text = trigger.actions[i]:format() }
-                  item.children = _triggerToList(action.args[1])
+                  local item    = { color = color, text = trigger.actions[i]:format() }
+                  local inColor = color
+                  if not action.args[1].enabled then
+                     inColor = { nil, nil, nil, 0.8 } -- override alpha
+                  end
+                  item.children = _triggerToList(action.args[1], true, inColor)
                   c[i] = item
                else
-                  c[i] = { text = trigger.actions[i]:format() }
+                  c[i] = { color = color, text = trigger.actions[i]:format() }
                end
             end
             list[2].children = c

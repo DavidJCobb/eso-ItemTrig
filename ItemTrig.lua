@@ -29,54 +29,11 @@ function ItemTrig:setupWindow(name, control)
    self.windows[name] = self.windowClasses[name]:install(control)
 end
 
-local function PerfTest(extra)
-   local testcount = math.min(1000000, math.max(10, (tonumber(extra) or 100)))
-   
-   -------------
-   
-   local t = ItemTrig.Trigger:new()
-   t.name = "Test trigger"
-   table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-   table.insert(t.conditions, ItemTrig.Condition:new(2, {true}))  -- Set And/Or
-   table.insert(t.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-   table.insert(t.conditions, ItemTrig.Condition:new(3, {false})) -- Always/Never
-   table.insert(t.actions, ItemTrig.Action:new(2, {"Hello, world!"})) -- Log Message
-   
-   local n = ItemTrig.Trigger:new()
-   n.name = "Nested test trigger"
-   table.insert(n.conditions, ItemTrig.Condition:new(3, {true}))  -- Always/Never
-   table.insert(n.actions, ItemTrig.Action:new(2, {"I am nested!"})) -- Log Message
-   table.insert(n.actions, ItemTrig.Action:new(1)) -- Return
-   
-   table.insert(t.actions, ItemTrig.Action:new(3, {n})) -- Run Nested Trigger
-   table.insert(t.actions, ItemTrig.Action:new(2, {"After nested!"})) -- Log Message
-   
-   -------------
-   
-   local diff
-   ItemTrig.pertTestStart()
-   for i = 1, testcount do
-      s = t:serialize()
-   end
-   diff = ItemTrig.perfTestEnd()
-   CHAT_SYSTEM:AddMessage("Serializating " .. testcount .. " times took " .. diff .. " ms.")
-   --
-   local tparsed
-   s = t:serialize()
-   d(s)
-   ItemTrig.pertTestStart()
-   for i = 1, testcount do
-      tparsed = ItemTrig.parseTrigger(s)
-   end
-   diff = ItemTrig.perfTestEnd()
-   CHAT_SYSTEM:AddMessage("Parsing " .. testcount .. " times took " .. diff .. " ms.")
-end
-
 local function ShowWin()
    ItemTrig.windows.triggerList:show()
 end
 
-local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
+local function _OnItemAdded(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
    if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
       return
    end
@@ -98,127 +55,82 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
    ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
 end
-
-local function _perfTestTableCount(extra)
-   d("-------------------------------")
-   local TEST_COUNT
-   local ARRAY_COUNT
-   do
-      local params = ItemTrig.split(extra or "", " ")
-      local tc = tonumber(params[1])
-      local ac = tonumber(params[2])
-      TEST_COUNT  = math.min(10000000, math.max(700, (tc or 5000)))
-      ARRAY_COUNT = math.min(400, math.max(5, (ac or 15)))
+local function _OnOpenClose(eventCode, ...)
+   ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK -- TODO: IsBankOpen()
+   ItemTrig.eventState.isInBarter    = eventCode == EVENT_OPEN_STORE
+   ItemTrig.eventState.isInCrafting  = eventCode == EVENT_CRAFTING_STATION_INTERACT
+   ItemTrig.eventState.isInFence     = eventCode == EVENT_OPEN_FENCE
+   ItemTrig.eventState.isInGuildBank = eventCode == EVENT_OPEN_GUILD_BANK -- TODO: IsGuildBankOpen()
+   ItemTrig.eventState.isInMail      = eventCode == EVENT_MAIL_OPEN_MAILBOX
+   -- TODO: Can we check "trading" state via TRADE_WINDOW:IsTrading() ?
+   --
+   if eventCode == EVENT_CRAFTING_STATION_INTERACT then
+      ItemTrig.eventState.inCraftingType = select(2, ...) or 0 -- craftSkill
+   else
+      ItemTrig.eventState.inCraftingType = 0
    end
-   local test = {}
-   local lockedTest = {}
-   for i = 1, ARRAY_COUNT do
-      test[i] = i
-      lockedTest[i] = i
+   if eventCode == EVENT_OPEN_FENCE then
+      ItemTrig.eventState.fenceAutoLaunderCount = 0
+      ItemTrig.eventState.fenceAutoFenceCount   = 0
    end
-   do
-      lockedTest[" length"] = #lockedTest
-      setmetatable(lockedTest, {
-         __newindex = function() end,
-         __len = function(t) return t[" length"] end
-      })
-   end
-   do -- bench: table.getn
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         table.getn(test)
+   --
+   do -- trigger entry points
+      local function _itemShouldRunTriggers(item)
+         --
+         -- TODO: Return false for quest items.
+         --
+         if item.locked then -- TODO: Make this a pref.
+            return false
+         end
+         --
+         -- TODO: Pref to return false for Crown Store and Crown Crate items, 
+         -- to exclude them from triggers.
+         --
+         return true
       end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " table.getn calls: " .. delay .. "ms")
-   end
-   do -- bench: #
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local length = #test
+      local function _processInventory(entryPoint, entryPointData)
+         ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
+            if not _itemShouldRunTriggers(item) then
+               return
+            end
+            item.entryPointData = entryPointData
+            ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, entryPoint, item)
+         end)
       end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " # operators: " .. delay .. "ms")
-   end
-   do -- bench: # with frozen array
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local length = #lockedTest
-      end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " # operators on frozen array: " .. delay .. "ms")
-   end
-   do -- bench: field access on frozen array
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local length = lockedTest[" length"]
-      end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " field access on frozen array: " .. delay .. "ms")
-   end
-   if TEST_COUNT > 100000 then
-      return
-   end
-   d("- - - - - - - - - - - - - - - -")
-   do -- bench: iterate normal array using #
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         for i = 1, #test do end
-      end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " iterating array via #: " .. delay .. "ms")
-   end
-   do -- bench: iterate normal array using while
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local i = 1
-         while test[i] ~= nil do
-            i = i + 1
+      --
+      if eventCode == EVENT_CRAFTING_STATION_INTERACT then
+         _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, {
+            craftingSkill = select(2, ...) or 0,
+         })
+      elseif eventCode == EVENT_OPEN_STORE then
+         _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
+      elseif eventCode == EVENT_OPEN_FENCE then
+         if true then -- TODO: Make this a pref: Robust Fencing
+            --
+            -- Sort the items to be processed by their sale value, so that 
+            -- we always launder and fence the most valuable items first.
+            --
+            local list = ItemTrig.bagToInterfaceList(BAG_BACKPACK)
+            table.sort(list, function(a, b)
+               return b.sellValue < a.sellValue
+            end)
+            for i = 1, table.getn(list) do
+               local item = list[i]
+               if _itemShouldRunTriggers(item) then
+                  item.entryPointData = {}
+                  ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_FENCE, item)
+               end
+            end
+         else
+            _processInventory(ItemTrig.ENTRY_POINT_FENCE, {})
          end
       end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " iterating array via while: " .. delay .. "ms")
-   end
-   d("- - - - - - - - - - - - - - - -")
-   do -- bench: insertion via table.insert
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local dummy = {}
-         for i = 1, ARRAY_COUNT do  
-            table.insert(dummy, i)
-         end
-      end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " inserting " .. ARRAY_COUNT .. " elements via table.insert: " .. delay .. "ms")
-   end
-   do -- bench: insertion at end
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local dummy = {}
-         for i = 1, ARRAY_COUNT do  
-            dummy[#dummy + 1] = i
-         end
-      end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " inserting " .. ARRAY_COUNT .. " elements at end: " .. delay .. "ms")
-   end
-   do -- bench: insertion by index
-      ItemTrig.perfTestStart()
-      for i = 1, TEST_COUNT do
-         local dummy = {}
-         for i = 1, ARRAY_COUNT do  
-            dummy[i] = i
-         end
-      end
-      local delay = ItemTrig.perfTestEnd()
-      d("Time for " .. TEST_COUNT .. " inserting " .. ARRAY_COUNT .. " elements via index: " .. delay .. "ms")
    end
 end
 
 local function Initialize()
    ItemTrig.Savedata:load()
-   SLASH_COMMANDS["/cobbperftest"] = PerfTest
    SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
-   SLASH_COMMANDS["/cobbarrayperftest"] = _perfTestTableCount
    --
    ItemTrig.ItemStackTools:setup("ItemTrig")
    ItemTrig.ItemInterface.validateLaunderOperation =
@@ -233,7 +145,7 @@ local function Initialize()
       end
    --
    do -- register item-added handler
-      EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _ItemAddedHandler)
+      EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _OnItemAdded)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
       --
@@ -242,89 +154,17 @@ local function Initialize()
       --
    end
    do -- register open/close handlers for menus that can give us items
-      local function _onOpenClose(eventCode, ...)
-         ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK -- TODO: IsBankOpen()
-         ItemTrig.eventState.isInBarter    = eventCode == EVENT_OPEN_STORE
-         ItemTrig.eventState.isInCrafting  = eventCode == EVENT_CRAFTING_STATION_INTERACT
-         ItemTrig.eventState.isInFence     = eventCode == EVENT_OPEN_FENCE
-         ItemTrig.eventState.isInGuildBank = eventCode == EVENT_OPEN_GUILD_BANK -- TODO: IsGuildBankOpen()
-         ItemTrig.eventState.isInMail      = eventCode == EVENT_MAIL_OPEN_MAILBOX
-         -- TODO: Can we check "trading" state via TRADE_WINDOW:IsTrading() ?
-         --
-         if eventCode == EVENT_CRAFTING_STATION_INTERACT then
-            ItemTrig.eventState.inCraftingType = select(2, ...) or 0 -- craftSkill
-         else
-            ItemTrig.eventState.inCraftingType = 0
-         end
-         if eventCode == EVENT_OPEN_FENCE then
-            ItemTrig.eventState.fenceAutoLaunderCount = 0
-            ItemTrig.eventState.fenceAutoFenceCount   = 0
-         end
-         --
-         do -- trigger entry points
-            local function _itemShouldRunTriggers(item)
-               --
-               -- TODO: Return false for quest items.
-               --
-               if item.locked then -- TODO: Make this a pref.
-                  return false
-               end
-               --
-               -- TODO: Pref to return false for Crown Store and Crown Crate items, 
-               -- to exclude them from triggers.
-               --
-               return true
-            end
-            local function _processInventory(entryPoint, entryPointData)
-               ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
-                  if not _itemShouldRunTriggers(item) then
-                     return
-                  end
-                  item.entryPointData = entryPointData
-                  ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, entryPoint, item)
-               end)
-            end
-            --
-            if eventCode == EVENT_CRAFTING_STATION_INTERACT then
-               _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, {
-                  craftingSkill = select(2, ...) or 0,
-               })
-            elseif eventCode == EVENT_OPEN_STORE then
-               _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
-            elseif eventCode == EVENT_OPEN_FENCE then
-               if true then -- TODO: Make this a pref: Robust Fencing
-                  --
-                  -- Sort the items to be processed by their sale value, so that 
-                  -- we always launder and fence the most valuable items first.
-                  --
-                  local list = ItemTrig.bagToInterfaceList(BAG_BACKPACK)
-                  table.sort(list, function(a, b)
-                     return b.sellValue < a.sellValue
-                  end)
-                  for i = 1, table.getn(list) do
-                     local item = list[i]
-                     if _itemShouldRunTriggers(item) then
-                        item.entryPointData = {}
-                        ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_FENCE, item)
-                     end
-                  end
-               else
-                  _processInventory(ItemTrig.ENTRY_POINT_FENCE, {})
-               end
-            end
-         end
-      end
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_BANK,          _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_BANK,         _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_STORE,         _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_STORE,        _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_GUILD_BANK,    _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_GUILD_BANK,   _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_OPEN_MAILBOX,  _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_CLOSE_MAILBOX, _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CRAFTING_STATION_INTERACT,     _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_END_CRAFTING_STATION_INTERACT, _onOpenClose)
-      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_FENCE,         _onOpenClose) -- Closing the fence menu fires the EVENT_CLOSE_STORE event.
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_BANK,          _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_BANK,         _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_STORE,         _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_STORE,        _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_GUILD_BANK,    _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CLOSE_GUILD_BANK,   _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_OPEN_MAILBOX,  _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_MAIL_CLOSE_MAILBOX, _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_CRAFTING_STATION_INTERACT,     _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_END_CRAFTING_STATION_INTERACT, _OnOpenClose)
+      EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_FENCE,         _OnOpenClose) -- Closing the fence menu fires the EVENT_CLOSE_STORE event.
    end
 end
 local function OnAddonLoaded(eventCode, addonName)
