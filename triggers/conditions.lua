@@ -241,6 +241,9 @@ ItemTrig.tableConditions = {
                [4] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_CRAFTING),
             },
             disabledEnumIndices = Set:new({
+               --
+               -- If changing this, update the trigger gallery as well.
+               --
                3, -- Feb. 20 2019: API limitations prevent us from responding to bank withdrawals unless we also respond to stack splits, which we really super definitely don't want
             }),
          },
@@ -501,6 +504,46 @@ ItemTrig.tableConditions = {
          end
          return not result
       end
+   ),
+   [18] = ConditionBase:new( -- Alchemy Effects (Known)
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ALCHEMYEFFECTS),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ALCHEMYEFFECTS),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            enum = ItemTrig.gameEnums.alchemyEffectStrings,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         do -- check
+            local traits = context.alchemyTraits
+            local target = ItemTrig.gameEnums.alchemyEffectStrings[args[2] or -1] or ""
+            target = target:lower()
+            for i = 1, #traits do
+               local n = traits[i].name
+               if n and n:lower() == target then
+                  result = true
+                  break
+               end
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end,
+      {
+         explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_ALCHEMYEFFECTS),
+      }
    ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions

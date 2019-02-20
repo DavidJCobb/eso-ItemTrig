@@ -71,7 +71,7 @@ local function serializeOpcode(o)
          safeArgs[i] = o.args[i]
          local rawType  = type(safeArgs[i])
          local baseType = bases[i].type
-         if rawType == "string" then
+         if rawType == "string" or rawType == "number" then
             safeArgs[i] = toSafeString(tostring(o.args[i]))
          elseif rawType == "boolean" then
             safeArgs[i] = tostring(o.args[i] and 1 or 0)
@@ -163,7 +163,7 @@ function _Parser:_parseOpcode(s, opcodeClass)
    for arg in s:gmatch(pattern_OPCODEARG) do
       arg = arg:sub(2, -2)
       local aType = baseArgs[j].type
-      if aType == "string" then
+      if aType == "string" or aType == "signature" then
          oCurrent.args[j] = fromSafeString(arg)
       elseif aType == "boolean" then
          --
@@ -174,7 +174,7 @@ function _Parser:_parseOpcode(s, opcodeClass)
             oCurrent.args[j] = true
          end
       elseif aType == "number" then
-         oCurrent.args[j] = 0 + arg
+         oCurrent.args[j] = tonumber(arg)
       elseif aType == "quantity" then
          local q = { qualifier = "E", number = 0 }
          local s = ItemTrig.split(arg, ",")

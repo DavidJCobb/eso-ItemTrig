@@ -211,6 +211,34 @@ end
 ]]--
 
 local _lazyGetterMappings = {
+   alchemyTraits =
+      function(i)
+         if i.invalid then
+            return {}
+         end
+         if i.craftingType ~= ITEMTYPE_REAGENT then
+            return {}
+         end
+         local function _handle(...)
+            local numTraits = select("#", ...) / ALCHEMY_TRAIT_STRIDE
+            if numTraits < 1 then
+               return {}
+            end
+            local traitData = {}
+            for i = 1, numTraits do
+               local offset = (i - 1) * ALCHEMY_TRAIT_STRIDE + 1
+               traitData[i] = {
+                  name         = select(offset, ...),
+                  icon         = select(offset + 1, ...),
+                  matchIcon    = select(offset + 2, ...),
+                  cancellingTraitName = select(offset + 3, ...),
+                  conflictIcon = select(offset + 4, ...),
+               }
+            end
+            return traitData
+         end
+         return _handle(GetAlchemyItemTraits(i.bag, i.slot))
+      end,
    canBeJunk      = function(i) return i.invalid and nil or CanItemBeMarkedAsJunk(i.bag, i.slot) end,
    canBeLocked    = function(i) return i.invalid and nil or CanItemBePlayerLocked(i.bag, i.slot) end,
    countTotal     = function(i) return i.invalid and nil or GetItemTotalCount(i.bag, i.slot) end,

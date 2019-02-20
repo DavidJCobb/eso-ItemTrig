@@ -213,11 +213,6 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          base:forEachInArgumentEnum(argIndex, function(k, v)
             combobox:push({ name = v, index = k }, false)
          end)
-         --[[for k, v in pairs(enum) do
-            if not (disabledEnumIndices and disabledEnumIndices:has(k)) then
-               combobox:push({ name = v, index = k }, false)
-            end
-         end]]--
          combobox:redraw()
          combobox:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
          combobox:select(function(item) return item.index == tonumber(val) end)
@@ -244,11 +239,6 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          base:forEachInArgumentEnum(argIndex, function(k, v)
             self.view.enum:push({ name = v, index = k }, false)
          end)
-         --[[for k, v in pairs(enum) do
-            if not (disabledEnumIndices and disabledEnumIndices:has(k)) then
-               self.view.enum:push({ name = v, value = k })
-            end
-         end]]--
          self.view.enum:redraw()
          self.view.enum:select(1) -- default
          self.view.enum:select(function(item) return item.index == tonumber(val) end)

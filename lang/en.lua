@@ -53,10 +53,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES", "A
 -- to raw materials in general, but also to specific raw material types 
 -- that exist for each crafting skill.
 --
--- Moreover, there are some enums that don't have localizations at all, 
--- because the enums themselves are never used for UI text; for example, 
--- item styles don't have matching localized strings because the game 
--- just localizes the items themselves.
+-- Moreover, there are quite a few enums that the game doesn't actually 
+-- expose; for example, there is no enum for alchemy effects, and you 
+-- can only receive an effect's name as a string when querying what 
+-- effects a potion or reagent has.
 --
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATCLOTHING",    "Raw Material, Clothier")
@@ -69,6 +69,42 @@ ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATSMITHING",    "Refined Mat
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATWOODWORKING", "Refined Material, Woodworking")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMSTYLE_NONE", "[none]")
+--
+-- The strings below need to exactly match the alchemy effect names seen 
+-- when brewing potions and poisons. They are used by a trigger condition 
+-- to check an ingredient's known effects; the API only allows us to do 
+-- this using strings.
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_BREACH",              "Breach") -- Reduces your Spell resistance by ____ for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_COWARDICE",           "Cowardice") -- Increases your Ultimate cost by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_DEFILE",              "Defile") -- Reduces your healing taken by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_DETECTION",           "Detection") -- Increase your Stealth Detection by __ meters for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_ENERVATION",          "Enervation") -- Reduces your Critical Damage by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_ENTRAPMENT",          "Entrapment") -- Stuns for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_FRACTURE",            "Fracture") -- Reduces your Physical Resistance by ____ for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_GRADUALRAVAGEHEALTH", "Gradual Ravage Health") -- Ravage ____ Health per second for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_HINDRANCE",           "Hindrance") -- Reduces your movement speed by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_INCREASEARMOR",       "Increase Armor") -- Increases your Physical Resistance by ____ for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_INCREASESPELLPOWER",  "Increase Spell Power") -- Increases your spell damage by ____ for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_INCREASESPELLRESIST", "Increase Spell Resist") -- Increases your Spell Resistance by ____ for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_INCREASEWEAPONPOWER", "Increase Weapon Power") -- Increases your weapon damage by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_INVISIBLE",       "Invisible") -- Vanish for _ seconds.
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_LINGERINGHEALTH", "Lingering Health") -- Restore ____ Health per second for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_MAIM",            "Maim") -- Reduces all damage you deal by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_PROTECTION",      "Protection") -- Reduces your damage taken by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_RAVAGEHEALTH",    "Ravage Health") -- Ravage ____ Health immediately. Ravage an additional __ Health every second for _ seconds.
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_RAVAGEMAGICKA",   "Ravage Magicka") -- Increases the cost of Magicka abilities by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_RAVAGESTAMINA",   "Ravage Stamina") -- Increases the cost of Stamina abilities by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_RESTOREHEALTH",   "Restore Health") -- Restore ____ Health immediately.
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_RESTOREMAGICKA",  "Restore Magicka") -- Restore ____ Magicka immediately.
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_RESTORESTAMINA",  "Restore Stamina") -- Restore ____ Stamina immediately.
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_SPEED",           "Speed") -- Increases your movement speed by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_SPELLCRITICAL",   "Spell Critical") -- Gives you ____ Spell Critical Rating for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_UNCERTAINTY",     "Uncertainty") -- Reduces all critical ratings by ____ for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_UNSTOPPABLE",     "Unstoppable") -- Become immune to knockback and disabling effects for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_VITALITY",        "Vitality") -- Increases your healing taken by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_VULNERABILITY",   "Vulnerability") -- Increases your damage taken by __% for _ seconds
+ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_WEAPONCRITICAL",  "Weapon Critical") -- Gives you ____ Weapon Critical Rating for _ seconds
 --
 --
 -- SYSTEM
@@ -191,6 +227,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYALLIANCE", "[any allia
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYRACIAL",   "[any racial style]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYNONSTYLE", "[no style]")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ALCHEMYEFFECTS", "Alchemy Effects")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ALCHEMYEFFECTS", "The reagent <<1>> a known effect named <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_NO",  "does not have")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_YES", "has")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -245,5 +286,5 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE", "This it
 -- messages, leave those strings intact.
 --
 --
-ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME",    "Destroy style materials past one stack, unless withdrawn or purchased")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME",    "Destroy common style materials past one stack, unless withdrawn or purchased")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_MESSAGE", "You have a full stack of $(name) already. Destroying the $(countAdded) that were added.")

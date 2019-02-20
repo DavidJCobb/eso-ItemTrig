@@ -54,6 +54,9 @@ end
 function ItemTrig.OpcodeBase:getArgumentArchetype(index)
    local arg = self.args[tonumber(index)]
    if arg.type == "string" then
+      if arg.enum then
+         return "enum"
+      end
       if arg.multiline then
          return "multiline"
       end
@@ -73,6 +76,8 @@ function ItemTrig.OpcodeBase:getArgumentArchetype(index)
          return "quantity-enum"
       end
       return arg.type
+   elseif arg.type == "signature" then
+      return "enum"
    else
       return arg.type
    end
@@ -96,6 +101,8 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
          qualifier = "E",
          number    = 0
       }
+   elseif t == "signature" then
+      return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
    elseif t == "string" then
       if arg.enum then
          return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
@@ -145,6 +152,9 @@ end
          operator is applied. For example, the quantity represented as 
          "GTE 5" or "at least 5" would match numbers 5 and above.
       
+      signature
+         A value stored as a string, but only alterable as an enum.
+      
       string
          The argument may have an additional field, "multiline," which 
          is a boolean indicating whether the user should be presented 
@@ -183,8 +193,13 @@ end
       quantity
          The enum limits the allowed "number" values.
       
+      signature
+         The argument value is treated as a key in the enum; the corres-
+         ponding value in the enum is what is shown.
+      
       string
-         This type cannot have an enum.
+         The argument value is treated as a key in the enum; the corres-
+         ponding value in the enum is what is shown.
    
    ARGUMENT EXTRA FIELDS
    
@@ -391,6 +406,9 @@ function ItemTrig.Opcode:format(argTransform)
             end
             renderArgs[i] = string.format(format, number)
          end
+      elseif t == "signature" then
+         assert(b.enum ~= nil, "Signature arguments must use enums.")
+         renderArgs[i] = b.enum[a]
       elseif t == "string" then
          if (not a) or a == "" then
             renderArgs[i] = b.placeholder or ""
