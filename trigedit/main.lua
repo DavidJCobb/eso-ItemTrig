@@ -100,27 +100,27 @@ do -- helper class for trigger list entries
             [1] = { text = "Conditions:" },
             [2] = { text = "Actions:" },
          }
-         if table.getn(trigger.conditions) == 0 then
+         if #trigger.conditions == 0 then
             list[1].children = { [1] = { text = "[None]" } }
          else
             local c = {}
-            for i = 1, table.getn(trigger.conditions) do
-               table.insert(c, { text = trigger.conditions[i]:format() })
+            for i = 1, #trigger.conditions do
+               c[i] = { text = trigger.conditions[i]:format() }
             end
             list[1].children = c
          end
-         if table.getn(trigger.actions) == 0 then
+         if #trigger.actions == 0 then
             list[2].children = { [1] = { text = "[None]" } }
          else
             local c = {}
-            for i = 1, table.getn(trigger.actions) do
+            for i = 1, #trigger.actions do
                local action = trigger.actions[i]
                if action.base == ItemTrig.TRIGGER_ACTION_RUN_NESTED then
                   local item    = { text = trigger.actions[i]:format() }
                   item.children = _triggerToList(action.args[1])
-                  table.insert(c, item)
+                  c[i] = item
                else
-                  table.insert(c, { text = trigger.actions[i]:format() })
+                  c[i] = { text = trigger.actions[i]:format() }
                end
             end
             list[2].children = c
@@ -420,7 +420,7 @@ end
 
 function WinCls:shouldShowTrigger(trigger)
    local filters = self.filters.entryPoints
-   local count   = table.getn(filters)
+   local count   = #filters
    if count < 1 then
       return true
    end
@@ -439,7 +439,7 @@ function WinCls:refresh()
    local tList = self.currentTriggerList or {}
    local scrollPane = self.ui.pane
    scrollPane:clear(false)
-   for i = 1, table.getn(tList) do
+   for i = 1, #tList do
       local trigger = tList[i]
       if self:shouldShowTrigger(trigger) then
          scrollPane:push({ trigger = trigger, triggerIndex = i }, false)

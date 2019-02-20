@@ -207,10 +207,10 @@ function WScrollList:boundsCheckIndex(index)
    if index < 1 then
       return false
    end
-   return index <= table.getn(self.listItems)
+   return index <= #self.listItems
 end
 function WScrollList:count()
-   return table.getn(self.listItems)
+   return #self.listItems
 end
 function WScrollList:forEach(functor)
    for i, data in ipairs(self.listItems) do
@@ -223,7 +223,7 @@ function WScrollList:fromItem(control) -- static method
    return self:cast(control:GetParent():GetParent())
 end
 function WScrollList:indexOf(data)
-   for i = 1, table.getn(self.listItems) do
+   for i = 1, #self.listItems do
       if self.listItems[i] == data then
          return i
       end
@@ -386,7 +386,7 @@ function WScrollList:redraw(options)
    self.dirty     = false
    self:_updateScrollbar(total)
    if self.element.toFinalize then
-      for i = 1, table.getn(self.visibleItems) do
+      for i = 1, #self.visibleItems do
          local index   = self.visibleItems[i]
          local control = self:controlByIndex(index)
          if control then
@@ -482,7 +482,7 @@ function WScrollList:scrollTo(position, options) -- analogous to ZO_ScrollList_S
    end
    do -- Check whether any list items have been scrolled into or out of view
       local function _checkRedraw(self, oldPos, newPos)
-         if table.getn(self.visibleItems) < 1 then
+         if #self.visibleItems < 1 then
             return true
          end
          local viewStart = 0
@@ -552,8 +552,10 @@ function WScrollList:setSortFunction(f, update)
 end
 function WScrollList:sort()
    local indices = {}
+   local count   = 0
    for k, _ in ipairs(self.listItems) do
-      table.insert(indices, k)
+      count = count + 1
+      indices[count] = k
    end
    table.sort(indices, function(a, b)
       local itemA = self.listItems[a]
@@ -562,7 +564,7 @@ function WScrollList:sort()
    end)
    local replItems  = {}
    local replStates = {}
-   for i = 1, table.getn(indices) do
+   for i = 1, count do
       replItems[i]  = self.listItems[indices[i]]
       replStates[i] = self.listItemStates[indices[i]]
    end

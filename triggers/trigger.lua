@@ -4,7 +4,7 @@ function ItemTrig.executeTriggerList(list, entryPoint, context)
    if entryPoint then
       list = ItemTrig.filterTriggerList(list, entryPoint)
    end
-   for i = 1, table.getn(list) do
+   for i = 1, #list do
       local result, extra = list[i]:exec(context, entryPoint)
       if result == ItemTrig.OPCODE_FAILED then
          --
@@ -25,7 +25,7 @@ end
 function ItemTrig.filterTriggerList(list, entryPoint)
    local filtered = {}
    local mapping  = {} -- list[mapping[i]] == filtered[i]
-   for i = 1, table.getn(list) do
+   for i = 1, #list do
       local trigger = list[i]
       if trigger:allowsEntryPoint(entryPoint) then
          table.insert(filtered, trigger)
@@ -47,7 +47,7 @@ local function _formatOpcodeEPMismatch(opcode)
       local allowed = opcode.allowedEntryPoints
       if allowed then
          names = {}
-         for i = 1, table.getn(allowed) do
+         for i = 1, #allowed do
             local name = ItemTrig.ENTRY_POINT_NAMES[allowed[i]] or "???"
          end
          names = table.concat(names, ", ")
@@ -100,10 +100,10 @@ function ItemTrig.Trigger:clone(deep)
       matched_or = false,
       entryPoint = nil,
    }
-   for i = 1, table.getn(self.conditions) do
+   for i = 1, #self.conditions do
       result.conditions[i] = self.conditions[i]:clone(deep)
    end
-   for i = 1, table.getn(self.actions) do
+   for i = 1, #self.actions do
       result.actions[i] = self.actions[i]:clone(deep)
    end
    return result
@@ -123,10 +123,10 @@ function ItemTrig.Trigger:copyAssign(other, deep)
       ZO_ClearNumericallyIndexedTable(self.conditions)
       ZO_ClearNumericallyIndexedTable(self.actions)
       --
-      for i = 1, table.getn(other.conditions) do
+      for i = 1, #other.conditions do
          self.conditions[i] = other.conditions[i]:clone(deep)
       end
-      for i = 1, table.getn(other.actions) do
+      for i = 1, #other.actions do
          self.actions[i] = other.actions[i]:clone(deep)
       end
    else
@@ -143,16 +143,16 @@ function ItemTrig.Trigger:getDescription()
    -- If a trigger's first condition or action is a comment, then 
    -- that comment can be used as a trigger description.
    --
-   if table.getn(self.conditions) > 0 then
-      local c = self.conditions[1]
+   local c = self.conditions[1]
+   if c then
       if c.base == ItemTrig.TRIGGER_CONDITION_COMMENT then
          if c.args[1] ~= "" then
             return c.args[1]
          end
       end
    end
-   if table.getn(self.actions) > 0 then
-      local a = self.actions[1]
+   local a = self.actions[1]
+   if a then
       if a.base == ItemTrig.TRIGGER_ACTION_COMMENT then
          if a.args[1] ~= "" then
             return a.args[1]
@@ -166,14 +166,14 @@ function ItemTrig.Trigger:is(obj)
    return getmetatable(obj) == self
 end
 function ItemTrig.Trigger:debugDump()
-   CHAT_SYSTEM:AddMessage("== Printing trigger " .. self.name .. "...")
-   CHAT_SYSTEM:AddMessage("= Conditions")
-   for i = 1, table.getn(self.conditions) do
-      CHAT_SYSTEM:AddMessage("   " .. self.conditions[i]:format())
+   d("== Printing trigger " .. self.name .. "...")
+   d("= Conditions")
+   for i = 1, #self.conditions do
+      d("   " .. self.conditions[i]:format())
    end
-   CHAT_SYSTEM:AddMessage("= Actions")
-   for i = 1, table.getn(self.actions) do
-      CHAT_SYSTEM:AddMessage("   " .. self.actions[i]:format())
+   d("= Actions")
+   for i = 1, #self.actions do
+      d("   " .. self.actions[i]:format())
    end
 end
 function ItemTrig.Trigger:exec(context, entryPoint)
@@ -184,7 +184,7 @@ function ItemTrig.Trigger:exec(context, entryPoint)
    self.state.using_or   = false
    self.state.matched_or = false
    self.state.entryPoint = entryPoint or nil
-   for i = 1, table.getn(self.conditions) do
+   for i = 1, #self.conditions do
       local c = self.conditions[i]
       if entryPoint and not c:allowsEntryPoint(entryPoint) then
          return ItemTrig.OPCODE_FAILED, { opcode = c, why = _formatOpcodeEPMismatch(c) }
@@ -233,7 +233,7 @@ function ItemTrig.Trigger:exec(context, entryPoint)
    --
    -- All conditions matched.
    --
-   for i = 1, table.getn(self.actions) do
+   for i = 1, #self.actions do
       local a = self.actions[i]
       if entryPoint and not a:allowsEntryPoint(entryPoint) then
          return ItemTrig.OPCODE_FAILED, { opcode = a, why = _formatOpcodeEPMismatch(c) }

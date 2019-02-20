@@ -30,7 +30,7 @@ function ItemTrig:setupWindow(name, control)
 end
 
 local function PerfTest(extra)
-   local testcount = math.max(1000000, math.min(10, (tonumber(extra) or 100)))
+   local testcount = math.min(1000000, math.max(10, (tonumber(extra) or 100)))
    
    -------------
    
@@ -99,11 +99,126 @@ local function _ItemAddedHandler(eventCode, bagIndex, slotIndex, isNewItem, item
    ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
 end
 
+local function _perfTestTableCount(extra)
+   d("-------------------------------")
+   local TEST_COUNT
+   local ARRAY_COUNT
+   do
+      local params = ItemTrig.split(extra or "", " ")
+      local tc = tonumber(params[1])
+      local ac = tonumber(params[2])
+      TEST_COUNT  = math.min(10000000, math.max(700, (tc or 5000)))
+      ARRAY_COUNT = math.min(400, math.max(5, (ac or 15)))
+   end
+   local test = {}
+   local lockedTest = {}
+   for i = 1, ARRAY_COUNT do
+      test[i] = i
+      lockedTest[i] = i
+   end
+   do
+      lockedTest[" length"] = #lockedTest
+      setmetatable(lockedTest, {
+         __newindex = function() end,
+         __len = function(t) return t[" length"] end
+      })
+   end
+   do -- bench: table.getn
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         table.getn(test)
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " table.getn calls: " .. delay .. "ms")
+   end
+   do -- bench: #
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local length = #test
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " # operators: " .. delay .. "ms")
+   end
+   do -- bench: # with frozen array
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local length = #lockedTest
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " # operators on frozen array: " .. delay .. "ms")
+   end
+   do -- bench: field access on frozen array
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local length = lockedTest[" length"]
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " field access on frozen array: " .. delay .. "ms")
+   end
+   if TEST_COUNT > 100000 then
+      return
+   end
+   d("- - - - - - - - - - - - - - - -")
+   do -- bench: iterate normal array using #
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         for i = 1, #test do end
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " iterating array via #: " .. delay .. "ms")
+   end
+   do -- bench: iterate normal array using while
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local i = 1
+         while test[i] ~= nil do
+            i = i + 1
+         end
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " iterating array via while: " .. delay .. "ms")
+   end
+   d("- - - - - - - - - - - - - - - -")
+   do -- bench: insertion via table.insert
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local dummy = {}
+         for i = 1, ARRAY_COUNT do  
+            table.insert(dummy, i)
+         end
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " inserting " .. ARRAY_COUNT .. " elements via table.insert: " .. delay .. "ms")
+   end
+   do -- bench: insertion at end
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local dummy = {}
+         for i = 1, ARRAY_COUNT do  
+            dummy[#dummy + 1] = i
+         end
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " inserting " .. ARRAY_COUNT .. " elements at end: " .. delay .. "ms")
+   end
+   do -- bench: insertion by index
+      ItemTrig.perfTestStart()
+      for i = 1, TEST_COUNT do
+         local dummy = {}
+         for i = 1, ARRAY_COUNT do  
+            dummy[i] = i
+         end
+      end
+      local delay = ItemTrig.perfTestEnd()
+      d("Time for " .. TEST_COUNT .. " inserting " .. ARRAY_COUNT .. " elements via index: " .. delay .. "ms")
+   end
+end
+
 local function Initialize()
    ItemTrig.Savedata:load()
    SLASH_COMMANDS["/cobbperftest"] = PerfTest
    SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
-   SLASH_COMMANDS["/cobbstartinvtest"] = InventoryFilterTest
+   SLASH_COMMANDS["/cobbarrayperftest"] = _perfTestTableCount
    --
    ItemTrig.ItemStackTools:setup("ItemTrig")
    ItemTrig.ItemInterface.validateLaunderOperation =

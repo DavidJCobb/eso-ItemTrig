@@ -72,12 +72,12 @@ end
 function WBulletedList:forEach(functor, _)
    local depth = (_ and _.depth) or 1
    local set   = (_ and _.set)   or self.listItems
-   for i = 1, table.getn(set) do
+   for i = 1, #set do
       local item = set[i]
       if functor(item, depth) then
          return true
       end
-      if item.children and table.getn(item.children) then
+      if item.children and #item.children then
          if self:forEach(functor, { set = item.children, depth = depth + 1 }) then
             return true
          end

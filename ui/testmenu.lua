@@ -26,7 +26,7 @@ do
             [1] = GetControl(wrap, "Row1"),
             [2] = GetControl(wrap, "Row2"),
          }
-         for i = 1, table.getn(rows) do
+         for i = 1, #rows do
             local row = rows[i]
             local c = {
                pointSelf = ZO_ComboBox_ObjectFromContainer(GetControl(row, "PointSelf")),
@@ -50,7 +50,7 @@ do
       self:refresh()
    end
    function Cls:refresh()
-      for i = 1, table.getn(self.config) do
+      for i = 1, #self.config do
          local row   = self.config[i]
          local pSelf = row.pointSelf:GetSelectedItemData().value
          local pRel  = row.pointRel:GetSelectedItemData().value

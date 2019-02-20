@@ -186,7 +186,7 @@ do -- editor state
       self.frames = {}
    end
    function TriggerStack:count()
-      return table.getn(self.frames)
+      return #self.frames
    end
    function TriggerStack:dirty(x)
       local last = self:last()
@@ -437,8 +437,8 @@ function WinCls:onEntryPointsChanged()
    assert(trig ~= nil)
    local result = {}
    local points = combobox:getSelectedItems()
-   for i = 1, table.getn(points) do
-      table.insert(result, points[i].value)
+   for i = 1, #points do
+      result[i] = points[i].value
    end
    trig.working.entryPoints = result
    trig.dirty = true
@@ -568,7 +568,7 @@ function WinCls:refresh()
          --
          combobox:close()
          combobox:deselectAll()
-         for i = 1, table.getn(trigger.entryPoints) do
+         for i = 1, #trigger.entryPoints do
             combobox:addToSelection(function(data) return data.value == trigger.entryPoints[i] end)
          end
          combobox:redraw()
@@ -584,7 +584,7 @@ function WinCls:refresh()
    do -- render conditions
       local pane = self.ui.paneConditions
       pane:clear(false)
-      for i = 1, table.getn(trigger.conditions) do
+      for i = 1, #trigger.conditions do
          pane:push(trigger.conditions[i], false)
       end
       pane:redraw()
@@ -592,7 +592,7 @@ function WinCls:refresh()
    do -- render actions
       local pane = self.ui.paneActions
       pane:clear(false)
-      for i = 1, table.getn(trigger.actions) do
+      for i = 1, #trigger.actions do
          pane:push(trigger.actions[i], false)
       end
       pane:redraw()

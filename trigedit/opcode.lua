@@ -144,7 +144,7 @@ function WinCls:requestEdit(opener, opcode, dirty, extra)
       end
       local combobox = self.ui.opcodeType
       combobox:clear()
-      for i = 1, table.getn(list) do
+      for i = 1, #list do
          local base = list[i]
          --
          -- ZO_ScrollableComboBox uses ZO_ScrollList under the hood. The data entries 
@@ -217,7 +217,7 @@ function WinCls:redrawDescription(options)
          end
          s = ItemTrig.splitByCount(s, 200)
          local out = ""
-         for j = 1, table.getn(s) do
+         for j = 1, #s do
             out = out .. ZO_LinkHandler_CreateLinkWithFormat(s[j], nil, "ItemTrigOpcodeEditArg", 0, "|H%d:%s|h%s|h", i) -- link without brackets
          end
          return out
@@ -237,7 +237,7 @@ function WinCls:redrawDescription(options)
             color = "EE3333"
          end
          local fmt = string.format("|c%s|l0:1:1:3:1:%s|l", color, color)
-         for j = 1, table.getn(s) do
+         for j = 1, #s do
             out = out .. string.format(fmt .. "%s|l|r", s[j])
          end
          return out

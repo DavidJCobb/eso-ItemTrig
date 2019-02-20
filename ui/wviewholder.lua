@@ -34,7 +34,7 @@ function ItemTrig.UI.WViewHolder:setView(control)
    if self.selected then
       self.selected:SetHidden(true)
    else
-      for i = 1, table.getn(self.views) do
+      for i = 1, #self.views do
          self.views[i]:SetHidden(true)
       end
    end
@@ -49,7 +49,7 @@ function ItemTrig.UI.WViewHolder:viewByName(name)
    return ItemTrig.UI.WViewHolderView:cast(c)
 end
 function ItemTrig.UI.WViewHolder:hasView(control)
-   for i = 1, table.getn(self.views) do
+   for i = 1, #self.views do
       if self.views[i] == control then
          return true
       end

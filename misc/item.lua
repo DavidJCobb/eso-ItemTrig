@@ -186,6 +186,13 @@ do
    end
 end
 
+--
+-- ITEMINTERFACE
+--
+-- This class can be used to cache data for a bag slot all at once, allowing 
+-- you to work with that bag slot without repeating API calls.
+--
+
 --[[
    As of 2/17/2019, benchmarks suggest that when creating an item interface from 
    the "item added" event, it takes an average of 11.5ms to create 400 interfaces, 

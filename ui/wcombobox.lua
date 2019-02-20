@@ -164,7 +164,7 @@ do -- internals
    function WCombobox:_onChange()
       if self:multiSelect() then
          local items = self:getSelectedItems()
-         local count = table.getn(items)
+         local count = #items
          if count < 1 then
             self.controls.label:SetText(self.emptyText or "")
          else

@@ -2,7 +2,7 @@ if not ItemTrig then return end
 
 local function _prepTriggersToSave(tList)
    local s = {}
-   for i = 1, table.getn(tList) do
+   for i = 1, #tList do
       s[i] = tList[i]:serialize()
    end
    s = table.concat(s)

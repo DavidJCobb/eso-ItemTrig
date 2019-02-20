@@ -121,7 +121,7 @@ function ISavedataForAccount:accountWide()
    end
    local interface = ISavedataCharacter:new(self, id, raw)
    if interface:isOutOfDate() then
-      for i = 1, table.getn(self.updateRoutines) do
+      for i = 1, #self.updateRoutines do
          interface:tryUpdateRoutine(self.updateRoutines[i])
          if not interface:isOutOfDate() then
             break
@@ -157,7 +157,7 @@ function ISavedataForAccount:character(id)
    end
    local interface = ISavedataCharacter:new(self, id, raw)
    if interface:isOutOfDate() then
-      for i = 1, table.getn(self.updateRoutines) do
+      for i = 1, #self.updateRoutines do
          interface:tryUpdateRoutine(self.updateRoutines[i])
          if not interface:isOutOfDate() then
             break

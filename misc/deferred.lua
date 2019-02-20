@@ -145,7 +145,7 @@ function Deferred:resolve(...)
       return
    end
    self.state = DEFERRED_STATE_RESOLVED
-   for i = 1, table.getn(self.resolveCallbacks) do
+   for i = 1, #self.resolveCallbacks do
       local meta = self.resolveCallbacks[i]
       if meta.context == nil then
          meta.func(...)
@@ -170,7 +170,7 @@ function Deferred:reject(...)
       return
    end
    self.state = DEFERRED_STATE_REJECTED
-   for i = 1, table.getn(self.rejectCallbacks) do
+   for i = 1, #self.rejectCallbacks do
       local meta = self.rejectCallbacks[i]
       if meta.context == nil then
          meta.func(...)

@@ -27,7 +27,7 @@ do
       cc_OPCODE_ARG_END,
       cc_SUBST_TRIG_INDEX,
    }
-   for i = 1, table.getn(list) do
+   for i = 1, #list do
       allControlCodes = allControlCodes .. "%" .. list[i] -- ensure pattern-matching doesn't choke on these glyphs
    end
 end
@@ -54,7 +54,7 @@ local function fromSafeString(s)
 end
 
 local function serializeOpcode(o)
-   local count = table.getn(o.args)
+   local count = #o.args
    local bases = o.base.args
    if count > 0 then
       local safeArgs = {}
@@ -95,7 +95,7 @@ local function serializeTrigger(t)
       _toChunk("e", t.enabled and "1" or "0"),
    }
    do -- chunk: entry points
-      local count = table.getn(t.entryPoints)
+      local count = #t.entryPoints
       if count > 0 then
          local chunk = {}
          for i = 1, count do
@@ -108,10 +108,10 @@ local function serializeTrigger(t)
    do
       local c = {}
       local a = {}
-      for i = 1, table.getn(t.conditions) do
+      for i = 1, #t.conditions do
          table.insert(c, t.conditions[i]:serialize())
       end
-      for i = 1, table.getn(t.actions) do
+      for i = 1, #t.actions do
          table.insert(a, t.actions[i]:serialize())
       end
       table.insert(chunks, _toChunk("c", table.concat(c, "")))
@@ -233,7 +233,7 @@ function _Parser:_parseTrigger(s)
          end
       elseif head == "ep" then -- Chunk: Entry Points
          local list  = ItemTrig.split(body, ",")
-         local count = table.getn(list)
+         local count = #list
          if count > 0 then
             for i = 1, count do
                table.insert(t.entryPoints, list[i])
@@ -286,19 +286,19 @@ function _Parser:parse(s)
          -- reverse-order) in order to properly handle nesting; however, 
          -- that means that top-level triggers will be in reverse-order.
          --
-         s = start .. cc_SUBST_TRIG_INDEX .. table.getn(self.triggerList) .. last
+         s = start .. cc_SUBST_TRIG_INDEX .. #self.triggerList .. last
          start, mid, last = s:match("^(.*)(" .. pattern_TRIGGER .. ")(.*)$")
       end
    end
-   for i = 1, table.getn(self.triggerList) do
+   for i = 1, #self.triggerList do
       self.triggers[i]    = self:_parseTrigger(self.triggerList[i])
       self.triggerList[i] = nil -- free strings as soon as possible to save on memory
    end
-   local finalCount = table.getn(self.triggers)
-   for i = 1, table.getn(self.pendingOpcodesWithTriggerArgs) do
+   local finalCount = #self.triggers
+   for i = 1, #self.pendingOpcodesWithTriggerArgs do
       local c = self.pendingOpcodesWithTriggerArgs[i]
       local baseArgs = c.base.args
-      for j = 1, table.getn(c.args) do
+      for j = 1, #c.args do
          if baseArgs[j].type == "trigger" then
             if type(c.args[j]) == "number" then
                --
@@ -312,7 +312,6 @@ function _Parser:parse(s)
                local index = c.args[j]
                c.args[j] = self.triggers[index]
                self.triggers[index] = nil
---CHAT_SYSTEM:AddMessage("Trigger " .. index .. " of " .. table.getn(self.triggers) .. " is nested.")
             end
          end
       end
@@ -326,9 +325,8 @@ function _Parser:parse(s)
       -- instead of appending them.
       --
       local final = {}
-      for i = 1, finalCount do -- table.getn breaks if there are nils in the middle
+      for i = 1, finalCount do -- # breaks if there are nils in the middle
          if self.triggers[i] ~= nil then
---CHAT_SYSTEM:AddMessage("Parse operation completed; found non-nil trigger")
             table.insert(final, 1, self.triggers[i])
          end
       end
