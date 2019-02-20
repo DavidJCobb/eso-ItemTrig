@@ -196,6 +196,9 @@ function WScrollSelectList:getFirstSelectedIndex()
    end
    return self.selection.index
 end
+function WScrollSelectList:getFirstSelectedItem()
+   return self:at(self:getFirstSelectedIndex())
+end
 function WScrollSelectList:getSelectedItems()
    local multi = self.selection.multi
    if not self:hasSelection() then
@@ -207,7 +210,7 @@ function WScrollSelectList:getSelectedItems()
    if multi then
       return self.selection.index:map(self.listItems)
    end
-   return self:at(self.selection.index)
+   return { self:at(self.selection.index) }
 end
 function WScrollSelectList:hasSelection()
    local i = self.selection.index

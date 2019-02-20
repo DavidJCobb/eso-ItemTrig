@@ -10,7 +10,7 @@ function ItemTrig.executeTriggerList(list, entryPoint, context)
          --
          -- TODO: Present this information in a better manner.
          --
-         d("Failed to execute an opcode in top-level trigger " .. list[i].name .. ".")
+         d(string.format("Failed to execute an opcode in top-level trigger %s while testing item %s.", list[i].name or "", context.formattedName or context.name or "-----"))
          if extra.opcode then
             d(string.sub(extra.opcode:format(), 1, 240))
          end

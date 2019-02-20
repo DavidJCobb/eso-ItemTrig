@@ -385,6 +385,111 @@ ItemTrig.tableConditions = {
          end
       end
    ),
+   [15] = ConditionBase:new( -- Locked
+      _s(ITEMTRIG_STRING_CONDITIONNAME_LOCKED),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_LOCKED),
+      {
+         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_LOCKED_NO), [2] = _s(ITEMTRIG_STRING_OPCODEARG_LOCKED_YES)} },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if args[1] then
+            return context.locked
+         end
+         return not context.locked
+      end
+   ),
+   [16] = ConditionBase:new( -- Junk
+      _s(ITEMTRIG_STRING_CONDITIONNAME_JUNK),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_JUNK),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_JUNK_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_JUNK_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if args[1] then
+            return context.hasJunkFlag
+         end
+         return not context.hasJunkFlag
+      end
+   ),
+   [17] = ConditionBase:new( -- Item Style
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMSTYLE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMSTYLE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            default = ITEMTYPE_TREASURE,
+            enum =
+               (function()
+                  local e = ItemTrig.assign({
+                     [-1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYALLIANCE),
+                     [-2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYRACIAL),
+                     --
+                     -- Pull the enum of all equipment styles, and add in some 
+                     -- special checks indicated by indices below zero.
+                     --
+                  }, ItemTrig.gameEnums.styles)
+                  e[ITEMSTYLE_NONE] = GetString(ITEMTRIG_STRING_ITEMSTYLE_NONE)
+                  return e
+               end)(),
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         do -- compare item style
+            if args[2] >= 0 then
+               result = context.style == args[2]
+            else
+               --
+               -- We use negative numbers to denote checks with custom 
+               -- logic.
+               --
+               local cs = context.style
+               if args[2] == -1 then -- any alliance style
+                  if cs == ITEMSTYLE_ALLIANCE_ALDMERI
+                  or cs == ITEMSTYLE_ALLIANCE_DAGGERFALL
+                  or cs == ITEMSTYLE_ALLIANCE_EBONHEART
+                  then
+                     result = true
+                  end
+               elseif args[2] == -2 then -- any racial style
+                  if cs == ITEMSTYLE_RACIAL_ARGONIAN
+                  or cs == ITEMSTYLE_RACIAL_BRETON
+                  or cs == ITEMSTYLE_RACIAL_DARK_ELF
+                  or cs == ITEMSTYLE_RACIAL_HIGH_ELF
+                  or cs == ITEMSTYLE_RACIAL_IMPERIAL
+                  or cs == ITEMSTYLE_RACIAL_KHAJIIT
+                  or cs == ITEMSTYLE_RACIAL_NORD
+                  or cs == ITEMSTYLE_RACIAL_ORC
+                  or cs == ITEMSTYLE_RACIAL_REDGUARD
+                  or cs == ITEMSTYLE_RACIAL_WOOD_ELF
+                  then
+                     result = true
+                  end
+               end
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do

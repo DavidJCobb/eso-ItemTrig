@@ -53,6 +53,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES", "A
 -- to raw materials in general, but also to specific raw material types 
 -- that exist for each crafting skill.
 --
+-- Moreover, there are some enums that don't have localizations at all, 
+-- because the enums themselves are never used for UI text; for example, 
+-- item styles don't have matching localized strings because the game 
+-- just localizes the items themselves.
+--
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATCLOTHING",    "Raw Material, Clothier")
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATJEWELRY",     "Raw Material, Jewelry")
@@ -62,6 +67,8 @@ ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATCLOTHING",    "Refined Mat
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATJEWELRY",     "Refined Material, Jewelry")
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATSMITHING",    "Refined Material, Blacksmithing")
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_REFINEDMATWOODWORKING", "Refined Material, Woodworking")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMSTYLE_NONE", "[none]")
 --
 --
 -- SYSTEM
@@ -166,6 +173,23 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CREATORNAME", "The item was cra
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_WHOLE",     "is")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_SUBSTRING", "contains")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_LOCKED", "Locked")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_LOCKED", "The item <<1>> locked.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_LOCKED_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_LOCKED_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_JUNK", "Junk")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_JUNK", "The item <<1>> flagged as junk.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_JUNK_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_JUNK_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ITEMSTYLE", "Item Style")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMSTYLE", "The item's style <<1>> <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYALLIANCE", "[any alliance style]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYRACIAL",   "[any racial style]")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -196,6 +220,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_MODIFYJUNKFLAG", "Modify Junk Flag
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_MODIFYJUNKFLAG", "<<1>> the item as junk.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_MODIFYJUNKFLAG_OFF", "Unmark")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_MODIFYJUNKFLAG_ON",  "Mark")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_JUNK_NOT_ALLOWED", "This item can't be flagged as junk.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_LAUNDER", "Launder")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_LAUNDER", "Launder <<1>> of the item.")

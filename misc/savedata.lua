@@ -134,6 +134,18 @@ function ISavedataForAccount:addUpdateRoutine(functor)
    table.insert(self.updateRoutines, functor)
 end
 function ISavedataForAccount:character(id)
+   --
+   -- This function returns an ISavedataCharacter object for 
+   -- the specified character ID. If no character ID is given, 
+   -- then it returns an ISavedataCharacter object for the 
+   -- current character.
+   --
+   -- Before returning the ISavedataCharacter object, this 
+   -- function checks whether the character data is out of 
+   -- date; if so, it runs all registered update routines 
+   -- on it, stopping early if one of them brings the data 
+   -- up to date.
+   --
    assert(id == nil or type(id) == "string", "A character ID cannot be a " .. type(id) .. ".")
    local currentID = GetCurrentCharacterId()
    if id == nil then

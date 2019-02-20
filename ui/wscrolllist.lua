@@ -379,7 +379,7 @@ function WScrollList:redraw(options)
          total = self.listItemStates[count].bottom or 0
       end
       self.scrollMax = total
-      if self.scrollTop + viewEnd > self.scrollMax then
+      if self.scrollTop + viewEnd > self.scrollMax + 1 then -- floating-point imprecision...
          self.scrollTop = 0
       end
    end

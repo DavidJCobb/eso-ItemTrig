@@ -281,16 +281,19 @@ function WinCls:onEntryPointFilterChange()
    --
    local pane = self.ui.entryPointFilterPane
    self.filters.entryPoints = {}
-   local data = pane:getSelectedItems()
+   local data = pane:getFirstSelectedItem()
    if data.entryPoint then
       self.filters.entryPoints = { data.entryPoint }
    end
    self:refresh()
    --
-   local triggerIndex = self:getPaneIndexForTrigger(selectedTrigger)
-   if triggerIndex then
-      pane:select(triggerIndex)
-      pane:scrollToItem(triggerIndex, false, true)
+   if selectedTrigger then
+      local triggerIndex = self:getPaneIndexForTrigger(selectedTrigger)
+      if triggerIndex then
+         local pane = self.ui.pane
+         pane:select(triggerIndex)
+         pane:scrollToItem(triggerIndex, false, true)
+      end
    end
 end
 

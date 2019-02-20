@@ -41,6 +41,7 @@ ItemTrig.tableActions = {
                level         = context.level,
                name          = context.formattedName,
                price         = context.sellValue,
+               style         = ItemTrig.gameEnums.styles[context.style or ITEMSTYLE_NONE],
             }
             if state.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
                substitutions.countAdded = context.entryPointData.countAdded or 0
@@ -140,11 +141,13 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
-         if not item:modifyJunkState(args[1]) then
-            --
-            -- TODO: alert if the item can't be junk.
-            --
-            return ItemTrig.OPCODE_FAILED, {}
+         local result, errorCode = context:modifyJunkState(args[1])
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_JUNK_NOT_ALLOWED)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
          end
       end
    ),

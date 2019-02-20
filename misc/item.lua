@@ -211,6 +211,8 @@ end
 ]]--
 
 local _lazyGetterMappings = {
+   canBeJunk      = function(i) return i.invalid and nil or CanItemBeMarkedAsJunk(i.bag, i.slot) end,
+   canBeLocked    = function(i) return i.invalid and nil or CanItemBePlayerLocked(i.bag, i.slot) end,
    countTotal     = function(i) return i.invalid and nil or GetItemTotalCount(i.bag, i.slot) end,
    forcedNonDeconstructable =
       function(i)
@@ -228,6 +230,7 @@ local _lazyGetterMappings = {
          return IsItemLinkForcedNotDeconstructable(i.link) and not IsItemLinkContainer(i.link)
       end,
    formattedName  = function(i) return LocalizeString("<<1>>", i.name) end,
+   hasJunkFlag    = function(i) return i.invalid and nil or IsItemJunk(i.bag, i.slot) end,
    isResearchable = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
    itemFilters    = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
 }
@@ -254,12 +257,14 @@ ItemInterface.meta = {
       end,
 }
 do -- define failure reasons for member functions
-   ItemInterface.FAILURE_CANNOT_DECONSTRUCT    = "DCON"
-   ItemInterface.FAILURE_CANNOT_SPLIT_STACK    = "SPLT"
-   ItemInterface.FAILURE_ITEM_IS_INVALID       = "INVA"
-   ItemInterface.FAILURE_ITEM_IS_LOCKED        = "LOCK"
-   ItemInterface.FAILURE_MOD_NOT_SETUP         = "NOPE"
-   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT = "ZLND"
+   ItemInterface.FAILURE_CANNOT_DECONSTRUCT    = "DCON" -- This item type can't be deconstructed.
+   ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK   = "NJNK" -- This item type can't be flagged as junk.
+   ItemInterface.FAILURE_CANNOT_LOCK           = "NLOK" -- This item type can't be locked.
+   ItemInterface.FAILURE_CANNOT_SPLIT_STACK    = "SPLT" -- Cannot split the stack; your inventory is full.
+   ItemInterface.FAILURE_ITEM_IS_INVALID       = "INVA" -- The ItemInterface is invalid: the bag slot now contains something different.
+   ItemInterface.FAILURE_ITEM_IS_LOCKED        = "LOCK" -- Cannot perform this operation on a locked item.
+   ItemInterface.FAILURE_MOD_NOT_SETUP         = "NOPE" -- The mod wasn't set up properly.
+   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
 end
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self.meta)
@@ -334,12 +339,6 @@ function ItemInterface:new(bagIndex, slotIndex)
       result.runestoneName = GetRunestoneTranslatedName(bagIndex, slotIndex)
    end
    return result
-end
-function ItemInterface:canBeJunk()
-   if self.canBeJunk == nil then
-      self.canBeJunk = CanItemBeMarkedAsJunk(self.bag, self.slot)
-   end
-   return self.canBeJunk
 end
 function ItemInterface:canDeconstruct()
    if self.craftingType == ITEMTYPE_GLYPH_WEAPON
@@ -450,21 +449,25 @@ function ItemInterface:launder(count)
 end
 function ItemInterface:modifyJunkState(flag)
    if self:isInvalid() then
-      return false
+      return false, ItemInterface.FAILURE_ITEM_IS_INVALID
    end
-   if self:canBeJunk() then
+   if self.canBeJunk then
       SetItemIsJunk(self.bag, self.slot, flag)
-      self.locked = IsItemJunk(self.bag, self.slot)
-      return self.locked == flag
+      self.hasJunkFlag = IsItemJunk(self.bag, self.slot)
+      return self.hasJunkFlag == flag
    end
-   return false
+   return false, ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK
 end
 function ItemInterface:modifyLockState(flag)
    if self:isInvalid() then
-      return
+      return false, ItemInterface.FAILURE_ITEM_IS_INVALID
    end
-   SetItemIsPlayerLocked(self.bag, self.slot, flag)
-   self.locked = IsItemPlayerLocked(self.bag, self.slot)
+   if self.canBeLocked then
+      SetItemIsPlayerLocked(self.bag, self.slot, flag)
+      self.locked = IsItemPlayerLocked(self.bag, self.slot)
+      return self.locked == flag
+   end
+   return false, ItemInterface.FAILURE_CANNOT_LOCK
 end
 function ItemInterface:sell(count)
    if self:isInvalid() then
