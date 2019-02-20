@@ -2,6 +2,7 @@ if not ItemTrig then return end
 if not ItemTrig.OpcodeBase then return end
 
 local ItemInterface = ItemTrig.ItemInterface
+local Set           = ItemTrig.Set
 
 local _s = GetString
 
@@ -238,7 +239,10 @@ ItemTrig.tableConditions = {
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_MAILGIFT),
                [3] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_BANKWITHDRAWAL),
                [4] = _s(ITEMTRIG_STRING_OPCODEARG_ADDEDITEMCAUSE_CRAFTING),
-            }
+            },
+            disabledEnumIndices = Set:new({
+               3, -- Feb. 20 2019: API limitations prevent us from responding to bank withdrawals unless we also respond to stack splits, which we really super definitely don't want
+            }),
          },
       },
       function(state, context, args)
@@ -438,12 +442,13 @@ ItemTrig.tableConditions = {
                   local e = ItemTrig.assign({
                      [-1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYALLIANCE),
                      [-2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYRACIAL),
+                     [-3] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYNONSTYLE),
                      --
                      -- Pull the enum of all equipment styles, and add in some 
                      -- special checks indicated by indices below zero.
                      --
                   }, ItemTrig.gameEnums.styles)
-                  e[ITEMSTYLE_NONE] = GetString(ITEMTRIG_STRING_ITEMSTYLE_NONE)
+                  e[ITEMSTYLE_NONE] = nil
                   return e
                end)(),
          },
@@ -478,6 +483,13 @@ ItemTrig.tableConditions = {
                   or cs == ITEMSTYLE_RACIAL_ORC
                   or cs == ITEMSTYLE_RACIAL_REDGUARD
                   or cs == ITEMSTYLE_RACIAL_WOOD_ELF
+                  then
+                     result = true
+                  end
+               elseif args[2] == -3 then -- not actually a style
+                  if cs == ITEMSTYLE_NONE
+                  or cs == ITEMSTYLE_UNIQUE ----- used for extremely rare furnishings, deprecated items, and developer test items
+                  or cs == ITEMSTYLE_UNIVERSAL -- unclear, but seems to include soul gems, instant research scrolls, repair kits, and the like
                   then
                      result = true
                   end

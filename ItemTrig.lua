@@ -34,12 +34,6 @@ local function ShowWin()
 end
 
 local function _OnItemAdded(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
-   if updateReason == INVENTORY_UPDATE_REASON_DURABILITY_CHANGE then
-      return
-   end
-   if stackCountChange < 1 then
-      return
-   end
    local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
    if item.locked then
       return
@@ -148,9 +142,14 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent ("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, _OnItemAdded)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_IS_NEW_ITEM, true)
       EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_BAG_ID, BAG_BACKPACK)
+      EVENT_MANAGER:AddFilterForEvent("ItemTrig", EVENT_INVENTORY_SINGLE_SLOT_UPDATE, REGISTER_FILTER_INVENTORY_UPDATE_REASON, INVENTORY_UPDATE_REASON_DEFAULT)
       --
       -- This event will only fire if an item is added, and splitting a stack 
       -- doesn't count. Good.
+      --
+      -- TODO: This doesn't fire if we withdraw an item from a bank, presumably 
+      -- because moving an item from one bag to another isn't recognized as a 
+      -- "new" item.
       --
    end
    do -- register open/close handlers for menus that can give us items

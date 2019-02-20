@@ -192,7 +192,9 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       local base = opcode.base
       local val  = opcode.args[argIndex]
       local arg  = base.args[argIndex]
-      local enum = arg.enum
+      --[[local enum = arg.enum
+      local disabledEnumIndices = arg.disabledEnumIndices]]--
+      --
       local archetype = base:getArgumentArchetype(argIndex)
       self.type = arg.type
       if archetype == "checkbox" then
@@ -208,9 +210,14 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view:show()
          local combobox = self.view.value
          combobox:clear()
-         for k, v in pairs(enum) do
+         base:forEachInArgumentEnum(argIndex, function(k, v)
             combobox:push({ name = v, index = k }, false)
-         end
+         end)
+         --[[for k, v in pairs(enum) do
+            if not (disabledEnumIndices and disabledEnumIndices:has(k)) then
+               combobox:push({ name = v, index = k }, false)
+            end
+         end]]--
          combobox:redraw()
          combobox:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
          combobox:select(function(item) return item.index == tonumber(val) end)
@@ -234,9 +241,14 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          self.view.qualifier:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
          self.view.qualifier:select(function(item) return item.value == val.qualifier end)
          self.view.enum:clear()
-         for k, v in pairs(enum) do
-            self.view.enum:push({ name = v, value = k })
-         end
+         base:forEachInArgumentEnum(argIndex, function(k, v)
+            self.view.enum:push({ name = v, index = k }, false)
+         end)
+         --[[for k, v in pairs(enum) do
+            if not (disabledEnumIndices and disabledEnumIndices:has(k)) then
+               self.view.enum:push({ name = v, value = k })
+            end
+         end]]--
          self.view.enum:redraw()
          self.view.enum:select(1) -- default
          self.view.enum:select(function(item) return item.index == tonumber(val) end)

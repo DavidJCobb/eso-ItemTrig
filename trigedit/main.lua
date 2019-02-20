@@ -323,6 +323,7 @@ function WinCls:getTriggerByPaneIndex(index)
    if not data then
       return nil
    end
+   assert(data.triggerIndex ~= nil, "Bad trigger index!")
    return data.trigger, data.triggerIndex
 end
 function WinCls:getPaneIndexForTrigger(trigger)

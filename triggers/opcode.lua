@@ -41,6 +41,16 @@ function ItemTrig.OpcodeBase:allowsEntryPoint(entryPoint)
    end
    return ItemTrig.indexOf(allowed, entryPoint) ~= nil
 end
+function ItemTrig.OpcodeBase:forEachInArgumentEnum(index, functor)
+   local arg      = self.args[tonumber(index)]
+   local enum     = arg.enum
+   local disabled = arg.disabledEnumIndices
+   for k, v in pairs(enum) do
+      if not (disabled and disabled:has(k)) then
+         functor(k, v)
+      end
+   end
+end
 function ItemTrig.OpcodeBase:getArgumentArchetype(index)
    local arg = self.args[tonumber(index)]
    if arg.type == "string" then
@@ -192,6 +202,14 @@ end
          for dummying out work-in-progress functionality.
          
          This is enforced by Opcode:format.
+      
+      disabledEnumIndices
+         This should be an instant of Set whose entries are indices in the 
+         argument's enum. These indices will be hidden from the UI -- that 
+         is, users will not be able to select them. Useful for dummying out 
+         work-in-progress functionality.
+         
+         This is enforced by OpcodeBase:forEachInArgumentEnum.
    
 --]]--
 
