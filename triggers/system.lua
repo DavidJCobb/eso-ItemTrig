@@ -2,8 +2,10 @@ if not ItemTrig then return end
 
 -- Define constants needed by other files
 
-ItemTrig.OPCODE_FAILED       = "FAIL"
-ItemTrig.RETURN_FROM_TRIGGER = "RETN"
+ItemTrig.NO_OR_CONDITIONS_HIT = "NOOR"
+ItemTrig.PLEASE_LOG_TRIG_MISS = "LOG!"
+ItemTrig.OPCODE_FAILED        = "FAIL"
+ItemTrig.RETURN_FROM_TRIGGER  = "RETN"
 
 ItemTrig.ENTRY_POINT_BARTER     = "BRTR"
 ItemTrig.ENTRY_POINT_CRAFTING   = "CRAF"

@@ -46,14 +46,17 @@ ItemTrig.tableConditions = {
                -- None of the "OR" conditions matched, so the 
                -- trigger should fail.
                --
-               return false
+               return false, ItemTrig.NO_OR_CONDITIONS_HIT
             end
          else
             state.using_or   = true
             state.matched_or = false
          end
          return nil
-      end
+      end,
+      {
+         neverSkip = true,
+      }
    ),
    [3] = ConditionBase:new( -- Always/Never
       _s(ITEMTRIG_STRING_CONDITIONNAME_ALWAYS),
@@ -331,12 +334,20 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local name = context.formattedName
-         local stub = tostring(args[1] or "")
+         local name = context.formattedName or context.name
+         if not name then
+            return false
+         end
+         local stub = args[1]
+         if not stub then
+            return false
+         end
+         name = name:lower()
+         stub = stub:lower()
          if args[2] then
             return name:find(stub) ~= nil
          else
-            return name:lower() == stub:lower()
+            return name == stub
          end
       end
    ),
@@ -543,6 +554,18 @@ ItemTrig.tableConditions = {
       end,
       {
          explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_ALCHEMYEFFECTS),
+      }
+   ),
+   [19] = ConditionBase:new( -- Log Trigger Miss
+      _s(ITEMTRIG_STRING_CONDITIONNAME_LOGTRIGGERMISS),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_LOGTRIGGERMISS),
+      {},
+      function(state, context, args)
+         return nil, ItemTrig.PLEASE_LOG_TRIG_MISS
+      end,
+      {
+         explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_LOGTRIGGERMISS),
+         neverSkip   = true,
       }
    ),
 }

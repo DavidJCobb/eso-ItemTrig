@@ -53,3 +53,12 @@ function ItemTrig.splitByCount(s, count)
    end
    return chunks
 end
+function ItemTrig.truncateString(s, length, tail)
+   if s:len() <= length then
+      return s
+   end
+   if not tail then
+      tail = GetString(ITEMTRIG_STRING_GENERIC_TRUNCATION_MARKER)
+   end
+   return string.sub(s, 1, length) .. tail
+end

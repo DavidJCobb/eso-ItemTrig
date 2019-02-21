@@ -24,6 +24,11 @@ function ItemTrig.assignDeep(tablevar, ...)
    ItemTrig.assign(tablevar, unpack(others))
    return tablevar
 end
+function ItemTrig.clearTable(tablevar)
+   for k in pairs(tablevar) do
+      tablevar[k] = nil
+   end
+end
 function ItemTrig.compact(tablevar)
    for i = 1, #tablevar do
       if tablevar[i] == nil then
@@ -163,17 +168,37 @@ function ItemTrig.remove(tablevar, x)
       ItemTrig.compact(tablevar)
    elseif type(x) == "function" then
       local changed = false
+      local final   = {}
+      local count   = 1
       for i = 1, #tablevar do
          local test = x(i, tablevar[i])
          if test then
             changed = true
-            tablevar[i] = nil
+         else
+            final[count] = tablevar[i]
+            count = count + 1
          end
       end
       if changed then
-         ItemTrig.compact(tablevar)
+         ItemTrig.clearTable(tablevar)
+         ItemTrig.assign(tablevar, final)
       end
    end
+end
+function ItemTrig.stripNils(array, length)
+   --
+   -- Returns a copy of (array) with all nils stripped out. Retrieves 
+   -- values up to (array[length]).
+   --
+   local stripped = {}
+   local count    = 1
+   for i = 1, length do
+      if array[i] ~= nil then
+         stripped[count] = array[i]
+         count = count + 1
+      end
+   end
+   return stripped
 end
 function ItemTrig.swapBackward(tablevar, i)
    if i - 1 > 0 then

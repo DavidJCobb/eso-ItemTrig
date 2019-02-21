@@ -1,20 +1,20 @@
 if not ItemTrig then return end
 
-function ItemTrig.executeTriggerList(list, entryPoint, context)
+function ItemTrig.executeTriggerList(list, entryPoint, context, options)
+   if not options then
+      options = {}
+   end
+   local eventRecipient = options.eventRecipient
    if entryPoint then
       list = ItemTrig.filterTriggerList(list, entryPoint)
    end
    for i = 1, #list do
-      local result, extra = list[i]:exec(context, entryPoint)
+      local trigger = list[i]
+      if eventRecipient then
+         eventRecipient.topLevelTrigger = list[i]
+      end
+      local result, extra = trigger:exec(context, entryPoint, options)
       if result == ItemTrig.OPCODE_FAILED then
-         --
-         -- TODO: Present this information in a better manner.
-         --
-         d(string.format("Failed to execute an opcode in top-level trigger %s while testing item %s.", list[i].name or "", context.formattedName or context.name or "-----"))
-         if extra.opcode then
-            d(string.sub(extra.opcode:format(), 1, 240))
-         end
-         d(extra)
          return result, extra
       end
       if context:isInvalid() then -- NOTE: Assumes context instanceof ItemInterface
@@ -68,7 +68,8 @@ function ItemTrig.Trigger:new()
    result.actions     = {} -- array
    result.state = {
       using_or   = false,
-      matched_or = false
+      matched_or = false,
+      log_a_miss = false,
    }
    return result
 end
@@ -176,20 +177,65 @@ function ItemTrig.Trigger:debugDump()
       d("   " .. self.actions[i]:format())
    end
 end
-function ItemTrig.Trigger:exec(context, entryPoint)
---CHAT_SYSTEM:AddMessage("== Executing trigger " .. self.name .. "...") -- debug
+function ItemTrig.Trigger:exec(context, entryPoint, options)
+   local function _logMiss(opcode, index, extra)
+      local recipient = self.state.options.eventRecipient
+      if not (recipient and recipient.onTriggerMiss) then
+         return
+      end
+      local details = extra
+      if type(extra) ~= "table" then
+         details = { data = extra }
+      end
+      details.context = context
+      details.opcode  = opcode
+      details.index   = index
+      recipient:onTriggerMiss(self, details)
+   end
+   local function _logFailure(opcode, index, extra)
+      local recipient = self.state.options.eventRecipient
+      if not (recipient and recipient.onTriggerFail) then
+         return
+      end
+      if opcode.base == ItemTrig.TRIGGER_ACTION_RUN_NESTED then
+         --
+         -- This opcode isn't the one that failed. It was an opcode inside 
+         -- of the nested trigger, and we will already have signalled that 
+         -- failure.
+         --
+         return
+      end
+      local details = extra
+      if type(extra) ~= "table" then
+         details = { data = extra }
+      end
+      details.context = context
+      details.opcode  = opcode
+      details.index   = index
+      recipient:onTriggerFail(self, details)
+   end
+   --
    if not self.enabled then
       return false
    end
+   if not options then
+      options = {}
+   end
+   --
    self.state.using_or   = false
    self.state.matched_or = false
    self.state.entryPoint = entryPoint or nil
+   self.state.log_a_miss = false
+   self.state.options    = options
    for i = 1, #self.conditions do
       local c = self.conditions[i]
       if entryPoint and not c:allowsEntryPoint(entryPoint) then
-         return ItemTrig.OPCODE_FAILED, { opcode = c, why = _formatOpcodeEPMismatch(c) }
+         local extra = { opcode = c, why = _formatOpcodeEPMismatch(c) }
+         _logFailure(c, i, extra)
+         self:resetRuntimeState()
+         return ItemTrig.OPCODE_FAILED, extra
       end
-      if c.never_skip or not (self.state.using_or and self.state.matched_or) then
+      if c.base.neverSkip or not (self.state.using_or and self.state.matched_or) then
          --
          -- Short-circuit evaluation for ORs:
          --
@@ -200,26 +246,39 @@ function ItemTrig.Trigger:exec(context, entryPoint)
          -- switches us between OR and AND.
          --
          local r, extra = c:exec(self.state, context)
-         if not (r == nil) then
-            if r == ItemTrig.OPCODE_FAILED then
-               --
-               -- TODO: option to log when a trigger halts due to a failed 
-               -- opcode. The (extra) variable should be a table that *may* 
-               -- have a "why" field whose string value is a human-readable 
-               -- clarification on why the opcode failed.
-               --
-               r = false
-               return r, extra
-            end
+         if r == nil then
             --
             -- If a condition returns nil, then we don't treat it as true 
-            -- or false, and we just continue down the condition list.
+            -- or false, and we just continue down the condition list. We 
+            -- mainly use this for conditions that alter processing logic 
+            -- or set processing flags.
             --
+            if extra == ItemTrig.PLEASE_LOG_TRIG_MISS then
+               --
+               -- A condition has asked that we log a detailed message if 
+               -- the rest of the trigger's conditions end up not matching.
+               --
+               self.state.log_a_miss = true
+            end
+         else
+            if r == ItemTrig.OPCODE_FAILED then
+               _logFailure(c, i, extra)
+               self:resetRuntimeState()
+               return false, extra
+            end
             if self.state.using_or then
                if r then
                   self.state.matched_or = true
                end
             elseif not r then
+               --
+               -- Condition didn't match, and we're using AND.
+               --
+               if self.state.log_a_miss then
+                  local code = (extra == ItemTrig.NO_OR_CONDITIONS_HIT) and extra or nil
+                  _logMiss(c, i, { code = code })
+               end
+               self:resetRuntimeState()
                return false
             end
          end
@@ -227,6 +286,10 @@ function ItemTrig.Trigger:exec(context, entryPoint)
    end
    if self.state.using_or then
       if not self.state.matched_or then
+         if self.state.log_a_miss then
+            _logMiss(nil, nil, { code = ItemTrig.NO_OR_CONDITIONS_HIT })
+         end
+         self:resetRuntimeState()
          return false
       end
    end
@@ -236,16 +299,23 @@ function ItemTrig.Trigger:exec(context, entryPoint)
    for i = 1, #self.actions do
       local a = self.actions[i]
       if entryPoint and not a:allowsEntryPoint(entryPoint) then
-         return ItemTrig.OPCODE_FAILED, { opcode = a, why = _formatOpcodeEPMismatch(c) }
+         local extra = { opcode = a, why = _formatOpcodeEPMismatch(c) }
+         _logFailure(a, i, extra)
+         self:resetRuntimeState()
+         return ItemTrig.OPCODE_FAILED, extra
       end
       local r, extra = a:exec(self.state, context)
       if r == ItemTrig.RETURN_FROM_TRIGGER then
+         self:resetRuntimeState()
          return r
       end
       if r == ItemTrig.OPCODE_FAILED then
+         _logFailure(a, i, extra)
+         self:resetRuntimeState()
          return r, extra
       end
    end
+   self:resetRuntimeState()
    return true
 end
 function ItemTrig.Trigger:insertActionAfter(opcode, index)
@@ -261,6 +331,13 @@ function ItemTrig.Trigger:insertConditionAfter(opcode, index)
    else
       table.insert(self.conditions, opcode)
    end
+end
+function ItemTrig.Trigger:resetRuntimeState()
+   self.state.using_or   = false
+   self.state.matched_or = false
+   self.state.entryPoint = nil
+   self.state.log_a_miss = false
+   self.state.options    = nil
 end
 function ItemTrig.Trigger:serialize()
    return ItemTrig.serializeTrigobject(self)

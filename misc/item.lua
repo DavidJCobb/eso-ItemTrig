@@ -32,6 +32,15 @@ function ItemTrig.forEachBagSlot(bag, functor)
    end
 end
 
+function ItemTrig.getNaiveItemNameFor(id)
+   --
+   -- This won't work for items that can vary, like armor and weapons, but 
+   -- it should work for items that exhibit minimal variation, like stolen 
+   -- goods.
+   --
+   return GetItemLinkName("|H1:item:" .. id .. ":0:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|hUnknown Name|h")
+end
+
 local StackTools = {
    eventPrefix   = nil,
    listening     = false,
@@ -211,6 +220,14 @@ end
 ]]--
 
 local _lazyGetterMappings = {
+   --
+   -- Given a key K and a value V in this table, if you try to access 
+   -- the K field on an ItemInterface, then the V function is called, 
+   -- passed that interface as an argument. The V function's return 
+   -- value will be written to the ItemInterface. So, these functions 
+   -- retrieve data only when it's needed, and that data then gets 
+   -- cached and reused. This is handled by ItemInterface.meta.
+   --
    alchemyTraits =
       function(i)
          if i.invalid then
@@ -257,10 +274,12 @@ local _lazyGetterMappings = {
          --
          return IsItemLinkForcedNotDeconstructable(i.link) and not IsItemLinkContainer(i.link)
       end,
-   formattedName  = function(i) return LocalizeString("<<1>>", i.name) end,
-   hasJunkFlag    = function(i) return i.invalid and nil or IsItemJunk(i.bag, i.slot) end,
-   isResearchable = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
-   itemFilters    = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
+   formattedName    = function(i) return LocalizeString("<<1>>", i.name) end,
+   hasJunkFlag      = function(i) return i.invalid and nil or IsItemJunk(i.bag, i.slot) end,
+   isCrownCrateItem = function(i) return i.invalid and nil or IsItemFromCrownCrate(i.bag, i.slot) end,
+   isCrownStoreItem = function(i) return i.invalid and nil or IsItemFromCrownStore(i.bag, i.slot) end,
+   isResearchable   = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
+   itemFilters      = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
 }
 
 ItemInterface.meta = {
@@ -310,6 +329,7 @@ function ItemInterface:new(bagIndex, slotIndex)
       countTotal    = nil, -- lazy getter, via metatable
       creator       = GetItemCreatorName(bagIndex, slotIndex) or "",
       level         = GetItemLevel(bagIndex, slotIndex),
+      locked        = IsItemPlayerLocked(bagIndex, slotIndex),
       name          = GetItemName(bagIndex, slotIndex), -- NOTE: This is a raw value and may have LocalizeString-intended format codes on the end.
       --quality       = GetItemQuality(bagIndex, slotIndex),
       requiredChamp = GetItemRequiredChampionPoints(bagIndex, slotIndex),
@@ -349,7 +369,7 @@ function ItemInterface:new(bagIndex, slotIndex)
          equipType = equipType,
          icon      = icon,
          style     = itemStyleId,
-         locked    = locked,
+         --locked    = locked, -- Feb. 21 2019: the API is buggy; this variable can sometimes be wrong
          meetsUsageRequirement = meetsUsageRequirement,
          quality   = quality, -- this would be better described as "rarity"
          sellValue = sellPrice or 0,
@@ -415,6 +435,7 @@ function ItemInterface:deconstruct()
       return false, self.FAILURE_CANNOT_DECONSTRUCT
    end
    ExtractOrRefineSmithingItem(self.bag, self.slot)
+   self:onModifyingAction("deconstruct")
    self.invalid   = true
    self.destroyed = true
    return true
@@ -430,6 +451,7 @@ function ItemInterface:destroy(count)
       DestroyItem(self.bag, self.slot)
       self.destroyed = true
       self.invalid   = true
+      self:onModifyingAction("destroy", self.count)
       self:updateCount(-self.count)
    else
       if count == 0 then -- don't even bother, lol
@@ -440,7 +462,10 @@ function ItemInterface:destroy(count)
          return false, code
       end
       self.invalid = true
-      result:done(function(bag, slot) DestroyItem(bag, slot) end)
+      result:done(function(bag, slot)
+         DestroyItem(bag, slot)
+         self:onModifyingAction("destroy", count)
+      end)
    end
    return true
 end
@@ -472,6 +497,7 @@ function ItemInterface:launder(count)
       return false, self.FAILURE_ZENIMAX_LAUNDER_LIMIT
    end
    LaunderItem(self.bag, self.slot, count)
+   self:onModifyingAction("launder", count)
    self:updateCount(-count)
    return true
 end
@@ -482,7 +508,11 @@ function ItemInterface:modifyJunkState(flag)
    if self.canBeJunk then
       SetItemIsJunk(self.bag, self.slot, flag)
       self.hasJunkFlag = IsItemJunk(self.bag, self.slot)
-      return self.hasJunkFlag == flag
+      local result = self.hasJunkFlag == flag
+      if result then
+         self:onModifyingAction("modifyJunkState", flag)
+      end
+      return result
    end
    return false, ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK
 end
@@ -493,9 +523,22 @@ function ItemInterface:modifyLockState(flag)
    if self.canBeLocked then
       SetItemIsPlayerLocked(self.bag, self.slot, flag)
       self.locked = IsItemPlayerLocked(self.bag, self.slot)
-      return self.locked == flag
+      local result = self.locked == flag
+      if result then
+         self:onModifyingAction("modifyLockState", flag)
+      end
+      return result
    end
    return false, ItemInterface.FAILURE_CANNOT_LOCK
+end
+function ItemInterface:onModifyingAction(action, ...)
+   --
+   -- The environment -- the broader add-on that this system is being 
+   -- used in -- should override this function on the class, to run 
+   -- code whenever an action is taken that will modify an item.
+   --
+   -- The (action) parameter is a string.
+   --
 end
 function ItemInterface:sell(count)
    if self:isInvalid() then
@@ -508,6 +551,7 @@ function ItemInterface:sell(count)
       count = self.count
    end
    SellInventoryItem(self.bag, self.slot, count)
+   self:onModifyingAction("sell", count)
    self:updateCount(-count)
 end
 function ItemInterface:totalForBag(bag)

@@ -1,6 +1,42 @@
 ZO_CreateStringId("ITEMTRIG_STRING_UI_GENERIC_CONFIRM_YES", "Yes")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_GENERIC_CONFIRM_NO", "No")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_GENERIC_CONFIRM_TITLE", "Are you sure?") -- confirmation prompt window title, if none is specified
+ZO_CreateStringId("ITEMTRIG_STRING_GENERIC_TRUNCATION_MARKER", "...")
+--
+--
+-- OPTIONS
+--
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_ALLOWTRIGGERS", "Allow triggers to run on...")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONCROWNCRATEITEMS", "Crown Crate items")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONCROWNCRATEITEMS", "Control whether triggers are run on Crown Crate items.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONCROWNSTOREITEMS", "Crown Store items")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONCROWNSTOREITEMS", "Control whether triggers are run on Crown Store items.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONLOCKEDITEMS", "Locked items")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONLOCKEDITEMS", "Control whether triggers are run on locked items.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_LOGGING", "Logging")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGALLITEMACTIONS", "Log actions taken on items")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGALLITEMACTIONS", "Log all actions taken on an item.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERMISSES", "Log trigger misses")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERMISSES", "Log every time a trigger's conditions don't match an item.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERFAILURES", "Log trigger failures")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES", "Log every time a trigger stops early due to an error.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_EXTRA", "Extra features")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ROBUSTFENCING", "Robust Fencing")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ROBUSTFENCING", "For the \"Fence\" entry point, sort items by value before running triggers on them, so that the most valuable items are fenced or laundered first.")
+--
+--
+-- USER INTERFACE
+--
 --
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_TITLE", "ItemTrig")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_FILTER_SHOW_ALL", "Show All Triggers")
@@ -105,6 +141,40 @@ ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_UNSTOPPABLE",     "Unstoppable"
 ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_VITALITY",        "Vitality") -- Increases your healing taken by __% for _ seconds
 ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_VULNERABILITY",   "Vulnerability") -- Increases your damage taken by __% for _ seconds
 ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_WEAPONCRITICAL",  "Weapon Critical") -- Gives you ____ Weapon Critical Rating for _ seconds
+--
+--
+-- MISCELLANEOUS
+--
+--
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DECONSTRUCT", "|cFFA020ItemTrig:|r Deconstructed <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",     "|cFFA020ItemTrig:|r Destroyed <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",     "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",        "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
+--
+-- Messages shown when a trigger stops due to an error, if the player has 
+-- fault logging enabled. We use black-colored dots to indent the text; 
+-- leading spaces will be stripped out.
+--
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_BASE",      "|cFFA020ItemTrig: Encountered an error in a trigger.|r")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_ITEM",      "|c000000...|r|cFFA020Item:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_TRIG",      "|c000000...|r|cFFA020Faulting Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_TRIG_TOP",  "|c000000...|r|cFFA020Containing Top-Level Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_OP_C",      "|c000000...|r|cFFA020Condition:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_OP_A",      "|c000000...|r|cFFA020Action:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_REASON",    "|c000000...|r<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_ERRORCODE", "|c000000...|r|cFFA020Error code:|r <<1>>")
+--
+-- Messages shown when a trigger's conditions fail to match, if the missed 
+-- condition was preceded by a "Log Trigger Miss" condition. We use black-
+-- colored dots to indent the text; leading spaces will be stripped out.
+--
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BASE",      "|cFFA020ItemTrig: A trigger's conditions didn't match.|r")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_ITEM",      "|c000000...|r|cFFA020Item:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_TRIG",      "|c000000...|r|cFFA020Missed Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_TRIG_TOP",  "|c000000...|r|cFFA020Containing Top-Level Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_COND",      "|c000000...|r|cFFA020<<i:2>> condition:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_NO_ORS",    "|c000000...|rNone of the OR-linked conditions had matched by this point.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BAD_TAIL_ORS", "|c000000...|rNone of the OR-linked conditions at the end matched.")
 --
 --
 -- SYSTEM
@@ -229,8 +299,13 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_ANYNONSTYLE", "[no style]
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ALCHEMYEFFECTS", "Alchemy Effects")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ALCHEMYEFFECTS", "The reagent <<1>> a known effect named <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_ALCHEMYEFFECTS", "Due to game engine limitations, this condition can only check the effects your character has discovered.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_NO",  "does not have")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_YES", "has")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_LOGTRIGGERMISS", "Log Trigger Miss")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_LOGTRIGGERMISS", "Log debugging information if this trigger's conditions don't match.")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_LOGTRIGGERMISS", "If this condition is reached, then a detailed message will be logged if the trigger's conditions don't match. Only conditions after this one will log a message.")
 --
 --
 -- ACTIONS
@@ -288,3 +363,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE", "This it
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME",    "Destroy common style materials past one stack, unless withdrawn or purchased")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_MESSAGE", "You have a full stack of $(name) already. Destroying the $(countAdded) that were added.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME",           "Destroy low-rarity stolen treasures")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME_NESTED_01", "...Unless we can stockpile them for The Covetous Countess")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_MESSAGE",        "Destroyed incoming $(name).")

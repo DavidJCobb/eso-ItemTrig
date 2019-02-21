@@ -31,6 +31,7 @@ function ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
       end
       result.allowedEntryPoints = extra.allowedEntryPoints or nil -- nil == no limit; else, array
       result.explanation        = extra.explanation or nil
+      result.neverSkip          = extra.neverSkip or false -- Indicates that a condition shouldn't be skipped when doing short-circuiting for ORs
    end
    return result
 end

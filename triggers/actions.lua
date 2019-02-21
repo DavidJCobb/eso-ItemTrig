@@ -69,7 +69,7 @@ ItemTrig.tableActions = {
          [1] = { type = "trigger" },
       },
       function(state, context, args)
-         local r = args[1]:exec(context)
+         local r = args[1]:exec(context, nil, state.options)
          if r == ItemTrig.RETURN_FROM_TRIGGER then
             return r
          end

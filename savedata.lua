@@ -37,12 +37,23 @@ end
 
 ItemTrig.Savedata = {
    [" DATA"] = savedVars,
+   prefs    = nil, -- if not nil, then it is a field in the character data; should autosave
    triggers = {},
 }
 function ItemTrig.Savedata:save(characterID)
    _saveTriggers(characterID, self.triggers)
 end
 function ItemTrig.Savedata:load(characterID)
+   local character = savedVars:character(characterID)
+   local cData     = character:data()
+   do -- set up prefs
+      local p = cData.prefs
+      if not p then
+         cData.prefs = {}
+         p = cData.prefs
+      end
+      self.prefs = p
+   end
    self.triggers = self:loadTriggersFor(characterID)
 end
 
