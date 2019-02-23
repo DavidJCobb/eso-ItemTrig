@@ -7,6 +7,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_GENERIC_TRUNCATION_MARKER", "...")
 -- OPTIONS
 --
 --
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONBUTTON_EDITTRIGGERS", "Edit triggers...")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_EDITTRIGGERS", "Click here to edit the rules you've set for handling items.")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_ALLOWTRIGGERS", "Allow triggers to run on...")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONCROWNCRATEITEMS", "Crown Crate items")
@@ -21,7 +24,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONLOCKEDITEMS", "Cont
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_LOGGING", "Logging")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGALLITEMACTIONS", "Log actions taken on items")
-ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGALLITEMACTIONS", "Log all actions taken on an item.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGALLITEMACTIONS", "Log whenever an action is taken on an item to destroy it, get rid of it, or otherwise move it.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERMISSES", "Log trigger misses")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERMISSES", "Log every time a trigger's conditions don't match an item.")
@@ -306,6 +309,24 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_YES", "has")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_LOGTRIGGERMISS", "Log Trigger Miss")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_LOGTRIGGERMISS", "Log debugging information if this trigger's conditions don't match.")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_LOGTRIGGERMISS", "If this condition is reached, then a detailed message will be logged if the trigger's conditions don't match. Only conditions after this one will log a message.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_PRIORITYSELL", "Priority Sell")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_PRIORITYSELL", "The item <<1>> basically useless and only good for selling.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CROWNITEM", "Crown Item")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CROWNITEM", "The item <<1>> <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CROWNITEM_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CROWNITEM_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CROWNITEM_STORE",  "a Crown Store item")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CROWNITEM_CRATE",  "a Crown Crate item")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CROWNITEM_ANY",  "a Crown Crate or Crown Store item")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ENLIGHTENED", "Enlightened")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ENLIGHTENED", "The player-character <<1>> Enlightened and will earn experience at a boosted rate.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ENLIGHTENED_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ENLIGHTENED_YES", "is")
 --
 --
 -- ACTIONS

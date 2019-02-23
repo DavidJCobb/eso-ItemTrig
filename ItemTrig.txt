@@ -33,6 +33,7 @@ lang/$(language).lua
 ItemTrig.lua
 misc/deferred.lua
 misc/gameEnums.lua
+misc/hook.lua
 misc/math.lua
 misc/savedata.lua
 misc/set.lua
@@ -78,6 +79,7 @@ trigedit/opcodearg.xml
 confirm.lua
 confirm.xml
 savedata.lua
+bindings.xml
 
 # This Add-on is not created by, affiliated with, or sponsored by, ZeniMax Media Inc. or its affiliates.
 # The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States

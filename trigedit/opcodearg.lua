@@ -123,6 +123,7 @@ do -- helper classes for views
 end
 
 function WinCls:_construct()
+   self:pushActionLayer("ItemTrigBlockMostKeys")
    self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEARGEDIT_TITLE))
    --
    local control = self:asControl()
@@ -150,9 +151,10 @@ function WinCls:_construct()
       },
    })
    do -- scene setup
-      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_OPCODEARGEDIT")
+      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control)
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)
+      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
+      self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
    end
    do
       local viewholder   = ItemTrig.UI.WViewHolder:cast(self:GetNamedChild("Body"))

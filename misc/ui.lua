@@ -76,6 +76,12 @@ function ItemTrig.offsetBottom(control, basis)
       return control:GetBottom()
    end
 end
+function ItemTrig.registerTrigeditWindowFragment(control)
+   local fragment = ZO_SimpleSceneFragment:New(control, "ItemTrigBlockMostKeys")
+   ItemTrig.SCENE_TRIGEDIT:AddFragment(fragment)
+   SCENE_MANAGER:RegisterTopLevel(control, false)
+   return fragment
+end
 
 --
 -- THEMING HELPERS

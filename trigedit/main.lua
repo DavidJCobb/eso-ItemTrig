@@ -1,6 +1,7 @@
 if not ItemTrig then return end
 
 ItemTrig.SCENE_TRIGEDIT = ZO_Scene:New("ItemTrig_TrigEdit_Scene", SCENE_MANAGER)
+ItemTrig.SCENE_TRIGEDIT:AddFragment(ZO_ActionLayerFragment:New("ItemTrigBlockMostKeys"))
 
 local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("TriggerListWindow")
 ItemTrig:registerWindow("triggerList", WinCls)
@@ -141,6 +142,7 @@ do -- helper class for trigger list entries
 end
 
 function WinCls:_construct()
+   self:pushActionLayer("ItemTrigBlockMostKeys")
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_TITLE))
    self:setResizeThrottle(5) -- throttle resize frame handler to every five frames
    --
@@ -167,9 +169,10 @@ function WinCls:_construct()
       },
    })
    do -- scene setup
-      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGERLIST")
+      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGERLIST")
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)
+      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
+      self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
    end
    do -- entry point filter list
       local pane = ItemTrig.UI.WScrollSelectList:cast(self:controlByPath("Body", "Col1"))

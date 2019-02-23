@@ -22,6 +22,7 @@ local WinCls = ItemTrig.UI.WSingletonWindow:makeSubclass("OpcodeEditWindow")
 ItemTrig:registerWindow("opcodeEdit", WinCls)
 
 function WinCls:_construct()
+   self:pushActionLayer("ItemTrigBlockMostKeys")
    self:setTitle(GetString(ITEMTRIG_STRING_UI_OPCODEEDIT_TITLE))
    --
    local control = self:asControl()
@@ -45,9 +46,10 @@ function WinCls:_construct()
       },
    })
    do -- scene setup
-      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_OPCODEEDIT")
+      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control)
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)
+      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
+      self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
    end
    do -- combobox setup
       self.ui.opcodeType = ItemTrig.UI.WCombobox:cast(ItemTrig_OpcodeEdit_Opcode)

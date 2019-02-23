@@ -274,10 +274,26 @@ local _lazyGetterMappings = {
          --
          return IsItemLinkForcedNotDeconstructable(i.link) and not IsItemLinkContainer(i.link)
       end,
-   formattedName    = function(i) return LocalizeString("<<1>>", i.name) end,
+   formattedName = function(i) return LocalizeString("<<1>>", i.name) end,
+   gemifyData =
+      function(i)
+         if i.invalid then
+            return nil
+         end
+         if not i.isCrownCrateItem then
+            return nil
+         end
+         local itemsPer, gemsPer = GetNumCrownGemsFromItemManualGemification(i.bag, i.slot)
+         return {
+            itemsPerOperation = itemsPer,
+            gemsPerOperation  = gemsPer,
+         }
+      end,
    hasJunkFlag      = function(i) return i.invalid and nil or IsItemJunk(i.bag, i.slot) end,
+   isBound          = function(i) return i.invalid and nil or IsItemBound(i.bag, i.slot) end,
    isCrownCrateItem = function(i) return i.invalid and nil or IsItemFromCrownCrate(i.bag, i.slot) end,
    isCrownStoreItem = function(i) return i.invalid and nil or IsItemFromCrownStore(i.bag, i.slot) end,
+   isPrioritySell   = function(i) return i.invalid and nil or IsItemLinkPrioritySell(i.link) end,
    isResearchable   = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
    itemFilters      = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
 }
@@ -424,6 +440,16 @@ function ItemInterface:canDeconstruct()
    end
    return false
 end
+function ItemInterface:canGemify()
+   if self:isInvalid() then
+      return
+   end
+   if self.locked then
+      return false
+   end
+   local data = self.gemifyData
+   return data.itemsPerOperation > 0 and data.gemsPerOperation > 0
+end
 function ItemInterface:deconstruct()
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
@@ -434,6 +460,9 @@ function ItemInterface:deconstruct()
    if not self:canDeconstruct() then
       return false, self.FAILURE_CANNOT_DECONSTRUCT
    end
+   --
+   -- TODO: We need to use ExtractEnchantingItem for glyphs
+   --
    ExtractOrRefineSmithingItem(self.bag, self.slot)
    self:onModifyingAction("deconstruct")
    self.invalid   = true

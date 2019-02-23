@@ -32,6 +32,15 @@ ItemTrig.gameEnums.alchemyEffectStrings = {
    [-29] = GetString(ITEMTRIG_STRING_ALCHEMYEFFECT_WEAPONCRITICAL),
 }
 ItemTrig.gameEnums.styles = {
+   --
+   -- TODO: Test:
+   --
+   --    local styles = {}
+   --    for i = 1, GetNumValidItemStyles() do
+   --       local id = GetValidItemStyleId(i)
+   --       styles[id] = GetItemStyleName(id)
+   --    end
+   --
    [ITEMSTYLE_ALLIANCE_ALDMERI]       = GetItemStyleName(ITEMSTYLE_ALLIANCE_ALDMERI),
    [ITEMSTYLE_ALLIANCE_DAGGERFALL]    = GetItemStyleName(ITEMSTYLE_ALLIANCE_DAGGERFALL),
    [ITEMSTYLE_ALLIANCE_EBONHEART]     = GetItemStyleName(ITEMSTYLE_ALLIANCE_EBONHEART),

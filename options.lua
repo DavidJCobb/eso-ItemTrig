@@ -17,11 +17,24 @@ local menu = {
 }
 local options = {
    {
+      type    = "button",
+      name    = GetString(ITEMTRIG_STRING_OPTIONBUTTON_EDITTRIGGERS),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_EDITTRIGGERS),
+      width   = "half",
+      func    =
+         function()
+            local pauseMenuScene = SCENE_MANAGER:GetScene("gameMenuInGame")
+            if pauseMenuScene:GetState() == SCENE_SHOWN then
+               SCENE_MANAGER:Hide(pauseMenuScene.name)
+            end
+            ItemTrig.windows.triggerList:show()
+         end,
+   },
+   {
       type = "header",
       name = GetString(ITEMTRIG_STRING_OPTIONHEADER_ALLOWTRIGGERS),
    },
-   {
-      -- NEEDS TESTING
+   {  -- NEEDS TESTING
       -- Allow triggers to run on Crown Crate items
       --
       type    = "checkbox",
@@ -30,8 +43,7 @@ local options = {
       getFunc = function()  return prefs:get("runTriggersOn/crownCrateItems") end,
       setFunc = function(v) prefs:set("runTriggersOn/crownCrateItems", v) end,
    },
-   {
-      -- NEEDS TESTING
+   {  -- NEEDS TESTING
       -- Allow triggers to run on Crown Store items
       --
       type    = "checkbox",
@@ -52,9 +64,7 @@ local options = {
       type = "header",
       name = GetString(ITEMTRIG_STRING_OPTIONHEADER_LOGGING),
    },
-   {
-      -- NOT YET IMPLEMENTED
-      -- Log all actions taken on an item
+   {  -- Log all actions taken on an item
       --
       type    = "checkbox",
       name    = GetString(ITEMTRIG_STRING_OPTIONNAME_LOGALLITEMACTIONS),
@@ -62,9 +72,7 @@ local options = {
       getFunc = function()  return prefs:get("logging/actionsTaken") end,
       setFunc = function(v) prefs:set("logging/actionsTaken", v) end,
    },
-   {
-      -- NOT YET IMPLEMENTED
-      -- Log when a trigger stops due to an error
+   {  -- Log when a trigger stops due to an error
       --
       type    = "checkbox",
       name    = GetString(ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERFAILURES),
@@ -76,8 +84,7 @@ local options = {
       type = "header",
       name = GetString(ITEMTRIG_STRING_OPTIONHEADER_EXTRA),
    },
-   {
-      -- NEEDS TESTING
+   {  -- Pre-sort items in the "fence" entry point, by value, descending
       --
       type    = "checkbox",
       name    = GetString(ITEMTRIG_STRING_OPTIONNAME_ROBUSTFENCING),

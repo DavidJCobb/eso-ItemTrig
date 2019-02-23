@@ -1,0 +1,70 @@
+<Bindings>
+   <Layer name="ItemTrigBlockMostKeys">
+      <Category>
+         <Action name="ITEMTRIG_INTERCEPT_UI_SHORTCUT_EXIT" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_EXIT">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_UI_SHORTCUT_NEGATIVE" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+             <Down>return true</Down>
+         </Action>
+         <!-- We don't want to disable the Esc key.
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_SYSTEM" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SYSTEM">
+             <Down>return true</Down>
+         </Action>-->
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_MARKET" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MARKET">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_INVENTORY" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_INVENTORY">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CHARACTER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CHARACTER">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_SKILLS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SKILLS">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CHAMPION" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CHAMPION">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_JOURNAL" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_JOURNAL">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_COLLECTIONS_BOOK" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_COLLECTIONS_BOOK">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_MAP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAP">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GROUP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GROUP">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CONTACTS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CONTACTS">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GUILDS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GUILDS">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_ALLIANCE_WAR" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ALLIANCE_WAR">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_MAIL" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAIL">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_NOTIFICATIONS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_NOTIFICATIONS">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_ACTIVITY_FINDER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ACTIVITY_FINDER">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CROWN_CRATES" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CROWN_CRATES">
+             <Down>return true</Down>
+         </Action>
+         <Action name="ITEMTRIG_INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
+             <Down>return true</Down>
+         </Action>
+      </Category>
+   </Layer>
+</Bindings>

@@ -41,6 +41,7 @@ function WWindow:_construct(options)
       titleExit = nil,
    }
    self.prefs = {
+      actionLayers       = options.actionLayers       or {},    -- array of action layers to be pushed
       centerIfModal      = options.centerIfModal      or false, -- if true, then the modal opens at the center of the screen; if false, it opens relative to its creator
       forceIntegerCoords = options.forceIntegerCoords or false, -- if true, then the modal forces itself to integer coordinates, which can help with rounding errors on control positions
       modalOnly          = options.modalOnly          or false, -- boolean OR the name of the only allowed opener
@@ -48,9 +49,10 @@ function WWindow:_construct(options)
    }
    self.style = ItemTrig.assignDeep({}, self:getClass().style, WWindow.style) -- TODO: metatables
    self.state = {
-      moving           = false,
-      resizing         = false,
-      resizeFramecount = 0,
+      lastActionLayerUpdate = nil,
+      moving                = false,
+      resizing              = false,
+      resizeFramecount      = 0,
    }
    self.modalState = {
       child    = nil, -- WWindow: a modal that we've opened
@@ -70,6 +72,14 @@ function WWindow:_construct(options)
          self.controls.titleExit:SetHidden(true)
       end
    end
+   ZO_PreHookHandler(control, "OnEffectivelyShown",
+      function(self)
+         local window = ItemTrig.UI.WWindow:cast(self)
+         if window then
+            window:_updateActionLayers()
+         end
+      end
+   )
    ZO_PreHookHandler(control, "OnEffectivelyHidden",
       function(self)
          local window = ItemTrig.UI.WWindow:cast(self)
@@ -88,6 +98,10 @@ function WWindow:_construct(options)
    self:refreshStyle()
 end
 
+function WWindow:pushActionLayer(name)
+   table.insert(self.prefs.actionLayers, name)
+   self:_updateActionLayers()
+end
 function WWindow:refreshStyle()
    local edge  = self:GetNamedChild("Bg")
    local fill  = GetControl(edge, "Fill")
@@ -186,6 +200,7 @@ function WWindow:_onChildModalHidden()
    self.modalState.child = nil
    self.controls.blocker:SetHidden(true)
    self:refreshStyle()
+   self:_updateActionLayers()
 end
 function WWindow:onChildModalHidden()
    --
@@ -224,7 +239,13 @@ function WWindow:_onHide()
       self.modalState.deferred = nil
       self:handleModalDeferredOnHide(deferred)
    end
+   if self.modalState.opener then
+      PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+   else
+      PlaySound(SOUNDS.GAMEPAD_CLOSE_WINDOW)
+   end
    self.modalState.opener = nil
+   self:_updateActionLayers()
 end
 function WWindow:onHide()
    --
@@ -280,6 +301,7 @@ function WWindow:show(...)
    SCENE_MANAGER:ShowTopLevel(c)
    c:BringWindowToTop()
    self:onShow()
+   PlaySound(SOUNDS.GAMEPAD_OPEN_WINDOW)
 end
 function WWindow:hide()
    SCENE_MANAGER:HideTopLevel(self:asControl())
@@ -385,6 +407,7 @@ function WWindow:showModal(modal, ...)
       end
       SCENE_MANAGER:ShowTopLevel(control)
       control:BringWindowToTop()
+      PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
    end
    self:refreshStyle()
    return deferred:promise()
@@ -394,6 +417,20 @@ function WWindow:getTitle()
 end
 function WWindow:setTitle(text)
    return self.controls.titleText:SetText(text)
+end
+function WWindow:_updateActionLayers()
+   local visible = not (self:asControl():IsHidden() or self.modalState.child)
+   if visible == self.state.lastActionLayerUpdate then
+      return
+   end
+   for i = 1, #self.prefs.actionLayers do
+      local layer = self.prefs.actionLayers[i]
+      RemoveActionLayerByName(layer)
+      if visible then
+         PushActionLayerByName(layer)
+      end
+   end
+   self.state.lastActionLayerUpdate = visible
 end
 
 --[[--

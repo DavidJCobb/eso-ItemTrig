@@ -568,6 +568,85 @@ ItemTrig.tableConditions = {
          neverSkip   = true,
       }
    ),
+   [20] = ConditionBase:new( -- Priority Sell
+      _s(ITEMTRIG_STRING_CONDITIONNAME_PRIORITYSELL),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_PRIORITYSELL),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if args[1] then
+            return context.isPrioritySell
+         end
+         return not context.isPrioritySell
+      end
+   ),
+   [21] = ConditionBase:new( -- Is Crown Item
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CROWNITEM),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CROWNITEM),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_STORE),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_CRATE),
+               [3] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_ANY),
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            if args[2] == 1 then
+               result = context.isCrownStoreItem
+            elseif args[2] == 2 then
+               result = context.isCrownCrateItem
+            elseif args[2] == 3 then
+               result = context.isCrownCrateItem or context.isCrownStoreItem
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [22] = ConditionBase:new( -- Enlightened
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ENLIGHTENED),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ENLIGHTENED),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ENLIGHTENED_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ENLIGHTENED_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = IsEnlightenedAvailableForCharacter() and GetEnlightenedPool() > 0
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do

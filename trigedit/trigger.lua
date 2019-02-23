@@ -245,14 +245,16 @@ do -- editor state
 end
 
 function WinCls:_construct()
+   self:pushActionLayer("ItemTrigBlockMostKeys")
    self:setTitle(GetString(ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT))
    --
    local control = self:asControl()
    self.ui = {}
    do -- scene setup
-      self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGEREDIT")
+      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control)
       ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)
+      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
+      self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
    end
    self.stack      = TriggerStack:new() -- state of the trigger(s) we're editing; nested; "last" frame is the innermost edited trigger
    self.refreshing = true
