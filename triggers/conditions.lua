@@ -134,6 +134,10 @@ ItemTrig.tableConditions = {
                [-2] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYFOODORDRINK),
                [-3] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYGLYPH),
                [-4] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYRUNE),
+               [-5] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYCRAFTMAT),
+               [-6] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYTRAITMAT),
+               [-7] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYUNREFINED),
+               [-8] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYREFINED),
                --
                -- Some of the built-in categories below appear to be unused; UESP's 
                -- database lists zero items in the categories, and some of them appear 
@@ -192,6 +196,8 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_JEWELRYCRAFTING_MATERIAL]     = GetString(ITEMTRIG_STRING_ITEMTYPE_REFINEDMATJEWELRY),
                [ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER]  = GetString(SI_ITEMTYPE0 + ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER),
                [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] = GetString(ITEMTRIG_STRING_ITEMTYPE_RAWMATJEWELRY),
+               [ITEMTYPE_JEWELRY_RAW_TRAIT]          = GetString(SI_ITEMTYPE0 + ITEMTYPE_JEWELRY_RAW_TRAIT)
+               [ITEMTYPE_JEWELRY_TRAIT]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_JEWELRY_TRAIT)
                [ITEMTYPE_LOCKPICK]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_LOCKPICK),
                [ITEMTYPE_LURE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_LURE),
                [ITEMTYPE_MASTER_WRIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_MASTER_WRIT),
@@ -203,7 +209,7 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_POTION]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_POTION),
                [ITEMTYPE_POTION_BASE]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_POTION_BASE),
                [ITEMTYPE_RACIAL_STYLE_MOTIF]         = GetString(SI_ITEMTYPE0 + ITEMTYPE_RACIAL_STYLE_MOTIF),
-               [ITEMTYPE_RAW_MATERIAL]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_RAW_MATERIAL),
+               [ITEMTYPE_RAW_MATERIAL]               = GetString(ITEMTRIG_STRING_ITEMTYPE_RAWSTYLEMATERIAL),
                [ITEMTYPE_REAGENT]                    = GetString(SI_ITEMTYPE0 + ITEMTYPE_REAGENT),
                [ITEMTYPE_RECIPE]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_RECIPE),
                [ITEMTYPE_SIEGE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SIEGE),
@@ -228,16 +234,75 @@ ItemTrig.tableConditions = {
       function(state, context, args)
          assert(ItemInterface:is(context))
          local result = context.type == args[2]
-         if args[2] < 0 then
+         if args[2] < 0 then -- Custom categories -- generally, aggregates of multiple built-ins.
             local t = context.type
-            if args[2] == -1 then
+            result = false
+            if args[2] == -1 then -- any alchemy solvent
                result = (t == ITEMTYPE_POISON_BASE) or (t == ITEMTYPE_POTION_BASE)
-            elseif args[2] == -2 then
+            elseif args[2] == -2 then -- any food or drink
                result = (t == ITEMTYPE_FOOD) or (t == ITEMTYPE_DRINK)
-            elseif args[2] == -3 then
+            elseif args[2] == -3 then -- any enchanting glyph
                result = (t == ITEMTYPE_GLYPH_ARMOR) or (t == ITEMTYPE_GLYPH_JEWELRY) or (t == ITEMTYPE_GLYPH_WEAPON)
-            elseif args[2] == -4 then
+            elseif args[2] == -4 then -- any enchanting rune
                result = (t == ITEMTYPE_ENCHANTING_RUNE_ASPECT) or (t == ITEMTYPE_ENCHANTING_RUNE_ESSENCE) or (t == ITEMTYPE_ENCHANTING_RUNE_POTENCY)
+            elseif args[2] == -5 then -- any crafting material
+               if result == ITEMTYPE_ARMOR_TRAIT
+               or result == ITEMTYPE_BLACKSMITHING_BOOSTER
+               or result == ITEMTYPE_BLACKSMITHING_MATERIAL
+               or result == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
+               or result == ITEMTYPE_CLOTHIER_BOOSTER
+               or result == ITEMTYPE_CLOTHIER_MATERIAL
+               or result == ITEMTYPE_CLOTHIER_RAW_MATERIAL
+               or result == ITEMTYPE_ENCHANTING_RUNE_ASPECT
+               or result == ITEMTYPE_ENCHANTING_RUNE_ESSENCE
+               or result == ITEMTYPE_ENCHANTING_RUNE_POTENCY
+               or result == ITEMTYPE_FURNISHING_MATERIAL
+               or result == ITEMTYPE_INGREDIENT
+               or result == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
+               or result == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
+               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
+               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
+               or result == ITEMTYPE_JEWELRY_RAW_TRAIT
+               or result == ITEMTYPE_JEWELRY_TRAIT
+               or result == ITEMTYPE_POISON_BASE
+               or result == ITEMTYPE_POTION_BASE
+               or result == ITEMTYPE_RAW_MATERIAL
+               or result == ITEMTYPE_REAGENT
+               or result == ITEMTYPE_WEAPON_TRAIT
+               or result == ITEMTYPE_WOODWORKING_BOOSTER
+               or result == ITEMTYPE_WOODWORKING_MATERIAL
+               or result == ITEMTYPE_WOODWORKING_RAW_MATERIAL
+               then
+                  result = true
+               end
+            elseif args[2] == -6 then -- any trait material
+               if result == ITEMTYPE_ARMOR_TRAIT
+               or result == ITEMTYPE_JEWELRY_TRAIT
+               or result == ITEMTYPE_WEAPON_TRAIT
+               then
+                  result = true
+               end
+            elseif args[2] == -7 then -- any unrefined material
+               if result == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
+               or result == ITEMTYPE_CLOTHIER_RAW_MATERIAL
+               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
+               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
+               or result == ITEMTYPE_JEWELRY_RAW_TRAIT
+               or result == ITEMTYPE_WOODWORKING_RAW_MATERIAL
+               or result == ITEMTYPE_RAW_MATERIAL -- raw style material
+               then
+                  result = true
+               end
+            elseif args[2] == -8 then -- any refined material
+               if result == ITEMTYPE_BLACKSMITHING_MATERIAL
+               or result == ITEMTYPE_CLOTHIER_MATERIAL
+               or result == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
+               or result == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
+               or result == ITEMTYPE_JEWELRY_TRAIT
+               or result == ITEMTYPE_WOODWORKING_MATERIAL
+               then
+                  result = true
+               end
             end
          end
          if args[1] then

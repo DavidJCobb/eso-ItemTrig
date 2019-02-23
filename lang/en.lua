@@ -95,6 +95,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES", "A
 -- effects a potion or reagent has.
 --
 --
+ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWSTYLEMATERIAL",  "Raw Style Material")
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATCLOTHING",    "Raw Material, Clothier")
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATJEWELRY",     "Raw Material, Jewelry")
 ZO_CreateStringId("ITEMTRIG_STRING_ITEMTYPE_RAWMATSMITHING",    "Raw Material, Blacksmithing")
@@ -242,6 +243,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYSOLVENT",     "[any alc
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYFOODORDRINK", "[any food or drink]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYGLYPH",       "[any enchanting glyph]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYRUNE",        "[any enchanting rune]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYCRAFTMAT",    "[any crafting material]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYTRAITMAT",    "[any trait material]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYUNREFINED",   "[any unrefined material]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYREFINED",     "[any refined material]")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CRAFTED", "Crafted By Player (Yes/No)")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CRAFTED", "The item <<1>> crafted by a player.")
