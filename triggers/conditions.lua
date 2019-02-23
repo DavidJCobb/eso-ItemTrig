@@ -130,9 +130,34 @@ ItemTrig.tableConditions = {
             type = "number",
             default = ITEMTYPE_TREASURE,
             enum = {
-               [ITEMTYPE_ADDITIVE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_ADDITIVE),
+               [-1] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYSOLVENT),
+               [-2] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYFOODORDRINK),
+               [-3] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYGLYPH),
+               [-4] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYRUNE),
+               --
+               -- Some of the built-in categories below appear to be unused; UESP's 
+               -- database lists zero items in the categories, and some of them appear 
+               -- to have been scrapped (e.g. "enchanting boosters," which would've 
+               -- been comparable to boosters in smithing; the functionality has been 
+               -- incorporated into one of the three runestones). These unused 
+               -- categories have been commented out; there is no point in letting 
+               -- the player select them.
+               --
+               -- The exceptions I'm making are:
+               --
+               -- COSTUME
+               --    Contains an obviously unused item named "WARDENCOSPREV," which 
+               --    has a "missing" icon and no data.
+               --
+               -- PLUG
+               --    Contains one item which is obviously an early version of glyphs, 
+               --    and which has no Google hits outside of UESP's database.
+               --
+               -- Those are hidden as well.
+               --
+               --[ITEMTYPE_ADDITIVE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_ADDITIVE), -- Category is unused?
                [ITEMTYPE_ARMOR]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR),
-               [ITEMTYPE_ARMOR_BOOSTER]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_BOOSTER),
+               --[ITEMTYPE_ARMOR_BOOSTER]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_BOOSTER),
                [ITEMTYPE_ARMOR_TRAIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_TRAIT),
                [ITEMTYPE_AVA_REPAIR]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_AVA_REPAIR),
                [ITEMTYPE_BLACKSMITHING_BOOSTER]      = GetString(SI_ITEMTYPE0 + ITEMTYPE_BLACKSMITHING_BOOSTER),
@@ -143,7 +168,7 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_CLOTHIER_RAW_MATERIAL]      = GetString(ITEMTRIG_STRING_ITEMTYPE_RAWMATCLOTHING),
                [ITEMTYPE_COLLECTIBLE]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_COLLECTIBLE),
                [ITEMTYPE_CONTAINER]                  = GetString(SI_ITEMTYPE0 + ITEMTYPE_CONTAINER),
-               [ITEMTYPE_COSTUME]                    = GetString(SI_ITEMTYPE0 + ITEMTYPE_COSTUME),
+               --[ITEMTYPE_COSTUME]                    = GetString(SI_ITEMTYPE0 + ITEMTYPE_COSTUME),
                [ITEMTYPE_CROWN_ITEM]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_CROWN_ITEM),
                [ITEMTYPE_CROWN_REPAIR]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_CROWN_REPAIR),
                [ITEMTYPE_DEPRECATED]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_DEPRECATED),
@@ -153,9 +178,9 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_ENCHANTING_RUNE_ASPECT]     = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTING_RUNE_ASPECT),
                [ITEMTYPE_ENCHANTING_RUNE_ESSENCE]    = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTING_RUNE_ESSENCE),
                [ITEMTYPE_ENCHANTING_RUNE_POTENCY]    = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTING_RUNE_POTENCY),
-               [ITEMTYPE_ENCHANTMENT_BOOSTER]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTMENT_BOOSTER),
+               --[ITEMTYPE_ENCHANTMENT_BOOSTER]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_ENCHANTMENT_BOOSTER),
                [ITEMTYPE_FISH]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_FISH),
-               [ITEMTYPE_FLAVORING]                  = GetString(SI_ITEMTYPE0 + ITEMTYPE_FLAVORING),
+               --[ITEMTYPE_FLAVORING]                  = GetString(SI_ITEMTYPE0 + ITEMTYPE_FLAVORING),
                [ITEMTYPE_FOOD]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_FOOD),
                [ITEMTYPE_FURNISHING]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_FURNISHING),
                [ITEMTYPE_FURNISHING_MATERIAL]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_FURNISHING_MATERIAL),
@@ -171,8 +196,8 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_LURE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_LURE),
                [ITEMTYPE_MASTER_WRIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_MASTER_WRIT),
                [ITEMTYPE_MOUNT]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_MOUNT),
-               [ITEMTYPE_NONE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_NONE),
-               [ITEMTYPE_PLUG]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_PLUG),
+               --[ITEMTYPE_NONE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_NONE),
+               --[ITEMTYPE_PLUG]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_PLUG),
                [ITEMTYPE_POISON]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_POISON),
                [ITEMTYPE_POISON_BASE]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_POISON_BASE),
                [ITEMTYPE_POTION]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_POTION),
@@ -183,16 +208,16 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_RECIPE]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_RECIPE),
                [ITEMTYPE_SIEGE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SIEGE),
                [ITEMTYPE_SOUL_GEM]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_SOUL_GEM),
-               [ITEMTYPE_SPELLCRAFTING_TABLET]       = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPELLCRAFTING_TABLET),
-               [ITEMTYPE_SPICE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPICE),
+               --[ITEMTYPE_SPELLCRAFTING_TABLET]       = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPELLCRAFTING_TABLET),
+               --[ITEMTYPE_SPICE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPICE),
                [ITEMTYPE_STYLE_MATERIAL]             = GetString(SI_ITEMTYPE0 + ITEMTYPE_STYLE_MATERIAL),
-               [ITEMTYPE_TABARD]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TABARD),
-               [ITEMTYPE_TOOL]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_TOOL),
+               [ITEMTYPE_TABARD]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TABARD), -- Only used for one item: the Guild Tabard, which lets you wear your guild's heraldry crest
+               [ITEMTYPE_TOOL]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_TOOL), -- includes non-crown repair kits
                [ITEMTYPE_TRASH]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_TRASH),
                [ITEMTYPE_TREASURE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_TREASURE),
                [ITEMTYPE_TROPHY]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TROPHY),
                [ITEMTYPE_WEAPON]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON),
-               [ITEMTYPE_WEAPON_BOOSTER]             = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON_BOOSTER),
+               --[ITEMTYPE_WEAPON_BOOSTER]             = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON_BOOSTER),
                [ITEMTYPE_WEAPON_TRAIT]               = GetString(SI_ITEMTYPE0 + ITEMTYPE_WEAPON_TRAIT),
                [ITEMTYPE_WOODWORKING_BOOSTER]        = GetString(SI_ITEMTYPE0 + ITEMTYPE_WOODWORKING_BOOSTER),
                [ITEMTYPE_WOODWORKING_MATERIAL]       = GetString(ITEMTRIG_STRING_ITEMTYPE_REFINEDMATWOODWORKING),
@@ -202,10 +227,23 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
+         local result = context.type == args[2]
+         if args[2] < 0 then
+            local t = context.type
+            if args[2] == -1 then
+               result = (t == ITEMTYPE_POISON_BASE) or (t == ITEMTYPE_POTION_BASE)
+            elseif args[2] == -2 then
+               result = (t == ITEMTYPE_FOOD) or (t == ITEMTYPE_DRINK)
+            elseif args[2] == -3 then
+               result = (t == ITEMTYPE_GLYPH_ARMOR) or (t == ITEMTYPE_GLYPH_JEWELRY) or (t == ITEMTYPE_GLYPH_WEAPON)
+            elseif args[2] == -4 then
+               result = (t == ITEMTYPE_ENCHANTING_RUNE_ASPECT) or (t == ITEMTYPE_ENCHANTING_RUNE_ESSENCE) or (t == ITEMTYPE_ENCHANTING_RUNE_POTENCY)
+            end
+         end
          if args[1] then
-            return context.type == args[2]
+            return result
          else
-            return context.type ~= args[2]
+            return not result
          end
       end
    ),

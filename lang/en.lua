@@ -26,9 +26,6 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_LOGGING", "Logging")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGALLITEMACTIONS", "Log actions taken on items")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGALLITEMACTIONS", "Log whenever an action is taken on an item to destroy it, get rid of it, or otherwise move it.")
 --
-ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERMISSES", "Log trigger misses")
-ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERMISSES", "Log every time a trigger's conditions don't match an item.")
---
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERFAILURES", "Log trigger failures")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES", "Log every time a trigger stops early due to an error.")
 --
@@ -241,6 +238,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ITEMTYPE", "Item Type")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMTYPE", "The item <<1>> a <<2>>.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_NO",  "is not")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYSOLVENT",     "[any alchemy solvent]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYFOODORDRINK", "[any food or drink]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYGLYPH",       "[any enchanting glyph]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYRUNE",        "[any enchanting rune]")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CRAFTED", "Crafted By Player (Yes/No)")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CRAFTED", "The item <<1>> crafted by a player.")
