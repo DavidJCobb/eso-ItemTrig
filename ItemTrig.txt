@@ -53,6 +53,10 @@ triggers/gallery.lua
 ui/theming.lua
 ui/theming.xml
 ui/base.lua
+ui/keynav/wkeynavigable.lua
+ui/keynav/wkeynavigablewindow.lua
+ui/keynav/gamepadkeynavmanager.lua
+ui/keynav/gamepadkeynavmanager.xml
 ui/window.xml
 ui/window.lua
 ui/wbulletedlist.lua

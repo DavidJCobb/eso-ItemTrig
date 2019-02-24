@@ -1,69 +1,246 @@
 <Bindings>
    <Layer name="ItemTrigBlockMostKeys">
+      <!--
+         Used to prevent the player from accidentally closing the TrigEdit 
+         windows should they press a key that's bound to open another menu, 
+         e.g. the inventory or map. We simply block those keys from perform-
+         ing their normal actions.
+         
+         This is based on ZOS's "SceneChangeInterceptLayer" action layer, 
+         with some modifications.
+      -->
       <Category>
          <Action name="ITEMTRIG_INTERCEPT_UI_SHORTCUT_EXIT" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_EXIT">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_UI_SHORTCUT_NEGATIVE" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <!-- We don't want to disable the Esc key.
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_SYSTEM" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SYSTEM">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>-->
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_MARKET" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MARKET">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_INVENTORY" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_INVENTORY">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CHARACTER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CHARACTER">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_SKILLS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SKILLS">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CHAMPION" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CHAMPION">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_JOURNAL" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_JOURNAL">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_COLLECTIONS_BOOK" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_COLLECTIONS_BOOK">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_MAP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAP">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GROUP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GROUP">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CONTACTS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CONTACTS">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GUILDS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GUILDS">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_ALLIANCE_WAR" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ALLIANCE_WAR">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_MAIL" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_MAIL">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_NOTIFICATIONS" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_NOTIFICATIONS">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_ACTIVITY_FINDER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ACTIVITY_FINDER">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_CROWN_CRATES" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_CROWN_CRATES">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
-             <Down>return true</Down>
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+      </Category>
+   </Layer>
+   <Layer name="ItemTrigGamepadKeynav">
+      <!--
+         This action layer is used by a system that allows a gamepad user to 
+         navigate through a window's controls. As of this writing, that sys-
+         tem is only employed in a single test menu (where it works well!), 
+         but I may expand it to the main TrigEdit UI in the future.
+         
+         It's worth noting that joystick input doesn't appear to route 
+         through here (aside from stick clicks); that's handled by an 
+         update registration on the Lua end of things.
+      -->
+      <Category>
+         <!-- These appear to be keyboard arrow keys, actually.
+         <Action name="ITEMTRIG_KEYNAV_LEFT" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_INPUT_LEFT">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_RIGHT" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_INPUT_RIGHT">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_UP" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_INPUT_UP">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_DOWN" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_INPUT_DOWN">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>-->
+         <Action name="ITEMTRIG_KEYNAV_PRIMARY" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_PRIMARY">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_SECONDARY" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_SECONDARY">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_TERTIARY" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_TERTIARY">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_QUATERNARY" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_QUATERNARY">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_NEGATIVE" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_LEFT_SHOULDER" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_LEFT_SHOULDER">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_RIGHT_SHOULDER" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_RIGHT_SHOULDER">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_LEFT_TRIGGER" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_LEFT_TRIGGER">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_RIGHT_TRIGGER" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_RIGHT_TRIGGER">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_LEFT_STICK" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_LEFT_STICK">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
+         </Action>
+         <Action name="ITEMTRIG_KEYNAV_RIGHT_STICK" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_RIGHT_STICK">
+            <Down>
+               ItemTrig.GamepadKeynavManager:dispatchKey(keybind)
+               return true
+            </Down>
          </Action>
       </Category>
    </Layer>

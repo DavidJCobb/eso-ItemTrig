@@ -1,0 +1,27 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_GamepadKeynav_FocusRing" hidden="true"
+         tier="HIGH"
+         level="-1"
+      >
+         <Controls>
+            <Line thickness="3" color="000000">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="TOPRIGHT" />
+            </Line>
+            <Line thickness="3" color="000000">
+               <Anchor point="TOPLEFT" />
+               <Anchor point="BOTTOMLEFT" />
+            </Line>
+            <Line thickness="3" color="000000">
+               <Anchor point="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" />
+            </Line>
+            <Line thickness="3" color="000000">
+               <Anchor point="BOTTOMRIGHT" />
+               <Anchor point="TOPRIGHT" />
+            </Line>
+         </Controls>
+      </Control>
+   </Controls>
+</GuiXml>

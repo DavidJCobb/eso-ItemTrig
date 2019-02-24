@@ -219,3 +219,69 @@ function ItemTrig.BulletedListTestMenu:onShow()
    self.list:redraw()
    control:SetHeight(cHeight + listCon:GetHeight())
 end
+
+do
+   ItemTrig.KeynavTestMenu = ItemTrig.UI.WSingletonWindow:makeSubclass("KeynavTestMenu")
+   local Cls = ItemTrig.KeynavTestMenu
+   local GamepadKeynavManager = ItemTrig.GamepadKeynavManager
+   local WKeyNavigable        = ItemTrig.WKeyNavigable
+   local WKeyNavigableWindow  = ItemTrig.WKeyNavigableWindow
+   
+   SLASH_COMMANDS["/cobbshowkeynavtestmenu"] =
+      function()
+         Cls:getInstance():show()
+      end
+   
+   function Cls:_construct()
+      SCENE_MANAGER:RegisterTopLevel(self:asControl(), true)
+      self:pushActionLayer("ItemTrigGamepadKeynav")
+      self:setTitle("Gamepad keynav test window")
+      local keynavWin = WKeyNavigableWindow:install(self:asControl())
+      --
+      local b01 = WKeyNavigable:install(self:GetNamedChild("01"))
+      local b02 = WKeyNavigable:install(self:GetNamedChild("02"))
+      local b03 = WKeyNavigable:install(self:GetNamedChild("03"))
+      local b04 = WKeyNavigable:install(self:GetNamedChild("04"))
+      local b05 = WKeyNavigable:install(self:GetNamedChild("05"))
+      local b06 = WKeyNavigable:install(self:GetNamedChild("06"))
+      --
+      --     [5]
+      -- [1] [2] [3] [4]
+      --     [6]
+      --
+      b01:setDirectionTarget(GamepadKeynavManager.RIGHT, b02)
+      b02:setDirectionTarget(GamepadKeynavManager.RIGHT, b03)
+      b03:setDirectionTarget(GamepadKeynavManager.RIGHT, b04)
+      b04:setDirectionTarget(GamepadKeynavManager.LEFT, b03)
+      b03:setDirectionTarget(GamepadKeynavManager.LEFT, b02)
+      b02:setDirectionTarget(GamepadKeynavManager.LEFT, b01)
+      b02:setDirectionTarget(GamepadKeynavManager.UP, b05)
+      b06:setDirectionTarget(GamepadKeynavManager.UP, b02)
+      b05:setDirectionTarget(GamepadKeynavManager.DOWN, b02)
+      b02:setDirectionTarget(GamepadKeynavManager.DOWN, b06)
+      --
+      keynavWin:setDefaultControl(b01)
+      --
+      keynavWin.onButtonSecondary =
+         function()
+            d("Window caught the secondary button!")
+            return true
+         end
+      keynavWin.onButtonTertiary =
+         function()
+            d("Window caught the tertiary button!")
+            return true
+         end
+      keynavWin.onButtonNegative =
+         function()
+            d("Window caught the negative button!")
+            return true
+         end
+   end
+   function Cls:onShow()
+      GamepadKeynavManager:setCurrentWindow(self:asControl())
+   end
+   function Cls:onHide()
+      WKeyNavigableWindow:cast(self:asControl()):onHide() -- for now
+   end
+end

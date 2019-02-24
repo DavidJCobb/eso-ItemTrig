@@ -202,5 +202,50 @@
             </Control>
          </Controls>
       </TopLevelControl>
+      <TopLevelControl name="ItemTrig_KeynavTestMenu"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+         inherits="ItemTrig_UITemplate_WWindow"
+      >
+         <Dimensions x="600" y="600" />
+         <DimensionConstraints minX="600" minY="100" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig.KeynavTestMenu:install(self) </OnInitialized>
+         <Controls>
+            <Button inherits="ZO_DefaultButton" name="$(parent)01" text="01">
+               <Anchor point="LEFT" relativeTo="$(parent)" offsetX="7" />
+               <Dimensions x="80" y="80" />
+               <OnClicked> d("Pressed: 01") </OnClicked>
+            </Button>
+            <Button inherits="ZO_DefaultButton" name="$(parent)02" text="02">
+               <Anchor point="LEFT" relativeTo="$(parent)01" relativePoint="RIGHT" offsetX="7" />
+               <Dimensions x="80" y="80" />
+               <OnClicked> d("Pressed: 02") </OnClicked>
+            </Button>
+            <Button inherits="ZO_DefaultButton" name="$(parent)03" text="03">
+               <Anchor point="LEFT" relativeTo="$(parent)02" relativePoint="RIGHT" offsetX="7" />
+               <Dimensions x="80" y="80" />
+               <ButtonState state="DISABLED" />
+               <OnClicked> d("Pressed: 03") </OnClicked>
+            </Button>
+            <Button inherits="ZO_DefaultButton" name="$(parent)04" text="04">
+               <Anchor point="LEFT" relativeTo="$(parent)03" relativePoint="RIGHT" offsetX="7" />
+               <Dimensions x="80" y="80" />
+               <OnClicked> d("Pressed: 04") </OnClicked>
+            </Button>
+            <Button inherits="ZO_DefaultButton" name="$(parent)05" text="05">
+               <Anchor point="BOTTOM" relativeTo="$(parent)02" relativePoint="TOP" offsetY="-7" />
+               <Dimensions x="80" y="80" />
+               <OnClicked> d("Pressed: 05") </OnClicked>
+            </Button>
+            <Button inherits="ZO_DefaultButton" name="$(parent)06" text="06">
+               <Anchor point="TOP" relativeTo="$(parent)02" relativePoint="BOTTOM" offsetY="7" />
+               <Dimensions x="80" y="80" />
+               <OnClicked> d("Pressed: 06") </OnClicked>
+            </Button>
+         </Controls>
+      </TopLevelControl>
    </Controls>
 </GuiXml>
