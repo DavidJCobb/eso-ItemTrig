@@ -152,7 +152,7 @@ end
 function _Parser:_parseOpcode(s, opcodeClass)
    if not s:find(cc_OPCODE_ARG_START) then
       --
-      -- This opcode has no arguments.
+      -- This opcode has no saved arguments.
       --
       return opcodeClass:new(0 + s)
    end

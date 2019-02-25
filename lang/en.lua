@@ -150,10 +150,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_WEAPONCRITICAL",  "Weapon Criti
 -- MISCELLANEOUS
 --
 --
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_DECONSTRUCT", "|cFFA020ItemTrig:|r Deconstructed <<1>>.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",     "|cFFA020ItemTrig:|r Destroyed <<1>> x|cFFFF00<<2>>|r.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",     "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",        "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DECONSTRUCT",     "|cFFA020ItemTrig:|r Deconstructed <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DEPOSIT_IN_BANK", "|cFFA020ItemTrig:|r Deposited <<1>> x|cFFFF00<<2>>|r in the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",         "|cFFA020ItemTrig:|r Destroyed <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",         "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",            "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
 --
 -- Messages shown when a trigger stops due to an error, if the player has 
 -- fault logging enabled. We use black-colored dots to indent the text; 
@@ -199,6 +200,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_QUALIFIERPREFIX_EXACTLY", "exactly")
 ZO_CreateStringId("ITEMTRIG_STRING_QUALIFIERPREFIX_NOTEQ",   "not equal to")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_NONE_SELECTED", "[None selected. When should your trigger run?]")
+ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_BANK",       "Bank Opened")
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_BARTER",     "Merchant Menu Opened")
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_CRAFTING",   "Crafting Menu Opened")
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_FENCE",      "Fence Menu Opened")
@@ -385,6 +387,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE", "This it
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_STOPRUNNINGTRIGGERS", "Stop Running Triggers")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_STOPRUNNINGTRIGGERS", "Stop all ongoing trigger processing for this item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_STOPRUNNINGTRIGGERS", "This action will immediately stop running triggers on the current item; you can use it to block the rest of your triggers from running on certain kinds of items. Note that this only applies to the one time that this action runs. If this action doesn't run when triggers are processed in the future, then the item will be processed again.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DEPOSITINBANK", "Deposit In Bank")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DEPOSITINBANK", "Deposit <<1>> of the item in the player's bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL",     "The bank is full.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN", "Cannot deposit items in the bank if you aren't viewing the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN",   "You can't store stolen items in the bank.")
 --
 --
 -- GALLERY

@@ -123,10 +123,7 @@ end
 
 local function _itemShouldRunTriggers(item)
    local prefs = ItemTrig.prefs
-   --
-   -- TODO: Return false for quest items.
-   --
-   if item.locked then -- TODO: Make this a pref.
+   if item.locked then
       if prefs:get("runTriggersOn/lockedItems") == false then
          return false
       end
@@ -192,7 +189,9 @@ do -- Event handlers
       end
       --
       do -- trigger entry points
-         if eventCode == EVENT_CRAFTING_STATION_INTERACT then
+         if eventCode == EVENT_OPEN_BANK and GetBankingBag() == BAG_BANK then
+            _processInventory(ItemTrig.ENTRY_POINT_BANK, {})
+         elseif eventCode == EVENT_CRAFTING_STATION_INTERACT then
             _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, {
                craftingSkill = select(1, ...) or 0,
             })
@@ -245,6 +244,10 @@ local function Initialize()
          if action == "deconstruct" then
             local message = GetString(ITEMTRIG_STRING_LOG_DECONSTRUCT)
             CHAT_SYSTEM:AddMessage(LocalizeString(message, name))
+         elseif action == "deposit-bank" then
+            local message = GetString(ITEMTRIG_STRING_LOG_DEPOSIT_IN_BANK)
+            local count   = select(1, ...)
+            CHAT_SYSTEM:AddMessage(LocalizeString(message, name, count))
          elseif action == "destroy" then
             local message = GetString(ITEMTRIG_STRING_LOG_DESTROY)
             local count   = select(1, ...)

@@ -254,6 +254,15 @@ function ItemTrig.Opcode:new(base, args, opTable, opType)
    result.base = base
    result.args = args or {} -- array
    result.type = opType
+   do -- setup default argument values
+      local specified = args and #args or 0
+      local count     = #base.args
+      if specified < count then
+         for i = specified + 1, count do
+            result.args[i] = base:getArgumentDefaultValue(i)
+         end
+      end
+   end
    return result
 end
 function ItemTrig.Opcode:allowsEntryPoint(...)
@@ -389,10 +398,10 @@ function ItemTrig.Opcode:format(argTransform)
          if b.enum then
             renderArgs[i] = b.enum[a]
             if not renderArgs[i] then
-               renderArgs[i] = ZO_LocalizeDecimalNumber(a)
+               renderArgs[i] = ZO_LocalizeDecimalNumber(a or 0)
             end
          else
-            renderArgs[i] = ZO_LocalizeDecimalNumber(a)
+            renderArgs[i] = ZO_LocalizeDecimalNumber(a or 0)
          end
       elseif t == "quantity" then
          if not a then
@@ -403,10 +412,10 @@ function ItemTrig.Opcode:format(argTransform)
             if b.enum then
                number = b.enum[a.number]
                if not number then
-                  number = ZO_LocalizeDecimalNumber(a.number)
+                  number = ZO_LocalizeDecimalNumber(a.number or 0)
                end
             else
-               number = ZO_LocalizeDecimalNumber(a.number)
+               number = ZO_LocalizeDecimalNumber(a.number or 0)
             end
             if a.qualifier == "GTE" then
                format = GetString(ITEMTRIG_STRING_QUALIFIER_ATLEAST)

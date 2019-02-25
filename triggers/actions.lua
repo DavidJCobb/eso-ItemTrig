@@ -228,6 +228,34 @@ ItemTrig.tableActions = {
          explanation = _s(ITEMTRIG_STRING_ACTIONEXPLANATION_STOPRUNNINGTRIGGERS),
       }
    ),
+   [11] = ActionBase:new( -- Deposit In Bank
+      _s(ITEMTRIG_STRING_ACTIONNAME_DEPOSITINBANK),
+      _s(ITEMTRIG_STRING_ACTIONDESC_DEPOSITINBANK),
+      {
+         [1] = {
+            type    = "number",
+            default = 9999,
+         }
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result, code = context:storeInBank(args[1])
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_BANK_CANT_STORE_STOLEN then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN)
+            elseif errorCode == ItemInterface.FAILURE_BANK_IS_FULL then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL)
+            elseif errorCode == ItemInterface.FAILURE_BANK_IS_NOT_OPEN then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
+         end
+      end,
+      {
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_BANK }
+      }
+   ),
 }
 ItemTrig.countActions = #ItemTrig.tableActions
 for i = 1, ItemTrig.countActions do

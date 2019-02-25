@@ -101,7 +101,7 @@ do
             -- item, and same count as was queued to split -- then signal a 
             -- successful stack split.
             --
-            deferred:resolve(bagIndex, slotIndex)
+            deferred:resolve(bagIndex, slotIndex, slotData.extra)
          end
       end
       bagData[slotIndex] = nil
@@ -110,11 +110,19 @@ do
          -- The item slot wasn't what we expected. Signal an invalid stack 
          -- state suggesting a failed stack split.
          --
-         deferred:reject(bagIndex, slotIndex)
+         deferred:reject(bagIndex, slotIndex, slotData.extra)
       end
    end
    --
-   function StackTools:earmarkSlot(bag, slot, id, count)
+   function StackTools:earmarkSlot(bag, slot, id, count, extra)
+      --
+      -- The (bag) and (slot) parameters are the item's destination. The 
+      -- (id) and (count) parameters are the item ID of the item you're 
+      -- moving, and the count that the slot should have if your move 
+      -- operation completes successfully. (This is not the same as the 
+      -- count that you're moving, if you're moving to an existing  
+      -- stack.)
+      --
       if not self.pendingSplits[bag] then
          self.pendingSplits[bag] = {}
       end
@@ -122,6 +130,7 @@ do
          id       = id,
          count    = count,
          deferred = ItemTrig.Deferred:new(),
+         extra    = extra
       }
       self.pendingSplits[bag][slot] = registration
       return registration.deferred
@@ -144,6 +153,26 @@ do
          slot = ZO_GetNextBagSlotIndex(bag, slot)
       end
       return slot
+   end
+   function StackTools:send(sourceBag, sourceSlot, destBag, count)
+      if not count then
+         count = GetSlotStackSize(sourceBag, sourceSlot)
+      end
+      if count < 1 then
+         return ItemTrig.Deferred:resolve():promise()
+      end
+      if destBag == BAG_VIRTUAL then
+         PickupInventoryItem(sourceBag, sourceSlot, count)
+         PlaceInInventory(BAG_VIRTUAL, 0)
+         return ItemTrig.Deferred:resolve():promise()
+      end
+      local free = self:findFreeSlot(destBag)
+      if not free then
+         return ItemTrig.Deferred:reject():promise()
+      end
+      local id = GetItemId(sourceBag, sourceSlot)
+      CallSecureProtected("RequestMoveItem", sourceBag, sourceSlot, destBag, free, count)
+      return self:earmarkSlot(destBag, free, id, count):promise()
    end
    function StackTools:setup(eventPrefix)
       if self.listening then
@@ -214,8 +243,6 @@ end
    TODO: Potential lazy getters to implement:
    
     - GetItemLaunderPrice(bag, slot)
-    - IsItemFromCrownCrate(bag, slot)
-    - IsItemFromCrownStore(bag, slot)
     - IsItemSoulGem(bag, slot)
 ]]--
 
@@ -320,14 +347,17 @@ ItemInterface.meta = {
       end,
 }
 do -- define failure reasons for member functions
-   ItemInterface.FAILURE_CANNOT_DECONSTRUCT    = "DCON" -- This item type can't be deconstructed.
-   ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK   = "NJNK" -- This item type can't be flagged as junk.
-   ItemInterface.FAILURE_CANNOT_LOCK           = "NLOK" -- This item type can't be locked.
-   ItemInterface.FAILURE_CANNOT_SPLIT_STACK    = "SPLT" -- Cannot split the stack; your inventory is full.
-   ItemInterface.FAILURE_ITEM_IS_INVALID       = "INVA" -- The ItemInterface is invalid: the bag slot now contains something different.
-   ItemInterface.FAILURE_ITEM_IS_LOCKED        = "LOCK" -- Cannot perform this operation on a locked item.
-   ItemInterface.FAILURE_MOD_NOT_SETUP         = "NOPE" -- The mod wasn't set up properly.
-   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
+   ItemInterface.FAILURE_BANK_CANT_STORE_STOLEN  = "BKST" -- You can't store stolen items in the bank.
+   ItemInterface.FAILURE_BANK_IS_FULL            = "BKFL" -- The bank is full.
+   ItemInterface.FAILURE_BANK_IS_NOT_OPEN        = "BKNO" -- You must have the bank open.
+   ItemInterface.FAILURE_CANNOT_DECONSTRUCT      = "DCON" -- This item type can't be deconstructed.
+   ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK     = "NJNK" -- This item type can't be flagged as junk.
+   ItemInterface.FAILURE_CANNOT_LOCK             = "NLOK" -- This item type can't be locked.
+   ItemInterface.FAILURE_CANNOT_SPLIT_STACK      = "SPLT" -- Cannot split the stack; your inventory is full.
+   ItemInterface.FAILURE_ITEM_IS_INVALID         = "INVA" -- The ItemInterface is invalid: the bag slot now contains something different.
+   ItemInterface.FAILURE_ITEM_IS_LOCKED          = "LOCK" -- Cannot perform this operation on a locked item.
+   ItemInterface.FAILURE_MOD_NOT_SETUP           = "NOPE" -- The mod wasn't set up properly.
+   ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT   = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
 end
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self.meta)
@@ -582,6 +612,28 @@ function ItemInterface:sell(count)
    SellInventoryItem(self.bag, self.slot, count)
    self:onModifyingAction("sell", count)
    self:updateCount(-count)
+end
+function ItemInterface:storeInBank(count)
+   if self:isInvalid() then
+      return false, self.FAILURE_ITEM_IS_INVALID
+   end
+   if not IsBankOpen() then
+      return false, self.FAILURE_BANK_IS_NOT_OPEN
+   end
+   if self.stolen then
+      return false, self.FAILURE_BANK_CANT_STORE_STOLEN
+   end
+   if not DoesBagHaveSpaceFor(BAG_BANK, self.bag, self.slot) then
+      return false, self.FAILURE_BANK_IS_FULL
+   end
+   if not (count and count <= self.count) then
+      count = self.count
+   end
+   CallSecureProtected("PickupInventoryItem", self.bag, self.slot, count)
+   CallSecureProtected("PlaceInTransfer")
+   self:updateCount(-count)
+   self:onModifyingAction("deposit-bank", count)
+   return true
 end
 function ItemInterface:totalForBag(bag)
    if self.bag == BAG_BACKPACK then

@@ -77,6 +77,7 @@ function Deferred:new()
       state = DEFERRED_STATE_PENDING,
       resolveCallbacks = {},
       rejectCallbacks  = {},
+      results          = {},
    }
    result[PROMISE_KEY_NAME] = nil
    setmetatable(result, self)
@@ -92,12 +93,57 @@ function Deferred:promise()
    end
    return Promise:new(self)
 end
+function Deferred:all(...)
+   assert(self == Deferred, "This method must be called on the class.")
+   --
+   local KEY       = " countResolved"
+   local aggregate = Deferred:new()
+   local count     = select("#", ...)
+   local failed    = false
+   local results   = {}
+   local validIndex = 1
+   local validCount = 0
+   if count == 0 then
+      return self:resolve():promise()
+   end
+   local function _onSingleDone(index, ...)
+      if failed then
+         return
+      end
+      results[index] = {...}
+      aggregate[KEY] = (aggregate[KEY] or 0) + 1
+      if aggregate[KEY] == validCount then
+         aggregate:resolve(results)
+      end
+   end
+   local function _onSingleFail(index, ...)
+      failed = true
+      aggregate:reject(...)
+   end
+   for i = 1, count do
+      local single = select(i, ...)
+      if single then
+         single:done(_onSingleDone, validIndex)
+         single:fail(_onSingleFail, validIndex)
+         validIndex = validIndex + 1
+         validCount = validCount + 1
+      end
+   end
+   if validCount == 0 then
+      aggregate:resolve()
+   end
+   return aggregate:promise()
+end
 function Deferred:done(callback, context)
    assert(self ~= Deferred, "This method must be called on an instance.")
    assert(callback ~= nil,  "You must specify a callback.")
    if self.state ~= DEFERRED_STATE_PENDING then
       if self.state == DEFERRED_STATE_RESOLVED then
-         callback(context, self)
+         if context then
+            callback(context, unpack(self.results))
+         else
+            callback(unpack(self.results))
+         end
       end
       return
    end
@@ -109,7 +155,11 @@ function Deferred:fail(callback, context)
    assert(callback ~= nil,  "You must specify a callback.")
    if self.state ~= DEFERRED_STATE_PENDING then
       if self.state == DEFERRED_STATE_REJECTED then
-         callback(context, self)
+         if context then
+            callback(context, unpack(self.results))
+         else
+            callback(unpack(self.results))
+         end
       end
       return
    end
@@ -120,7 +170,11 @@ function Deferred:always(callback, context)
    assert(self ~= Deferred, "This method must be called on an instance.")
    assert(callback ~= nil,  "You must specify a callback.")
    if self.state ~= DEFERRED_STATE_PENDING then
-      callback(context, self)
+      if context then
+         callback(context, unpack(self.results))
+      else
+         callback(unpack(self.results))
+      end
       return
    end
    table.insert(self.resolveCallbacks, { func = callback, context = context })
@@ -144,7 +198,8 @@ function Deferred:resolve(...)
    if self.state ~= DEFERRED_STATE_PENDING then
       return
    end
-   self.state = DEFERRED_STATE_RESOLVED
+   self.state   = DEFERRED_STATE_RESOLVED
+   self.results = {...}
    for i = 1, #self.resolveCallbacks do
       local meta = self.resolveCallbacks[i]
       if meta.context == nil then
@@ -169,7 +224,8 @@ function Deferred:reject(...)
    if self.state ~= DEFERRED_STATE_PENDING then
       return
    end
-   self.state = DEFERRED_STATE_REJECTED
+   self.state   = DEFERRED_STATE_REJECTED
+   self.results = {...}
    for i = 1, #self.rejectCallbacks do
       local meta = self.rejectCallbacks[i]
       if meta.context == nil then
