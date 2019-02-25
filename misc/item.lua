@@ -155,6 +155,10 @@ do
       return slot
    end
    function StackTools:send(sourceBag, sourceSlot, destBag, count)
+      --
+      -- Send an item to another bag. Note that this function is, 
+      -- as of this writing, untested.
+      --
       if not count then
          count = GetSlotStackSize(sourceBag, sourceSlot)
       end
@@ -256,6 +260,24 @@ local _lazyGetterMappings = {
    -- cached and reused. This is handled by ItemInterface.meta.
    --
    alchemyTraits =
+      function(i)
+         if i.invalid then
+            return {}
+         end
+         if i.craftingType ~= ITEMTYPE_REAGENT then
+            return {}
+         end
+         local traitData = {}
+         for j = 1, GetMaxTraits() do
+            local known, name = GetItemLinkReagentTraitInfo(i.link, j)
+            traitData[j] = {
+               name  = name,
+               known = known,
+            }
+         end
+         return traitData
+      end,
+   alchemyTraitDetails =
       function(i)
          if i.invalid then
             return {}
