@@ -1,5 +1,16 @@
 if not ItemTrig then return end
 
+function ItemTrig.arrayConcat(target, ...)
+   for i = 1, select("#", ...) do
+      local current = select(i, ...)
+      if current then
+         for k, v in ipairs(current) do
+            target[#target] = v
+         end
+      end
+   end
+   return target
+end
 function ItemTrig.assign(tablevar, ...)
    for i = 1, select("#", ...) do
       local other = select(i, ...)

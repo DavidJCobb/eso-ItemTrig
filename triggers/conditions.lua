@@ -758,6 +758,216 @@ ItemTrig.tableConditions = {
          return not result
       end
    ),
+   [23] = ConditionBase:new( -- Ornate
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ORNATE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ORNATE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ORNATE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ORNATE_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.specialTrait == ITEM_TRAIT_INFORMATION_ORNATE
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [24] = ConditionBase:new( -- Intricate
+      _s(ITEMTRIG_STRING_CONDITIONNAME_INTRICATE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_INTRICATE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_INTRICATE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_INTRICATE_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.specialTrait == ITEM_TRAIT_INFORMATION_INTRICATE
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [25] = ConditionBase:new( -- Item Trait, Armor
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMTRAIT_ARMOR),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMTRAIT_ARMOR),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            default = ITEM_TRAIT_TYPE_NONE,
+            enum =
+               {
+                  [ITEM_TRAIT_TYPE_NONE]               = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_NONE),
+                  [ITEM_TRAIT_TYPE_ARMOR_DIVINES]      = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_DIVINES),
+                  [ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE] = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_IMPENETRABLE),
+                  [ITEM_TRAIT_TYPE_ARMOR_INFUSED]      = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_INFUSED),
+                  [ITEM_TRAIT_TYPE_ARMOR_INTRICATE]    = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_INTRICATE),
+                  [ITEM_TRAIT_TYPE_ARMOR_NIRNHONED]    = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_NIRNHONED),
+                  [ITEM_TRAIT_TYPE_ARMOR_ORNATE]       = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_ORNATE),
+                  [ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS]   = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_PROSPEROUS),
+                  [ITEM_TRAIT_TYPE_ARMOR_REINFORCED]   = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_REINFORCED),
+                  [ITEM_TRAIT_TYPE_ARMOR_STURDY]       = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_STURDY),
+                  [ITEM_TRAIT_TYPE_ARMOR_TRAINING]     = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_TRAINING),
+                  [ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED]  = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_ARMOR_WELL_FITTED),
+               },
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.trait == args[2]
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [26] = ConditionBase:new( -- Item Trait, Jewelry
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMTRAIT_JEWELRY),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMTRAIT_JEWELRY),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            default = ITEM_TRAIT_TYPE_NONE,
+            enum =
+               {
+                  [ITEM_TRAIT_TYPE_NONE]            = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_NONE),
+                  [ITEM_TRAIT_TYPE_JEWELRY_ARCANE]  = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_JEWELRY_ARCANE),
+                  [ITEM_TRAIT_TYPE_JEWELRY_HEALTHY] = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_JEWELRY_HEALTHY),
+                  [ITEM_TRAIT_TYPE_JEWELRY_ORNATE]  = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_JEWELRY_ORNATE),
+                  [ITEM_TRAIT_TYPE_JEWELRY_ROBUST]  = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_JEWELRY_ROBUST),
+               },
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.trait == args[2]
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [27] = ConditionBase:new( -- Item Trait, Weapon
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMTRAIT_WEAPON),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMTRAIT_WEAPON),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            default = ITEM_TRAIT_TYPE_NONE,
+            enum =
+               {
+                  [ITEM_TRAIT_TYPE_NONE]             = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_NONE),
+                  [ITEM_TRAIT_TYPE_WEAPON_CHARGED]   = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_CHARGED),
+                  [ITEM_TRAIT_TYPE_WEAPON_DECISIVE]  = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_DECISIVE),
+                  [ITEM_TRAIT_TYPE_WEAPON_DEFENDING] = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_DEFENDING),
+                  [ITEM_TRAIT_TYPE_WEAPON_INFUSED]   = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_INFUSED),
+                  [ITEM_TRAIT_TYPE_WEAPON_INTRICATE] = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_INTRICATE),
+                  [ITEM_TRAIT_TYPE_WEAPON_NIRNHONED] = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_NIRNHONED),
+                  [ITEM_TRAIT_TYPE_WEAPON_ORNATE]    = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_ORNATE),
+                  [ITEM_TRAIT_TYPE_WEAPON_POWERED]   = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_POWERED),
+                  [ITEM_TRAIT_TYPE_WEAPON_PRECISE]   = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_PRECISE),
+                  [ITEM_TRAIT_TYPE_WEAPON_SHARPENED] = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_SHARPENED),
+                  [ITEM_TRAIT_TYPE_WEAPON_TRAINING]  = GetString(SI_ITEMTRAITTYPE0 + ITEM_TRAIT_TYPE_WEAPON_TRAINING), 
+               },
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.trait == args[2]
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [28] = ConditionBase:new( -- Item Filter
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMFILTER),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMFILTER),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            default = ITEMFILTERTYPE_ALL,
+            enum =
+               {
+                  [ITEMFILTERTYPE_ALCHEMY]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALCHEMY),
+                  [ITEMFILTERTYPE_ALL]                 = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
+                  [ITEMFILTERTYPE_ARMOR]               = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR),
+                  [ITEMFILTERTYPE_BLACKSMITHING]       = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_BLACKSMITHING),
+                  [ITEMFILTERTYPE_CLOTHING]            = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CLOTHING),
+                  [ITEMFILTERTYPE_COLLECTIBLE]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_COLLECTIBLE),
+                  [ITEMFILTERTYPE_CONSUMABLE]          = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CONSUMABLE),
+                  [ITEMFILTERTYPE_CRAFTING]            = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CRAFTING),
+                  [ITEMFILTERTYPE_DAMAGED]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_DAMAGED),
+                  [ITEMFILTERTYPE_ENCHANTING]          = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ENCHANTING),
+                  [ITEMFILTERTYPE_FURNISHING]          = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_FURNISHING),
+                  [ITEMFILTERTYPE_JEWELRYCRAFTING]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JEWELRYCRAFTING),
+                  [ITEMFILTERTYPE_JUNK]                = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JUNK),
+                  [ITEMFILTERTYPE_MISCELLANEOUS]       = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_MISCELLANEOUS),
+                  [ITEMFILTERTYPE_PROVISIONING]        = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_PROVISIONING),
+                  --[ITEMFILTERTYPE_QUEST]               = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUEST),
+                  [ITEMFILTERTYPE_QUICKSLOT]           = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
+                  [ITEMFILTERTYPE_STYLE_MATERIALS]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_STYLE_MATERIALS),
+                  [ITEMFILTERTYPE_TRAIT_ITEMS]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_TRAIT_ITEMS),
+                  [ITEMFILTERTYPE_WEAPONS]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS),
+                  [ITEMFILTERTYPE_WOODWORKING]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WOODWORKING),
+               },
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         for i = 1, #context.itemFilters do
+            if context.itemFilters[i] == args[2] then
+               result = true
+               break
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do

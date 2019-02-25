@@ -323,6 +323,7 @@ local _lazyGetterMappings = {
    isPrioritySell   = function(i) return i.invalid and nil or IsItemLinkPrioritySell(i.link) end,
    isResearchable   = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
    itemFilters      = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
+   specialTrait     = function(i) return i.invalid and nil or GetItemTraitInformation(i.bag, i.slot) end,
 }
 
 ItemInterface.meta = {

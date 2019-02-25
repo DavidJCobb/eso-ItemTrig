@@ -239,9 +239,9 @@ function WinCls:redrawDescription(options)
          if i == options.highlightIndex then
             color = "EE3333"
          end
-         local fmt = string.format("|c%s|l0:1:1:3:1:%s|l", color, color)
+         local fmt = LocalizeString("|c<<1>>|l0:1:1:5%:2.5:<<1>>|l", color) .. "<<1>>|l|r"
          for j = 1, #s do
-            out = out .. string.format(fmt .. "%s|l|r", s[j])
+            out = out .. LocalizeString(fmt, s[j])
          end
          return out
       end
