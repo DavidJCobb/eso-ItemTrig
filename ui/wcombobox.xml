@@ -73,6 +73,18 @@
                   </Control>
                </Controls>
             </Control>
+            <EditBox name="$(parent)AutoComplete"
+               editEnabled="true"
+               multiLine="false"
+               newLineEnabled="false"
+            >
+               <Dimensions x="0" y="0" />
+               <OnTextChanged> ItemTrig.UI.WCombobox:cast(self:GetParent()):_onAutocompleteChange() </OnTextChanged>
+               <OnUpArrow> ItemTrig.UI.WCombobox:cast(self:GetParent()):_onAutocompleteDirection(-1) </OnUpArrow>
+               <OnDownArrow> ItemTrig.UI.WCombobox:cast(self:GetParent()):_onAutocompleteDirection(1) </OnDownArrow>
+               <OnEnter> ItemTrig.UI.WCombobox:cast(self:GetParent()):_onAutocompleteEnter() </OnEnter>
+               <OnEscape> ItemTrig.UI.WCombobox:cast(self:GetParent()):close() </OnEscape>
+            </EditBox>
          </Controls>
       </Control>
    </Controls>

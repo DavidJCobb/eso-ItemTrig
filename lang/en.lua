@@ -349,6 +349,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_RETURN", "Stop executing the top-l
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_LOG", "Log Message")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_LOG", "Log a message in the chatbox:\n<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_LOG", "You can specify the following format codes in your message:\n\n$(countTotalBag) = The total amount of the item in your inventory\n$(creator) = The character who crafted the item\n$(level) = The item's level\n$(name) = The item's name\n$(price) = The item's price\n$(style) = The item's style")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_RUNNESTED", "Run Nested Trigger")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_RUNNESTED", "Execute a nested trigger:\n<<1>>")

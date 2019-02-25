@@ -6,6 +6,8 @@ if not (ItemTrig and ItemTrig.UI) then return end
 -- of its other functionality.
 --
 
+local _AUTOCOMPLETE_RESET_TIME = 1500 -- 1.5s
+
 local function _comboboxFromPane(pane)
    if type(pane) == "table" then
       pane = pane:asControl()
@@ -35,18 +37,34 @@ function WCombobox:_construct(options)
       button   = self:GetNamedChild("OpenButton"),
       contents = self:GetNamedChild("Contents"),
       pane     = WScrollSelectList:cast(self:controlByPath("Contents", "ScrollPane")),
+      autoComplete = self:GetNamedChild("AutoComplete"),
    }
+   do -- set up autocomplete box
+      local editbox = self.controls.autoComplete
+      editbox:SetCopyEnabled(false)
+      editbox:SetNewLineEnabled(false)
+      editbox:SetPasteEnabled(false)
+   end
    self.element = {
       onSelect      = options.element.onSelect      or nil, -- callback
       onDeselect    = options.element.onDeselect    or nil, -- callback
       onDoubleClick = options.element.onDoubleClick or nil, -- callback
    }
    self.state = {
+      autocomplete = {
+         lastEntry = "",
+         lastIndex = nil,
+         suppressEvents = false,
+      },
       disabled = false,
       isOpen   = false,
       lastMouseoverIndex = nil,
    }
    self.emptyText = options.emptyText or "" -- for multi-select, if there is no selection
+   self._useAutocomplete = options.useAutocomplete
+   if self._useAutocomplete == nil then
+      self._useAutocomplete = true
+   end
    self.style = {
       focusRing = options.style.focusRing or ItemTrig.theme.COMBOBOX_FOCUS_RING,
       font      = options.style.font      or "ZoFontGame",
@@ -142,6 +160,104 @@ function WCombobox:fromItem(control) -- static method
    return _comboboxFromPane(pane)
 end
 
+do -- autocomplete
+   function WCombobox:autocompleteEnabled(flag)
+      if flag == nil then
+         return self._useAutocomplete
+      end
+      self._useAutocomplete = flag
+      if self:isOpen() then
+         self:setAutocompleteState(flag)
+      end
+   end
+   function WCombobox:_autocompleteFocusIndex(index)
+      local pane = self.controls.pane
+      pane:scrollToItem(index, false, true)
+      local control = pane:controlByIndex(index)
+      if control then
+         local oldIndex = self.state.lastMouseoverIndex
+         if oldIndex then
+            self:onItemMouseExit(oldIndex, pane:controlByIndex(oldIndex))
+         end
+         self:_onItemMouseEnter(control)
+      end
+   end
+   function WCombobox:_onAutocompleteChange()
+      local editbox = self.controls.autoComplete
+      local state   = self.state.autocomplete
+      if state.suppressEvents then
+         return
+      end
+      if not (self._useAutocomplete and self:isOpen() and editbox:HasFocus()) then
+         return
+      end
+      local text = editbox:GetText():lower()
+      if text == state.lastEntry then
+         return
+      end
+      state.lastIndex = nil
+      local pane = self.controls.pane
+      pane:forEach(function(i, data)
+         local name = data.name:lower()
+         if type(name) == "string" then
+            if ItemTrig.stringStartsWith(name, text) then
+               state.lastIndex = i
+               return true
+            end
+         end
+      end)
+      state.lastEntry = text
+      --
+      if state.lastIndex then
+         self:_autocompleteFocusIndex(state.lastIndex)
+      end
+      self:rescheduleAutocompleteReset()
+   end
+   function WCombobox:_onAutocompleteDirection(offset)
+      local index = self.state.lastMouseoverIndex or 1
+      index = math.min(self:count(), math.max(1, index + offset))
+      if index ~= self.state.lastMouseoverIndex then
+         self:_autocompleteFocusIndex(index)
+      end
+   end
+   function WCombobox:_onAutocompleteEnter()
+      local pane = self.controls.pane
+      if pane:multiSelect() then
+         pane:toggle(self.state.lastMouseoverIndex)
+      else
+         pane:select(self.state.lastMouseoverIndex)
+      end
+      self:_onItemClicked(self.state.lastMouseoverIndex)
+   end
+   function WCombobox:rescheduleAutocompleteReset()
+      local uniqueName = "AutocompleteFor" .. self:asControl():GetName()
+      EVENT_MANAGER:UnregisterForUpdate(uniqueName)
+      EVENT_MANAGER:RegisterForUpdate(uniqueName, _AUTOCOMPLETE_RESET_TIME,
+         function()
+            EVENT_MANAGER:UnregisterForUpdate(uniqueName)
+            self:resetAutocomplete(true)
+         end
+      )
+   end
+   function WCombobox:resetAutocomplete(suppressEvent)
+      self.state.autocomplete.lastEntry = ""
+      self.state.autocomplete.lastIndex = nil
+      self.state.autocomplete.suppressEvents = suppressEvent
+      self.controls.autoComplete:SetText("")
+      self.state.autocomplete.suppressEvents = false
+   end
+   function WCombobox:setAutocompleteState(enabled)
+      if enabled then
+         if not self._useAutocomplete then
+            return
+         end
+         self.controls.autoComplete:TakeFocus()
+      else
+         self.controls.autoComplete:LoseFocus()
+         self:resetAutocomplete()
+      end
+   end
+end
 do -- events, to be overridden by subclasses or instances
    function WCombobox:onBeforeShow()
       --
@@ -254,6 +370,7 @@ function WCombobox:close()
    self.controls.contents:SetHidden(true)
    self.state.isOpen = false
    self:refreshStyle() -- clear focus ring
+   self:setAutocompleteState(false) -- turn off type-to-autocomplete
 end
 function WCombobox:count()
    assert(self ~= WCombobox, "This method must be called on an instance.")
@@ -337,6 +454,7 @@ function WCombobox:open()
       self:refreshStyle() -- also redraws the pane
       self.controls.pane:scrollToItem(self:getSelectedIndex(), true)
    end
+   self:setAutocompleteState(true) -- turn on type-to-autocomplete
 end
 function WCombobox:push(...)
    assert(self ~= WCombobox, "This method must be called on an instance.")

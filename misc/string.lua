@@ -53,6 +53,9 @@ function ItemTrig.splitByCount(s, count)
    end
    return chunks
 end
+function ItemTrig.stringStartsWith(whole, part)
+   return whole:sub(1, #part) == part
+end
 function ItemTrig.truncateString(s, length, tail)
    if s:len() <= length then
       return s

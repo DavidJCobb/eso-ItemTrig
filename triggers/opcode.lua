@@ -212,6 +212,20 @@ end
          
          This is enforced by UI code.
       
+      autocompleteSet
+         If the argument is a string, then this field can be used to 
+         define autocomplete entries in the UI. If the field is a table, 
+         then its values will be the autocomplete entries. If the field 
+         is a function, then it will be called when the UI needs it; if 
+         it returns a table, then that table's values will be the auto-
+         complete entries (this allows for lazy initialization when 
+         dealing with particularly large sets).
+         
+         Note that ItemTrig offers a userpref to globally disable auto-
+         complete, and I intend to have that default to "disable it" 
+         until I figure out how to theme ZO_AutoComplete or else make 
+         my own replacement for it.
+      
       disabled
          If this is truthy, then the argument will not be shown as config-
          urable in the UI; it'll be plain-text and non-alterable. Useful 

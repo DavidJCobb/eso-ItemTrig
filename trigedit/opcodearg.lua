@@ -152,6 +152,14 @@ do -- helper classes for views
       local _AUTOCOMPLETE_FLAG =
          ZO_AutoComplete.AddFlag(
             function(results, input, onlineOnly, include)
+               if ItemTrig.windows.opcodeArgEdit:asControl():IsHidden() then
+                  --
+                  -- This function affects textboxes that use the AUTO_COMPLETE_FLAG_ALL 
+                  -- autocomplete type, so we need to be responsible and avoid tampering 
+                  -- with the autocomplete results when our specific textbox isn't open.
+                  --
+                  return
+               end
                for _, v in pairs(_autoCompleteData.entries) do
                   ZO_AutoComplete.IncludeOrExcludeResult(results, v, include)
                end

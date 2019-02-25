@@ -443,13 +443,19 @@ function WScrollList:scrollToItem(index, shouldBeCentered, lazy)
    local childHeight = state.bottom - state.top
    if childHeight < listHeight then
       if lazy then
-         if self.scrollTop < position and self.scrollTop + listHeight > position + childHeight then
+         if  self.scrollTop <= position -- the item is not above the visible area
+         and self.scrollTop + listHeight >= position + childHeight -- or below it
+         then
             return
          end
       end
       if shouldBeCentered then
          local offset = (listHeight - childHeight) / 2
          position = position - offset
+      else
+         if lazy and (self.scrollTop + listHeight <= position + childHeight) then
+            position = position - listHeight + childHeight
+         end
       end
    end
    self:scrollTo(position)

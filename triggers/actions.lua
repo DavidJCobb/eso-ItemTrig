@@ -52,15 +52,13 @@ ItemTrig.tableActions = {
                end
                return "$(" .. token .. ")"
             end
-            --
-            -- TODO: Find a way to document this in the UI. We should add 
-            -- an "explanation" key to the arg, and the opcode-arg editor 
-            -- should show that as plain text below the textbox.
-            --
             text = text:gsub("$%((%a+)%)", _substitute)
          end
          CHAT_SYSTEM:AddMessage(text)
-      end
+      end,
+      {
+         explanation = _s(ITEMTRIG_STRING_ACTIONEXPLANATION_LOG),
+      }
    ),
    [3] = ActionBase:new( -- Run Nested Trigger
       _s(ITEMTRIG_STRING_ACTIONNAME_RUNNESTED),

@@ -62,6 +62,7 @@ function WinCls:_construct()
             end
          end
       self.ui.opcodeType:setShouldSort(true, false)
+      combobox:autocompleteEnabled(true)
    end
    self.ui.opcodeBody = ItemTrig_OpcodeEdit_OpcodeBody
    --
