@@ -50,6 +50,15 @@ function WCombobox:_construct(options)
       onDeselect    = options.element.onDeselect    or nil, -- callback
       onDoubleClick = options.element.onDoubleClick or nil, -- callback
    }
+   self.prefs = {
+      maxCountVisible  = options.maxCountVisible  or nil, -- Drop-down can be no larger than is needed to display this many elements
+      maxHeight        = options.maxHeight        or nil, -- Drop-down can be no larger than this many pixels
+      maxHeightPercent = options.maxHeightPercent or 1 / 3, -- Drop-down can be no larger than this percent of the screen height. The default for Windows (or at least .NET) is 1/3 the screen.
+      maxHeightIsMult  = options.maxHeightIsMult, -- When max height comes into play, constrain drop-down height to a multiple of the base widget height
+   }
+   if self.prefs.maxHeightIsMult == nil then
+      self.prefs.maxHeightIsMult = true
+   end
    self.state = {
       autocomplete = {
          lastEntry = "",
@@ -356,7 +365,7 @@ function WCombobox:clear(...)
       self:_onChange()
       self:onChange()
    end
-   if self.state.isOpen then
+   if self:isOpen() then
       self:close()
    end
 end
@@ -444,13 +453,33 @@ function WCombobox:open()
          end,
          1 -- it looks like zo_callLater guarantees at least one frame's worth of delay
       ) 
-      local count = self.controls.pane:count()
-      if count > 5 then
-         count = 5
-      elseif count < 1 then
-         count = 1
+      local height
+      do -- Set and constrain drop-down height
+         local prefs        = self.prefs
+         local count        = self.controls.pane:count()
+         local selfHeight   = self:asControl():GetHeight()
+         local screenHeight = GuiRoot:GetHeight()
+         local offsetTop    = contents:GetTop()
+         local maxHeight    = nil
+         if prefs.maxHeightVisible then
+            maxHeight = selfHeight * prefs.maxHeightVisible
+         elseif prefs.maxHeight then
+            maxHeight = prefs.maxHeight
+         elseif prefs.maxHeightPercent then
+            maxHeight = screenHeight * prefs.maxHeightPercent
+         end
+         height = selfHeight * count
+         if offsetTop + (maxHeight or height) > screenHeight then -- Ensure we're not cut off at the screen edge
+            maxHeight = screenHeight - offsetTop
+         end
+         if maxHeight and height > maxHeight then
+            height = maxHeight
+            if prefs.maxHeightIsMult then
+               height = ItemTrig.floor(height, count)
+            end
+         end
       end
-      contents:SetHeight(self:asControl():GetHeight() * count + 2)
+      contents:SetHeight(height + 2) -- +2 to account for the drop-down bottom border
       self:refreshStyle() -- also redraws the pane
       self.controls.pane:scrollToItem(self:getSelectedIndex(), true)
    end

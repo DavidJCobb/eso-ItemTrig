@@ -1,5 +1,5 @@
 ## Title: ItemTrig
-## APIVersion: 100021
+## APIVersion: 100026
 ## AddOnVersion: 1
 ## Version: alpha01
 ## SavedVariables: ItemTrigSavedata
