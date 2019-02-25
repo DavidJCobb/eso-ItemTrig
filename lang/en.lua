@@ -9,7 +9,8 @@ ZO_CreateStringId("ITEMTRIG_STRING_GENERIC_TRUNCATION_MARKER", "...")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CHAT_BAD_SUBCOMMAND",          "Type |cFFA020/itemtrig help|r to view the list of valid commands.")
 ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_EDIT",    "Open the trigger editor.")
-ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_HELP",    "List all ItemTrig chat commands. Do |cFFA020/itemtrig help TextHere|r to search.")
+--ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_HELP",    "List all ItemTrig chat commands. Do |cFFA020/itemtrig help TextHere|r to search.") -- this is a bit excessive for the number of commands we offer, lol
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_HELP",    "List all ItemTrig chat commands.")
 ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_OPTIONS", "Open ItemTrig's options menu.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_HEADER", "|cFFA020|l0:1:1:15%:1.5:FFA020|lItemTrig chat commands:|l|r")

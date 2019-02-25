@@ -220,6 +220,8 @@ end
 
 local _coreChatCommand
 do -- A single chat command with arguments to control behavior
+   local HELP_SHOULD_ALLOW_SEARCHING = false
+   --
    local _subcommands = {}
    do -- Command definitions
       _subcommands.edit = {
@@ -231,7 +233,7 @@ do -- A single chat command with arguments to control behavior
          handler =
             function(data)
                local search = nil
-               if data ~= "" then
+               if HELP_SHOULD_ALLOW_SEARCHING and data ~= "" then
                   search = ItemTrig.upToFirst(data, " ")
                   if search == "" then
                      search = nil
@@ -270,7 +272,7 @@ do -- A single chat command with arguments to control behavior
       }
       _subcommands.options = {
          desc    = GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_OPTIONS),
-         handler = function() LibStub:GetLibrary("LibAddonMenu-2.0"):OpenToPanel("ItemTrigOptionsMenu") end,
+         handler = function() LibStub:GetLibrary("LibAddonMenu-2.0"):OpenToPanel(ItemTrigOptionsMenu) end,
       }
    end
    function _coreChatCommand(extra)
