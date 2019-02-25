@@ -198,7 +198,7 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL] = GetString(ITEMTRIG_STRING_ITEMTYPE_RAWMATJEWELRY),
                [ITEMTYPE_JEWELRY_RAW_TRAIT]          = GetString(SI_ITEMTYPE0 + ITEMTYPE_JEWELRY_RAW_TRAIT),
                [ITEMTYPE_JEWELRY_TRAIT]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_JEWELRY_TRAIT),
-               [ITEMTYPE_LOCKPICK]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_LOCKPICK),
+               --[ITEMTYPE_LOCKPICK]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_LOCKPICK),
                [ITEMTYPE_LURE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_LURE),
                [ITEMTYPE_MASTER_WRIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_MASTER_WRIT),
                [ITEMTYPE_MOUNT]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_MOUNT),
@@ -426,7 +426,15 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMNAME),
       _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMNAME),
       {
-         [1] = { type = "string", placeholder = "name" },
+         [1] = {
+            type = "string",
+            placeholder = "name",
+            autocompleteSet =
+               function()
+                  ItemTrig.gameEnums.commonItems:generate()
+                  return ItemTrig.gameEnums.commonItems
+               end,
+         },
          [2] = {
             type = "boolean",
             enum = {

@@ -31,6 +31,20 @@ do -- helper classes for views
             return x
          end
       end
+      function ViewCls.Enum:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         if argBase.type == "boolean" then
+            argValue = argValue and 2 or 1
+         end
+         local combobox = self.value
+         combobox:clear()
+         opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
+            combobox:push({ name = v, index = k }, false)
+         end)
+         combobox:redraw()
+         combobox:select(1) -- default selection
+         combobox:select(function(item) return item.index == tonumber(argValue) end)
+      end
    end
    do -- number
       ViewCls.Number = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgNumberView")
@@ -39,6 +53,10 @@ do -- helper classes for views
       end
       function ViewCls.Number:GetValue()
          return tonumber(self.value:GetText())
+      end
+      function ViewCls.Number:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         self.value:SetText(tostring(argValue))
       end
    end
    do -- quantity
@@ -73,6 +91,12 @@ do -- helper classes for views
             q.qualifier = "E"
          end
          return q
+      end
+      function ViewCls.Quantity:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         self.qualifier:select(1) -- default selection in case qualifier is invalid
+         self.qualifier:select(function(item) return item.value == argValue.qualifier end)
+         self.number:SetText(argValue.number or "0")
       end
    end
    do -- quantity-enum
@@ -110,14 +134,57 @@ do -- helper classes for views
          end
          return q
       end
+      function ViewCls.QuantityEnum:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         self.qualifier:select(1) -- default selection in case qualifier is invalid
+         self.qualifier:select(function(item) return item.value == argValue.qualifier end)
+         self.enum:clear()
+         opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
+            self.enum:push({ name = v, index = k }, false)
+         end)
+         self.enum:redraw()
+         self.enum:select(1) -- default
+         self.enum:select(function(item) return item.index == tonumber(argValue.number) end)
+      end
    end
    do -- string
+      local _autoCompleteData = { entries = {} }
+      local _AUTOCOMPLETE_FLAG =
+         ZO_AutoComplete.AddFlag(
+            function(results, input, onlineOnly, include)
+               for _, v in pairs(_autoCompleteData.entries) do
+                  ZO_AutoComplete.IncludeOrExcludeResult(results, v, include)
+               end
+            end
+         )
+      --
       ViewCls.String = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgStringView")
       function ViewCls.String:_construct()
-         self.value = self:GetNamedChild("Value")
+         self.value        = self:GetNamedChild("Value")
+         self.autoComplete = ZO_AutoComplete:New(self.value, { _AUTOCOMPLETE_FLAG }, {}, AUTO_COMPLETION_ONLINE_ONLY, MAX_AUTO_COMPLETION_RESULTS, AUTO_COMPLETION_AUTOMATIC_MODE)
+         --
+         ZO_PreHookHandler(self:asControl(), "OnEffectivelyHidden",
+            function(self)
+               _autoCompleteData.entries = {}
+            end
+         )
       end
       function ViewCls.String:GetValue()
          return self.value:GetText()
+      end
+      function ViewCls.String:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         self.value:SetText(argValue or "")
+         --
+         if argBase.autocompleteSet and ItemTrig.prefs:get("opcodeArgAutocomplete") then
+            local s = argBase.autocompleteSet
+            if type(s) == "function" then
+               s = s()
+            end
+            _autoCompleteData.entries = s
+         else
+            _autoCompleteData.entries = {}
+         end
       end
    end
 end
@@ -206,49 +273,18 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          --
       elseif archetype == "enum" then
          self.view = self.ui.views.enum
-         if arg.type == "boolean" then
-            val = val and 2 or 1
-         end
-         self.view:show()
-         local combobox = self.view.value
-         combobox:clear()
-         base:forEachInArgumentEnum(argIndex, function(k, v)
-            combobox:push({ name = v, index = k }, false)
-         end)
-         combobox:redraw()
-         combobox:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
-         combobox:select(function(item) return item.index == tonumber(val) end)
       elseif archetype == "multiline" then
          self.view = self.ui.views.multiline
-         self.view:show()
-         self.view.value:SetText(val or "")
       elseif archetype == "number" then
          self.view = self.ui.views.number
-         self.view:show()
-         self.view.value:SetText(tostring(val))
       elseif archetype == "quantity" then
          self.view = self.ui.views.quantity
-         self.view:show()
-         self.view.qualifier:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
-         self.view.qualifier:select(function(item) return item.value == val.qualifier end)
-         self.view.number:SetText(val.number or "0")
       elseif archetype == "quantity-enum" then
          self.view = self.ui.views.quantEnum
-         self.view:show()
-         self.view.qualifier:select(1) -- default selection in case qualifier is invalid; boolean arg suppresses "change" callback
-         self.view.qualifier:select(function(item) return item.value == val.qualifier end)
-         self.view.enum:clear()
-         base:forEachInArgumentEnum(argIndex, function(k, v)
-            self.view.enum:push({ name = v, index = k }, false)
-         end)
-         self.view.enum:redraw()
-         self.view.enum:select(1) -- default
-         self.view.enum:select(function(item) return item.index == tonumber(val) end)
       elseif archetype == "string" then
          self.view = self.ui.views.string
-         self.view:show()
-         self.view.value:SetText(val or "")
       end
+      self.view:SetupArgument(val, arg, argIndex, base)
       assert(self.view ~= nil, "No view for this archetype: " .. tostring(archetype) .. "! Did you forget to make one?")
    end
    self:autoSize()

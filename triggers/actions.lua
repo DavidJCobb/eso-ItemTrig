@@ -219,6 +219,17 @@ ItemTrig.tableActions = {
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
       }
    ),
+   [10] = ActionBase:new( -- Stop Running Triggers
+      _s(ITEMTRIG_STRING_ACTIONNAME_STOPRUNNINGTRIGGERS),
+      _s(ITEMTRIG_STRING_ACTIONDESC_STOPRUNNINGTRIGGERS),
+      {},
+      function(state, context, args)
+         return ItemTrig.RUN_NO_MORE_TRIGGERS
+      end,
+      {
+         explanation = _s(ITEMTRIG_STRING_ACTIONEXPLANATION_STOPRUNNINGTRIGGERS),
+      }
+   ),
 }
 ItemTrig.countActions = #ItemTrig.tableActions
 for i = 1, ItemTrig.countActions do

@@ -31,6 +31,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES", "Log every ti
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_EXTRA", "Extra features")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_TRIGGERARGAUTOCOMPLETE", "Trigger argument autocomplete")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_TRIGGERARGAUTOCOMPLETE", "Enable auto-complete for trigger arguments that support it")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ROBUSTFENCING", "Robust Fencing")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ROBUSTFENCING", "For the \"Fence\" entry point, sort items by value before running triggers on them, so that the most valuable items are fenced or laundered first.")
 --
@@ -377,6 +380,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DECONSTRUCT", "Deconstruct")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DECONSTRUCT", "Deconstruct the item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED",     "The item is locked.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE", "This item can't be deconstructed.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_STOPRUNNINGTRIGGERS", "Stop Running Triggers")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_STOPRUNNINGTRIGGERS", "Stop all ongoing trigger processing for this item.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_STOPRUNNINGTRIGGERS", "This action will immediately stop running triggers on the current item; you can use it to block the rest of your triggers from running on certain kinds of items. Note that this only applies to the one time that this action runs. If this action doesn't run when triggers are processed in the future, then the item will be processed again.")
 --
 --
 -- GALLERY

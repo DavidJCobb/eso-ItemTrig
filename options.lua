@@ -2,6 +2,7 @@ do -- define prefs
    ItemTrig.assign(ItemTrig.prefs, {
       ["logging/actionsTaken"]    = { default = false },
       ["logging/triggerFailures"] = { default = false },
+      ["opcodeArgAutocomplete"]   = { default = false },
       ["robustFencing"]           = { default = true },
       ["runTriggersOn/crownCrateItems"] = { default = false },
       ["runTriggersOn/crownStoreItems"] = { default = false },
@@ -83,6 +84,14 @@ local options = {
    {
       type = "header",
       name = GetString(ITEMTRIG_STRING_OPTIONHEADER_EXTRA),
+   },
+   {  -- Enable auto-complete for trigger arguments that support it
+      --
+      type    = "checkbox",
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_TRIGGERARGAUTOCOMPLETE),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_TRIGGERARGAUTOCOMPLETE),
+      getFunc = function()  return prefs:get("opcodeArgAutocomplete") end,
+      setFunc = function(v) prefs:set("opcodeArgAutocomplete", v) end,
    },
    {  -- Pre-sort items in the "fence" entry point, by value, descending
       --

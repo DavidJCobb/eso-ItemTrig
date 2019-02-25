@@ -14,6 +14,9 @@ function ItemTrig.executeTriggerList(list, entryPoint, context, options)
          eventRecipient.topLevelTrigger = list[i]
       end
       local result, extra = trigger:exec(context, entryPoint, options)
+      if result == ItemTrig.RUN_NO_MORE_TRIGGERS then
+         return result
+      end
       if result == ItemTrig.OPCODE_FAILED then
          return result, extra
       end
@@ -305,7 +308,7 @@ function ItemTrig.Trigger:exec(context, entryPoint, options)
          return ItemTrig.OPCODE_FAILED, extra
       end
       local r, extra = a:exec(self.state, context)
-      if r == ItemTrig.RETURN_FROM_TRIGGER then
+      if r == ItemTrig.RETURN_FROM_TRIGGER or r == ItemTrig.RUN_NO_MORE_TRIGGERS then
          self:resetRuntimeState()
          return r
       end
