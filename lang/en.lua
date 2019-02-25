@@ -4,6 +4,19 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_GENERIC_CONFIRM_TITLE", "Are you sure?") -
 ZO_CreateStringId("ITEMTRIG_STRING_GENERIC_TRUNCATION_MARKER", "...")
 --
 --
+-- CHAT COMMAND BEHAVIOR
+--
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_BAD_SUBCOMMAND",          "Type |cFFA020/itemtrig help|r to view the list of valid commands.")
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_EDIT",    "Open the trigger editor.")
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_HELP",    "List all ItemTrig chat commands. Do |cFFA020/itemtrig help TextHere|r to search.")
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_OPTIONS", "Open ItemTrig's options menu.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_HEADER", "|cFFA020|l0:1:1:15%:1.5:FFA020|lItemTrig chat commands:|l|r")
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_SEARCH", "|cFFA020|l0:1:1:15%:1.5:FFA020|lItemTrig chat commands (filter: <<1>>):|l|r")
+ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_ITEM",   "|cFFA020<<1>>|r: <<2>>")
+--
+--
 -- OPTIONS
 --
 --

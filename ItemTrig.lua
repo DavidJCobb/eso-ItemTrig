@@ -54,10 +54,6 @@ do -- Registry for windows
    end
 end
 
-local function ShowWin()
-   ItemTrig.windows.triggerList:show()
-end
-
 local TriggerExecutionEventHandler
 do
    --
@@ -222,10 +218,78 @@ do -- Event handlers
    end
 end
 
+local _coreChatCommand
+do -- A single chat command with arguments to control behavior
+   local _subcommands = {}
+   do -- Command definitions
+      _subcommands.edit = {
+         desc    = GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_EDIT),
+         handler = function() ItemTrig.windows.triggerList:show() end,
+      }
+      _subcommands.help = {
+         desc    = GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_HELP),
+         handler =
+            function(data)
+               local search = nil
+               if data ~= "" then
+                  search = ItemTrig.upToFirst(data, " ")
+                  if search == "" then
+                     search = nil
+                  end
+               end
+               --
+               if search then
+                  local fmt = GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_SEARCH)
+                  CHAT_SYSTEM:AddMessage(LocalizeString(fmt, search))
+               else
+                  CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_HEADER))
+               end
+               --
+               local results = {}
+               do
+                  local index = 1
+                  for k, v in pairs(_subcommands) do
+                     local show = true
+                     if search then
+                        show = k:find(search) or v.desc:find(search)
+                     end
+                     if show then
+                        results[index] = k
+                        index = index + 1
+                     end
+                  end
+                  table.sort(results)
+               end
+               local fmt = GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_ITEM)
+               for i = 1, #results do
+                  local name  = results[i]
+                  local entry = _subcommands[name]
+                  CHAT_SYSTEM:AddMessage(LocalizeString(fmt, name, entry.desc))
+               end
+            end,
+      }
+      _subcommands.options = {
+         desc    = GetString(ITEMTRIG_STRING_CHAT_SUBCOMMAND_DESC_OPTIONS),
+         handler = function() LibStub:GetLibrary("LibAddonMenu-2.0"):OpenToPanel("ItemTrigOptionsMenu") end,
+      }
+   end
+   function _coreChatCommand(extra)
+      extra = ItemTrig.trimString(extra or "")
+      --
+      local subcommand = ItemTrig.upToFirst(extra, " ")
+      if _subcommands[subcommand] then
+         local data = ItemTrig.trimString(extra:sub(subcommand:len() + 2))
+         _subcommands[subcommand].handler(data)
+      else
+         CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_CHAT_BAD_SUBCOMMAND))
+      end
+   end
+end
+
 local function Initialize()
    ItemTrig.registerLAMOptions()
    ItemTrig.Savedata:load()
-   SLASH_COMMANDS["/cobbshowwin"]  = ShowWin
+   SLASH_COMMANDS["/itemtrig"] = _coreChatCommand
    --
    ItemTrig.ItemStackTools:setup("ItemTrig")
    ItemTrig.ItemInterface.onModifyingAction =

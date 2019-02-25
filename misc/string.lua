@@ -56,6 +56,11 @@ end
 function ItemTrig.stringStartsWith(whole, part)
    return whole:sub(1, #part) == part
 end
+function ItemTrig.trimString(s)
+   s = string.gsub(s, "^%s+", "")
+   s = string.gsub(s, "%s+$", "")
+   return s
+end
 function ItemTrig.truncateString(s, length, tail)
    if s:len() <= length then
       return s
@@ -64,4 +69,14 @@ function ItemTrig.truncateString(s, length, tail)
       tail = GetString(ITEMTRIG_STRING_GENERIC_TRUNCATION_MARKER)
    end
    return string.sub(s, 1, length) .. tail
+end
+function ItemTrig.upToFirst(haystack, needle, shouldTrim)
+   if shouldTrim then
+      s = ItemTrig.trimString(s)
+   end
+   local index = haystack:find(needle)
+   if index then
+      return haystack:sub(1, index - 1)
+   end
+   return haystack
 end
