@@ -355,6 +355,7 @@ function WinCls:newTrigger()
          else
             table.insert(self.currentTriggerList, i + 1, trigger)
          end
+         ItemTrig.Savedata:save() -- Save when adding a trigger
          self:refresh()
          do
             local paneIndex = self:getPaneIndexForTrigger(trigger)
@@ -378,7 +379,11 @@ function WinCls:editTrigger(trigger)
          return
       end
    end
-   editor:requestEdit(self, trigger, false, true):done(self.refresh, self)
+   editor:requestEdit(self, trigger, false, true):done(function()
+      local editor = WinCls:getInstance()
+      ItemTrig.Savedata:save() -- Save when committing a trigger
+      editor:refresh()
+   end)
 end
 function WinCls:moveSelectedTrigger(direction)
    if direction == 0 then

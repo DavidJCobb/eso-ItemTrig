@@ -377,6 +377,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMFILTER", "The item <<1>> to
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_NO",  "does not belong")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_YES", "belongs")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_USAGEREQUIREMENTSMET", "Usage Requirement Met")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_USAGEREQUIREMENTSMET", "The player-character <<1>> the level and Champion Point requirements for using this item.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_USAGEREQUIREMENTSMET_NO",  "does not meet")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_USAGEREQUIREMENTSMET_YES", "meets")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 

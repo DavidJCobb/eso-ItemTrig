@@ -70,8 +70,8 @@ ui/wcombobox.lua
 ui/wcombobox.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
-ui/testmenu.lua
-ui/testmenu.xml
+#ui/testmenu.lua # DISABLED
+#ui/testmenu.xml # DISABLED
 trigedit/main.lua
 trigedit/trigger.lua
 trigedit/opcode.lua

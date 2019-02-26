@@ -114,7 +114,7 @@ ItemTrig.tableConditions = {
          return ItemTrig.testQuantity(args[1], context.quality)
       end
    ),
-   [7] = ConditionBase:new( -- Base Type
+   [7] = ConditionBase:new( -- Item Type
       _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMTYPE),
       _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMTYPE),
       {
@@ -246,60 +246,60 @@ ItemTrig.tableConditions = {
             elseif args[2] == -4 then -- any enchanting rune
                result = (t == ITEMTYPE_ENCHANTING_RUNE_ASPECT) or (t == ITEMTYPE_ENCHANTING_RUNE_ESSENCE) or (t == ITEMTYPE_ENCHANTING_RUNE_POTENCY)
             elseif args[2] == -5 then -- any crafting material
-               if result == ITEMTYPE_ARMOR_TRAIT
-               or result == ITEMTYPE_BLACKSMITHING_BOOSTER
-               or result == ITEMTYPE_BLACKSMITHING_MATERIAL
-               or result == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
-               or result == ITEMTYPE_CLOTHIER_BOOSTER
-               or result == ITEMTYPE_CLOTHIER_MATERIAL
-               or result == ITEMTYPE_CLOTHIER_RAW_MATERIAL
-               or result == ITEMTYPE_ENCHANTING_RUNE_ASPECT
-               or result == ITEMTYPE_ENCHANTING_RUNE_ESSENCE
-               or result == ITEMTYPE_ENCHANTING_RUNE_POTENCY
-               or result == ITEMTYPE_FURNISHING_MATERIAL
-               or result == ITEMTYPE_INGREDIENT
-               or result == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
-               or result == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
-               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
-               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
-               or result == ITEMTYPE_JEWELRY_RAW_TRAIT
-               or result == ITEMTYPE_JEWELRY_TRAIT
-               or result == ITEMTYPE_POISON_BASE
-               or result == ITEMTYPE_POTION_BASE
-               or result == ITEMTYPE_RAW_MATERIAL
-               or result == ITEMTYPE_REAGENT
-               or result == ITEMTYPE_WEAPON_TRAIT
-               or result == ITEMTYPE_WOODWORKING_BOOSTER
-               or result == ITEMTYPE_WOODWORKING_MATERIAL
-               or result == ITEMTYPE_WOODWORKING_RAW_MATERIAL
+               if t == ITEMTYPE_ARMOR_TRAIT
+               or t == ITEMTYPE_BLACKSMITHING_BOOSTER
+               or t == ITEMTYPE_BLACKSMITHING_MATERIAL
+               or t == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
+               or t == ITEMTYPE_CLOTHIER_BOOSTER
+               or t == ITEMTYPE_CLOTHIER_MATERIAL
+               or t == ITEMTYPE_CLOTHIER_RAW_MATERIAL
+               or t == ITEMTYPE_ENCHANTING_RUNE_ASPECT
+               or t == ITEMTYPE_ENCHANTING_RUNE_ESSENCE
+               or t == ITEMTYPE_ENCHANTING_RUNE_POTENCY
+               or t == ITEMTYPE_FURNISHING_MATERIAL
+               or t == ITEMTYPE_INGREDIENT
+               or t == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
+               or t == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
+               or t == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
+               or t == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
+               or t == ITEMTYPE_JEWELRY_RAW_TRAIT
+               or t == ITEMTYPE_JEWELRY_TRAIT
+               or t == ITEMTYPE_POISON_BASE
+               or t == ITEMTYPE_POTION_BASE
+               or t == ITEMTYPE_RAW_MATERIAL
+               or t == ITEMTYPE_REAGENT
+               or t == ITEMTYPE_WEAPON_TRAIT
+               or t == ITEMTYPE_WOODWORKING_BOOSTER
+               or t == ITEMTYPE_WOODWORKING_MATERIAL
+               or t == ITEMTYPE_WOODWORKING_RAW_MATERIAL
                then
                   result = true
                end
             elseif args[2] == -6 then -- any trait material
-               if result == ITEMTYPE_ARMOR_TRAIT
-               or result == ITEMTYPE_JEWELRY_TRAIT
-               or result == ITEMTYPE_WEAPON_TRAIT
+               if t == ITEMTYPE_ARMOR_TRAIT
+               or t == ITEMTYPE_JEWELRY_TRAIT
+               or t == ITEMTYPE_WEAPON_TRAIT
                then
                   result = true
                end
             elseif args[2] == -7 then -- any unrefined material
-               if result == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
-               or result == ITEMTYPE_CLOTHIER_RAW_MATERIAL
-               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
-               or result == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
-               or result == ITEMTYPE_JEWELRY_RAW_TRAIT
-               or result == ITEMTYPE_WOODWORKING_RAW_MATERIAL
-               or result == ITEMTYPE_RAW_MATERIAL -- raw style material
+               if t == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
+               or t == ITEMTYPE_CLOTHIER_RAW_MATERIAL
+               or t == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
+               or t == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
+               or t == ITEMTYPE_JEWELRY_RAW_TRAIT
+               or t == ITEMTYPE_WOODWORKING_RAW_MATERIAL
+               or t == ITEMTYPE_RAW_MATERIAL -- raw style material
                then
                   result = true
                end
             elseif args[2] == -8 then -- any refined material
-               if result == ITEMTYPE_BLACKSMITHING_MATERIAL
-               or result == ITEMTYPE_CLOTHIER_MATERIAL
-               or result == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
-               or result == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
-               or result == ITEMTYPE_JEWELRY_TRAIT
-               or result == ITEMTYPE_WOODWORKING_MATERIAL
+               if t == ITEMTYPE_BLACKSMITHING_MATERIAL
+               or t == ITEMTYPE_CLOTHIER_MATERIAL
+               or t == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
+               or t == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
+               or t == ITEMTYPE_JEWELRY_TRAIT
+               or t == ITEMTYPE_WOODWORKING_MATERIAL
                then
                   result = true
                end
@@ -320,7 +320,8 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local isCrafted = (type(context.creator) == "string" and context.creator ~= "")
+         --local isCrafted = (type(context.creator) == "string" and context.creator ~= "")
+         local isCrafted = IsItemLinkCrafted(context.link) -- vanilla UI code has provisions for an item that is crafted, but with no creator name
          if args[1] then
             return isCrafted
          end
@@ -960,6 +961,35 @@ ItemTrig.tableConditions = {
             if context.itemFilters[i] == args[2] then
                result = true
                break
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [29] = ConditionBase:new( -- Meet Usage Requirements
+      _s(ITEMTRIG_STRING_CONDITIONNAME_USAGEREQUIREMENTSMET),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_USAGEREQUIREMENTSMET),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_USAGEREQUIREMENTSMET_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_USAGEREQUIREMENTSMET_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = true
+         if item.requiredLevel > 0 or item.requiredChamp > 0 then
+            if GetUnitLevel("player") < item.requiredLevel then
+               result = false
+            end
+            if GetPlayerChampionPointsEarned() < item.requiredChamp then
+               result = false
             end
          end
          if args[1] then

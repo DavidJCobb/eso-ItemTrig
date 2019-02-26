@@ -345,6 +345,20 @@ local _lazyGetterMappings = {
    isPrioritySell   = function(i) return i.invalid and nil or IsItemLinkPrioritySell(i.link) end,
    isResearchable   = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
    itemFilters      = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
+   itemSetData =
+      function(i)
+         if i.invalid then
+            return nil
+         end
+         local hasSet, setName, numBonuses, numEquipped, maxEquipped = GetItemLinkSetInfo(i.link)
+         return {
+            hasSet        = hasSet,
+            name          = setName,
+            bonusCount    = numBonuses,
+            equippedCount = numEquipped,
+            maxEquipped   = maxEquipped,
+         }
+      end,
    specialTrait     = function(i) return i.invalid and nil or GetItemTraitInformation(i.bag, i.slot) end,
 }
 

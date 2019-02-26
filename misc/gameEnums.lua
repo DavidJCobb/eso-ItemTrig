@@ -41,6 +41,54 @@ do
    ItemTrig.gameEnums.styles = styles
 end
 
+ItemTrig.gameEnums.leveledMaterials = {
+   alchemy = {
+      { level =   3, ids = {   883, 75357 } }, --   Natural Water | Grease
+      { level =  10, ids = {  1187, 75358 } }, --     Clear Water | Ichor
+      { level =  20, ids = {  4570, 75359 } }, --  Pristine Water | Slime
+      { level =  30, ids = { 23265, 75360 } }, --  Cleansed Water | Gall
+      { level =  40, ids = { 23266, 75361 } }, --  Filtered Water | Terebinthine
+      { level =  50, ids = { 23267, 75362 } }, --  Purified Water | Pitch-Bile
+      { champ =  50, ids = { 23268, 75363 } }, --      Cloud Mist | Tarblack
+      { champ = 100, ids = { 64500, 75364 } }, --        Star Dew | Night-Oil
+      { champ = 150, ids = { 64501, 75365 } }, -- Lorkhan's Tears | Alkahest
+   },
+   blacksmithing = {
+      { level =   1, max =  14, ids = {  5413,   808 } }, -- Iron
+      { level =  16, max =  24, ids = {  4487,  5820 } }, -- Steel
+      { level =  26, max =  34, ids = { 23107, 23103 } }, -- Orichalcum
+      { level =  36, max =  44, ids = {  6000, 23104 } }, -- Dwarven
+      { level =  46, max =  50, ids = {  6001, 23105 } }, -- Ebony
+      { champ =  10, max =  30, ids = { 46127,  4482 } }, -- Calcinium
+      { champ =  40, max =  60, ids = { 46128, 23133 } }, -- Galatite
+      { champ =  70, max =  80, ids = { 46129, 23134 } }, -- Quicksilver
+      { champ =  90, max = 140, ids = { 46130, 23135 } }, -- Voidstone
+      { champ = 150, max = 160, ids = { 64489, 71198 } }, -- Rubedite
+   },
+   clothier = {
+   },
+   enchanting = {
+      { level =   5, ids = { 45855, 45817 } }, --   Jora | Jode
+      { level =  10, ids = { 45856, 45818 } }, -- Porade | Notade
+      { level =  15, ids = { 45857, 45819 } }, --   Jera | Ode
+      { level =  20, ids = { 45806, 45820 } }, -- Jejora | Tade
+      { level =  25, ids = { 45807, 45821 } }, --   Odra | Jayde
+      { level =  30, ids = { 45808, 45822 } }, -- Pojora | Edode
+      { level =  35, ids = { 45809, 45823 } }, --  Edora | Pojode
+      { level =  40, ids = { 45810, 45824 } }, --  Jaera | Rekude
+      { level =  45, ids = { 45811, 45825 } }, --   Pora | Hade
+      { champ =  10, ids = { 45812, 45826 } }, -- Denara | Idode
+      { champ =  30, ids = { 45813, 45827 } }, --   Rera | Pode
+      { champ =  50, ids = { 45814, 45828 } }, -- Derado | Kedeko
+      { champ =  70, ids = { 45815, 45829 } }, -- Rekura | Rede
+      { champ = 100, ids = { 45816, 45830 } }, --   Kura | Kude
+      { champ = 150, ids = { 64509, 64508 } }, -- Rejera | Jehade
+      { champ = 160, ids = { 68341, 68340 } }, -- Repora | Itade
+   },
+   woodworking = {
+   },
+}
+
 ItemTrig.gameEnums.commonItems = {}
 do
    local wasGenerated = false
