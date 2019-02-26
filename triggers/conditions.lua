@@ -998,6 +998,59 @@ ItemTrig.tableConditions = {
          return not result
       end
    ),
+   [30] = ConditionBase:new( -- Crafting Material Level
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CRAFTINGMATERIALLEVEL),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CRAFTINGMATERIALLEVEL),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGMATERIALLEVEL_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGMATERIALLEVEL_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGMATERIALLEVEL_USABLE),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGMATERIALLEVEL_PLAYERMAX),
+               [3] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGMATERIALLEVEL_AFTERPLAYERMAX),
+               [4] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGMATERIALLEVEL_MAXTIER),
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         do
+            local data = ItemTrig.gameEnums.leveledMaterials
+            local list = data:listForType(context.type)
+            if list then
+               local level = GetUnitLevel("player")
+               local champ = GetPlayerChampionPointsEarned()
+               if args[2] == 1 then -- is usable?
+                  result = list:levelCanUse(context.id, level, champ)
+               elseif args[2] == 2 then -- is max-usable?
+                  local tier = list:lookupTierForId(context.id)
+                  local max  = list:highestTierIndex(level, champ)
+                  result = tier == max
+               elseif args[2] == 3 then -- is after max-usable?
+                  local tier    = list:lookupTierForId(context.id)
+                  local _, next = list:highestTierIndex(level, champ)
+                  result = tier == next
+               elseif args[2] == 4 then -- is the highest, even if unusable?
+                  local tier = list:lookupTierForId(context.id)
+                  local max  = list:highestTierIndex()
+                  result = tier == max
+               end
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do

@@ -66,6 +66,16 @@ ItemTrig.gameEnums.leveledMaterials = {
       { champ = 150, max = 160, ids = { 64489, 71198 } }, -- Rubedite
    },
    clothier = {
+      { level =   1, max =  14, ids = {   812,   811,   794,   793 } }, --          Jute | Rawhide
+      { level =  16, max =  24, ids = {  4464,  4463,  4447,  4448 } }, --          Flax | Hide
+      { level =  26, max =  34, ids = { 23129, 23125, 23099, 23095 } }, --        Cotton | Leather
+      { level =  36, max =  44, ids = { 23130, 23126, 23100,  6020 } }, --    Spidersilk | Thick Leather
+      { level =  46, max =  50, ids = { 23131, 23127, 23101, 23097 } }, --    Ebonthread | Fell Hide
+      { champ =  10, max =  30, ids = { 33217, 46131, 46135, 23142 } }, --   Kresh Fiber | Topgrain Hide
+      { champ =  40, max =  60, ids = { 33218, 46132, 46136, 23143 } }, --    Ironthread | Iron Hide
+      { champ =  70, max =  80, ids = { 33219, 46133, 46137,   800 } }, --   Silverweave | Superb Hide
+      { champ =  90, max = 140, ids = { 33220, 46134, 46138,  4478 } }, --    Void Cloth | Shadowhide
+      { champ = 150, max = 160, ids = { 71200, 64504, 64506, 71239 } }, -- Ancestor Silk | Rubedo Leather
    },
    enchanting = {
       { level =   5, ids = { 45855, 45817 } }, --   Jora | Jode
@@ -85,9 +95,110 @@ ItemTrig.gameEnums.leveledMaterials = {
       { champ = 150, ids = { 64509, 64508 } }, -- Rejera | Jehade
       { champ = 160, ids = { 68341, 68340 } }, -- Repora | Itade
    },
+   jewelry = {
+      { level =   1, max =  24, ids = { 135137, 135138 } }, -- Pewter
+      { level =  26, max =  50, ids = { 135139, 135140 } }, -- Copper
+      { champ =  10, max =  70, ids = { 135141, 135142 } }, -- Silver
+      { champ =  80, max = 140, ids = { 135143, 135144 } }, -- Electrum
+      { champ = 150, max = 160, ids = { 135145, 135146 } }, -- Platinum
+   },
    woodworking = {
+      { level =   1, max =  14, ids = {   803,   802 } }, -- Maple
+      { level =  16, max =  24, ids = {   533,   521 } }, -- Oak
+      { level =  26, max =  34, ids = { 23121, 23117 } }, -- Beech
+      { level =  36, max =  44, ids = { 23122, 23118 } }, -- Hickory
+      { level =  46, max =  50, ids = { 23123, 23119 } }, -- Yew
+      { champ =  10, max =  30, ids = { 46139,   818 } }, -- Birch
+      { champ =  40, max =  60, ids = { 46140,  4439 } }, -- Ash
+      { champ =  70, max =  80, ids = { 46141, 23137 } }, -- Mahogany
+      { champ =  90, max = 140, ids = { 46142, 23138 } }, -- Nightwood
+      { champ = 150, max = 160, ids = { 64502, 71199 } }, -- Ruby Ash
    },
 }
+do -- Setup for leveledMaterials: helper functions
+   local methods = {}
+   function methods:highestTierIndex(level, champ)
+      local count = #self
+      if level or champ then
+         for i = count, 1 do
+            local entry = self[i]
+            local after = (i ~= count) and (i + 1) or nil
+            if champ and entry.champ <= champ then
+               return i, after
+            end
+            if level and entry.level <= level then
+               return i, after
+            end
+         end
+      end
+      return count, nil
+   end
+   function methods:levelCanUse(id, level, champ)
+      for i = 1, #self do
+         local entry = self[i]
+         for j = 1, #entry.ids do
+            if entry.ids[j] == id then
+               if champ and entry.champ and entry.champ <= champ then
+                  return true
+               end
+               if level and entry.level and entry.level <= level then
+                  return true
+               end
+               return false
+            end
+         end
+      end
+      return false
+   end
+   function methods:lookupTierForId(id)
+      for i = 1, #self do
+         local entry = self[i]
+         for j = 1, #entry.ids do
+            if entry.ids[j] == id then
+               return i
+            end
+         end
+      end
+   end
+   --
+   local meta = {
+      __index =
+         function(t, k)
+            local base = rawget(t, k)
+            if base then
+               return base
+            end
+            return rawget(methods, k)
+         end
+   }
+   --
+   for k, v in pairs(ItemTrig.gameEnums.leveledMaterials) do
+      setmetatable(v, meta)
+   end
+   --
+   function ItemTrig.gameEnums.leveledMaterials:listForType(t)
+      if t == ITEMTYPE_POISON_BASE
+      or t == ITEMTYPE_POTION_BASE
+      then
+         return self.alchemy
+      elseif t == ITEMTYPE_BLACKSMITHING_MATERIAL
+      or t == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
+      then
+         return self.blacksmithing
+      elseif t == ITEMTYPE_CLOTHIER_MATERIAL
+      or t == ITEMTYPE_CLOTHIER_RAW_MATERIAL
+      then
+         return self.clothier
+      elseif t == ITEMTYPE_ENCHANTING_RUNE_POTENCY
+      then
+         return self.enchanting
+      elseif t == ITEMTYPE_WOODWORKING_MATERIAL
+      or t == ITEMTYPE_WOODWORKING_RAW_MATERIAL
+      then
+         return self.woodworking
+      end
+   end
+end
 
 ItemTrig.gameEnums.commonItems = {}
 do
