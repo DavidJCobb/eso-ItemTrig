@@ -266,6 +266,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYCRAFTMAT",    "[any cra
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYTRAITMAT",    "[any trait material]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYUNREFINED",   "[any unrefined material]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYREFINED",     "[any refined material]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYEQUIP",       "[any equippable]")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CRAFTED", "Crafted By Player (Yes/No)")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CRAFTED", "The item <<1>> crafted by a player.")
@@ -376,6 +377,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ITEMFILTER", "Item Category")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMFILTER", "The item <<1>> to the <<2>> category.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_NO",  "does not belong")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_YES", "belongs")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_ANYEQUIP", "[any equippable]")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_USAGEREQUIREMENTSMET", "Usage Requirement Met")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_USAGEREQUIREMENTSMET", "The player-character <<1>> the level and Champion Point requirements for using this item.")
@@ -388,8 +390,29 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_NO",  "does not belong
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_YES", "belongs to")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_USABLE", "any craftable")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_PLAYERMAX", "the highest craftable")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_AFTERPLAYERMAX", "the tier after the highest craftable")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_AFTERPLAYERMAX", "the one after the highest craftable")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_MAXTIER", "the highest")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_SALEVALUE", "Sale Value")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_SALEVALUE", "The item can be sold for <<1>> gold.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ISTREASUREMAP", "Is Treasure Map")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ISTREASUREMAP", "The item <<1>> a treasure map.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISTREASUREMAP_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISTREASUREMAP_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ISCLOTHES", "Is Clothes")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ISCLOTHES", "The item <<1>> civilian clothes that confer no armor.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISCLOTHES_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISCLOTHES_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ISSOULGEM", "Is Soul Gem")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ISSOULGEM", "The item <<1>> a(n) <<2>> soul gem")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_EMPTY",    "empty")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_FILLED",   "filled")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_ANYSTATE", "[any state]")
 --
 --
 -- ACTIONS

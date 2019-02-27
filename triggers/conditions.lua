@@ -138,6 +138,7 @@ ItemTrig.tableConditions = {
                [-6] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYTRAITMAT),
                [-7] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYUNREFINED),
                [-8] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYREFINED),
+               [-9] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMTYPE_ANYEQUIP),
                --
                -- Some of the built-in categories below appear to be unused; UESP's 
                -- database lists zero items in the categories, and some of them appear 
@@ -160,7 +161,7 @@ ItemTrig.tableConditions = {
                -- Those are hidden as well.
                --
                --[ITEMTYPE_ADDITIVE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_ADDITIVE), -- Category is unused?
-               [ITEMTYPE_ARMOR]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR),
+               [ITEMTYPE_ARMOR]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR), -- Actually "apparel;" includes jewelry
                --[ITEMTYPE_ARMOR_BOOSTER]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_BOOSTER),
                [ITEMTYPE_ARMOR_TRAIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_TRAIT),
                [ITEMTYPE_AVA_REPAIR]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_AVA_REPAIR),
@@ -201,7 +202,7 @@ ItemTrig.tableConditions = {
                --[ITEMTYPE_LOCKPICK]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_LOCKPICK),
                [ITEMTYPE_LURE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_LURE),
                [ITEMTYPE_MASTER_WRIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_MASTER_WRIT),
-               [ITEMTYPE_MOUNT]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_MOUNT),
+               --[ITEMTYPE_MOUNT]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_MOUNT),
                --[ITEMTYPE_NONE]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_NONE),
                --[ITEMTYPE_PLUG]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_PLUG),
                [ITEMTYPE_POISON]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_POISON),
@@ -300,6 +301,13 @@ ItemTrig.tableConditions = {
                or t == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
                or t == ITEMTYPE_JEWELRY_TRAIT
                or t == ITEMTYPE_WOODWORKING_MATERIAL
+               then
+                  result = true
+               end
+            elseif args[2] == -9 then -- any equippable
+               if t == ITEMTYPE_ARMOR -- actually "apparel;" includes jewelry
+               or t == ITEMTYPE_WEAPON
+               or t == ITEMTYPE_TABARD -- guild tabard: a wearable banner
                then
                   result = true
                end
@@ -914,7 +922,7 @@ ItemTrig.tableConditions = {
          return not result
       end
    ),
-   [28] = ConditionBase:new( -- Item Filter
+   [28] = ConditionBase:new( -- Item Filter Type
       _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMFILTER),
       _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMFILTER),
       {
@@ -930,38 +938,46 @@ ItemTrig.tableConditions = {
             default = ITEMFILTERTYPE_ALL,
             enum =
                {
-                  [ITEMFILTERTYPE_ALCHEMY]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALCHEMY),
-                  [ITEMFILTERTYPE_ALL]                 = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
-                  [ITEMFILTERTYPE_ARMOR]               = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR),
-                  [ITEMFILTERTYPE_BLACKSMITHING]       = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_BLACKSMITHING),
-                  [ITEMFILTERTYPE_CLOTHING]            = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CLOTHING),
-                  [ITEMFILTERTYPE_COLLECTIBLE]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_COLLECTIBLE),
-                  [ITEMFILTERTYPE_CONSUMABLE]          = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CONSUMABLE),
-                  [ITEMFILTERTYPE_CRAFTING]            = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CRAFTING),
-                  [ITEMFILTERTYPE_DAMAGED]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_DAMAGED),
-                  [ITEMFILTERTYPE_ENCHANTING]          = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ENCHANTING),
-                  [ITEMFILTERTYPE_FURNISHING]          = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_FURNISHING),
-                  [ITEMFILTERTYPE_JEWELRYCRAFTING]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JEWELRYCRAFTING),
-                  [ITEMFILTERTYPE_JUNK]                = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JUNK),
-                  [ITEMFILTERTYPE_MISCELLANEOUS]       = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_MISCELLANEOUS),
-                  [ITEMFILTERTYPE_PROVISIONING]        = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_PROVISIONING),
-                  --[ITEMFILTERTYPE_QUEST]               = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUEST),
-                  [ITEMFILTERTYPE_QUICKSLOT]           = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
-                  [ITEMFILTERTYPE_STYLE_MATERIALS]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_STYLE_MATERIALS),
-                  [ITEMFILTERTYPE_TRAIT_ITEMS]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_TRAIT_ITEMS),
-                  [ITEMFILTERTYPE_WEAPONS]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS),
-                  [ITEMFILTERTYPE_WOODWORKING]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WOODWORKING),
+                  [-1] = GetString(ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_ANYEQUIP),
+                  [ITEMFILTERTYPE_ALCHEMY]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALCHEMY),
+                  [ITEMFILTERTYPE_ALL]             = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
+                  [ITEMFILTERTYPE_ARMOR]           = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ARMOR),
+                  [ITEMFILTERTYPE_BLACKSMITHING]   = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_BLACKSMITHING),
+                  [ITEMFILTERTYPE_CLOTHING]        = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CLOTHING),
+                  [ITEMFILTERTYPE_COLLECTIBLE]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_COLLECTIBLE),
+                  [ITEMFILTERTYPE_CONSUMABLE]      = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CONSUMABLE),
+                  [ITEMFILTERTYPE_CRAFTING]        = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_CRAFTING),
+                  [ITEMFILTERTYPE_DAMAGED]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_DAMAGED),
+                  [ITEMFILTERTYPE_ENCHANTING]      = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ENCHANTING),
+                  [ITEMFILTERTYPE_FURNISHING]      = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_FURNISHING),
+                  [ITEMFILTERTYPE_JEWELRY]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JEWELRY),
+                  [ITEMFILTERTYPE_JEWELRYCRAFTING] = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JEWELRYCRAFTING),
+                  [ITEMFILTERTYPE_JUNK]            = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_JUNK),
+                  [ITEMFILTERTYPE_MISCELLANEOUS]   = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_MISCELLANEOUS),
+                  [ITEMFILTERTYPE_PROVISIONING]    = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_PROVISIONING),
+                  --[ITEMFILTERTYPE_QUEST]           = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUEST),
+                  [ITEMFILTERTYPE_QUICKSLOT]       = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
+                  [ITEMFILTERTYPE_STYLE_MATERIALS] = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_STYLE_MATERIALS),
+                  [ITEMFILTERTYPE_TRAIT_ITEMS]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_TRAIT_ITEMS),
+                  [ITEMFILTERTYPE_WEAPONS]         = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WEAPONS),
+                  [ITEMFILTERTYPE_WOODWORKING]     = GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_WOODWORKING),
                },
          },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
          local result = false
-         for i = 1, #context.itemFilters do
-            if context.itemFilters[i] == args[2] then
-               result = true
-               break
+         if args[2] < 0 then
+            if args[2] == -1 then -- any equippable
+               if context:hasFilterType(ITEMFILTERTYPE_ARMOR)
+               or context:hasFilterType(ITEMFILTERTYPE_JEWELRY)
+               or context:hasFilterType(ITEMFILTERTYPE_WEAPONS)
+               then
+                  result = true
+               end
             end
+         else
+            result = context:hasFilterType(args[2])
          end
          if args[1] then
             return result
@@ -1021,13 +1037,15 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local result = false
+         local result = nil
          do
             local type = context:pertinentCraftingType()
             --
             local data = ItemTrig.gameEnums.leveledMaterials
             local list = data:craftForType(type)
             if list then
+               result = false
+               --
                local rankPlayer = ItemTrig.getCurrentCraftingRank(type)
                local rankItem   = list:rankForID(context.id)
                if not rankItem then
@@ -1044,6 +1062,103 @@ ItemTrig.tableConditions = {
                   elseif args[2] == 4 then -- is the highest, even if unusable?
                      result = rankItem == list:highestRank()
                   end
+               end
+            end
+         end
+         if result == nil then -- not a valid item for this condition; always fail
+            return false
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [31] = ConditionBase:new( -- Sale Value
+      _s(ITEMTRIG_STRING_CONDITIONNAME_SALEVALUE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_SALEVALUE),
+      {
+         [1] = { type = "quantity" },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         return ItemTrig.testQuantity(args[2], context.sellValue)
+      end
+   ),
+   [32] = ConditionBase:new( -- Is Treasure Map
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ISTREASUREMAP),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ISTREASUREMAP),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISTREASUREMAP_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISTREASUREMAP_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = (context.type == ITEMTYPE_TROPHY) and (context.specType == SPECIALIZED_ITEMTYPE_TROPHY_TREASURE_MAP)
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [33] = ConditionBase:new( -- Is Clothes
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ISCLOTHES),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ISCLOTHES),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISCLOTHES_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISCLOTHES_YES)
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context:isClothes()
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [34] = ConditionBase:new( -- Is Soul Gem
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ISSOULGEM),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ISSOULGEM),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_YES)
+            }
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [0] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_EMPTY),
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_FILLED),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_ANYSTATE),
+            }
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         do
+            local data = context.soulGemInfo or {}
+            if data.isSoulGem then
+               if args[2] == 0 then
+                  result = data.isFilled == SOUL_GEM_TYPE_EMPTY
+               elseif args[2] == 1 then
+                  result = data.isFilled == SOUL_GEM_TYPE_FILLED
+               elseif args[2] == 2 then
+                  result = true
                end
             end
          end

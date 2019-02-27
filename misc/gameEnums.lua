@@ -41,6 +41,18 @@ do
    ItemTrig.gameEnums.styles = styles
 end
 
+--
+-- STRUCTURED ENUM: leveledMaterials
+--
+-- This enum has named fields for each crafting type. Each of these 
+-- fields is an array of crafting ranks; each crafting rank has the 
+-- minimum level or champion point count, and an array of item IDs 
+-- for materials (raw and refined) in that rank. Crafting types that 
+-- use the "smithing" system also define a maximum level for each 
+-- rank.
+--
+-- 
+--
 do
    local Craft = {}
    local Tier  = {}
@@ -216,6 +228,22 @@ do
    end
 end
 
+--
+-- LAZILY-GENERATED ENUM: commonItems
+--
+-- To generate the enum, call ItemTrig.gameEnums.commonItems:generate(). 
+-- To check whether the enum was generated, check the "wasGenerated" 
+-- member.
+--
+-- Once the enum is generated, the keys will be item IDs, and the values 
+-- will be those items' names. The reason we require manual generation of 
+-- the enum is because recovering the item names involves making a TON of 
+-- calls to GetItemLinkName, with string manipulation -- one per item ID 
+-- in the enum.
+--
+-- The only value this enum has is as a means to provide auto-complete 
+-- entries for textboxes in which the player must type an item's name.
+--
 ItemTrig.gameEnums.commonItems = {}
 do
    local wasGenerated = false

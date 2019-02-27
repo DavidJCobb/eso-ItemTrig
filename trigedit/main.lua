@@ -420,15 +420,19 @@ function WinCls:moveSelectedTrigger(direction)
    end
 end
 function WinCls:deleteSelectedTrigger()
-   local paneIndex          = self.ui.pane:getFirstSelectedIndex()
+   local paneIndex = self.ui.pane:getFirstSelectedIndex()
+   if not paneIndex then
+      return
+   end
    local trigger, listIndex = self:getTriggerByPaneIndex(paneIndex)
+   assert(trigger and listIndex, "Couldn't identify the selected trigger.")
    deferred = self:showModal(ItemTrig.windows.genericConfirm, {
       text = GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_CONFIRM_DELETE),
       showCloseButton = false
    }):done(
       function(w)
          table.remove(w.currentTriggerList, listIndex)
-         w.ui.pane:remove(paneIndex)
+         w:refresh()
       end,
       self
    )

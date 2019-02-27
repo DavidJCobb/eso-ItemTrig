@@ -359,7 +359,19 @@ local _lazyGetterMappings = {
             maxEquipped   = maxEquipped,
          }
       end,
-   specialTrait     = function(i) return i.invalid and nil or GetItemTraitInformation(i.bag, i.slot) end,
+   soulGemInfo =
+      function(i)
+         if i.invalid then
+            return nil
+         end
+         local tier, filled = GetSoulGemItemInfo(i.bag, i.slot)
+         return {
+            isFilled  = filled,
+            isSoulGem = (tier ~= 0),
+            tier      = tier,
+         }
+      end,
+   specialTrait = function(i) return i.invalid and nil or GetItemTraitInformation(i.bag, i.slot) end,
 }
 
 ItemInterface.meta = {
@@ -565,12 +577,38 @@ function ItemInterface:destroy(count)
    end
    return true
 end
+function ItemInterface:hasFilterType(ft)
+   for i = 1, #self.itemFilters do
+      if self.itemFilters[i] == ft then
+         return true
+      end
+   end
+   return false
+end
 function ItemInterface:is(instance)
    assert(self == ItemInterface, "This is a static method.")
    if instance then
       return getmetatable(instance) == self.meta
    end
    return false
+end
+function ItemInterface:isClothes()
+   --
+   -- "Clothes" here refers to equippable clothing that confers no 
+   -- armor. This does not include disguises.
+   --
+   if self.type ~= ITEMTYPE_ARMOR or self.armorType ~= ARMORTYPE_NONE then
+      return false
+   end
+   if self.equipType == EQUIP_TYPE_NECK -- Jewelry check
+   or self.equipType == EQUIP_TYPE_RING
+   then
+      return false
+   end
+   if self.equipType == EQUIP_TYPE_INVALID then
+      return false
+   end
+   return true
 end
 function ItemInterface:isDestroyed()
    return self.destroyed
@@ -663,6 +701,11 @@ do
       end
       if self.weaponType ~= WEAPONTYPE_NONE then
          return _mapWeaponTypes[self.weaponType]
+      end
+      if self.equipType == EQUIP_TYPE_NECK
+      or self.equipType == EQUIP_TYPE_RING
+      then
+         return CRAFTING_TYPE_JEWELRYCRAFTING
       end
       local it = self.type
       if it == ITEMTYPE_POISON_BASE
