@@ -1,9 +1,11 @@
 ## Title: ItemTrig
+## Author: DavidJCobb
+## Description: Automatically performs actions on your items based on the rules you specify.
 ## APIVersion: 100026
 ## AddOnVersion: 1
 ## Version: alpha01
 ## SavedVariables: ItemTrigSavedata
-## OptionalDependsOn: LibAddonMenu-2.0
+##DependsOn: LibAddonMenu-2.0
 
 #
 # This add-on embeds versions of LibStub and LibAddonMenu. LibStub is 
@@ -33,6 +35,7 @@ lang/$(language).lua
 ItemTrig.lua
 misc/deferred.lua
 misc/gameEnums.lua
+misc/gameStats.lua
 misc/hook.lua
 misc/math.lua
 misc/savedata.lua

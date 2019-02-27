@@ -636,6 +636,85 @@ function ItemInterface:onModifyingAction(action, ...)
    -- The (action) parameter is a string.
    --
 end
+do
+   local _mapArmorTypes = {
+      [ARMORTYPE_LIGHT]  = CRAFTING_TYPE_CLOTHIER,
+      [ARMORTYPE_MEDIUM] = CRAFTING_TYPE_CLOTHIER,
+      [ARMORTYPE_HEAVY]  = CRAFTING_TYPE_BLACKSMITHING,
+   }
+   local _mapWeaponTypes = {
+      [WEAPONTYPE_AXE]               = CRAFTING_TYPE_BLACKSMITHING,
+      [WEAPONTYPE_BOW]               = CRAFTING_TYPE_WOODWORKING,
+      [WEAPONTYPE_DAGGER]            = CRAFTING_TYPE_BLACKSMITHING,
+      [WEAPONTYPE_FIRE_STAFF]        = CRAFTING_TYPE_WOODWORKING,
+      [WEAPONTYPE_FROST_STAFF]       = CRAFTING_TYPE_WOODWORKING,
+      [WEAPONTYPE_HAMMER]            = CRAFTING_TYPE_BLACKSMITHING,
+      [WEAPONTYPE_HEALING_STAFF]     = CRAFTING_TYPE_WOODWORKING,
+      [WEAPONTYPE_LIGHTNING_STAFF]   = CRAFTING_TYPE_WOODWORKING,
+      [WEAPONTYPE_SHIELD]            = CRAFTING_TYPE_WOODWORKING,
+      [WEAPONTYPE_SWORD]             = CRAFTING_TYPE_BLACKSMITHING,
+      [WEAPONTYPE_TWO_HANDED_AXE]    = CRAFTING_TYPE_BLACKSMITHING,
+      [WEAPONTYPE_TWO_HANDED_HAMMER] = CRAFTING_TYPE_BLACKSMITHING,
+      [WEAPONTYPE_TWO_HANDED_SWORD]  = CRAFTING_TYPE_BLACKSMITHING,
+   }
+   function ItemInterface:pertinentCraftingType()
+      if self.armorType ~= ARMORTYPE_NONE then
+         return _mapArmorTypes[self.armorType]
+      end
+      if self.weaponType ~= WEAPONTYPE_NONE then
+         return _mapWeaponTypes[self.weaponType]
+      end
+      local it = self.type
+      if it == ITEMTYPE_POISON_BASE
+      or it == ITEMTYPE_POTION_BASE
+      or it == ITEMTYPE_REAGENT
+      then
+         return CRAFTING_TYPE_ALCHEMY
+      end
+      if it == ITEMTYPE_BLACKSMITHING_MATERIAL
+      or it == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
+      or it == ITEMTYPE_BLACKSMITHING_BOOSTER
+      then
+         return CRAFTING_TYPE_BLACKSMITHING
+      end
+      if it == ITEMTYPE_CLOTHIER_MATERIAL
+      or it == ITEMTYPE_CLOTHIER_RAW_MATERIAL
+      or it == ITEMTYPE_CLOTHIER_BOOSTER
+      then
+         return CRAFTING_TYPE_CLOTHIER
+      end
+      if it == ITEMTYPE_ENCHANTING_RUNE_ASPECT
+      or it == ITEMTYPE_ENCHANTING_RUNE_ESSENCE
+      or it == ITEMTYPE_ENCHANTING_RUNE_POTENCY
+      or it == ITEMTYPE_GLYPH_ARMOR
+      or it == ITEMTYPE_GLYPH_JEWELRY
+      or it == ITEMTYPE_GLYPH_WEAPON
+      then
+         return CRAFTING_TYPE_ENCHANTING
+      end
+      if it == ITEMTYPE_JEWELRYCRAFTING_BOOSTER
+      or it == ITEMTYPE_JEWELRYCRAFTING_MATERIAL
+      or it == ITEMTYPE_JEWELRYCRAFTING_RAW_BOOSTER
+      or it == ITEMTYPE_JEWELRYCRAFTING_RAW_MATERIAL
+      or it == ITEMTYPE_JEWELRY_RAW_TRAIT
+      or it == ITEMTYPE_JEWELRY_TRAIT
+      then
+         return CRAFTING_TYPE_JEWELRYCRAFTING
+      end
+      if it == ITEMTYPE_INGREDIENT
+      or it == ITEMTYPE_DRINK
+      or it == ITEMTYPE_FOOD
+      then
+         return CRAFTING_TYPE_PROVISIONING
+      end
+      if it == ITEMTYPE_WOODWORKING_MATERIAL
+      or it == ITEMTYPE_WOODWORKING_RAW_MATERIAL
+      or it == ITEMTYPE_WOODWORKING_BOOSTER
+      then
+         return CRAFTING_TYPE_WOODWORKING
+      end
+   end
+end
 function ItemInterface:sell(count)
    if self:isInvalid() then
       return

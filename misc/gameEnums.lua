@@ -41,160 +41,176 @@ do
    ItemTrig.gameEnums.styles = styles
 end
 
-ItemTrig.gameEnums.leveledMaterials = {
-   alchemy = {
-      { level =   3, ids = {   883, 75357 } }, --   Natural Water | Grease
-      { level =  10, ids = {  1187, 75358 } }, --     Clear Water | Ichor
-      { level =  20, ids = {  4570, 75359 } }, --  Pristine Water | Slime
-      { level =  30, ids = { 23265, 75360 } }, --  Cleansed Water | Gall
-      { level =  40, ids = { 23266, 75361 } }, --  Filtered Water | Terebinthine
-      { level =  50, ids = { 23267, 75362 } }, --  Purified Water | Pitch-Bile
-      { champ =  50, ids = { 23268, 75363 } }, --      Cloud Mist | Tarblack
-      { champ = 100, ids = { 64500, 75364 } }, --        Star Dew | Night-Oil
-      { champ = 150, ids = { 64501, 75365 } }, -- Lorkhan's Tears | Alkahest
-   },
-   blacksmithing = {
-      { level =   1, max =  14, ids = {  5413,   808 } }, -- Iron
-      { level =  16, max =  24, ids = {  4487,  5820 } }, -- Steel
-      { level =  26, max =  34, ids = { 23107, 23103 } }, -- Orichalcum
-      { level =  36, max =  44, ids = {  6000, 23104 } }, -- Dwarven
-      { level =  46, max =  50, ids = {  6001, 23105 } }, -- Ebony
-      { champ =  10, max =  30, ids = { 46127,  4482 } }, -- Calcinium
-      { champ =  40, max =  60, ids = { 46128, 23133 } }, -- Galatite
-      { champ =  70, max =  80, ids = { 46129, 23134 } }, -- Quicksilver
-      { champ =  90, max = 140, ids = { 46130, 23135 } }, -- Voidstone
-      { champ = 150, max = 160, ids = { 64489, 71198 } }, -- Rubedite
-   },
-   clothier = {
-      { level =   1, max =  14, ids = {   812,   811,   794,   793 } }, --          Jute | Rawhide
-      { level =  16, max =  24, ids = {  4464,  4463,  4447,  4448 } }, --          Flax | Hide
-      { level =  26, max =  34, ids = { 23129, 23125, 23099, 23095 } }, --        Cotton | Leather
-      { level =  36, max =  44, ids = { 23130, 23126, 23100,  6020 } }, --    Spidersilk | Thick Leather
-      { level =  46, max =  50, ids = { 23131, 23127, 23101, 23097 } }, --    Ebonthread | Fell Hide
-      { champ =  10, max =  30, ids = { 33217, 46131, 46135, 23142 } }, --   Kresh Fiber | Topgrain Hide
-      { champ =  40, max =  60, ids = { 33218, 46132, 46136, 23143 } }, --    Ironthread | Iron Hide
-      { champ =  70, max =  80, ids = { 33219, 46133, 46137,   800 } }, --   Silverweave | Superb Hide
-      { champ =  90, max = 140, ids = { 33220, 46134, 46138,  4478 } }, --    Void Cloth | Shadowhide
-      { champ = 150, max = 160, ids = { 71200, 64504, 64506, 71239 } }, -- Ancestor Silk | Rubedo Leather
-   },
-   enchanting = {
-      { level =   5, ids = { 45855, 45817 } }, --   Jora | Jode
-      { level =  10, ids = { 45856, 45818 } }, -- Porade | Notade
-      { level =  15, ids = { 45857, 45819 } }, --   Jera | Ode
-      { level =  20, ids = { 45806, 45820 } }, -- Jejora | Tade
-      { level =  25, ids = { 45807, 45821 } }, --   Odra | Jayde
-      { level =  30, ids = { 45808, 45822 } }, -- Pojora | Edode
-      { level =  35, ids = { 45809, 45823 } }, --  Edora | Pojode
-      { level =  40, ids = { 45810, 45824 } }, --  Jaera | Rekude
-      { level =  45, ids = { 45811, 45825 } }, --   Pora | Hade
-      { champ =  10, ids = { 45812, 45826 } }, -- Denara | Idode
-      { champ =  30, ids = { 45813, 45827 } }, --   Rera | Pode
-      { champ =  50, ids = { 45814, 45828 } }, -- Derado | Kedeko
-      { champ =  70, ids = { 45815, 45829 } }, -- Rekura | Rede
-      { champ = 100, ids = { 45816, 45830 } }, --   Kura | Kude
-      { champ = 150, ids = { 64509, 64508 } }, -- Rejera | Jehade
-      { champ = 160, ids = { 68341, 68340 } }, -- Repora | Itade
-   },
-   jewelry = {
-      { level =   1, max =  24, ids = { 135137, 135138 } }, -- Pewter
-      { level =  26, max =  50, ids = { 135139, 135140 } }, -- Copper
-      { champ =  10, max =  70, ids = { 135141, 135142 } }, -- Silver
-      { champ =  80, max = 140, ids = { 135143, 135144 } }, -- Electrum
-      { champ = 150, max = 160, ids = { 135145, 135146 } }, -- Platinum
-   },
-   woodworking = {
-      { level =   1, max =  14, ids = {   803,   802 } }, -- Maple
-      { level =  16, max =  24, ids = {   533,   521 } }, -- Oak
-      { level =  26, max =  34, ids = { 23121, 23117 } }, -- Beech
-      { level =  36, max =  44, ids = { 23122, 23118 } }, -- Hickory
-      { level =  46, max =  50, ids = { 23123, 23119 } }, -- Yew
-      { champ =  10, max =  30, ids = { 46139,   818 } }, -- Birch
-      { champ =  40, max =  60, ids = { 46140,  4439 } }, -- Ash
-      { champ =  70, max =  80, ids = { 46141, 23137 } }, -- Mahogany
-      { champ =  90, max = 140, ids = { 46142, 23138 } }, -- Nightwood
-      { champ = 150, max = 160, ids = { 64502, 71199 } }, -- Ruby Ash
-   },
-}
-do -- Setup for leveledMaterials: helper functions
-   local methods = {}
-   function methods:highestTierIndex(level, champ)
-      local count = #self
-      if level or champ then
-         for i = count, 1 do
-            local entry = self[i]
-            local after = (i ~= count) and (i + 1) or nil
-            if champ and entry.champ <= champ then
-               return i, after
-            end
-            if level and entry.level <= level then
-               return i, after
+do
+   local Craft = {}
+   local Tier  = {}
+   do -- Tier class definition
+      Tier.__index = Tier
+      function Tier.__lt(a, b)
+         if b.champ and not a.champ then
+            return true
+         end
+         if a.champ and not b.champ then
+            return false
+         end
+         if a.champ then
+            return a.champ < b.champ
+         end
+         return (a.level or 0) < (b.level or 0)
+      end
+      function Tier:new(data)
+         return setmetatable(data, self)
+      end
+      function Tier:matchesStat(level, champ)
+         if champ and self.champ and champ >= self.champ then
+            return true
+         end
+         if level and self.level and level >= self.level then
+            return true
+         end
+         return false
+      end
+      function Tier:matchesID(id)
+         for i = 1, #self.ids do
+            if self.ids[i] == id then
+               return true
             end
          end
+         return false
       end
-      return count, nil
-   end
-   function methods:levelCanUse(id, level, champ)
-      for i = 1, #self do
-         local entry = self[i]
-         for j = 1, #entry.ids do
-            if entry.ids[j] == id then
-               if champ and entry.champ and entry.champ <= champ then
-                  return true
-               end
-               if level and entry.level and entry.level <= level then
-                  return true
-               end
-               return false
+   end --
+   do -- Craft class definition
+      Craft.__index = Craft
+      function Craft:new(array)
+         local result = setmetatable({}, self)
+         for i = 1, #array do
+            result[i] = Tier:new(array[i])
+         end
+         return result
+      end
+      function Craft:highestRank()
+         return #self
+      end
+      function Craft:highestTier()
+         return self[#self]
+      end
+      function Craft:levelCanUse(id, level, champ)
+         for i = 1, #self do
+            if self[i]:matchesID(id) then
+               return self[i]:matchesStat(level, champ)
             end
          end
+         return false
       end
-      return false
-   end
-   function methods:lookupTierForId(id)
-      for i = 1, #self do
-         local entry = self[i]
-         for j = 1, #entry.ids do
-            if entry.ids[j] == id then
+      function Craft:maxRankForStat(level, champ)
+         for i = #self, 1, -1 do
+            if self[i]:matchesStat(level, champ) then
                return i
             end
          end
       end
+      function Craft:maxTierForStat(level, champ)
+         return self[self:maxRankForStat(level, champ) or -1]
+      end
+      function Craft:rankForID(id)
+         for i = 1, #self do
+            if self[i]:matchesID(id) then
+               return i
+            end
+         end
+      end
+      function Craft:tierForID(id)
+         return self[self:rankForID(id) or -1]
+      end
    end
    --
-   local meta = {
-      __index =
-         function(t, k)
-            local base = rawget(t, k)
-            if base then
-               return base
-            end
-            return rawget(methods, k)
-         end
+   ItemTrig.gameEnums.leveledMaterials = {
+      alchemy = Craft:new({
+         { level =   3, ids = {   883, 75357 } }, --   Natural Water | Grease
+         { level =  10, ids = {  1187, 75358 } }, --     Clear Water | Ichor
+         { level =  20, ids = {  4570, 75359 } }, --  Pristine Water | Slime
+         { level =  30, ids = { 23265, 75360 } }, --  Cleansed Water | Gall
+         { level =  40, ids = { 23266, 75361 } }, --  Filtered Water | Terebinthine
+         { level =  50, ids = { 23267, 75362 } }, --  Purified Water | Pitch-Bile
+         { champ =  50, ids = { 23268, 75363 } }, --      Cloud Mist | Tarblack
+         { champ = 100, ids = { 64500, 75364 } }, --        Star Dew | Night-Oil
+         { champ = 150, ids = { 64501, 75365 } }, -- Lorkhan's Tears | Alkahest
+      }),
+      blacksmithing = Craft:new({
+         { level =   1, max =  14, ids = {  5413,   808 } }, -- Iron
+         { level =  16, max =  24, ids = {  4487,  5820 } }, -- Steel
+         { level =  26, max =  34, ids = { 23107, 23103 } }, -- Orichalcum
+         { level =  36, max =  44, ids = {  6000, 23104 } }, -- Dwarven
+         { level =  46, max =  50, ids = {  6001, 23105 } }, -- Ebony
+         { champ =  10, max =  30, ids = { 46127,  4482 } }, -- Calcinium
+         { champ =  40, max =  60, ids = { 46128, 23133 } }, -- Galatite
+         { champ =  70, max =  80, ids = { 46129, 23134 } }, -- Quicksilver
+         { champ =  90, max = 140, ids = { 46130, 23135 } }, -- Voidstone
+         { champ = 150, max = 160, ids = { 64489, 71198 } }, -- Rubedite
+      }),
+      clothier = Craft:new({
+         { level =   1, max =  14, ids = {   812,   811,   794,   793 } }, --          Jute | Rawhide
+         { level =  16, max =  24, ids = {  4464,  4463,  4447,  4448 } }, --          Flax | Hide
+         { level =  26, max =  34, ids = { 23129, 23125, 23099, 23095 } }, --        Cotton | Leather
+         { level =  36, max =  44, ids = { 23130, 23126, 23100,  6020 } }, --    Spidersilk | Thick Leather
+         { level =  46, max =  50, ids = { 23131, 23127, 23101, 23097 } }, --    Ebonthread | Fell Hide
+         { champ =  10, max =  30, ids = { 33217, 46131, 46135, 23142 } }, --   Kresh Fiber | Topgrain Hide
+         { champ =  40, max =  60, ids = { 33218, 46132, 46136, 23143 } }, --    Ironthread | Iron Hide
+         { champ =  70, max =  80, ids = { 33219, 46133, 46137,   800 } }, --   Silverweave | Superb Hide
+         { champ =  90, max = 140, ids = { 33220, 46134, 46138,  4478 } }, --    Void Cloth | Shadowhide
+         { champ = 150, max = 160, ids = { 71200, 64504, 64506, 71239 } }, -- Ancestor Silk | Rubedo Leather
+      }),
+      enchanting = Craft:new({
+         { level =   5, ids = { 45855, 45817 } }, --   Jora | Jode
+         { level =  10, ids = { 45856, 45818 } }, -- Porade | Notade
+         { level =  15, ids = { 45857, 45819 } }, --   Jera | Ode
+         { level =  20, ids = { 45806, 45820 } }, -- Jejora | Tade
+         { level =  25, ids = { 45807, 45821 } }, --   Odra | Jayde
+         { level =  30, ids = { 45808, 45822 } }, -- Pojora | Edode
+         { level =  35, ids = { 45809, 45823 } }, --  Edora | Pojode
+         { level =  40, ids = { 45810, 45824 } }, --  Jaera | Rekude
+         { level =  45, ids = { 45811, 45825 } }, --   Pora | Hade
+         { champ =  10, ids = { 45812, 45826 } }, -- Denara | Idode
+         { champ =  30, ids = { 45813, 45827 } }, --   Rera | Pode
+         { champ =  50, ids = { 45814, 45828 } }, -- Derado | Kedeko
+         { champ =  70, ids = { 45815, 45829 } }, -- Rekura | Rede
+         { champ = 100, ids = { 45816, 45830 } }, --   Kura | Kude
+         { champ = 150, ids = { 64509, 64508 } }, -- Rejera | Jehade
+         { champ = 160, ids = { 68341, 68340 } }, -- Repora | Itade
+      }),
+      jewelry = Craft:new({
+         { level =   1, max =  24, ids = { 135137, 135138 } }, -- Pewter
+         { level =  26, max =  50, ids = { 135139, 135140 } }, -- Copper
+         { champ =  10, max =  70, ids = { 135141, 135142 } }, -- Silver
+         { champ =  80, max = 140, ids = { 135143, 135144 } }, -- Electrum
+         { champ = 150, max = 160, ids = { 135145, 135146 } }, -- Platinum
+      }),
+      woodworking = Craft:new({
+         { level =   1, max =  14, ids = {   803,   802 } }, -- Maple
+         { level =  16, max =  24, ids = {   533,   521 } }, -- Oak
+         { level =  26, max =  34, ids = { 23121, 23117 } }, -- Beech
+         { level =  36, max =  44, ids = { 23122, 23118 } }, -- Hickory
+         { level =  46, max =  50, ids = { 23123, 23119 } }, -- Yew
+         { champ =  10, max =  30, ids = { 46139,   818 } }, -- Birch
+         { champ =  40, max =  60, ids = { 46140,  4439 } }, -- Ash
+         { champ =  70, max =  80, ids = { 46141, 23137 } }, -- Mahogany
+         { champ =  90, max = 140, ids = { 46142, 23138 } }, -- Nightwood
+         { champ = 150, max = 160, ids = { 64502, 71199 } }, -- Ruby Ash
+      }),
    }
    --
-   for k, v in pairs(ItemTrig.gameEnums.leveledMaterials) do
-      setmetatable(v, meta)
-   end
-   --
-   function ItemTrig.gameEnums.leveledMaterials:listForType(t)
-      if t == ITEMTYPE_POISON_BASE
-      or t == ITEMTYPE_POTION_BASE
-      then
+   function ItemTrig.gameEnums.leveledMaterials:craftForType(t)
+      if t == CRAFTING_TYPE_ALCHEMY then
          return self.alchemy
-      elseif t == ITEMTYPE_BLACKSMITHING_MATERIAL
-      or t == ITEMTYPE_BLACKSMITHING_RAW_MATERIAL
-      then
+      elseif t == CRAFTING_TYPE_BLACKSMITHING then
          return self.blacksmithing
-      elseif t == ITEMTYPE_CLOTHIER_MATERIAL
-      or t == ITEMTYPE_CLOTHIER_RAW_MATERIAL
-      then
+      elseif t == CRAFTING_TYPE_CLOTHIER then
          return self.clothier
-      elseif t == ITEMTYPE_ENCHANTING_RUNE_POTENCY
-      then
+      elseif t == CRAFTING_TYPE_ENCHANTING then
          return self.enchanting
-      elseif t == ITEMTYPE_WOODWORKING_MATERIAL
-      or t == ITEMTYPE_WOODWORKING_RAW_MATERIAL
-      then
+      elseif t == CRAFTING_TYPE_JEWELRYCRAFTING then
+         return self.jewelry
+      elseif t == CRAFTING_TYPE_WOODWORKING then
          return self.woodworking
       end
    end
