@@ -200,6 +200,12 @@ function ISavedataCharacter:new(root, id, struct)
    })
    return result
 end
+function ISavedataCharacter:is(x)
+   if type(x) ~= "table" then
+      return false
+   end
+   return getmetatable(x) == self
+end
 function ISavedataCharacter:data()
    return self.wrapped
 end

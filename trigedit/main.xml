@@ -13,8 +13,8 @@
                <Anchor point="TOPLEFT" offsetX="5" offsetY="5" />
             </Button>
             <Label name="$(parent)Name" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-               <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="5" offsetY="-2" relativeTo="$(parent)Enabled" />
-               <Anchor point="TOPRIGHT" />
+               <Anchor point="TOPLEFT"  relativePoint="TOPRIGHT" offsetX="5" offsetY="-2" relativeTo="$(parent)Enabled" />
+               <Anchor point="TOPRIGHT" offsetX="-5" />
             </Label>
             <Label hidden="true" name="$(parent)Description" font="ITEMTRIG_FONT_LIST_ITEM" text="Trigger description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                <Anchor point="TOPLEFT"  relativePoint="BOTTOMLEFT"  relativeTo="$(parent)Name" />
@@ -68,6 +68,7 @@
                      <Anchor point="BOTTOMRIGHT" />
                      <Dimensions x="150" />
                      <Controls>
+                        <!-- Top-aligned buttons, in order from top to bottom: -->
                         <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)AddTrigger"  text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_ADD">
                            <Anchor point="LEFT" />
                            <Anchor point="TOPRIGHT" />
@@ -93,12 +94,32 @@
                            <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
                            <OnClicked> ItemTrig.windows.triggerList:deleteSelectedTrigger() </OnClicked>
                         </Button>
+                        <!-- Bottom-aligned buttons, in order from bottom to top: -->
+                        <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)OpenImport" text="ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_IMPORT">
+                           <Anchor point="BOTTOMLEFT" />
+                           <Anchor point="BOTTOMRIGHT" />
+                           <OnClicked> ItemTrig.windows.triggerList:requestImport() </OnClicked>
+                        </Button>
                      </Controls>
                   </Control>
                   <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_ThemedScrollSelectList">
                      <Anchor point="TOPLEFT"     relativeTo="$(parent)Col1" relativePoint="TOPRIGHT"   offsetX="5" />
                      <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Col3" relativePoint="BOTTOMLEFT" offsetX="-5" />
                   </Control>
+                  <Label name="$(parent)ShowIfEmpty" hidden="true"
+                     font="ITEMTRIG_FONT_BASIC"
+                     text="ITEMTRIG_STRING_UI_TRIGGERLIST_HAS_NO_TRIGGERS"
+                     horizontalAlignment="CENTER"
+                     verticalAlignment="CENTER"
+                  >
+                     <Anchor point="LEFT"  offsetX="20"  relativeTo="$(parent)Col2Contents" />
+                     <Anchor point="RIGHT" offsetX="-20" relativeTo="$(parent)Col2Contents" />
+                     <OnInitialized>
+                        local c = ItemTrig.assign({}, ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)
+                        c[4] = c[4] - 0.4
+                        self:SetColor(unpack(c))
+                     </OnInitialized>
+                  </Label>
                </Controls>
             </Control>
          </Controls>

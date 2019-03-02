@@ -63,6 +63,8 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEUP", "Move Up")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_MOVEDOWN", "Move Down")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_DELETE", "Delete")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_CONFIRM_DELETE", "Are you sure you want to delete this trigger? This mod doesn't offer Ctrl+Z, you know!")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_HAS_NO_TRIGGERS",       "Click the \"New\" button to create a trigger, or click the \"Import\" button to copy some pre-made ones! :)")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_ALL_TRIGGERS_FILTERED", "None of your triggers are set to run during this entry point.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_NEW", "Create trigger...")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_TITLE_EDIT", "Edit trigger...")
@@ -75,6 +77,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_EDIT", "Edit")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEUP", "Move Up")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_MOVEDOWN", "Move Down")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DELETE", "Delete")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_BUTTON_IMPORT", "Import...")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS", "Conditions:")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_ACTIONS", "Actions:")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_SAVE", "OK")
@@ -97,6 +100,15 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_TITLE", "Edit value...")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_SAVE", "OK")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_CANCEL", "Cancel")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES", "Are you sure you want to discard your unsaved changes?")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_TITLE", "Import trigger...")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_LABEL_IMPORTSOURCE", "Import from:")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_BUTTON_IMPORT", "Import")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_TRIGGERENTRYPOINT", "Entry point(s): <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_TRIGGERENTRYPOINTSEPARATOR", ", ")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_TRIGGERENTRYPOINTNONE", "[none set]")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_HAS_NO_TRIGGERS",       "This character doesn't have any triggers to import.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_ALL_TRIGGERS_FILTERED", "The current display filters are hiding all triggers.") -- This should not appear
 --
 --
 -- GAME
@@ -414,6 +426,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_EMPTY",    "empty")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_FILLED",   "filled")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_ANYSTATE", "[any state]")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CURRENTCRAFTINGSTATIONMATCHES", "Current Crafting Station Matches")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CURRENTCRAFTINGSTATIONMATCHES", "The current crafting station <<1>> this item.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CURRENTCRAFTINGSTATIONMATCHES_NO",  "isn't appropriate for")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CURRENTCRAFTINGSTATIONMATCHES_YES", "is appropriate for")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -485,3 +502,17 @@ ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_MESSAGE", "You
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME",           "Destroy low-rarity stolen treasures")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME_NESTED_01", "...Unless we can stockpile them for The Covetous Countess")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_MESSAGE",        "Destroyed incoming $(name).")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_COMMENT",        "We want to keep these specific items, so let's force the containing trigger to stop before it gets to destroy them.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_LAUNDERCOVETOUSCOUNTESS_NAME", "Launder items that we're stockpiling for The Covetous Countess")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_NAME",    "Stop later triggers from running on certain item types")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT", "If the next trigger action runs, then it will stop all processing on the current item. You can put a trigger like this at the very top of your trigger list to make sure that nothing ever runs on certain items. (There are also built-in convenience settings to suppress triggers for locked and Crown items.)")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DECONSTRUCTINTRICATE_NAME", "Deconstruct \"intricate\" gear for bonus XP")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_SELLORNATE_NAME", "Sell \"ornate\" gear for additional gold")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME",    "Example trigger that will never run")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_COMMENT", "A \"never\" condition can be used to turn off a trigger for testing purposes. Of course, it's easier to use the trigger's \"enabled\" checkbox.")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE", "This message should not appear!")

@@ -79,10 +79,12 @@ trigedit/main.lua
 trigedit/trigger.lua
 trigedit/opcode.lua
 trigedit/opcodearg.lua
+trigedit/import.lua
 trigedit/main.xml
 trigedit/trigger.xml
 trigedit/opcode.xml
 trigedit/opcodearg.xml
+trigedit/import.xml
 confirm.lua
 confirm.xml
 savedata.lua

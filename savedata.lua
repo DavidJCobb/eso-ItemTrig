@@ -36,9 +36,9 @@ local function _saveTriggers(characterID, tList)
 end
 
 ItemTrig.Savedata = {
-   [" DATA"] = savedVars,
-   prefs    = nil, -- if not nil, then it is a field in the character data; should autosave
-   triggers = {},
+   interface = savedVars,
+   prefs     = nil, -- if not nil, then it is a field in the character data; should autosave
+   triggers  = {},
 }
 function ItemTrig.Savedata:save(characterID)
    _saveTriggers(characterID, self.triggers)

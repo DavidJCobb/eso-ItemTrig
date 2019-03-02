@@ -27,6 +27,9 @@
             </Button>
          </Controls>
       </Control>
+      <Control name="ItemTrig_UITemplate_WComboboxPlaceholder" virtual="true">
+         <Dimensions x="140" y="42" />
+      </Control>
       <Control name="ItemTrig_UITemplate_WCombobox" virtual="true" mouseEnabled="true">
          <Dimensions x="140" y="42" />
          <OnInitialized> ItemTrig.UI.WCombobox:install(self) </OnInitialized>

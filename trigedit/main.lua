@@ -43,6 +43,15 @@ do -- helper class for trigger list entries
       end
       return ItemTrig.theme.LIST_ITEM_BACKGROUND
    end
+   function TriggerListEntry:makeReadOnly()
+      self.enabled:SetHidden(true)
+      self.enabled.toggleFunction = function() end
+      --
+      local control = self:asControl()
+      self.name:ClearAnchors()
+      self.name:SetAnchor(TOPLEFT,  control, TOPLEFT,  5, 0)
+      self.name:SetAnchor(TOPRIGHT, control, TOPRIGHT, -5, 0)
+   end
    function TriggerListEntry:setSelected(state)
       do -- background color
          local color = self:getBaseBackgroundColor()
@@ -80,17 +89,6 @@ do -- helper class for trigger list entries
          cName:SetText(name)
       end
       height = ItemTrig.offsetBottom(cName)
-      --[[if description then
-         cDesc:SetText(description)
-         if description == "" then
-            cDesc:SetHidden(true)
-         else
-            cDesc:SetHidden(false)
-            height = ItemTrig.offsetBottom(cDesc)
-         end
-      elseif not cDesc:GetHidden() then
-         height = ItemTrig.offsetBottom(cDesc)
-      end]]--
       if name or description then
          self:asControl():SetHeight(ItemTrig.round(height + paddingTop))
       end
@@ -149,31 +147,17 @@ function WinCls:_construct()
    local control = self:asControl()
    ItemTrig.assign(self, {
       ui = {
-         fragment = nil,
-         pane     = nil,
+         fragment  = nil,
+         pane      = nil,
+         emptyText = nil,
       },
       filters = {
          entryPoints = {},
       },
       currentTriggerList = nil,
-      keybinds = {
-         alignment = KEYBIND_STRIP_ALIGN_CENTER,
-         {
-            name     = "Close Menu (Debugging)",
-            keybind  = "UI_SHORTCUT_PRIMARY",
-            callback = function() WinCls:getInstance():close() end,
-            visible  = function() return true end,
-            enabled  = true,  -- set to "false" to make the keybind grey out -- can also be a function
-            ethereal = false, -- if true, then the keybind isn't actually shown in the menus; vanilla gamepad menus use this for LT/RT flipping pages or fast-scrolling menus
-         },
-      },
    })
-   do -- scene setup
-      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control, "ITEMTRIG_ACTION_LAYER_TRIGGERLIST")
-      ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
-      self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
-   end
+   self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
+   self.ui.emptyText = self:controlByPath("Body", "ShowIfEmpty")
    do -- entry point filter list
       local pane = ItemTrig.UI.WScrollSelectList:cast(self:controlByPath("Body", "Col1"))
       self.ui.entryPointFilterPane = pane
@@ -267,19 +251,23 @@ function WinCls:_construct()
 end
 
 function WinCls:onShow()
-   KEYBIND_STRIP:AddKeybindButtonGroup(self.keybinds)
+   --KEYBIND_STRIP:AddKeybindButtonGroup(self.keybinds)
    self.ui.entryPointFilterPane:select(1)
    self:renderTriggers(ItemTrig.Savedata.triggers)
 end
 function WinCls:onHide()
-   KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybinds)
+   --KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybinds)
    ItemTrig.Savedata:save()
+   self.ui.pane:clear()
 end
 function WinCls:onResizeFrame()
    self.ui.pane:redraw()
 end
 
 function WinCls:onEntryPointFilterChange()
+   if self:isHidden() then
+      return
+   end
    local selectedTrigger = self:getTriggerByPaneIndex()
    --
    local pane = self.ui.entryPointFilterPane
@@ -437,6 +425,34 @@ function WinCls:deleteSelectedTrigger()
       self
    )
 end
+function WinCls:requestImport()
+   ItemTrig.windows.importList:requestImport(self):done(function(trigger)
+      if not trigger then
+         return
+      end
+      local win  = WinCls:getInstance()
+      local pane = win.ui.pane
+      local _, i = self:getTriggerByPaneIndex()
+      if i == nil then
+         table.insert(self.currentTriggerList, trigger)
+      else
+         table.insert(self.currentTriggerList, i + 1, trigger)
+      end
+      ItemTrig.Savedata:save() -- Save when adding a trigger
+      self:refresh()
+      do
+         local paneIndex = self:getPaneIndexForTrigger(trigger)
+         --
+         -- If the trigger's entry points don't match our filter, then 
+         -- it may not be visible.
+         --
+         if paneIndex then
+            pane:select(paneIndex)
+            pane:scrollToItem(paneIndex, true, true)
+         end
+      end
+   end)
+end
 
 function WinCls:shouldShowTrigger(trigger)
    local filters = self.filters.entryPoints
@@ -466,4 +482,16 @@ function WinCls:refresh()
       end
    end
    scrollPane:redraw()
+   do
+      local text = self.ui.emptyText
+      local hide = scrollPane:count() > 0
+      text:SetHidden(hide)
+      if not hide then
+         if #tList > 0 then
+            text:SetText(GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_ALL_TRIGGERS_FILTERED))
+         else
+            text:SetText(GetString(ITEMTRIG_STRING_UI_TRIGGERLIST_HAS_NO_TRIGGERS))
+         end
+      end
+   end
 end

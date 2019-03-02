@@ -11,6 +11,47 @@ local CAN_CHECK_WHETHER_ADDED_ITEM_WAS_WITHDRAWN = false
 
 function ItemTrig.retrieveTriggerGallery()
    local gallery = {}
+   do -- Deconstruct "intricate" gear for bonus XP
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_DECONSTRUCTINTRICATE_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
+      cl[2] = Condition:new(24, { true }) -- The item [is] intricate
+      --
+      al[1] = Action:new(9) -- Deconstruct the item.
+      --
+      table.insert(gallery, t)
+   end
+   do -- Sell "ornate" gear for additional gold
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_SELLORNATE_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_BARTER }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new(23, { true }) -- The item [is] ornate.
+      --
+      al[1] = Action:new(8, { 9999 }) -- Sell [9999] of the item.
+      --
+      table.insert(gallery, t)
+   end
+   do -- This trigger will never run
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new(1, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_COMMENT) }) -- Comment
+      cl[2] = Condition:new(3, { false }) -- [Never].
+      --
+      al[1] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE) }) -- Log Message
+      --
+      table.insert(gallery, t)
+   end
    do -- Destroy common style materials past one stack, unless withdrawn or purchased
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME)
@@ -66,16 +107,54 @@ function ItemTrig.retrieveTriggerGallery()
          -- Pocket Rules For Kick the Khajiit
          -- Logic Fob
          --
-         clNested[2] = Condition:new(12, { false, ItemTrig.getNaiveItemNameFor(61737) }) -- Item name [is] [Ayleid House Idol]
-         clNested[3] = Condition:new(12, { false, ItemTrig.getNaiveItemNameFor(74581) }) -- Item name [is] [Pocket Rules For Kick the Khajiit]
-         clNested[4] = Condition:new(12, { false, ItemTrig.getNaiveItemNameFor(64409) }) -- Item name [is] [Logic Fob]
+         clNested[2] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(61737), false }) -- Item name [is] [Ayleid House Idol]
+         clNested[3] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(74581), false }) -- Item name [is] [Pocket Rules For Kick the Khajiit]
+         clNested[4] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(64409), false }) -- Item name [is] [Logic Fob]
          --
-         alNested[1] = Action:new(1) -- Stop execution of the top-level trigger
+         alNested[1] = Action:new(4, { GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_COMMENT) }) -- Comment
+         alNested[2] = Action:new(1) -- Stop execution of the top-level trigger
          --
          al[1] = Action:new(3, { t })
       end
       al[2] = Action:new(5, { true }) -- Destroy [the whole stack]
       al[3] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_MESSAGE) }) -- Log message
+      --
+      table.insert(gallery, t)
+   end
+   do -- Launder the Covetous Countess items
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_LAUNDERCOVETOUSCOUNTESS_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_FENCE }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new( 2, { true }) -- Use [OR] for conditions
+      cl[2] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(61737), false }) -- Item name [is] [Ayleid House Idol]
+      cl[3] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(74581), false }) -- Item name [is] [Pocket Rules For Kick the Khajiit]
+      cl[4] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(64409), false }) -- Item name [is] [Logic Fob]
+      --
+      al[1] = Action:new(7, { 9999 }) -- Launder as many as possible.
+      --
+      table.insert(gallery, t)
+   end
+   do -- Stop later triggers from running on certain item types
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_NAME)
+      t.entryPoints = {}
+      for k in pairs(ItemTrig.ENTRY_POINT_NAMES) do -- we want all entry points
+         t.entryPoints[#t.entryPoints + 1] = k
+      end
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new( 2, { true }) -- Use [OR] for conditions
+      cl[2] = Condition:new(32, { true }) -- Item [is] a treasure map.
+      cl[3] = Condition:new(21, { true, 3 }) -- Item [is] a [Crown Crate or Crown Store] item.
+      cl[4] = Condition:new(13, { true }) -- Item [can be] researched.
+      cl[5] = Condition:new(34, { true, 1 }) -- Item [is] a [filled] Soul Gem.
+      --
+      al[1] = Action:new( 4, { GetString(ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT) }) -- Comment
+      al[2] = Action:new(10) -- Stop processing triggers on this item
       --
       table.insert(gallery, t)
    end

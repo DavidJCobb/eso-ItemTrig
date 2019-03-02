@@ -77,6 +77,7 @@ function WWindow:_construct(options)
          local window = ItemTrig.UI.WWindow:cast(self)
          if window then
             window:_updateActionLayers()
+            window:onShow()
          end
       end
    )
@@ -300,7 +301,6 @@ function WWindow:show(...)
    end
    SCENE_MANAGER:ShowTopLevel(c)
    c:BringWindowToTop()
-   self:onShow()
    PlaySound(SOUNDS.GAMEPAD_OPEN_WINDOW)
 end
 function WWindow:hide()
@@ -332,6 +332,9 @@ do -- Internals for window resizing
    end
 end
 
+function WWindow:isHidden()
+   return self:asControl():IsHidden()
+end
 function WWindow:setPosition(x, y)
    self:asControl():SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
 end

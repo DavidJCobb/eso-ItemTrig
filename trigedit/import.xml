@@ -1,0 +1,80 @@
+<GuiXml>
+   <Controls>
+      <TopLevelControl name="ItemTrig_TriggerImport"
+         mouseEnabled="true"
+         movable="true"
+         clampedToScreen="true"
+         hidden="true"
+         resizeHandleSize="8"
+         inherits="ItemTrig_UITemplate_WWindow"
+      >
+         <Dimensions x="700" y="600" />
+         <DimensionConstraints minX="400" minY="500" />
+         <Anchor point="CENTER" />
+         <OnInitialized> ItemTrig:setupWindow("importList", self) </OnInitialized>
+         <Controls>
+            <Control name="$(parent)SourceBar">
+               <Anchor point="TOPLEFT"  offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="TOPRIGHT" offsetY="7" relativeTo="$(parent)TitleBar" relativePoint="BOTTOMRIGHT" />
+               <Dimensions y="50" />
+               <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
+               <Controls>
+                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_IMPORTLIST_LABEL_IMPORTSOURCE" font="ITEMTRIG_FONT_BASIC">
+                     <Anchor point="TOPLEFT" />
+                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
+                  </Label>
+                  <Control name="ItemTrig_TriggerImportSourceSelectPlaceholder" inherits="ItemTrig_UITemplate_WComboboxPlaceholder">
+                     <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="8" />
+                     <Anchor point="TOPRIGHT" />
+                  </Control>
+               </Controls>
+            </Control>
+            <Control name="$(parent)Bottom" resizeToFitDescendents="true">
+               <Anchor point="BOTTOMLEFT"  />
+               <Anchor point="BOTTOMRIGHT" />
+               <Controls>
+                  <Control name="$(parent)Positioner">
+                     <Anchor point="BOTTOM" />
+                  </Control>
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Cancel" text="Cancel">
+                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMLEFT" offsetX="-8" />
+                     <OnClicked> ItemTrig.windows.importList:hide() </OnClicked>
+                  </Button>
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)ImportButton" text="ITEMTRIG_STRING_UI_IMPORTLIST_BUTTON_IMPORT">
+                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Positioner" relativePoint="BOTTOMRIGHT" offsetX="8" />
+                     <OnClicked> ItemTrig.windows.importList:doImport() </OnClicked>
+                  </Button>
+               </Controls>
+            </Control>
+            <Control name="$(parent)Body">
+               <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)SourceBar" relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom"    relativePoint="TOPRIGHT" />
+               <Controls>
+                  <Control name="$(parent)Col2" inherits="ItemTrig_UITemplate_ThemedScrollSelectList">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="BOTTOMRIGHT" />
+                  </Control>
+                  <Label name="$(parent)ShowIfEmpty" hidden="true"
+                     font="ITEMTRIG_FONT_BASIC"
+                     text="ITEMTRIG_STRING_UI_TRIGGERLIST_HAS_NO_TRIGGERS"
+                     horizontalAlignment="CENTER"
+                     verticalAlignment="CENTER"
+                  >
+                     <Anchor point="LEFT"  offsetX="20"  relativeTo="$(parent)Col2Contents" />
+                     <Anchor point="RIGHT" offsetX="-20" relativeTo="$(parent)Col2Contents" />
+                     <OnInitialized>
+                        local c = ItemTrig.assign({}, ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)
+                        c[4] = c[4] - 0.4
+                        self:SetColor(unpack(c))
+                     </OnInitialized>
+                  </Label>
+               </Controls>
+            </Control>
+            <Control name="ItemTrig_TriggerImportSourceSelect" inherits="ItemTrig_UITemplate_WCombobox">
+               <Anchor point="TOPLEFT"     relativeTo="ItemTrig_TriggerImportSourceSelectPlaceholder" />
+               <Anchor point="BOTTOMRIGHT" relativeTo="ItemTrig_TriggerImportSourceSelectPlaceholder" />
+            </Control>
+         </Controls>
+      </TopLevelControl>
+   </Controls>
+</GuiXml>

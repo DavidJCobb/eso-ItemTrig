@@ -1168,6 +1168,31 @@ ItemTrig.tableConditions = {
          return not result
       end
    ),
+   [35] = ConditionBase:new( -- Current Crafting Station Matches
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CURRENTCRAFTINGSTATIONMATCHES),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CURRENTCRAFTINGSTATIONMATCHES),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CURRENTCRAFTINGSTATIONMATCHES_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CURRENTCRAFTINGSTATIONMATCHES_YES)
+            },
+            default = true
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.entryPointData.craftingSkill == context:pertinentCraftingType()
+         if args[1] then
+            return result
+         end
+         return not result
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+      }
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do
