@@ -140,11 +140,11 @@ do -- helper classes for views
          self.qualifier:select(function(item) return item.value == argValue.qualifier end)
          self.enum:clear()
          opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
-            self.enum:push({ name = v, index = k }, false)
+            self.enum:push({ name = v, value = k }, false)
          end)
          self.enum:redraw()
          self.enum:select(1) -- default
-         self.enum:select(function(item) return item.index == tonumber(argValue.number) end)
+         self.enum:select(function(item) return item.value == tonumber(argValue.number) end)
       end
    end
    do -- string

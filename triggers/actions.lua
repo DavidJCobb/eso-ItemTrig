@@ -17,6 +17,31 @@ function ItemTrig.Action:new(base, args)
    return ItemTrig.Opcode:new(base, args, ItemTrig.tableActions, "action")
 end
 
+local function _doPretend(context, action)
+   --
+   -- We have a userpref that allows us to "pretend" to do an 
+   -- action: instead of actually acting on the item, we just 
+   -- log what we would've done.
+   --
+   -- Trigger actions need to manually check the pref; if it's 
+   -- true, they need to call this function and return before 
+   -- doing anything else. (Checking for other errors first is 
+   -- allowed and encouraged.) When calling this function, the 
+   -- actions should pass (context) and a string; this string 
+   -- will be used to get the localized verb for the action.
+   --
+   context.invalid = true
+   if action then
+      local key = _G["ITEMTRIG_STRING_PRETEND_" .. action]
+      if key then
+         local base = GetString(ITEMTRIG_STRING_PRETENDBASE)
+         local verb = GetString(key)
+         local text = LocalizeString(base, verb, context.formattedName)
+         CHAT_SYSTEM:AddMessage(text)
+      end
+   end
+end
+
 ItemTrig.tableActions = {
    [1] = ActionBase:new( -- Return
       _s(ITEMTRIG_STRING_ACTIONNAME_RETURN),
@@ -103,6 +128,9 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
+         if ItemTrig.prefs:get("pretendActions") then
+            return _doPretend(context, "DESTROYITEM")
+         end
          local count = nil
          if state.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
             if args[1] then
@@ -139,6 +167,9 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
+         if ItemTrig.prefs:get("pretendActions") then
+            return _doPretend(context, "MODIFYJUNKFLAG")
+         end
          local result, errorCode = context:modifyJunkState(args[1])
          if not result then
             local extra = { code = errorCode, why = nil }
@@ -163,11 +194,16 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
+         if ItemTrig.prefs:get("pretendActions") then
+            return _doPretend(context, "LAUNDER")
+         end
          local result, errorCode = context:launder(args[1])
          if not result then
             local extra = { code = errorCode, why = nil }
             if errorCode == ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT)
+            elseif errorCode == ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NORMAL_MAX_COUNT)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
@@ -190,7 +226,17 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
-         context:sell(args[1])
+         if ItemTrig.prefs:get("pretendActions") then
+            return _doPretend(context, "SELLORFENCE")
+         end
+         local result, errorCode = context:sell(args[1])
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_NORMAL_FENCE_LIMIT then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_NORMAL_MAX_FENCE)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
+         end
       end,
       { -- extra data for this opcode
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_BARTER, ItemTrig.ENTRY_POINT_FENCE }
@@ -202,6 +248,9 @@ ItemTrig.tableActions = {
       {},
       function(state, context, args)
          assert(ItemInterface:is(context))
+         if ItemTrig.prefs:get("pretendActions") then
+            return _doPretend(context, "DECONSTRUCT")
+         end
          local result, errorCode = context:deconstruct()
          if not result then
             local extra = { code = errorCode, why = nil }
@@ -239,6 +288,9 @@ ItemTrig.tableActions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
+         if ItemTrig.prefs:get("pretendActions") then
+            return _doPretend(context, "DEPOSITINBANK")
+         end
          local result, code = context:storeInBank(args[1])
          if not result then
             local extra = { code = errorCode, why = nil }

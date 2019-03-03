@@ -51,7 +51,9 @@ end
 -- use the "smithing" system also define a maximum level for each 
 -- rank.
 --
--- 
+-- Both the crafting type fields and the crafting rank fields are 
+-- structs with member functions that can be used to retrieve common-
+-- ly-needed values.
 --
 do
    local Craft = {}

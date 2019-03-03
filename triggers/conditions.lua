@@ -1193,6 +1193,72 @@ ItemTrig.tableConditions = {
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
       }
    ),
+   [36] = ConditionBase:new( -- Can Launder
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CANLAUNDERCOUNT),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CANLAUNDERCOUNT),
+      {
+         [1] = { type = "quantity" },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            local max, used = GetFenceLaunderTransactionInfo()
+            local remaining = max - used
+            local quantity  = ItemTrig.assign({}, args[1])
+            if false then
+               --
+               -- TODO:
+               --
+               -- At some point, we should make it possible to comare the 
+               -- size of the entire stack -- which in turn means adding 
+               -- UI and data functionality to let the user specify a 
+               -- pre-existing number (whether a constant or a function 
+               -- that returns a value) for a quantity option.
+               --
+               quantity.number = context.count
+            end
+            result = ItemTrig.testQuantity(quantity, remaining)
+         end
+         return result
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }
+      }
+   ),
+   [37] = ConditionBase:new( -- Can Fence
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CANFENCECOUNT),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CANFENCECOUNT),
+      {
+         [1] = { type = "quantity" },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            local max, used = GetFenceSellTransactionInfo()
+            local remaining = max - used
+            local quantity  = ItemTrig.assign({}, args[1])
+            if false then
+               --
+               -- TODO:
+               --
+               -- At some point, we should make it possible to comare the 
+               -- size of the entire stack -- which in turn means adding 
+               -- UI and data functionality to let the user specify a 
+               -- pre-existing number (whether a constant or a function 
+               -- that returns a value) for a quantity option.
+               --
+               quantity.number = context.count
+            end
+            result = ItemTrig.testQuantity(quantity, remaining)
+         end
+         return result
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }
+      }
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do

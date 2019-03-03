@@ -71,7 +71,6 @@ function ItemTrig.retrieveTriggerGallery()
       cl[5 + i] = Condition:new(11, { BAG_BACKPACK, { qualifier = "GTE", number = 200 } }) -- [Player inventory] contains [at least 200]
       --
       al[1] = Action:new(5, { false }) -- Destroy [the entire stack]
-      al[2] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_MESSAGE) }) -- Log
       --
       table.insert(gallery, t)
    end
@@ -117,7 +116,6 @@ function ItemTrig.retrieveTriggerGallery()
          al[1] = Action:new(3, { t })
       end
       al[2] = Action:new(5, { true }) -- Destroy [the whole stack]
-      al[3] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_MESSAGE) }) -- Log message
       --
       table.insert(gallery, t)
    end
@@ -134,6 +132,62 @@ function ItemTrig.retrieveTriggerGallery()
       cl[4] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(64409), false }) -- Item name [is] [Logic Fob]
       --
       al[1] = Action:new(7, { 9999 }) -- Launder as many as possible.
+      --
+      table.insert(gallery, t)
+   end
+   do -- Destroy stolen junk
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new(10, { true }) -- Added item [is] a new stack
+      cl[2] = Condition:new( 4, { true }) -- Added item [is] stolen
+      cl[3] = Condition:new( 2, { true }) -- Use [OR].
+      cl[4] = Condition:new(33, { true }) -- Added item [is] clothes
+      cl[5] = Condition:new( 7, { true, -9 }) -- Added item [is] an [any equippable]
+      cl[6] = Condition:new( 7, { true, -2 }) -- Added item [is] an [any food or drink]
+      cl[7] = Condition:new( 7, { true, ITEMTYPE_INGREDIENT }) -- Added item [is] an [ingredient]
+      cl[8] = Condition:new( 7, { true, ITEMTYPE_STYLE_MATERIAL }) -- Added item [is] a [style material]
+      --
+      do -- Run Nested Trigger: Exempt rare style materials
+         local t = Trigger:new()
+         t.name = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_01)
+         local clNested = t.conditions
+         local alNested = t.actions
+         clNested[1] = Condition:new( 7, { true, ITEMTYPE_STYLE_MATERIAL }) -- Added item [is] a [style material]
+         clNested[2] = Condition:new(17, { false, -2 }) -- Item name [is not] [any racial style]
+         --
+         alNested[1] = Action:new(1) -- Stop execution of the top-level trigger
+         --
+         al[1] = Action:new(3, { t })
+      end
+      do -- Run Nested Trigger: Exempt rare equipment
+         local t = Trigger:new()
+         t.name = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_02)
+         local clNested = t.conditions
+         local alNested = t.actions
+         clNested[1] = Condition:new(7, { true, -9 }) -- Added item [is] an [any equippable]
+         clNested[2] = Condition:new(6, { { qualifier = "GTE", number = ITEM_QUALITY_ARCANE } }) -- Rarity is [at least] [Superior]
+         --
+         alNested[1] = Action:new(1) -- Stop execution of the top-level trigger
+         --
+         al[2] = Action:new(3, { t })
+      end
+      do -- Run Nested Trigger: Exempt ingredients that we could use more of
+         local t = Trigger:new()
+         t.name = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_03)
+         local clNested = t.conditions
+         local alNested = t.actions
+         clNested[1] = Condition:new( 7, { true, ITEMTYPE_INGREDIENT }) -- Added item [is] an [ingredient]
+         clNested[2] = Condition:new(11, { BAG_BANK, { qualifier = "LTE", number = 199 } }) -- The player's [bank] has [at most 199] of the item
+         --
+         alNested[1] = Action:new(1) -- Stop execution of the top-level trigger
+         --
+         al[3] = Action:new(3, { t })
+      end
+      al[4] = Action:new(5, { false }) -- Destroy [the entire stack]
       --
       table.insert(gallery, t)
    end

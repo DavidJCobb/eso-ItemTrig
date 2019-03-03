@@ -406,6 +406,8 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_ITEM_IS_INVALID         = "INVA" -- The ItemInterface is invalid: the bag slot now contains something different.
    ItemInterface.FAILURE_ITEM_IS_LOCKED          = "LOCK" -- Cannot perform this operation on a locked item.
    ItemInterface.FAILURE_MOD_NOT_SETUP           = "NOPE" -- The mod wasn't set up properly.
+   ItemInterface.FAILURE_NORMAL_FENCE_LIMIT      = "FENL" -- You've hit the limit of items you can fence for today.
+   ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT    = "LNDR" -- You've hit the limit of items you can launder for the day.
    ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT   = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
 end
 function ItemInterface:new(bagIndex, slotIndex)
@@ -630,9 +632,23 @@ function ItemInterface:launder(count)
    if count < 1 then
       return false, self.FAILURE_ZENIMAX_LAUNDER_LIMIT
    end
+   local willFail = false
+   do
+      local max, used = GetFenceLaunderTransactionInfo()
+      local remaining = max - used
+      if count > remaining then
+         willFail = true
+         if remaining == 0 then
+            return false, self.FAILURE_NORMAL_LAUNDER_LIMIT
+         end
+      end
+   end
    LaunderItem(self.bag, self.slot, count)
    self:onModifyingAction("launder", count)
    self:updateCount(-count)
+   if willFail then
+      return false, self.FAILURE_NORMAL_LAUNDER_LIMIT
+   end
    return true
 end
 function ItemInterface:modifyJunkState(flag)
@@ -768,9 +784,24 @@ function ItemInterface:sell(count)
    if count > self.count then
       count = self.count
    end
+   local willFail = false
+   do
+      local max, used = GetFenceSellTransactionInfo()
+      local remaining = max - used
+      if count > remaining then
+         willFail = true
+         if remaining == 0 then
+            return false, self.FAILURE_NORMAL_FENCE_LIMIT
+         end
+      end
+   end
    SellInventoryItem(self.bag, self.slot, count)
    self:onModifyingAction("sell", count)
    self:updateCount(-count)
+   if willFail then
+      return false, self.FAILURE_NORMAL_FENCE_LIMIT
+   end
+   return true
 end
 function ItemInterface:storeInBank(count)
    if self:isInvalid() then

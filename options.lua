@@ -4,6 +4,7 @@ do -- define prefs
       ["logging/triggerFailures"] = { default = false },
       ["opcodeArgAutocomplete"]   = { default = false },
       ["robustFencing"]           = { default = true },
+      ["pretendActions"]          = { default = false },
       ["runTriggersOn/crownCrateItems"] = { default = false },
       ["runTriggersOn/crownStoreItems"] = { default = false },
       ["runTriggersOn/lockedItems"]     = { default = false },
@@ -60,6 +61,14 @@ local options = {
       tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONLOCKEDITEMS),
       getFunc = function()  return prefs:get("runTriggersOn/lockedItems") end,
       setFunc = function(v) prefs:set("runTriggersOn/lockedItems", v) end,
+   },
+   {  -- Only pretend to take actions
+      --
+      type    = "checkbox",
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_PRETENDACTIONS),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_PRETENDACTIONS),
+      getFunc = function()  return prefs:get("pretendActions") end,
+      setFunc = function(v) prefs:set("pretendActions", v) end,
    },
    {
       type = "header",

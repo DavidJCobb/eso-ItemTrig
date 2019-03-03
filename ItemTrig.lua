@@ -332,8 +332,11 @@ local function Initialize()
       end
    ItemTrig.ItemInterface.validateLaunderOperation =
       function(count)
+         --local ALLOWED_BY_API = 98
+         local ALLOWED_BY_API = 98 -- FOR TESTING ONLY
+         --
          local state     = ItemTrig.eventState
-         local remaining = 98 - state.fenceAutoLaunderCount
+         local remaining = ALLOWED_BY_API - state.fenceAutoLaunderCount
          if remaining < count then
             count = remaining
          end

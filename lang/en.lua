@@ -34,6 +34,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONCROWNSTOREITEMS", "
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONLOCKEDITEMS", "Locked items")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONLOCKEDITEMS", "Control whether triggers are run on locked items.")
+
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_PRETENDACTIONS", "Pretend Mode")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_PRETENDACTIONS", "If this is enabled, then ItemTrig will not take any actions on your items. Instead, it will simply log what it would have done.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_LOGGING", "Logging")
 --
@@ -235,6 +238,14 @@ ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_ITEM_ADDED", "Item Added")
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ENTRYPOINT_LIMIT",    "This action can only run from the following entry points: <<1>>")
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_CONDITION_ENTRYPOINT_LIMIT", "This condition can only run from the following entry points: <<1>>")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_PRETENDBASE", "|cFFA020[Pretend Mode] ItemTrig would have <<1>>|r <<2>>|cFFA020.|r")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DESTROYITEM",    "destroyed")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_MODIFYJUNKFLAG", "modified the junk flag for")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_LAUNDER",        "laundered")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_SELLORFENCE",    "sold/fenced")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DECONSTRUCT",    "deconstructed")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DEPOSITINBANK",  "banked")
+--
 --
 -- CONDITIONS
 -- Condition descriptions use Zenimax format strings, wherein arguments 
@@ -431,6 +442,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CURRENTCRAFTINGSTATIONMATCHES",
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CURRENTCRAFTINGSTATIONMATCHES_NO",  "isn't appropriate for")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CURRENTCRAFTINGSTATIONMATCHES_YES", "is appropriate for")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANLAUNDERCOUNT", "Launders Remaining")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANLAUNDERCOUNT", "The player can launder <<1>> more items.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANFENCECOUNT", "Fences Remaining")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANFENCECOUNT", "The player can fence <<1>> more items.")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -466,10 +483,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_JUNK_NOT_ALLOWED", "This item can
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_LAUNDER", "Launder")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_LAUNDER", "Launder <<1>> of the item.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT", "Add-ons can only launder 98 items every time the fence window is open. Close the fence window and reopen it to launder more items.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT", "Add-ons can only launder 98 items every time the fence window is open; more than that and you'll disconnect from the server. Close the fence window and reopen it to launder more items.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NORMAL_MAX_COUNT", "You've hit the limit on how many items you can launder today.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_SELLORFENCE", "Sell or Fence")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_SELLORFENCE", "Sell <<1>> of the item.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_NORMAL_MAX_FENCE", "You've hit the limit on how many items you can fence today.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DECONSTRUCT", "Deconstruct")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DECONSTRUCT", "Deconstruct the item.")
@@ -497,14 +516,17 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN",   "You can
 --
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME",    "Destroy common style materials past one stack, unless withdrawn or purchased")
-ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_MESSAGE", "You have a full stack of $(name) already. Destroying the $(countAdded) that were added.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME",           "Destroy low-rarity stolen treasures")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME_NESTED_01", "...Unless we can stockpile them for The Covetous Countess")
-ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_MESSAGE",        "Destroyed incoming $(name).")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_COMMENT",        "We want to keep these specific items, so let's force the containing trigger to stop before it gets to destroy them.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_LAUNDERCOVETOUSCOUNTESS_NAME", "Launder items that we're stockpiling for The Covetous Countess")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME",           "Destroy stolen junk")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_01", "Exempt rare style materials")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_02", "Exempt rare equipment")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_03", "Exempt ingredients that we could use more of")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_NAME",    "Stop later triggers from running on certain item types")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT", "If the next trigger action runs, then it will stop all processing on the current item. You can put a trigger like this at the very top of your trigger list to make sure that nothing ever runs on certain items. (There are also built-in convenience settings to suppress triggers for locked and Crown items.)")
