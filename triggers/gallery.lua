@@ -9,6 +9,8 @@ local Condition = ItemTrig.Condition
 --
 local CAN_CHECK_WHETHER_ADDED_ITEM_WAS_WITHDRAWN = false
 
+local ITEM_NAME_LOCKPICK = ItemTrig.getNaiveItemNameFor(30357)
+
 function ItemTrig.retrieveTriggerGallery()
    local gallery = {}
    do -- Deconstruct "intricate" gear for bonus XP
@@ -81,14 +83,10 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      local i = 0
       cl[1] = Condition:new(10, { true }) -- Added item [is] a new stack
-      cl[2] = Condition:new( 9, { false, 1 }) -- Added item [was not] [purchased]
-      if CAN_CHECK_WHETHER_ADDED_ITEM_WAS_WITHDRAWN then
-         cl[3] = Condition:new( 9, { false, 3 }) -- Added item [was not] [withdrawn]
-      end
-      cl[3 + i] = Condition:new( 7, { true, ITEMTYPE_TREASURE }) -- Item type [is] [Treasure]
-      cl[4 + i] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
+      cl[2] = Condition:new( 4, { true }) -- Added item [is] stolen
+      cl[3] = Condition:new( 7, { true, ITEMTYPE_TREASURE }) -- Item type [is] [Treasure]
+      cl[4] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
       --
       do -- Run Nested Trigger: ...Unless we can stockpile them for The Covetous Countess
          local t = Trigger:new()
@@ -142,14 +140,17 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new(10, { true }) -- Added item [is] a new stack
-      cl[2] = Condition:new( 4, { true }) -- Added item [is] stolen
-      cl[3] = Condition:new( 2, { true }) -- Use [OR].
-      cl[4] = Condition:new(33, { true }) -- Added item [is] clothes
-      cl[5] = Condition:new( 7, { true, -9 }) -- Added item [is] an [any equippable]
-      cl[6] = Condition:new( 7, { true, -2 }) -- Added item [is] an [any food or drink]
-      cl[7] = Condition:new( 7, { true, ITEMTYPE_INGREDIENT }) -- Added item [is] an [ingredient]
-      cl[8] = Condition:new( 7, { true, ITEMTYPE_STYLE_MATERIAL }) -- Added item [is] a [style material]
+      cl[ 1] = Condition:new(10, { true }) -- Added item [is] a new stack
+      cl[ 2] = Condition:new( 4, { true }) -- Added item [is] stolen
+      cl[ 3] = Condition:new( 2, { true }) -- Use [OR].
+      cl[ 4] = Condition:new(33, { true }) -- Added item [is] clothes
+      cl[ 5] = Condition:new( 7, { true, -9 }) -- Added item [is] an [any equippable]
+      cl[ 6] = Condition:new( 7, { true, -2 }) -- Added item [is] an [any food or drink]
+      cl[ 7] = Condition:new( 7, { true, ITEMTYPE_INGREDIENT }) -- Added item [is] an [ingredient]
+      cl[ 8] = Condition:new( 7, { true, ITEMTYPE_POTION }) -- Added item [is] a [potion]
+      cl[ 9] = Condition:new( 7, { true, ITEMTYPE_POISON }) -- Added item [is] a [poison]
+      cl[10] = Condition:new( 7, { true, ITEMTYPE_STYLE_MATERIAL }) -- Added item [is] a [style material]
+      cl[11] = Condition:new(12, { ITEM_NAME_LOCKPICK, false }) -- Item name [is] [Lockpick]
       --
       do -- Run Nested Trigger: Exempt rare style materials
          local t = Trigger:new()
@@ -187,7 +188,34 @@ function ItemTrig.retrieveTriggerGallery()
          --
          al[3] = Action:new(3, { t })
       end
-      al[4] = Action:new(5, { false }) -- Destroy [the entire stack]
+      do -- Run Nested Trigger: Exempt rare potions and poisons
+         local t = Trigger:new()
+         t.name = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_04)
+         local clNested = t.conditions
+         local alNested = t.actions
+         clNested[1] = Condition:new(2, { true }) -- Use [OR].
+         clNested[2] = Condition:new(7, { true, ITEMTYPE_POTION }) -- Added item [is] a [potion]
+         clNested[3] = Condition:new(7, { true, ITEMTYPE_POISON }) -- Added item [is] a [poison]
+         clNested[4] = Condition:new(2, { false }) -- Use [AND].
+         clNested[5] = Condition:new(6, { { qualifier = "GTE", number = ITEM_QUALITY_ARCANE } }) -- Rarity is [at least] [Superior]
+         --
+         alNested[1] = Action:new(1) -- Stop execution of the top-level trigger
+         --
+         al[4] = Action:new(3, { t })
+      end
+      do -- Run Nested Trigger: Exempt lockpicks if we can carry more of them
+         local t = Trigger:new()
+         t.name = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_05)
+         local clNested = t.conditions
+         local alNested = t.actions
+         clNested[1] = Condition:new(12, { ITEM_NAME_LOCKPICK, false }) -- Item name [is] [Lockpick]
+         clNested[2] = Condition:new(11, { BAG_BANK, { qualifier = "LTE", number = 199 } }) -- The player's [bank] has [at most 199] of the item
+         --
+         alNested[1] = Action:new(1) -- Stop execution of the top-level trigger
+         --
+         al[5] = Action:new(3, { t })
+      end
+      al[6] = Action:new(5, { false }) -- Destroy [the entire stack]
       --
       table.insert(gallery, t)
    end

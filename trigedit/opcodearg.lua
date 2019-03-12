@@ -64,6 +64,7 @@ do -- helper classes for views
       function ViewCls.Quantity:_construct()
          self.number    = self:GetNamedChild("Number")
          self.qualifier = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Qualifier"))
+         self.argBase   = nil
          --
          local qualifier = self.qualifier
          qualifier.onChange =
@@ -81,18 +82,19 @@ do -- helper classes for views
          qualifier:redraw()
       end
       function ViewCls.Quantity:GetValue()
-         local q = {
-            qualifier = self.qualifier:getSelectedData(),
-            number    = tonumber(self.number:GetText() or 0)
-         }
-         if q.qualifier then
-            q.qualifier = q.qualifier.value
-         else
-            q.qualifier = "E"
-         end
+         local qualifier = self.qualifier:getSelectedData()
+         qualifier = qualifier and qualifier.value or "E"
+         --
+         local q = ItemTrig.OpcodeQuantityArg:new(
+            qualifier,
+            tonumber(self.number:GetText() or 0),
+            nil,
+            self.argBase
+         )
          return q
       end
       function ViewCls.Quantity:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self.argBase = argBase
          self:show()
          self.qualifier:select(1) -- default selection in case qualifier is invalid
          self.qualifier:select(function(item) return item.value == argValue.qualifier end)

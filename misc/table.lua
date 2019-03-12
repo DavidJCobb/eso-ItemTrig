@@ -173,11 +173,38 @@ function ItemTrig.moveToBefore(tablevar, i, target)
    end
    return nil
 end
-function ItemTrig.remove(tablevar, x)
+function ItemTrig.overwriteTable(a, b)
+   --
+   -- Use case: you need to modify a table that you've received as 
+   -- an argument, but this modification is significantly easier 
+   -- (or only possible at all) to perform when creating a new list 
+   -- from scratch (e.g. iterating over the list and constructing a 
+   -- transformed copy).
+   --
+   -- An example, to demonstrate:
+   --
+   --    local function reverseArray(x)
+   --       local y     = {}
+   --       local count = #x
+   --       for i = 1, count do
+   --          y[i] = x[count - i + 1]
+   --       end
+   --       ItemTrig.overwriteTable(x, y)
+   --    end
+   --    local test = { 1, 2, 3 }
+   --    reverseArray(test)
+   --    d(test[1]) -- "3"
+   --    d(test[2]) -- "2"
+   --    d(test[3]) -- "1"
+   --
+   ItemTrig.clearTable(a)
+   ItemTrig.assign(a, b)
+end
+function ItemTrig.remove(tablevar, x) -- provided for completeness, but honestly? it's ugly.
    if type(x) == "number" then -- remove at index
       tablevar[x] = nil
       ItemTrig.compact(tablevar)
-   elseif type(x) == "function" then
+   elseif type(x) == "function" then -- this has significant overhead associated with it
       local changed = false
       local final   = {}
       local count   = 1
@@ -191,8 +218,7 @@ function ItemTrig.remove(tablevar, x)
          end
       end
       if changed then
-         ItemTrig.clearTable(tablevar)
-         ItemTrig.assign(tablevar, final)
+         ItemTrig.overwriteTable(tablevar, final)
       end
    end
 end

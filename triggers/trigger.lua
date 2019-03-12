@@ -2,26 +2,72 @@ if not ItemTrig then return end
 
 function ItemTrig.executeTriggerList(list, entryPoint, context, options)
    if not options then
-      options = {}
+      options = {
+         --
+         -- OPTION: eventRecipient
+         --
+         -- A struct; if the following member functions exist, they will 
+         -- be called as appropriate:
+         --
+         -- thiscall onTriggerFail(trigger, details)
+         -- thiscall onTriggerMiss(trigger, details)
+         --
+         eventRecipient   = nil,
+         --
+         -- OPTION: stripBadTriggers
+         --
+         -- If this option is true, then triggers will be removed from the 
+         -- trigger list if they fail due to having an opcode with an in-
+         -- compatible entry point, or due to having an opcode that fails 
+         -- run-time validation.
+         --
+         -- This option was implemented in order to prevent log spam when 
+         -- a trigger fails for these reasons. Some of our trigger entry 
+         -- points involve us running a trigger list on every item in the 
+         -- player's inventory, which means that without this option, a 
+         -- trigger failing for these reasons would log an error for every 
+         -- single item the player is carrying. With this option, it logs 
+         -- once, and we then decline to execute it until the next entry 
+         -- point.
+         --
+         -- Note that this option WILL modify the list you pass in as an 
+         -- argument (which is how the skipping even works), so you should 
+         -- pass a copy of the original trigger list (i.e. don't pass a 
+         -- direct reference to the user's savedata) if you're using it.
+         --
+         stripBadTriggers = false,
+      }
    end
    local eventRecipient = options.eventRecipient
    if entryPoint then
-      list = ItemTrig.filterTriggerList(list, entryPoint)
+      local filtered = ItemTrig.filterTriggerList(list, entryPoint)
+      ItemTrig.overwriteTable(list, filtered)
+      --
+      -- Normally, it'd be sufficient to just overwrite (list) with the 
+      -- return value of the (filterTriggerList) call. However, this 
+      -- doesn't work with the (stripBadTriggers) option.
+      --
    end
    for i = 1, #list do
       local trigger = list[i]
-      if eventRecipient then
-         eventRecipient.topLevelTrigger = list[i]
-      end
-      local result, extra = trigger:exec(context, entryPoint, options)
-      if result == ItemTrig.RUN_NO_MORE_TRIGGERS then
-         return result
-      end
-      if result == ItemTrig.OPCODE_FAILED then
-         return result, extra
-      end
-      if context:isInvalid() then -- NOTE: Assumes context instanceof ItemInterface
-         break
+      if trigger then
+         if eventRecipient then
+            eventRecipient.topLevelTrigger = list[i]
+         end
+         local result, extra = trigger:exec(context, entryPoint, options)
+         if result == ItemTrig.RUN_NO_MORE_TRIGGERS then
+            return result
+         end
+         if options.stripBadTriggers then
+            if result == ItemTrig.WRONG_ENTRY_POINT
+            or result == ItemTrig.OPCODE_INVALID
+            then
+               list[i] = nil
+            end
+         end
+         if context:isInvalid() then -- NOTE: Assumes context instanceof ItemInterface
+            break
+         end
       end
    end
 end
@@ -217,6 +263,21 @@ function ItemTrig.Trigger:exec(context, entryPoint, options)
       details.index   = index
       recipient:onTriggerFail(self, details)
    end
+   local function _validateOpcodeArgs(opcode)
+      local result, index, code = opcode:validateArgs()
+      if not result then
+         local extra = {}
+         if code == ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE then
+            extra.why = GetString(ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_TYPE_ERROR)
+         elseif code == ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE then
+            extra.why = GetString(ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_VALUE_ERROR)
+         elseif code == ItemTrig.OPCODE_ARGUMENT_INVALID_UNKNOWN_TYPE then
+            extra.why = GetString(ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_TYPE_UNKNOWN)
+         end
+         return false, extra
+      end
+      return true
+   end
    --
    if not self.enabled then
       return false
@@ -236,9 +297,17 @@ function ItemTrig.Trigger:exec(context, entryPoint, options)
          local extra = { opcode = c, why = _formatOpcodeEPMismatch(c) }
          _logFailure(c, i, extra)
          self:resetRuntimeState()
-         return ItemTrig.OPCODE_FAILED, extra
+         return ItemTrig.WRONG_ENTRY_POINT, extra
       end
       if c.base.neverSkip or not (self.state.using_or and self.state.matched_or) then
+         do -- Validation.
+            local result, extra = _validateOpcodeArgs(c)
+            if not result then
+               _logFailure(c, i, extra)
+               self:resetRuntimeState()
+               return ItemTrig.OPCODE_INVALID, extra
+            end
+         end
          --
          -- Short-circuit evaluation for ORs:
          --
@@ -302,10 +371,18 @@ function ItemTrig.Trigger:exec(context, entryPoint, options)
    for i = 1, #self.actions do
       local a = self.actions[i]
       if entryPoint and not a:allowsEntryPoint(entryPoint) then
-         local extra = { opcode = a, why = _formatOpcodeEPMismatch(c) }
+         local extra = { opcode = a, why = _formatOpcodeEPMismatch(a) }
          _logFailure(a, i, extra)
          self:resetRuntimeState()
-         return ItemTrig.OPCODE_FAILED, extra
+         return ItemTrig.WRONG_ENTRY_POINT, extra
+      end
+      do -- Validation.
+         local result, extra = _validateOpcodeArgs(a)
+         if not result then
+            _logFailure(a, i, extra)
+            self:resetRuntimeState()
+            return ItemTrig.OPCODE_INVALID, extra
+         end
       end
       local r, extra = a:exec(self.state, context)
       if r == ItemTrig.RETURN_FROM_TRIGGER or r == ItemTrig.RUN_NO_MORE_TRIGGERS then

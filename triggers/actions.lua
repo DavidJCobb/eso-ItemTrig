@@ -187,6 +187,8 @@ ItemTrig.tableActions = {
          [1] = {
             type    = "number",
             default = 9999,
+            requireInteger = true,
+            min = 0,
          }
       },
       function(state, context, args)
@@ -219,6 +221,8 @@ ItemTrig.tableActions = {
          [1] = {
             type    = "number",
             default = 9999,
+            requireInteger = true,
+            min = 0,
          }
       },
       function(state, context, args)
@@ -284,6 +288,8 @@ ItemTrig.tableActions = {
          [1] = {
             type    = "number",
             default = 9999,
+            requireInteger = true,
+            min = 0,
          }
       },
       function(state, context, args)

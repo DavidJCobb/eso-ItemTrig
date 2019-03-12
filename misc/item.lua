@@ -638,6 +638,7 @@ function ItemInterface:launder(count)
       local remaining = max - used
       if count > remaining then
          willFail = true
+         count    = remaining
          if remaining == 0 then
             return false, self.FAILURE_NORMAL_LAUNDER_LIMIT
          end
@@ -790,6 +791,7 @@ function ItemInterface:sell(count)
       local remaining = max - used
       if count > remaining then
          willFail = true
+         count    = remaining
          if remaining == 0 then
             return false, self.FAILURE_NORMAL_FENCE_LIMIT
          end

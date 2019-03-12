@@ -86,11 +86,11 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_LEVEL),
       _s(ITEMTRIG_STRING_CONDITIONDESC_LEVEL),
       {
-         [1] = { type = "quantity" },
+         [1] = { type = "quantity", requireInteger = true, min = 0 },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         return ItemTrig.testQuantity(args[1], context.level)
+         return args[1]:test(context.level)
       end
    ),
    [6] = ConditionBase:new( -- Rarity
@@ -111,7 +111,7 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         return ItemTrig.testQuantity(args[1], context.quality)
+         return args[1]:test(context.quality)
       end
    ),
    [7] = ConditionBase:new( -- Item Type
@@ -420,7 +420,7 @@ ItemTrig.tableConditions = {
                [BAG_SUBSCRIBER_BANK] = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_CRAFTBAG),
             }
          },
-         [2] = { type = "quantity" },
+         [2] = { type = "quantity", requireInteger = true, min = 0 },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -428,7 +428,7 @@ ItemTrig.tableConditions = {
          if not count then
             return ItemTrig.OPCODE_FAILED, {}
          end
-         return ItemTrig.testQuantity(args[2], count)
+         return args[2]:test(count)
       end
    ),
    [12] = ConditionBase:new( -- Item Name
@@ -1078,11 +1078,11 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_SALEVALUE),
       _s(ITEMTRIG_STRING_CONDITIONDESC_SALEVALUE),
       {
-         [1] = { type = "quantity" },
+         [1] = { type = "quantity", min = 0 },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         return ItemTrig.testQuantity(args[2], context.sellValue)
+         return args[1]:test(context.sellValue)
       end
    ),
    [32] = ConditionBase:new( -- Is Treasure Map
@@ -1197,7 +1197,7 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_CANLAUNDERCOUNT),
       _s(ITEMTRIG_STRING_CONDITIONDESC_CANLAUNDERCOUNT),
       {
-         [1] = { type = "quantity" },
+         [1] = { type = "quantity", requireInteger = true, min = 0 },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -1205,7 +1205,7 @@ ItemTrig.tableConditions = {
          do
             local max, used = GetFenceLaunderTransactionInfo()
             local remaining = max - used
-            local quantity  = ItemTrig.assign({}, args[1])
+            local quantity  = args[1]:clone()
             if false then
                --
                -- TODO:
@@ -1218,7 +1218,7 @@ ItemTrig.tableConditions = {
                --
                quantity.number = context.count
             end
-            result = ItemTrig.testQuantity(quantity, remaining)
+            result = quantity:test(remaining)
          end
          return result
       end,
@@ -1230,7 +1230,7 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_CANFENCECOUNT),
       _s(ITEMTRIG_STRING_CONDITIONDESC_CANFENCECOUNT),
       {
-         [1] = { type = "quantity" },
+         [1] = { type = "quantity", requireInteger = true, min = 0 },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -1238,7 +1238,7 @@ ItemTrig.tableConditions = {
          do
             local max, used = GetFenceSellTransactionInfo()
             local remaining = max - used
-            local quantity  = ItemTrig.assign({}, args[1])
+            local quantity  = args[1]:clone()
             if false then
                --
                -- TODO:
@@ -1251,7 +1251,7 @@ ItemTrig.tableConditions = {
                --
                quantity.number = context.count
             end
-            result = ItemTrig.testQuantity(quantity, remaining)
+            result = quantity:test(remaining)
          end
          return result
       end,

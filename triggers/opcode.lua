@@ -15,6 +15,107 @@ function ItemTrig.testQuantity(quantity, number)
    return false
 end
 
+ItemTrig.OpcodeQuantityArg = {}
+ItemTrig.OpcodeQuantityArg.__index = ItemTrig.OpcodeQuantityArg
+local OpcodeQuantityArg = ItemTrig.OpcodeQuantityArg
+function OpcodeQuantityArg:new(qualifier, number, alternate, base)
+   local result = setmetatable({}, self)
+   result.qualifier = qualifier or "E" -- string: "E", "GTE", "LTE", "NE"
+   result.number    = number    or 0
+   result.alternate = alternate -- string; reserved
+   result.base      = base      -- base argument
+   if alternate and not number then
+      result.number = nil
+   end
+   --
+   -- The currently-unused "alternate" field is intended to allow 
+   -- the user to specify a computed value for use as the number. 
+   -- For example, if the user wants to compare something to the 
+   -- current level of their character, you might allow an altern-
+   -- ate value such as "PlayerLevel".
+   --
+   -- If the number is nil, then the alternate will be used.
+   --
+   return result
+end
+function OpcodeQuantityArg:test(num)
+   local q = self.qualifier
+   local n = self.number
+   if not n then
+      --
+      -- TODO: Use the "alternate" field to determine a point 
+      -- of comparison. This may require that a "context" 
+      -- argument be added to this function. It will also 
+      -- likely require that we define a map on the base arg-
+      -- ument, i.e.
+      --
+      --    alternates[KEY] == function(context) return context.someNumber end
+      --
+      -- and then we
+      --
+      --    n = self.base.alternates[self.alternate](context)
+      --
+      -- and fall through.
+      --
+      return false -- for now
+   end
+   if q == "E" then -- equal
+      return num == n
+   elseif q == "GTE" then -- at least
+      return num >= n
+   elseif q == "LTE" then -- at most
+      return num <= n
+   elseif q == "NE" then -- not equal
+      return num ~= n
+   end
+   return false
+end
+function OpcodeQuantityArg:is(obj)
+   assert(self == OpcodeQuantityArg, "This method must be called on the class.")
+   if type(obj) ~= "table" then
+      return false
+   end
+   return getmetatable(obj) == self
+end
+function OpcodeQuantityArg:clone()
+   local result = OpcodeQuantityArg:new()
+   result.qualifier = self.qualifier
+   result.number    = self.number
+   result.alternate = self.alternate
+   result.base      = self.base
+   return result
+end
+function OpcodeQuantityArg:isValid()
+   local base = self.base
+   if not base then
+      return true
+   end
+   local n = self.number
+   if not n then
+      --
+      -- TODO: Validate the "alternate" field against allowed values.
+      --
+      return false
+   end
+   if base.enum then
+      if not base.enum[n] then
+         return false
+      end
+   end
+   if base.min and n < base.min then
+      return false
+   end
+   if base.max and n > base.max then
+      return false
+   end
+   if base.requireInteger then
+      if math.floor(n) ~= n then
+         return false
+      end
+   end
+   return true
+end
+
 ItemTrig.OpcodeBase = {}
 ItemTrig.OpcodeBase.__index = ItemTrig.OpcodeBase
 function ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
@@ -98,10 +199,7 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
       end
       return 0
    elseif t == "quantity" then
-      return {
-         qualifier = "E",
-         number    = 0
-      }
+      return OpcodeQuantityArg:new()
    elseif t == "signature" then
       return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
    elseif t == "string" then
@@ -240,6 +338,24 @@ end
          work-in-progress functionality.
          
          This is enforced by OpcodeBase:forEachInArgumentEnum.
+      
+      max
+         If this number is specified, then the argument's value will not be 
+         considered valid if it is above this number.
+         
+         Only valid for number and quantity arguments.
+      
+      min
+         If this number is specified, then the argument's value will not be 
+         considered valid if it is below this number.
+         
+         Only valid for number and quantity arguments.
+      
+      requireInteger
+         If this field is truthy, then the argument's value will not be 
+         considered valid if it is a non-integer number.
+         
+         Only valid for number and quantity arguments.
    
 --]]--
 
@@ -462,4 +578,61 @@ function ItemTrig.Opcode:format(argTransform)
 end
 function ItemTrig.Opcode:serialize()
    return ItemTrig.serializeTrigobject(self)
+end
+function ItemTrig.Opcode:validateArgs()
+   local count = #self.base.args
+   for i = 1, count do
+      local a = self.args[i]
+      local b = self.base.args[i]
+      local t = b.type
+      if t == "boolean" then
+         if a ~= true and a ~= false then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+      elseif t == "number" then
+         if type(a) ~= "number" and not tonumber(a) then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+         if b.enum then
+            if not b.enum[a] then
+               return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+            end
+            local dei = b.disabledEnumIndices
+            if dei and dei:has(tonumber(a)) then
+               return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+            end
+         else
+            if b.min and a < b.min then
+               return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+            end
+            if b.max and a > b.max then
+               return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+            end
+            if b.requireInteger and math.floor(a) ~= a then
+               return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+            end
+         end
+      elseif t == "quantity" then
+         if not OpcodeQuantityArg:is(a) then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+         if not a:isValid() then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+         end
+      elseif t == "signature" then
+         if type(a) ~= "string" then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+         if a:len() ~= 4 then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+         end
+      elseif t == "string" then
+         if type(a) ~= "string" then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+      else
+         return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_UNKNOWN_TYPE
+      end
+   end
+   return true
 end

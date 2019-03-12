@@ -104,6 +104,14 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_SAVE", "OK")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_BUTTON_CANCEL", "Cancel")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_ABANDON_UNSAVED_CHANGES", "Are you sure you want to discard your unsaved changes?")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_MAX",       "You must use a number less than or equal to <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_MIN",       "You must use a number greater than or equal to <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_MINMAX",    "You must use a number between <<1>> and <<2>>, inclusive.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INT",       "You must use an integer. Fractional numbers are not allowed.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INTMAX",    "You must use an integer less than or equal to <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INTMIN",    "You must use an integer greater than or equal to <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INTMINMAX", "You must use an integer between <<1>> and <<2>>, inclusive.")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_TITLE", "Import trigger...")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_LABEL_IMPORTSOURCE", "Import from:")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_BUTTON_IMPORT", "Import")
@@ -237,6 +245,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_ITEM_ADDED", "Item Added")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ENTRYPOINT_LIMIT",    "This action can only run from the following entry points: <<1>>")
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_CONDITION_ENTRYPOINT_LIMIT", "This condition can only run from the following entry points: <<1>>")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_TYPE_ERROR",   "The options' data is incorrect. This trigger will not run again until the next entry point.")
+ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_TYPE_UNKNOWN", "One of the options has a value that this mod can't handle. Consider reporting this as a bug, and sending your savedata to the developer. For now, this trigger will not run again until the next entry point.")
+ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_VALUE_ERROR",  "One of the options has a value that isn't allowed. This trigger will not run again until the next entry point.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_PRETENDBASE", "|cFFA020[Pretend Mode] ItemTrig would have <<1>>|r <<2>>|cFFA020.|r")
 ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DESTROYITEM",    "destroyed")
@@ -527,6 +539,8 @@ ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME",           "D
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_01", "Exempt rare style materials")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_02", "Exempt rare equipment")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_03", "Exempt ingredients that we could use more of")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_04", "Exempt rare potions and poisons")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME_NESTED_05", "Exempt lockpicks if we can carry more of them")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_NAME",    "Stop later triggers from running on certain item types")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT", "If the next trigger action runs, then it will stop all processing on the current item. You can put a trigger like this at the very top of your trigger list to make sure that nothing ever runs on certain items. (There are also built-in convenience settings to suppress triggers for locked and Crown items.)")

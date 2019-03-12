@@ -76,7 +76,7 @@ local function serializeOpcode(o)
          elseif rawType == "boolean" then
             safeArgs[i] = tostring(o.args[i] and 1 or 0)
          elseif baseType == "quantity" then
-            safeArgs[i] = safeArgs[i].qualifier .. "," .. safeArgs[i].number
+            safeArgs[i] = safeArgs[i].qualifier .. "," .. (safeArgs[i].number or safeArgs[i].alternate)
          elseif getmetatable(safeArgs[i]) == ItemTrig.Trigger then
             safeArgs[i] = o.args[i]:serialize( )
          end
@@ -176,10 +176,13 @@ function _Parser:_parseOpcode(s, opcodeClass)
       elseif aType == "number" then
          oCurrent.args[j] = tonumber(arg)
       elseif aType == "quantity" then
-         local q = { qualifier = "E", number = 0 }
          local s = ItemTrig.split(arg, ",")
+         local q = ItemTrig.OpcodeQuantityArg:new(nil, nil, nil, baseArgs[j])
          q.qualifier = s[1] or "E"
-         q.number    = tonumber(s[2] or 0)
+         q.number    = tonumber(s[2] or "")
+         if not q.number then
+            q.alternate = s[2]
+         end
          oCurrent.args[j] = q
       elseif aType == "trigger" then
          --

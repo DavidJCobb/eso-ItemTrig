@@ -137,13 +137,35 @@ local function _itemShouldRunTriggers(item)
    return true
 end
 local function _processInventory(entryPoint, entryPointData)
+   local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
    ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
       if not _itemShouldRunTriggers(item) then
          return
       end
       item.entryPointData = entryPointData
-      ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, entryPoint, item, { eventRecipient = TriggerExecutionEventHandler })
+      ItemTrig.executeTriggerList(list, entryPoint, item,
+         {
+            eventRecipient   = TriggerExecutionEventHandler,
+            stripBadTriggers = true,
+         }
+      )
    end)
+end
+local function _processItemList(entryPoint, entryPointData, items)
+   local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
+   for i = 1, #items do
+      local item = items[i]
+      if not _itemShouldRunTriggers(item) then
+         return
+      end
+      item.entryPointData = entryPointData
+      ItemTrig.executeTriggerList(list, entryPoint, item,
+         {
+            eventRecipient   = TriggerExecutionEventHandler,
+            stripBadTriggers = true,
+         }
+      )
+   end
 end
 
 local _OnItemAdded
@@ -203,13 +225,7 @@ do -- Event handlers
                table.sort(list, function(a, b)
                   return b.sellValue < a.sellValue
                end)
-               for i = 1, table.getn(list) do
-                  local item = list[i]
-                  if _itemShouldRunTriggers(item) then
-                     item.entryPointData = {}
-                     ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_FENCE, item, { eventRecipient = TriggerExecutionEventHandler })
-                  end
-               end
+               _processItemList(ItemTrig.ENTRY_POINT_FENCE, {}, list)
             else
                _processInventory(ItemTrig.ENTRY_POINT_FENCE, {})
             end
