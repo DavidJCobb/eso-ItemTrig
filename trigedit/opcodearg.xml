@@ -28,9 +28,13 @@
                   </Button>
                </Controls>
             </Control>
+            <Label name="$(parent)Explanation" font="ITEMTRIG_FONT_BASIC" text="Test!">
+               <Anchor point="BOTTOMLEFT"  offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+            </Label>
             <Control name="$(parent)Body" inherits="ItemTrig_UITemplate_WViewHolder">
-               <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)TitleBar" relativePoint="BOTTOMLEFT" />
-               <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom"   relativePoint="TOPRIGHT" />
+               <Anchor point="TOPLEFT"     offsetY="7" relativeTo="$(parent)TitleBar"    relativePoint="BOTTOMLEFT" />
+               <Anchor point="BOTTOMRIGHT" offsetY="0" relativeTo="$(parent)Explanation" relativePoint="TOPRIGHT" />
                <Controls>
                   <!-- START OF VIEWS
                      These controls are technically WViewHolderViews, but they're 
@@ -50,7 +54,7 @@
                   </Control>
                   <Control name="$(parent)Multiline">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="400" y="168" />
+                     <Dimensions x="600" y="168" />
                      <Controls>
                         <EditBox name="$(parent)Value"
                            maxInputCharacters="2048"
@@ -129,7 +133,7 @@
                   </Control>
                   <Control name="$(parent)String">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="400" />
+                     <Dimensions x="600" />
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <EditBox name="$(parent)Value"

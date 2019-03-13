@@ -5,10 +5,13 @@ ItemTrig:registerWindow("opcodeArgEdit", WinCls)
 
 local ViewCls = {}
 do -- helper classes for views
+   local WCombobox       = ItemTrig.UI.WCombobox
+   local WNumberEditbox  = ItemTrig.UI.WNumberEditbox
+   local WViewHolderView = ItemTrig.UI.WViewHolderView
    do -- enum
-      ViewCls.Enum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgEnumView")
+      ViewCls.Enum = WViewHolderView:makeSubclass("OpcodeArgEnumView")
       function ViewCls.Enum:_construct()
-         self.value = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Value"))
+         self.value = WCombobox:cast(self:GetNamedChild("Value"))
          self.value.onChange =
             function()
                local win = ItemTrig.windows.opcodeArgEdit
@@ -47,23 +50,45 @@ do -- helper classes for views
       end
    end
    do -- number
-      ViewCls.Number = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgNumberView")
+      ViewCls.Number = WViewHolderView:makeSubclass("OpcodeArgNumberView")
       function ViewCls.Number:_construct()
-         self.value = self:GetNamedChild("Value")
+         self.value = WNumberEditbox:install(self:GetNamedChild("Value"))
+         self.value.onValidationStateChanged =
+            function(widget, value, isNowValid)
+               local color = ItemTrig.theme.TEXTEDIT_TEXT
+               if not isNowValid then
+                  color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
+               end
+               widget:asControl():SetColor(unpack(color))
+            end
       end
       function ViewCls.Number:GetValue()
-         return tonumber(self.value:GetText())
+         return self.value:value()
       end
       function ViewCls.Number:SetupArgument(argValue, argBase, argIndex, opcodeBase)
          self:show()
-         self.value:SetText(tostring(argValue))
+         self.value:resetValidationConstraints()
+         self.value:setValidationConstraints({
+            min = argBase.min,
+            max = argBase.max,
+            requireInteger = argBase.requireInteger,
+         })
+         self.value:text(tostring(argValue))
       end
    end
    do -- quantity
-      ViewCls.Quantity = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityView")
+      ViewCls.Quantity = WViewHolderView:makeSubclass("OpcodeArgQuantityView")
       function ViewCls.Quantity:_construct()
-         self.number    = self:GetNamedChild("Number")
-         self.qualifier = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Qualifier"))
+         self.number = WNumberEditbox:install(self:GetNamedChild("Number"))
+         self.number.onValidationStateChanged =
+            function(widget, value, isNowValid)
+               local color = ItemTrig.theme.TEXTEDIT_TEXT
+               if not isNowValid then
+                  color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
+               end
+               widget:asControl():SetColor(unpack(color))
+            end
+         self.qualifier = WCombobox:cast(self:GetNamedChild("Qualifier"))
          self.argBase   = nil
          --
          local qualifier = self.qualifier
@@ -98,14 +123,20 @@ do -- helper classes for views
          self:show()
          self.qualifier:select(1) -- default selection in case qualifier is invalid
          self.qualifier:select(function(item) return item.value == argValue.qualifier end)
+         self.number:resetValidationConstraints()
+         self.number:setValidationConstraints({
+            min = argBase.min,
+            max = argBase.max,
+            requireInteger = argBase.requireInteger,
+         })
          self.number:SetText(argValue.number or "0")
       end
    end
    do -- quantity-enum
-      ViewCls.QuantityEnum = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgQuantityEnumView")
+      ViewCls.QuantityEnum = WViewHolderView:makeSubclass("OpcodeArgQuantityEnumView")
       function ViewCls.QuantityEnum:_construct()
-         self.enum      = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Number"))
-         self.qualifier = ItemTrig.UI.WCombobox:cast(self:GetNamedChild("Qualifier"))
+         self.enum      = WCombobox:cast(self:GetNamedChild("Number"))
+         self.qualifier = WCombobox:cast(self:GetNamedChild("Qualifier"))
          --
          local qualifier = self.qualifier
          qualifier.onChange =
@@ -168,7 +199,7 @@ do -- helper classes for views
             end
          )
       --
-      ViewCls.String = ItemTrig.UI.WViewHolderView:makeSubclass("OpcodeArgStringView")
+      ViewCls.String = WViewHolderView:makeSubclass("OpcodeArgStringView")
       function ViewCls.String:_construct()
          self.value        = self:GetNamedChild("Value")
          self.autoComplete = ZO_AutoComplete:New(self.value, { _AUTOCOMPLETE_FLAG }, {}, AUTO_COMPLETION_ONLINE_ONLY, MAX_AUTO_COMPLETION_RESULTS, AUTO_COMPLETION_AUTOMATIC_MODE)
@@ -216,6 +247,7 @@ function WinCls:_construct()
             quantEnum = nil,
             string    = nil,
          },
+         explanation = nil,
       },
       view     = nil, -- one of the "views" objects above
       type     = nil, -- raw argument type, not ui type; i.e. boolean, number, string, quantity
@@ -242,6 +274,8 @@ function WinCls:_construct()
       self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
       self.ui.views.quantEnum = ViewCls.QuantityEnum:install(viewholder:GetNamedChild("QuantityEnum"))
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
+      self.ui.explanation = self:GetNamedChild("Explanation")
+      self.ui.explanation:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR))
    end
 end
 function WinCls:handleModalDeferredOnHide(deferred)
@@ -271,45 +305,64 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       local base = opcode.base
       local val  = opcode.args[argIndex]
       local arg  = base.args[argIndex]
-      --[[local enum = arg.enum
-      local disabledEnumIndices = arg.disabledEnumIndices]]--
-      --
-      local archetype = base:getArgumentArchetype(argIndex)
-      self.type = arg.type
-      if archetype == "checkbox" then
-         self.view = self.ui.views.checkbox
-         --
-         -- TODO
-         --
-      elseif archetype == "enum" then
-         self.view = self.ui.views.enum
-      elseif archetype == "multiline" then
-         self.view = self.ui.views.multiline
-      elseif archetype == "number" then
-         self.view = self.ui.views.number
-      elseif archetype == "quantity" then
-         self.view = self.ui.views.quantity
-      elseif archetype == "quantity-enum" then
-         self.view = self.ui.views.quantEnum
-      elseif archetype == "string" then
-         self.view = self.ui.views.string
+      do -- Set up the view.
+         local archetype = base:getArgumentArchetype(argIndex)
+         self.type = arg.type
+         if archetype == "checkbox" then
+            self.view = self.ui.views.checkbox
+            --
+            -- TODO
+            --
+         elseif archetype == "enum" then
+            self.view = self.ui.views.enum
+         elseif archetype == "multiline" then
+            self.view = self.ui.views.multiline
+         elseif archetype == "number" then
+            self.view = self.ui.views.number
+         elseif archetype == "quantity" then
+            self.view = self.ui.views.quantity
+         elseif archetype == "quantity-enum" then
+            self.view = self.ui.views.quantEnum
+         elseif archetype == "string" then
+            self.view = self.ui.views.string
+         end
+         self.view:SetupArgument(val, arg, argIndex, base)
+         assert(self.view ~= nil, "No view for this archetype: " .. tostring(archetype) .. "! Did you forget to make one?")
       end
-      self.view:SetupArgument(val, arg, argIndex, base)
-      assert(self.view ~= nil, "No view for this archetype: " .. tostring(archetype) .. "! Did you forget to make one?")
+      do -- Set up the explanation
+         local node = self.ui.explanation
+         if base.explanation then
+            node:SetText(base.explanation)
+         else
+            node:SetText("")
+         end
+      end
    end
    self:autoSize()
    self.dirty = false -- writing to UI controls may trigger "change" handlers, so set this here
    return deferred
 end
-function WinCls:autoSize()
+function WinCls:autoSize(recursing)
    if not self.view then
       return
    end
-   local window   = self:asControl()
-   local viewhold = self.ui.viewholder:asControl()
-   local view     = self.view:asControl()
+   local window        = self:asControl()
+   local viewhold      = self.ui.viewholder:asControl()
+   local view          = self.view:asControl()
+   local explanation   = self.ui.explanation
+   local explOldHeight = explanation:GetHeight()
    window:SetWidth (window:GetWidth()  - viewhold:GetWidth()  + view:GetWidth())
-   window:SetHeight(window:GetHeight() - viewhold:GetHeight() + view:GetHeight())
+   window:SetHeight(window:GetHeight() - viewhold:GetHeight() - explOldHeight + view:GetHeight() + explanation:GetHeight())
+   --
+   if not recursing then
+      --
+      -- The game's UI engine doesn't compute word-wrapping correctly 
+      -- until the next frame. It'll compute it, but just not correctly.
+      --
+      zo_callLater(function()
+         self:autoSize(true)
+      end, 1)
+   end
 end
 function WinCls:onArgumentEdited()
    self.dirty = true

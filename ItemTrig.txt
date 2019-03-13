@@ -73,6 +73,7 @@ ui/wcombobox.lua
 ui/wcombobox.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
+ui/editboxtemplates.lua
 #ui/testmenu.lua # DISABLED
 #ui/testmenu.xml # DISABLED
 trigedit/main.lua
