@@ -498,9 +498,12 @@ end
 function ItemTrig.Opcode:exec(state, context)
    return self.base.func(state, context, self.args)
 end
-function ItemTrig.Opcode:format(argTransform)
+function ItemTrig.Opcode:format(argTransform, fmtTransform)
    local count = #self.base.args
    if count == 0 then
+      if fmtTransform then
+         return fmtTransform(self.base.format)
+      end
       return self.base.format
    end
    local renderArgs = {}
@@ -578,7 +581,11 @@ function ItemTrig.Opcode:format(argTransform)
    -- functions for decimal numbers anyway, we don't need to bother using 
    -- the wrapper.
    --
-   return LocalizeString(self.base.format, unpack(renderArgs))
+   local fmt = self.base.format
+   if fmtTransform then
+      fmt = fmtTransform(fmt)
+   end
+   return LocalizeString(fmt, unpack(renderArgs))
 end
 function ItemTrig.Opcode:serialize()
    return ItemTrig.serializeTrigobject(self)
@@ -632,6 +639,10 @@ function ItemTrig.Opcode:validateArgs()
          end
       elseif t == "string" then
          if type(a) ~= "string" then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+      elseif t == "trigger" then
+         if not ItemTrig.Trigger:is(a) then
             return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
          end
       else

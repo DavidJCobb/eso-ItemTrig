@@ -482,7 +482,15 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_LOG", "You can specify the 
 )
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_RUNNESTED", "Run Nested Trigger")
+   --
+   -- Due to code limitations and UI needs, the description for this 
+   -- action MUST meet the following requirements:
+   --
+   --  - The nested trigger name is on the last line.
+   --  - The nested trigger name is the only thing on that line.
+   --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_RUNNESTED", "Execute a nested trigger:\n<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_RUNNESTED_EDIT", "Execute a nested trigger:")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_COMMENT", "Comment")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_COMMENT", "Comment:\n<<1>>")

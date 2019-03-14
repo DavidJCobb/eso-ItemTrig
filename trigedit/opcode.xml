@@ -81,6 +81,32 @@
                         ItemTrig.windows.opcodeEdit:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
                      </OnLinkMouseUp>
                   </Label>
+                  <Control hidden="true" name="ItemTrig_OpcodeEdit_NestedTriggerHack">
+                     <Anchor point="TOPLEFT"  relativeTo="ItemTrig_OpcodeEdit_OpcodeBody" relativePoint="BOTTOMLEFT" />
+                     <Anchor point="TOPRIGHT" relativeTo="ItemTrig_OpcodeEdit_OpcodeBody" relativePoint="BOTTOMRIGHT" />
+                     <Controls>
+                        <Button inherits="ZO_CheckButton" name="$(parent)Enabled">
+                           <Anchor point="TOPLEFT" offsetY="12" />
+                        </Button>
+                        <Label name="$(parent)Underlay" text="" font="ITEMTRIG_FONT_BASIC">
+                           <!-- <Anchor point="TOPLEFT"  relativeTo="$(parent)Enabled" relativePoint="TOPRIGHT" offsetX="7" offsetY="-7" /> -->
+                           <Anchor point="TOPLEFT" offsetX="23" />
+                           <Anchor point="TOPRIGHT" />
+                           <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT)) </OnInitialized>
+                        </Label>
+                        <Label name="$(parent)Clickable" text="" font="ITEMTRIG_FONT_BASIC"
+                           mouseEnabled="true"
+                           linkEnabled="true"
+                           alpha="0"
+                        >
+                           <Anchor point="TOPLEFT"  relativeTo="$(parent)Underlay" />
+                           <Anchor point="TOPRIGHT" relativeTo="$(parent)Underlay" />
+                           <OnLinkMouseUp>
+                              ItemTrig.windows.opcodeEdit:onLinkClicked(linkData, linkText, mouseButton, ctrl, alt, shift, command)
+                           </OnLinkMouseUp>
+                        </Label>
+                     </Controls>
+                  </Control>
                </Controls>
             </Control>
          </Controls>

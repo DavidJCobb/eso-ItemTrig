@@ -41,12 +41,16 @@ function ItemTrig.executeTriggerList(list, entryPoint, context, options)
    local eventRecipient = options.eventRecipient
    if entryPoint then
       local filtered = ItemTrig.filterTriggerList(list, entryPoint)
-      ItemTrig.overwriteTable(list, filtered)
-      --
-      -- Normally, it'd be sufficient to just overwrite (list) with the 
-      -- return value of the (filterTriggerList) call. However, this 
-      -- doesn't work with the (stripBadTriggers) option.
-      --
+      if options.stripBadTriggers then
+         --
+         -- Normally, it'd be sufficient to just overwrite (list) with the 
+         -- return value of the (filterTriggerList) call. However, this 
+         -- doesn't work with the (stripBadTriggers) option.
+         --
+         ItemTrig.overwriteTable(list, filtered)
+      else
+         list = filtered
+      end
    end
    for i = 1, #list do
       local trigger = list[i]
@@ -70,8 +74,12 @@ function ItemTrig.executeTriggerList(list, entryPoint, context, options)
          end
       end
    end
+   if eventRecipient then
+      eventRecipient.topLevelTrigger = nil
+   end
 end
 function ItemTrig.filterTriggerList(list, entryPoint)
+   assert(list, "You must specify a list.")
    local filtered = {}
    local mapping  = {} -- list[mapping[i]] == filtered[i]
    for i = 1, #list do
@@ -93,11 +101,11 @@ local function _formatOpcodeEPMismatch(opcode)
    end
    local names = ""
    do
-      local allowed = opcode.allowedEntryPoints
+      local allowed = opcode.base.allowedEntryPoints
       if allowed then
          names = {}
          for i = 1, #allowed do
-            local name = ItemTrig.ENTRY_POINT_NAMES[allowed[i]] or "???"
+            names[#names + 1] = ItemTrig.ENTRY_POINT_NAMES[allowed[i]] or "???"
          end
          names = table.concat(names, ", ")
       end
@@ -266,7 +274,7 @@ function ItemTrig.Trigger:exec(context, entryPoint, options)
    local function _validateOpcodeArgs(opcode)
       local result, index, code = opcode:validateArgs()
       if not result then
-         local extra = {}
+         local extra = { code = code }
          if code == ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE then
             extra.why = GetString(ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_TYPE_ERROR)
          elseif code == ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE then
@@ -391,6 +399,14 @@ function ItemTrig.Trigger:exec(context, entryPoint, options)
       end
       if r == ItemTrig.OPCODE_FAILED then
          _logFailure(a, i, extra)
+         self:resetRuntimeState()
+         return r, extra
+      end
+      if r == ItemTrig.WRONG_ENTRY_POINT then
+         --
+         -- This error occurred in a nested trigger, and should already 
+         -- have been reported.
+         --
          self:resetRuntimeState()
          return r, extra
       end

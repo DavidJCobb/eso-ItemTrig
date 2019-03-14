@@ -37,6 +37,14 @@ do -- helper class for trigger list entries
             trigger.enabled = checked
          end
    end
+   function TriggerListEntry:getTrigger()
+      local pane  = WinCls:getInstance().ui.pane
+      local index = pane:indexOfControl(self:asControl())
+      if index then
+         return (pane:at(index) or {}).trigger
+      end
+      return nil
+   end
    function TriggerListEntry:getBaseBackgroundColor()
       if self:indexInParent() % 2 == 0 then
          return ItemTrig.theme.LIST_ITEM_BACKGROUND_ALT
@@ -69,7 +77,16 @@ do -- helper class for trigger list entries
          self.desc:SetColor(unpack(color))
          self.contents.style.fontColor   = color
          self.contents.style.bulletColor = color
-         self.contents:refreshStyle()
+         local trigger = self:getTrigger()
+         if trigger then
+            self:renderContents(trigger)
+         else
+            --
+            -- There won't be a trigger if (setSelected) was called 
+            -- as part of the element constructor.
+            --
+            self.contents:refreshStyle() -- not sufficient for if nested triggers are disabled; it doesn't properly handle list item color overrides
+         end
       end
    end
    function TriggerListEntry:setEnabled(state)
@@ -118,7 +135,7 @@ do -- helper class for trigger list entries
                   local item    = { color = color, text = trigger.actions[i]:format() }
                   local inColor = color
                   if not action.args[1].enabled then
-                     inColor = { nil, nil, nil, 0.8 } -- override alpha
+                     inColor = { nil, nil, nil, 0.6 } -- override alpha
                   end
                   item.children = _triggerToList(action.args[1], true, inColor)
                   c[i] = item

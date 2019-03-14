@@ -31,6 +31,7 @@ function WinCls:_construct()
          fragment   = nil,
          opcodeType = nil,
          opcodeBody = nil,
+         nestedTriggerEnable = nil,
       },
       settingUp   = false,
       entryPoints = {},
@@ -66,6 +67,17 @@ function WinCls:_construct()
    end
    self.ui.opcodeBody = ItemTrig_OpcodeEdit_OpcodeBody
    --
+   self.ui.nestedTriggerEnable = GetControl(ItemTrig_OpcodeEdit_NestedTriggerHack, "Enabled")
+   self.ui.nestedTriggerEnable.toggleFunction =
+      function(self, checked)
+         local editor = WinCls:getInstance()
+         local opcode = editor.opcode.working
+         if opcode.base ~= ItemTrig.TRIGGER_ACTION_RUN_NESTED then
+            return
+         end
+         opcode.args[1].enabled = checked
+         editor.opcode.dirty = true
+      end
 end
 function WinCls:handleModalDeferredOnHide(deferred)
    if self.pendingResults.outcome then
@@ -192,7 +204,14 @@ function WinCls:redrawDescription(options)
    if not options then
       options = {}
    end
-   local baseArgs = self.opcode.working.base.args
+   local baseOp   = self.opcode.working.base
+   local baseArgs = baseOp.args
+   local function _formatTransform(fmt)
+      if baseOp == ItemTrig.TRIGGER_ACTION_RUN_NESTED then
+         return GetString(ITEMTRIG_STRING_ACTIONDESC_RUNNESTED_EDIT)
+      end
+      return fmt
+   end
    local function _validateEntryPoints(i)
       local ep = baseArgs[i].allowedEntryPoints
       if not ep then
@@ -200,6 +219,9 @@ function WinCls:redrawDescription(options)
       end
       return ItemTrig.valuesOverlap(ep, self.entryPoints)
    end
+   local triggerArgIndex = nil
+   local triggerArgLink  = nil
+   local triggerArgText  = nil
    --
    -- It's impossible to combine formatting codes (i.e. color, underline) with 
    -- links, and custom links cannot have color. We "solve" this by using two 
@@ -223,8 +245,14 @@ function WinCls:redrawDescription(options)
          for j = 1, #s do
             out = out .. ZO_LinkHandler_CreateLinkWithFormat(s[j], nil, "ItemTrigOpcodeEditArg", 0, "|H%d:%s|h%s|h", i) -- link without brackets
          end
+         if baseArgs[i].type == "trigger" then
+            triggerArgIndex = i
+            triggerArgLink  = out
+            out = ""
+         end
          return out
-      end
+      end,
+      _formatTransform
    )
    self.ui.opcodeBody:SetText(rendered)
    --
@@ -243,17 +271,49 @@ function WinCls:redrawDescription(options)
          for j = 1, #s do
             out = out .. LocalizeString(fmt, s[j])
          end
+         if baseArgs[i].type == "trigger" then
+            triggerArgText = out
+            out = ""
+         end
          return out
-      end
+      end,
+      _formatTransform
    )
    ItemTrig_OpcodeEdit_OpcodeBodyUnderlay:SetText(rendered)
    --
+   do
+      local node = ItemTrig_OpcodeEdit_NestedTriggerHack
+      if triggerArgIndex then
+         local show  = GetControl(node, "Underlay")
+         local link  = GetControl(node, "Clickable")
+         local check = GetControl(node, "Enabled")
+         show:SetText(triggerArgText)
+         link:SetText(triggerArgLink)
+         do
+            local state = self.opcode.working.args[triggerArgIndex].enabled
+            if state then
+               ZO_CheckButton_SetChecked(check)
+            else
+               ZO_CheckButton_SetUnchecked(check)
+            end
+         end
+         node:SetHidden(false)
+      else
+         node:SetHidden(true)
+      end
+   end
+   --
    do -- resize the window to prevent overflow
+      local hackNode   = ItemTrig_OpcodeEdit_NestedTriggerHack
       local window     = self:asControl()
       local wrapper    = self.ui.opcodeBody:GetParent()
       local heightText = self.ui.opcodeBody:GetHeight()
       local heightWrap = wrapper:GetHeight()
-      window:SetHeight(window:GetHeight() - heightWrap + heightText)
+      local heightHack = 0
+      if not hackNode:IsHidden() then
+         heightHack = GetControl(hackNode, "Underlay"):GetHeight()
+      end
+      window:SetHeight(window:GetHeight() - heightWrap + heightText + heightHack)
    end
 end
 function WinCls:refresh(options) -- Render the opcode being edited.

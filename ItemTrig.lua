@@ -165,16 +165,25 @@ local function _processItemList(entryPoint, entryPointData, items)
       )
    end
 end
+local function _processSingleItem(entryPoint, entryPointData, item)
+   local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
+   if not _itemShouldRunTriggers(item) then
+      return
+   end
+   item.entryPointData = entryPointData
+   ItemTrig.executeTriggerList(list, entryPoint, item,
+      {
+         eventRecipient = TriggerExecutionEventHandler,
+      }
+   )
+end
 
 local _OnItemAdded
 local _OnOpenClose
 do -- Event handlers
    function _OnItemAdded(eventCode, bagIndex, slotIndex, isNewItem, itemSoundCategory, updateReason, stackCountChange)
       local item = ItemTrig.ItemInterface:new(bagIndex, slotIndex)
-      if item.locked then
-         return
-      end
-      item.entryPointData = {
+      local entryPointData = {
          countAdded    = stackCountChange,
          --
          crafting      = ItemTrig.eventState.isInCrafting,
@@ -182,8 +191,7 @@ do -- Event handlers
          takenFromMail = ItemTrig.eventState.isInMail,
          withdrawn     = ItemTrig.eventState.isInBank or ItemTrig.eventState.isInGuildBank or false,
       }
-      --d(zo_strformat("Added item <<3>>. <<1>> now obtained; we now have <<2>>.", stackCountChange, item.count, item.name))
-      ItemTrig.executeTriggerList(ItemTrig.Savedata.triggers, ItemTrig.ENTRY_POINT_ITEM_ADDED, item)
+      _processSingleItem(ItemTrig.ENTRY_POINT_ITEM_ADDED, entryPointData, item)
    end
    function _OnOpenClose(eventCode, ...)
       ItemTrig.eventState.isInBank      = eventCode == EVENT_OPEN_BANK -- TODO: IsBankOpen()
