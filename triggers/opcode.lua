@@ -337,7 +337,11 @@ end
          is, users will not be able to select them. Useful for dummying out 
          work-in-progress functionality.
          
-         This is enforced by OpcodeBase:forEachInArgumentEnum.
+         This is enforced by OpcodeBase:forEachInArgumentEnum.\
+      
+      doNotSortEnum
+         If this is set to true, then the argument's enum won't be sorted 
+         in the UI.
       
       explanation
          Text explaining the meaning of the argument. The UI can display it 

@@ -62,7 +62,14 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_ALWAYS),
       _s(ITEMTRIG_STRING_CONDITIONDESC_ALWAYS),
       {
-         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_ALWAYS_NEVER), [2] = _s(ITEMTRIG_STRING_OPCODEARG_ALWAYS_ALWAYS)} },
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ALWAYS_NEVER),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ALWAYS_ALWAYS)
+            },
+            default = true,
+         },
       },
       function(state, context, args)
          return args[1]
@@ -72,7 +79,14 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_STOLEN),
       _s(ITEMTRIG_STRING_CONDITIONDESC_STOLEN),
       {
-         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_STOLEN_NO), [2] = _s(ITEMTRIG_STRING_OPCODEARG_STOLEN_YES)} },
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_STOLEN_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_STOLEN_YES)
+            },
+            default = true,
+         },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -160,8 +174,8 @@ ItemTrig.tableConditions = {
                --
                -- Those are hidden as well.
                --
-               --[ITEMTYPE_ADDITIVE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_ADDITIVE), -- Category is unused?
-               [ITEMTYPE_ARMOR]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR), -- Actually "apparel;" includes jewelry
+               --[ITEMTYPE_ADDITIVE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_ADDITIVE), -- category is unused?
+               [ITEMTYPE_ARMOR]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR), -- actually "apparel;" includes jewelry
                --[ITEMTYPE_ARMOR_BOOSTER]              = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_BOOSTER),
                [ITEMTYPE_ARMOR_TRAIT]                = GetString(SI_ITEMTYPE0 + ITEMTYPE_ARMOR_TRAIT),
                [ITEMTYPE_AVA_REPAIR]                 = GetString(SI_ITEMTYPE0 + ITEMTYPE_AVA_REPAIR),
@@ -212,13 +226,13 @@ ItemTrig.tableConditions = {
                [ITEMTYPE_RACIAL_STYLE_MOTIF]         = GetString(SI_ITEMTYPE0 + ITEMTYPE_RACIAL_STYLE_MOTIF),
                [ITEMTYPE_RAW_MATERIAL]               = GetString(ITEMTRIG_STRING_ITEMTYPE_RAWSTYLEMATERIAL),
                [ITEMTYPE_REAGENT]                    = GetString(SI_ITEMTYPE0 + ITEMTYPE_REAGENT),
-               [ITEMTYPE_RECIPE]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_RECIPE),
+               [ITEMTYPE_RECIPE]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_RECIPE), -- provisioning recipes or smithing patterns
                [ITEMTYPE_SIEGE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SIEGE),
                [ITEMTYPE_SOUL_GEM]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_SOUL_GEM),
                --[ITEMTYPE_SPELLCRAFTING_TABLET]       = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPELLCRAFTING_TABLET),
                --[ITEMTYPE_SPICE]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_SPICE),
                [ITEMTYPE_STYLE_MATERIAL]             = GetString(SI_ITEMTYPE0 + ITEMTYPE_STYLE_MATERIAL),
-               [ITEMTYPE_TABARD]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TABARD), -- Only used for one item: the Guild Tabard, which lets you wear your guild's heraldry crest
+               [ITEMTYPE_TABARD]                     = GetString(SI_ITEMTYPE0 + ITEMTYPE_TABARD), -- only used for one item: the Guild Tabard, which lets you wear your guild's heraldry crest
                [ITEMTYPE_TOOL]                       = GetString(SI_ITEMTYPE0 + ITEMTYPE_TOOL), -- includes non-crown repair kits
                [ITEMTYPE_TRASH]                      = GetString(SI_ITEMTYPE0 + ITEMTYPE_TRASH),
                [ITEMTYPE_TREASURE]                   = GetString(SI_ITEMTYPE0 + ITEMTYPE_TREASURE),
@@ -324,7 +338,14 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_CRAFTED),
       _s(ITEMTRIG_STRING_CONDITIONDESC_CRAFTED),
       {
-         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTED_NO), [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTED_YES)} },
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTED_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTED_YES)
+            },
+            default = true,
+         },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -527,7 +548,14 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_LOCKED),
       _s(ITEMTRIG_STRING_CONDITIONDESC_LOCKED),
       {
-         [1] = { type = "boolean", enum = {[1] = _s(ITEMTRIG_STRING_OPCODEARG_LOCKED_NO), [2] = _s(ITEMTRIG_STRING_OPCODEARG_LOCKED_YES)} },
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_LOCKED_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_LOCKED_YES)
+            },
+            default = true,
+         },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -546,7 +574,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_JUNK_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_JUNK_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -566,11 +595,12 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSTYLE_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
-            default = ITEMTYPE_TREASURE,
+            default = -2,
             enum =
                (function()
                   local e = ItemTrig.assign({
@@ -645,7 +675,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ALCHEMYEFFECTS_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -695,7 +726,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -715,7 +747,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_CROWNITEM_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -753,7 +786,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ENLIGHTENED_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ENLIGHTENED_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -774,7 +808,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ORNATE_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ORNATE_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -795,7 +830,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_INTRICATE_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_INTRICATE_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -816,7 +852,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -856,7 +893,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -889,7 +927,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMTRAIT_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -929,7 +968,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMFILTER_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -992,7 +1032,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_USAGEREQUIREMENTSMET_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_USAGEREQUIREMENTSMET_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -1021,7 +1062,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGRANK_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -1092,7 +1134,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISTREASUREMAP_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISTREASUREMAP_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -1113,7 +1156,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISCLOTHES_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISCLOTHES_YES)
-            }
+            },
+            default = true,
          },
       },
       function(state, context, args)
@@ -1134,7 +1178,8 @@ ItemTrig.tableConditions = {
             enum = {
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_NO),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_YES)
-            }
+            },
+            default = true,
          },
          [2] = {
             type = "number",
@@ -1142,7 +1187,8 @@ ItemTrig.tableConditions = {
                [0] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_EMPTY),
                [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_FILLED),
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISSOULGEM_ANYSTATE),
-            }
+            },
+            default = 2,
          },
       },
       function(state, context, args)
@@ -1256,6 +1302,156 @@ ItemTrig.tableConditions = {
       { -- extra data for this opcode
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }
       }
+   ),
+   [38] = ConditionBase:new( -- Is Known Recipe
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ISKNOWNRECIPE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ISKNOWNRECIPE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISKNOWNRECIPE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISKNOWNRECIPE_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            local it = context.type
+            if it == ITEMTYPE_RACIAL_STYLE_MOTIF then
+               result = context.isKnownLorebook
+            elseif it == ITEMTYPE_RECIPE then -- provisioning recipes or smithing patterns
+               result = context.isKnownRecipe
+            end
+         end
+         if result == nil then
+            return false
+         end
+         if args[1] then
+            return result or false
+         end
+         return not result
+      end
+   ),
+   [39] = ConditionBase:new( -- Treasure Tag
+      _s(ITEMTRIG_STRING_CONDITIONNAME_TREASURETAG),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_TREASURETAG),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_TREASURETAG_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_TREASURETAG_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = ItemTrig.gameEnums.treasureTags,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         do
+            local tags = context.treasureTags
+            local name = (ItemTrig.gameEnums.treasureTags[args[2]] or ""):lower()
+            for i = 1, #tags do
+               if tags[i]:lower() == name then
+                  result = true
+                  break
+               end
+            end
+         end
+         if args[1] then
+            return result or false
+         end
+         return not result
+      end
+   ),
+   [40] = ConditionBase:new( -- Covetous Countess
+      _s(ITEMTRIG_STRING_CONDITIONNAME_COVETOUSCOUNTESS),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_COVETOUSCOUNTESS),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_CURRENT),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_CHARACTER),
+               [3] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_ANY),
+               [4] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_GAMESDOLLSSTATUES),
+               [5] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_RITUALSODDITIES),
+               [6] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_WRITINGSMAPS),
+               [7] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_COSMETICSLINENSWARDROBE),
+               [8] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_DRINKWAREUTENSILSDISHES),
+            },
+            doNotSortEnum = true,
+            explanation   = _s(ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2)
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            if args[2] == 1 then -- current quest objectives
+               local quest = ItemTrig.questByName(GetString(ITEMTRIG_STRING_COVETOUS_NAME))
+               if quest then
+                  result = quest:itemFulfillsAnyObjective(context)
+               end
+            else
+               local itemTags = context.treasureTags
+               local wantTags = {}
+               do -- Fill wantTags.
+                  local gameEnum = ItemTrig.gameEnums.covetousCountessTreasureTagsByLevel
+                  if args[2] == 2 then -- current character level
+                     local level = GetUnitLevel("player")
+                     if level == 50 then -- any are possible
+                        for _, v in pairs(gameEnum) do
+                           ItemTrig.arrayConcat(wantTags, v.tags)
+                        end
+                     else
+                        for _, v in pairs(gameEnum) do
+                           if level >= v.min and level <= v.max then
+                              ItemTrig.arrayConcat(wantTags, v.tags)
+                              break
+                           end
+                        end
+                     end
+                  elseif args[2] == 3 then -- any
+                     for _, v in pairs(gameEnum) do
+                        ItemTrig.arrayConcat(wantTags, v.tags)
+                     end
+                  elseif args[2] == 4 then -- games/dolls/statues
+                     ItemTrig.arrayConcat(wantTags, gameEnum[1].tags)
+                  elseif args[2] == 5 then -- ritual objects/oddities
+                     ItemTrig.arrayConcat(wantTags, gameEnum[2].tags)
+                  elseif args[2] == 6 then -- writings/scrivener supplies/maps
+                     ItemTrig.arrayConcat(wantTags, gameEnum[3].tags)
+                  elseif args[2] == 7 then -- cosmetics/linens/wardrobe supplies
+                     ItemTrig.arrayConcat(wantTags, gameEnum[4].tags)
+                  elseif args[2] == 8 then -- drinkware/utensils/dishes
+                     ItemTrig.arrayConcat(wantTags, gameEnum[5].tags)
+                  end
+               end
+               result = ItemTrig.valuesOverlap(itemTags, wantTags)
+            end
+         end
+         if args[1] then
+            return result or false
+         end
+         return not result
+      end
    ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions

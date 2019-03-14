@@ -41,6 +41,11 @@ do -- helper classes for views
          end
          local combobox = self.value
          combobox:clear()
+         if argBase.doNotSortEnum then
+            self.value:setShouldSort(false, false)
+         else
+            self.value:setShouldSort(true, false)
+         end
          opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
             combobox:push({ name = v, index = k }, false)
          end)
@@ -172,6 +177,11 @@ do -- helper classes for views
          self.qualifier:select(1) -- default selection in case qualifier is invalid
          self.qualifier:select(function(item) return item.value == argValue.qualifier end)
          self.enum:clear()
+         if argBase.doNotSortEnum then
+            self.enum:setShouldSort(false, false)
+         else
+            self.enum:setShouldSort(true, false)
+         end
          opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
             self.enum:push({ name = v, value = k }, false)
          end)
@@ -338,25 +348,39 @@ function WinCls:requestEdit(opener, opcode, argIndex)
    self.dirty = false -- writing to UI controls may trigger "change" handlers, so set this here
    return deferred
 end
-function WinCls:autoSize(recursing)
+function WinCls:autoSize(options)
    if not self.view then
       return
+   end
+   if not options then
+      options = {
+         forceWidth = nil,
+         recursing  = false,
+      }
    end
    local window        = self:asControl()
    local viewhold      = self.ui.viewholder:asControl()
    local view          = self.view:asControl()
    local explanation   = self.ui.explanation
    local explOldHeight = explanation:GetHeight()
-   window:SetWidth (window:GetWidth()  - viewhold:GetWidth()  + view:GetWidth())
-   window:SetHeight(window:GetHeight() - viewhold:GetHeight() - explOldHeight + view:GetHeight() + explanation:GetHeight())
    --
-   if not recursing then
-      --
-      -- The game's UI engine doesn't compute word-wrapping correctly 
-      -- until the next frame. It'll compute it, but just not correctly.
-      --
+   local desiredWidth = options.forceWidth
+   if not desiredWidth then
+      desiredWidth = window:GetWidth() - viewhold:GetWidth() + view:GetWidth()
+   end
+   window:SetWidth (desiredWidth)
+   local desiredHeight = window:GetHeight() - viewhold:GetHeight() - explOldHeight + view:GetHeight() + explanation:GetHeight()
+   window:SetHeight(desiredHeight)
+   if not options.forceWidth and (desiredHeight >= desiredWidth * 1.5) then
+      options.forceWidth = (desiredWidth + desiredHeight) / 2
+      self:autoSize(options)
+      return
+   end
+   --
+   if not options.recursing then
+      options.recursing = true
       zo_callLater(function()
-         self:autoSize(true)
+         self:autoSize(options)
       end, 1)
    end
 end

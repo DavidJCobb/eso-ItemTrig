@@ -183,6 +183,55 @@ ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_VITALITY",        "Vitality") -
 ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_VULNERABILITY",   "Vulnerability") -- Increases your damage taken by __% for _ seconds
 ZO_CreateStringId("ITEMTRIG_STRING_ALCHEMYEFFECT_WEAPONCRITICAL",  "Weapon Critical") -- Gives you ____ Weapon Critical Rating for _ seconds
 --
+-- This is a list of known treasure categories. This is used by the 
+-- trigger system, so these strings need to exactly match the ones 
+-- shown for these categories in any given language.
+--
+-- Where possible, each string is annotated with a comment identifying 
+-- a treasure item (by ID and name) that has only that category.
+--
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_ARTWORK",             "Artwork") -- 64358: Autographed Calling Card
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_CHILDRENSTOYS",       "Children's Toys")
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_COSMETICS",           "Cosmetics")
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_DEVICES",             "Devices")
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_DISHESANDCOOKWARE",   "Dishes and Cookware") -- 61263: Cherrywood Morsel Bowl
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_DOLLS",               "Dolls") -- 64365: Bloody Buttons' Ragamuffin
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_DRINKWARE",           "Drinkware") -- 61850: "Ancient" Clay Goblet
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_DRYGOODS",            "Dry Goods") -- 61382: Bolt of Red Fabric
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_FISHINGSUPPLIES",     "Fishing Supplies") -- 64455: Crawler Tube
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_FURNISHINGS",         "Furnishings") -- 61821: Argonian Darkwood Tabletop
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_GAMES",               "Games") -- 64381: Bag of Letter Tiles
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_GROOMINGITEMS",       "Grooming Items") -- 62810: Boarbristle Brush
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_LIGHTS",              "Lights") -- 61358: Brass Candle Snuffer
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_LINENS",              "Linens")
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_MAGICCURIOSITIES",    "Magic Curiosities") -- 64389: Portal Seed
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_MAPS",                "Maps") -- 62081: Caravan Schedule
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_MEDICALSUPPLIES",     "Medical Supplies") -- 62883: False Eye
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_MUSICALINSTRUMENTS",  "Musical Instruments") -- 138919: Aldmeri Sheet Music
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_ODDITIES",            "Oddities") -- 61442: Commemorative Imperial Coins
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_RELIC",               "Relic") -- 73781: Akaviri Armistice Banquet Tray -- NOTE: Is this only used for Kari's Hit List?
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_RITUALOBJECTS",       "Ritual Objects") -- 64408: Dried Prayer Garlands
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_SCRIVENERSUPPLIES",   "Scrivener Supplies") -- 62584: Carved Pumice Stone
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_SMITHINGEQUIPMENT",   "Smithing Equipment") -- 64442: Spool of Bendy Wire
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_STATUES",             "Statues") -- 61536: Glass Owl Curio
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_TOOLS",               "Tools") -- 62784: Copper Measures
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_TRIFLESANDORNAMENTS", "Trifles and Ornaments") -- 61555: Colorful Pottery
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_UTENSILS",            "Utensils") -- 64326: Cast Iron Toothed Spoon
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_WALLDECOR",           "Wall Décor") -- 62179: Pewter Portrait Frame
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_WARDROBEACCESSORIES", "Wardrobe Accessories") -- 61107: Common Buckle
+ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_WRITINGS",            "Writings") -- 61207: Cheaply Bound Journal
+
+--
+-- COVETOUS COUNTESS
+--
+-- We have a condition that allows the player to match items against 
+-- their current Covetous Countess objective. However, the game doesn't 
+-- expose any useful internal values (e.g. unique identifiers for the 
+-- quest or its objectives). The only way to detect the quest is to 
+-- match its name.
+--
+ZO_CreateStringId("ITEMTRIG_STRING_COVETOUS_NAME", "The Covetous Countess") -- Quest name; must match exactly
+--
 --
 -- MISCELLANEOUS
 --
@@ -459,6 +508,30 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANLAUNDERCOUNT", "The player c
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANFENCECOUNT", "Fences Remaining")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANFENCECOUNT", "The player can fence <<1>> more items.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ISKNOWNRECIPE", "Is Known Recipe/Motif")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ISKNOWNRECIPE", "The player <<1>> learned how to craft this recipe, pattern, or motif.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISKNOWNRECIPE_NO",  "has not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISKNOWNRECIPE_YES", "has")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_TREASURETAG", "Treasure Category")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_TREASURETAG", "The item <<1>> to the <<2>> treasure category.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_TREASURETAG_NO",  "does not belong")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_TREASURETAG_YES", "belongs")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_COVETOUSCOUNTESS", "Covetous Countess")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_COVETOUSCOUNTESS", "The item <<1>> can be used for the Covetous Countess: <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_NO",  "does not belong")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_YES", "belongs")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_CURRENT",                 "current objective")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_CHARACTER",               "current character level")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_ANY",                     "any objective")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_GAMESDOLLSSTATUES",       "games, dolls, and statues")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_RITUALSODDITIES",         "ritual objects and oddities")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_WRITINGSMAPS",            "writings and maps")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_COSMETICSLINENSWARDROBE", "cosmetics, linens, and wardrobe accessories")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_DRINKWAREUTENSILSDISHES", "drinkware, utensils, and dishes")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2", "You can test the item against the current Covetous Countess quest objectives, if the quest is active and you haven't delivered the items to the Countess yet. Alternatively, you can test the items against your level: if you're below level 50, then the objective you get depends on your level. (If you're above level 50, then testing against your level is the same as \"any objective.\"")
 --
 --
 -- ACTIONS

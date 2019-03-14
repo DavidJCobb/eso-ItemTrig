@@ -394,9 +394,9 @@ local _lazyGetterMappings = {
          end
          return _handle(GetAlchemyItemTraits(i.bag, i.slot))
       end,
-   canBeJunk      = function(i) return i.invalid and nil or CanItemBeMarkedAsJunk(i.bag, i.slot) end,
-   canBeLocked    = function(i) return i.invalid and nil or CanItemBePlayerLocked(i.bag, i.slot) end,
-   countTotal     = function(i) return i.invalid and nil or GetItemTotalCount(i.bag, i.slot) end,
+   canBeJunk      = function(i) return not i.invalid and CanItemBeMarkedAsJunk(i.bag, i.slot) or nil end,
+   canBeLocked    = function(i) return not i.invalid and CanItemBePlayerLocked(i.bag, i.slot) or nil end,
+   countTotal     = function(i) return not i.invalid and GetItemTotalCount(i.bag, i.slot)     or nil end,
    forcedNonDeconstructable =
       function(i)
          if i.invalid then
@@ -427,13 +427,17 @@ local _lazyGetterMappings = {
             gemsPerOperation  = gemsPer,
          }
       end,
-   hasJunkFlag      = function(i) return i.invalid and nil or IsItemJunk(i.bag, i.slot) end,
-   isBound          = function(i) return i.invalid and nil or IsItemBound(i.bag, i.slot) end,
-   isCrownCrateItem = function(i) return i.invalid and nil or IsItemFromCrownCrate(i.bag, i.slot) end,
-   isCrownStoreItem = function(i) return i.invalid and nil or IsItemFromCrownStore(i.bag, i.slot) end,
-   isPrioritySell   = function(i) return i.invalid and nil or IsItemLinkPrioritySell(i.link) end,
-   isResearchable   = function(i) return i.invalid and nil or CanItemLinkBeTraitResearched(i.link) end,
-   itemFilters      = function(i) return i.invalid and {} or {GetItemFilterTypeInfo(i.bag, i.slot)} end,
+   hasJunkFlag      = function(i) return not i.invalid and IsItemJunk(i.bag, i.slot)              or nil end,
+   isBook           = function(i) return not i.invalid and IsItemLinkBook(i.link)                 or nil end,
+   isBound          = function(i) return not i.invalid and IsItemBound(i.bag, i.slot)             or nil end,
+   isCrownCrateItem = function(i) return not i.invalid and IsItemFromCrownCrate(i.bag, i.slot)    or nil end,
+   isCrownStoreItem = function(i) return not i.invalid and IsItemFromCrownStore(i.bag, i.slot)    or nil end,
+   isKnownLorebook  = function(i) return not i.invalid and IsItemLinkBookKnown(i.link)            or nil end,
+   isKnownRecipe    = function(i) return not i.invalid and IsItemLinkRecipeKnown(i.link)          or nil end, -- provisioning
+   isLorebook       = function(i) return not i.invalid and IsItemLinkBookPartOfCollection(i.link) or nil end,
+   isPrioritySell   = function(i) return not i.invalid and IsItemLinkPrioritySell(i.link)         or nil end,
+   isResearchable   = function(i) return not i.invalid and CanItemLinkBeTraitResearched(i.link)   or nil end,
+   itemFilters      = function(i) return not i.invalid and {GetItemFilterTypeInfo(i.bag, i.slot)} or {} end,
    itemSetData =
       function(i)
          if i.invalid then
@@ -460,7 +464,19 @@ local _lazyGetterMappings = {
             tier      = tier,
          }
       end,
-   specialTrait = function(i) return i.invalid and nil or GetItemTraitInformation(i.bag, i.slot) end,
+   specialTrait = function(i) return not i.invalid and GetItemTraitInformation(i.bag, i.slot) or nil end,
+   treasureTags =
+      function(i)
+         local tags  = {}
+         local count = GetItemLinkNumItemTags(i.link)
+         for j = 1, count do
+            local text, cat = GetItemLinkItemTagInfo(i.link, j)
+            if cat == TAG_CATEGORY_TREASURE_TYPE then
+               tags[#tags + 1] = text
+            end
+         end
+         return tags
+      end,
 }
 
 ItemInterface.meta = {
