@@ -339,6 +339,10 @@ end
          
          This is enforced by OpcodeBase:forEachInArgumentEnum.
       
+      explanation
+         Text explaining the meaning of the argument. The UI can display it 
+         when the user is editing the argument's value.
+      
       max
          If this number is specified, then the argument's value will not be 
          considered valid if it is above this number.

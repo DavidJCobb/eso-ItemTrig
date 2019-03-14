@@ -55,7 +55,11 @@ ItemTrig.tableActions = {
       _s(ITEMTRIG_STRING_ACTIONNAME_LOG),
       _s(ITEMTRIG_STRING_ACTIONDESC_LOG),
       {
-         [1] = { type = "string", placeholder = _s(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT) },
+         [1] = {
+            type = "string",
+            placeholder = _s(ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT),
+            explanation = _s(ITEMTRIG_STRING_ACTIONEXPLANATION_LOG),
+         },
       },
       function(state, context, args)
          local text = args[1] or ""
@@ -80,10 +84,7 @@ ItemTrig.tableActions = {
             text = text:gsub("$%((%a+)%)", _substitute)
          end
          CHAT_SYSTEM:AddMessage(text)
-      end,
-      {
-         explanation = _s(ITEMTRIG_STRING_ACTIONEXPLANATION_LOG),
-      }
+      end
    ),
    [3] = ActionBase:new( -- Run Nested Trigger
       _s(ITEMTRIG_STRING_ACTIONNAME_RUNNESTED),
@@ -206,6 +207,10 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT)
             elseif errorCode == ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NORMAL_MAX_COUNT)
+            elseif errorCode == ItemInterface.FAILURE_LAUNDER_CANT_AFFORD then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_CANT_AFFORD)
+            elseif errorCode == ItemInterface.FAILURE_LAUNDER_NOT_STOLEN then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NOT_STOLEN)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end

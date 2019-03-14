@@ -331,11 +331,7 @@ function WinCls:requestEdit(opener, opcode, argIndex)
       end
       do -- Set up the explanation
          local node = self.ui.explanation
-         if base.explanation then
-            node:SetText(base.explanation)
-         else
-            node:SetText("")
-         end
+         node:SetText(arg.explanation or "")
       end
    end
    self:autoSize()

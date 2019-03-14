@@ -503,7 +503,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_JUNK_NOT_ALLOWED", "This item can
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_LAUNDER", "Launder")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_LAUNDER", "Launder <<1>> of the item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT", "Add-ons can only launder 98 items every time the fence window is open; more than that and you'll disconnect from the server. Close the fence window and reopen it to launder more items.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NORMAL_MAX_COUNT", "You've hit the limit on how many items you can launder today.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NORMAL_MAX_COUNT",  "You've hit the limit on how many items you can launder today.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_CANT_AFFORD",       "You don't have enough money to launder this item.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NOT_STOLEN",        "You can't launder an item that isn't stolen.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_SELLORFENCE", "Sell or Fence")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_SELLORFENCE", "Sell <<1>> of the item.")

@@ -32,6 +32,23 @@ function ItemTrig.forEachBagSlot(bag, functor)
    end
 end
 
+function ItemTrig.countStolen(bag)
+   local totalItems  = 0
+   local totalStacks = 0
+   local slot = ZO_GetNextBagSlotIndex(bag)
+   while slot do
+      if HasItemInSlot(bag, slot) then
+         if IsItemStolen(bag, slot) then
+            local _, stack, _, _, _, _, _, _ = GetItemInfo(bag, slot)
+            totalStacks = totalStacks + 1
+            totalItems  = totalItems  + stack
+         end
+      end
+      slot = ZO_GetNextBagSlotIndex(bag, slot)
+   end
+   return totalItems, totalStacks
+end
+
 function ItemTrig.getNaiveItemNameFor(id)
    --
    -- This won't work for items that can vary, like armor and weapons, but 
@@ -228,6 +245,78 @@ do
    end
 end
 
+local APILimits = {}
+ItemTrig.ItemAPILimits = APILimits
+do
+   --
+   -- APILimits
+   --
+   -- Some item-related APIs have a hard limit on the number of actions you 
+   -- can perform per frame; exceeding this limit will cause the player to 
+   -- be disconnected from the server. This singleton manages the limits.
+   --
+   -- An add-on using this system must call the setup(...) method once loaded, so 
+   -- that this system registers the events it needs in order to function. If the 
+   -- add-on has teardown routines, it can likewise call the teardown() method.
+   --
+   ItemTrig.assign(APILimits, {
+      limits = {
+         autoLaunders = 100,
+      },
+      safeties = { -- stop X below the limit, to be considerate to other add-ons
+         autoLaunders = 2,
+      },
+      state = {},
+      --
+      eventPrefix = nil,
+      listening   = false,
+   })
+   function APILimits:capToLimit(name, count)
+      assert(name,  "You must specify a limit name.")
+      assert(count, "You must specify a count.")
+      assert(self.limits[name], "Invalid limit name: " .. tostring(name) .. ".")
+      local limit = self.limits[name] - (self.safeties[name] or 0)
+      local state = self.state[name] or 0
+      if state + count <= limit then
+         return count
+      end
+      return math.max(0, limit - state)
+   end
+   function APILimits:trackOperation(name, count)
+      assert(name,  "You must specify a limit name.")
+      assert(count, "You must specify a count.")
+      assert(self.limits[name], "Invalid limit name: " .. tostring(name) .. ".")
+      self.state[name] = (self.state[name] or 0) + count
+   end
+   --
+   function APILimits:capLaunder(count)
+      return self:capToLimit("autoLaunders", count)
+   end
+   function APILimits:didLaunder(count)
+      return self:trackOperation("autoLaunders", count)
+   end
+   --
+   local function _listener(eventCode, ...)
+      if eventCode == EVENT_OPEN_FENCE then
+         APILimits.state.autoLaunders = 0
+      end
+   end
+   function APILimits:teardown()
+      local namespace = self.eventPrefix .. "ItemAPILimitsListener"
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_OPEN_FENCE)
+      self.listening = false
+   end
+   function APILimits:setup(eventPrefix)
+      if self.listening then
+         self:teardown()
+      end
+      self.eventPrefix = eventPrefix
+      local namespace = eventPrefix .. "ItemAPILimitsListener"
+      EVENT_MANAGER:RegisterForEvent (namespace, EVENT_OPEN_FENCE, _listener)
+      self.listening = true
+   end
+end
+
 --
 -- ITEMINTERFACE
 --
@@ -408,6 +497,8 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_MOD_NOT_SETUP           = "NOPE" -- The mod wasn't set up properly.
    ItemInterface.FAILURE_NORMAL_FENCE_LIMIT      = "FENL" -- You've hit the limit of items you can fence for today.
    ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT    = "LNDR" -- You've hit the limit of items you can launder for the day.
+   ItemInterface.FAILURE_LAUNDER_CANT_AFFORD     = "LNDG" -- You don't have enough gold to launder this item.
+   ItemInterface.FAILURE_LAUNDER_NOT_STOLEN      = "LDNS" -- You can't launder something that isn't stolen!
    ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT   = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
 end
 function ItemInterface:new(bagIndex, slotIndex)
@@ -622,33 +713,50 @@ function ItemInterface:launder(count)
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
    end
+   if not self.stolen then
+      return false, self.FAILURE_LAUNDER_NOT_STOLEN
+   end
    if not count then
       count = self.count
    end
    if count > self.count then
       count = self.count
    end
-   count = ItemInterface.validateLaunderOperation(count)
-   if count < 1 then
-      return false, self.FAILURE_ZENIMAX_LAUNDER_LIMIT
-   end
    local willFail = false
-   do
+   do -- Constrain the launder count based on the number of available launder operations.
       local max, used = GetFenceLaunderTransactionInfo()
       local remaining = max - used
       if count > remaining then
-         willFail = true
+         willFail = self.FAILURE_NORMAL_LAUNDER_LIMIT
          count    = remaining
-         if remaining == 0 then
-            return false, self.FAILURE_NORMAL_LAUNDER_LIMIT
+         if count < 1 then
+            return false, willFail
          end
       end
    end
+   do -- Constrain the launder count based on the player's gold.
+      local cost = GetItemLaunderPrice(self.bag, self.slot)
+      local gold = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+      if (cost * count) > gold then
+         willFail = self.FAILURE_LAUNDER_CANT_AFFORD
+         count    = math.floor(gold / cost)
+         if count < 1 then
+            return false, willFail
+         end
+      end
+   end
+   do -- Constrain the launder count based on the add-on limit, AND update the currently used launders.
+      count = APILimits:capLaunder(count)
+      if count < 1 then
+         return false, self.FAILURE_ZENIMAX_LAUNDER_LIMIT
+      end
+   end
    LaunderItem(self.bag, self.slot, count)
+   APILimits:didLaunder(count)
    self:onModifyingAction("launder", count)
    self:updateCount(-count)
    if willFail then
-      return false, self.FAILURE_NORMAL_LAUNDER_LIMIT
+      return false, willFail
    end
    return true
 end
@@ -868,13 +976,4 @@ function ItemInterface:validate()
       self.invalid = true
    end
    return not self:isInvalid()
-end
-function ItemInterface.validateLaunderOperation(count) -- static method; uses stdcall, not thiscall
-   --
-   -- The environment -- the broader add-on that this system is being 
-   -- used in -- should override this function on the class, to check 
-   -- whether a launder operation is possible. Zenimax only allows 98 
-   -- automated launders every time the fence window is opened.
-   --
-   return count
 end

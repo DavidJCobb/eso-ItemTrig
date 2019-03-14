@@ -650,6 +650,7 @@ ItemTrig.tableConditions = {
          [2] = {
             type = "number",
             enum = ItemTrig.gameEnums.alchemyEffectStrings,
+            explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_ALCHEMYEFFECTS),
          },
       },
       function(state, context, args)
@@ -671,10 +672,7 @@ ItemTrig.tableConditions = {
             return result
          end
          return not result
-      end,
-      {
-         explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_ALCHEMYEFFECTS),
-      }
+      end
    ),
    [19] = ConditionBase:new( -- Log Trigger Miss
       _s(ITEMTRIG_STRING_CONDITIONNAME_LOGTRIGGERMISS),

@@ -10,8 +10,6 @@ ItemTrig = {
       isInGuildBank  = false,
       isInMail       = false,
       inCraftingType = 0,
-      fenceAutoLaunderCount = 0,
-      fenceAutoFenceCount   = 0,
    },
    prefs = {}
 }
@@ -310,6 +308,7 @@ local function Initialize()
    SLASH_COMMANDS["/itemtrig"] = _coreChatCommand
    --
    ItemTrig.ItemStackTools:setup("ItemTrig")
+   ItemTrig.ItemAPILimits:setup("ItemTrig")
    ItemTrig.ItemInterface.onModifyingAction =
       function(interface, action, ...)
          --
@@ -345,19 +344,6 @@ local function Initialize()
             local count   = select(1, ...)
             CHAT_SYSTEM:AddMessage(LocalizeString(message, name, count))
          end
-      end
-   ItemTrig.ItemInterface.validateLaunderOperation =
-      function(count)
-         --local ALLOWED_BY_API = 98
-         local ALLOWED_BY_API = 98 -- FOR TESTING ONLY
-         --
-         local state     = ItemTrig.eventState
-         local remaining = ALLOWED_BY_API - state.fenceAutoLaunderCount
-         if remaining < count then
-            count = remaining
-         end
-         state.fenceAutoLaunderCount = state.fenceAutoLaunderCount + count
-         return count
       end
    --
    do -- register item-added handler
