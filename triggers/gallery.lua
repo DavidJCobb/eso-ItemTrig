@@ -1,6 +1,7 @@
 local Trigger   = ItemTrig.Trigger
 local Action    = ItemTrig.Action
 local Condition = ItemTrig.Condition
+local OpcodeQuantityArg = ItemTrig.OpcodeQuantityArg
 
 -- FLAG: Condition 9 (Added Item Cause) is subject to API limits: as of this 
 -- writing, we cannot differentiate between an item moving between two bags 
@@ -124,10 +125,12 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new( 2, { true }) -- Use [OR] for conditions
-      cl[2] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(61737), false }) -- Item name [is] [Ayleid House Idol]
-      cl[3] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(74581), false }) -- Item name [is] [Pocket Rules For Kick the Khajiit]
-      cl[4] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(64409), false }) -- Item name [is] [Logic Fob]
+      cl[1] = Condition:new( 4, { true }) -- Added item [is] stolen
+      cl[2] = Condition:new(36, { { qualifier = "GTE", number = 1 } }) -- Player can still launder
+      cl[3] = Condition:new( 2, { true }) -- Use [OR] for conditions
+      cl[4] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(61737), false }) -- Item name [is] [Ayleid House Idol]
+      cl[5] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(74581), false }) -- Item name [is] [Pocket Rules For Kick the Khajiit]
+      cl[6] = Condition:new(12, { ItemTrig.getNaiveItemNameFor(64409), false }) -- Item name [is] [Logic Fob]
       --
       al[1] = Action:new(7, { 9999 }) -- Launder as many as possible.
       --

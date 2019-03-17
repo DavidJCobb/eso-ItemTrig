@@ -388,9 +388,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANBERESEARCHED_NO",  "can't")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANBERESEARCHED_YES", "can")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CREATORNAME", "Crafted By Player (Name)")
-ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CREATORNAME", "The item was crafted by a character whose name <<2>> <<1>>.")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_WHOLE",     "is")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_SUBSTRING", "contains")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CREATORNAME", "The item <<1>> crafted by a character whose name <<2>> <<3>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_NO",  "was not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_YES", "was")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_WHOLE",      "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CREATORNAME_SUBSTRING",  "contains")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARGEXPLANATION_CREATORNAME", "If you specify \"$(player)\", then this condition will use your character's name.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_LOCKED", "Locked")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_LOCKED", "The item <<1>> locked.")
@@ -531,7 +534,19 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_RITUALSODDITIES", 
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_WRITINGSMAPS",            "writings and maps")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_COSMETICSLINENSWARDROBE", "cosmetics, linens, and wardrobe accessories")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_DRINKWAREUTENSILSDISHES", "drinkware, utensils, and dishes")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2", "You can test the item against the current Covetous Countess quest objectives, if the quest is active and you haven't delivered the items to the Countess yet. Alternatively, you can test the items against your level: if you're below level 50, then the objective you get depends on your level. (If you're above level 50, then testing against your level is the same as \"any objective.\"")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2", "You can test the item against the current Covetous Countess quest objectives, if the quest is active and you haven't delivered the items to the Countess yet. Alternatively, you can test the items against your level: if you're below level 50, then the objective you get depends on your level. (If you're at or above level 50, then testing against your level is the same as \"any objective.\"")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ISITEMSET", "Item Set (Yes/No)")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ISITEMSET", "The item <<1>> to an Item Set.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISITEMSET_NO",  "does not belong")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ISITEMSET_YES", "belongs")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ITEMSETNAME", "Item Set (Name)")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMSETNAME", "The item <<1>> to an Item Set whose name <<2>> <<3>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_NO",  "does not belong")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_YES", "belongs")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_WHOLE",     "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_SUBSTRING", "contains")
 --
 --
 -- ACTIONS

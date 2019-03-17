@@ -339,6 +339,17 @@ end
     - IsItemSoulGem(bag, slot)
 ]]--
 
+local function _nilIfInvalid(i, r)
+   --
+   -- Lua doesn't have ternary operators, and the nearest equivalent  
+   -- sucks. The equivalent of (a ? b : c) breaks if (b) is ever falsy.
+   --
+   if i.invalid then
+      return nil
+   end
+   return r
+end
+
 local _lazyGetterMappings = {
    --
    -- Given a key K and a value V in this table, if you try to access 
@@ -394,9 +405,9 @@ local _lazyGetterMappings = {
          end
          return _handle(GetAlchemyItemTraits(i.bag, i.slot))
       end,
-   canBeJunk      = function(i) return not i.invalid and CanItemBeMarkedAsJunk(i.bag, i.slot) or nil end,
-   canBeLocked    = function(i) return not i.invalid and CanItemBePlayerLocked(i.bag, i.slot) or nil end,
-   countTotal     = function(i) return not i.invalid and GetItemTotalCount(i.bag, i.slot)     or nil end,
+   canBeJunk      = function(i) return _nilIfInvalid(i, CanItemBeMarkedAsJunk(i.bag, i.slot)) end,
+   canBeLocked    = function(i) return _nilIfInvalid(i, CanItemBePlayerLocked(i.bag, i.slot)) end,
+   countTotal     = function(i) return _nilIfInvalid(i, GetItemTotalCount(i.bag, i.slot))     end,
    forcedNonDeconstructable =
       function(i)
          if i.invalid then
@@ -427,16 +438,16 @@ local _lazyGetterMappings = {
             gemsPerOperation  = gemsPer,
          }
       end,
-   hasJunkFlag      = function(i) return not i.invalid and IsItemJunk(i.bag, i.slot)              or nil end,
-   isBook           = function(i) return not i.invalid and IsItemLinkBook(i.link)                 or nil end,
-   isBound          = function(i) return not i.invalid and IsItemBound(i.bag, i.slot)             or nil end,
-   isCrownCrateItem = function(i) return not i.invalid and IsItemFromCrownCrate(i.bag, i.slot)    or nil end,
-   isCrownStoreItem = function(i) return not i.invalid and IsItemFromCrownStore(i.bag, i.slot)    or nil end,
-   isKnownLorebook  = function(i) return not i.invalid and IsItemLinkBookKnown(i.link)            or nil end,
-   isKnownRecipe    = function(i) return not i.invalid and IsItemLinkRecipeKnown(i.link)          or nil end, -- provisioning
-   isLorebook       = function(i) return not i.invalid and IsItemLinkBookPartOfCollection(i.link) or nil end,
-   isPrioritySell   = function(i) return not i.invalid and IsItemLinkPrioritySell(i.link)         or nil end,
-   isResearchable   = function(i) return not i.invalid and CanItemLinkBeTraitResearched(i.link)   or nil end,
+   hasJunkFlag      = function(i) return _nilIfInvalid(i, IsItemJunk(i.bag, i.slot))              end,
+   isBook           = function(i) return _nilIfInvalid(i, IsItemLinkBook(i.link))                 end,
+   isBound          = function(i) return _nilIfInvalid(i, IsItemBound(i.bag, i.slot))             end,
+   isCrownCrateItem = function(i) return _nilIfInvalid(i, IsItemFromCrownCrate(i.bag, i.slot))    end,
+   isCrownStoreItem = function(i) return _nilIfInvalid(i, IsItemFromCrownStore(i.bag, i.slot))    end,
+   isKnownLorebook  = function(i) return _nilIfInvalid(i, IsItemLinkBookKnown(i.link))            end,
+   isKnownRecipe    = function(i) return _nilIfInvalid(i, IsItemLinkRecipeKnown(i.link))          end, -- provisioning
+   isLorebook       = function(i) return _nilIfInvalid(i, IsItemLinkBookPartOfCollection(i.link)) end,
+   isPrioritySell   = function(i) return _nilIfInvalid(i, IsItemLinkPrioritySell(i.link))         end,
+   isResearchable   = function(i) return _nilIfInvalid(i, CanItemLinkBeTraitResearched(i.link))   end,
    itemFilters      = function(i) return not i.invalid and {GetItemFilterTypeInfo(i.bag, i.slot)} or {} end,
    itemSetData =
       function(i)
@@ -464,7 +475,7 @@ local _lazyGetterMappings = {
             tier      = tier,
          }
       end,
-   specialTrait = function(i) return not i.invalid and GetItemTraitInformation(i.bag, i.slot) or nil end,
+   specialTrait = function(i) return _nilIfInvalid(i, GetItemTraitInformation(i.bag, i.slot)) end,
    treasureTags =
       function(i)
          local tags  = {}

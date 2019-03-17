@@ -518,7 +518,14 @@ ItemTrig.tableConditions = {
       _s(ITEMTRIG_STRING_CONDITIONNAME_CREATORNAME),
       _s(ITEMTRIG_STRING_CONDITIONDESC_CREATORNAME),
       {
-         [1] = { type = "string", placeholder = "name" },
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CREATORNAME_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CREATORNAME_YES)
+            },
+            default = true,
+         },
          [2] = {
             type = "boolean",
             enum = {
@@ -526,22 +533,31 @@ ItemTrig.tableConditions = {
                [2] = _s(ITEMTRIG_STRING_OPCODEARG_CREATORNAME_SUBSTRING)
             }
          },
+         [3] = {
+            type        = "string",
+            placeholder = "name",
+            explanation = _s(ITEMTRIG_STRING_OPCODEARGEXPLANATION_CREATORNAME),
+         },
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local name = context.creator
-         local stub = tostring(args[1] or "")
-         if args[2] then
-            return name:find(stub) ~= nil
-         else
-            if stub == "$(player)" then
-               --
-               -- TODO: Document this.
-               --
-               stub = GetUnitName("player")
+         local result
+         do
+            local name = context.creator
+            local stub = tostring(args[1] or "")
+            if args[2] then
+               result = name:find(stub) ~= nil
+            else
+               if stub == "$(player)" then
+                  stub = GetUnitName("player")
+               end
+               result = name:lower() == stub:lower()
             end
-            return name:lower() == stub:lower()
          end
+         if args[1] then
+            return result or false
+         end
+         return not result
       end
    ),
    [15] = ConditionBase:new( -- Locked
@@ -1103,6 +1119,24 @@ ItemTrig.tableConditions = {
                      result = rankItem == list:highestRank()
                   end
                end
+            elseif type == CRAFTING_TYPE_PROVISIONING then
+               --
+               -- For Provisioning, the items you can craft are gated 
+               -- out by rarity.
+               --
+               local rankPlayer = ItemTrig.getProvisioningQualityLimit()
+               local rankItem   = context.quality
+               if rankPlayer and rankItem then
+                  if args[2] == 1 then -- is usable?
+                     result = rankPlayer >= rankItem
+                  elseif args[2] == 2 then -- is max-usable?
+                     result = rankPlayer == rankItem
+                  elseif args[2] == 3 then -- is after max-usable?
+                     result = rankItem == rankPlayer + 1
+                  elseif args[2] == 4 then -- is the highest, even if unusable?
+                     result = rankItem == ITEM_QUALITY_LEGENDARY
+                  end
+               end
             end
          end
          if result == nil then -- not a valid item for this condition; always fail
@@ -1396,8 +1430,9 @@ ItemTrig.tableConditions = {
                [7] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_COSMETICSLINENSWARDROBE),
                [8] = _s(ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_DRINKWAREUTENSILSDISHES),
             },
-            doNotSortEnum = true,
-            explanation   = _s(ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2)
+            doNotSortEnum    = true,
+            enumIsContiguous = true,
+            explanation      = _s(ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2)
          },
       },
       function(state, context, args)
@@ -1445,6 +1480,71 @@ ItemTrig.tableConditions = {
                   end
                end
                result = ItemTrig.valuesOverlap(itemTags, wantTags)
+            end
+         end
+         if args[1] then
+            return result or false
+         end
+         return not result
+      end
+   ),
+   [41] = ConditionBase:new( -- Item Set (Yes/No)
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ISITEMSET),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ISITEMSET),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ISITEMSET_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ISITEMSET_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.itemSetData.hasSet
+         if args[1] then
+            return result or false
+         end
+         return not result
+      end
+   ),
+   [42] = ConditionBase:new( -- Item Set (Name)
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ITEMSETNAME),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ITEMSETNAME),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_WHOLE),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_SUBSTRING)
+            },
+            default = true,
+         },
+         [3] = {
+            type    = "string",
+            default = "",
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            local stub = (args[3] or ""):lower()
+            local name = context.itemSetData.name:lower()
+            if args[2] then
+               result = name:find(stub) ~= nil
+            else
+               result = name == stub
             end
          end
          if args[1] then

@@ -43,7 +43,8 @@
                   -->
                   <Control name="$(parent)Enum">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="336" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="336" />
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_WCombobox">
@@ -54,7 +55,8 @@
                   </Control>
                   <Control name="$(parent)Multiline">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="600" y="168" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="600" minY="168" />
                      <Controls>
                         <EditBox name="$(parent)Value"
                            maxInputCharacters="2048"
@@ -70,7 +72,8 @@
                   </Control>
                   <Control name="$(parent)Number">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="286" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="286" />
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <EditBox name="$(parent)Value"
@@ -87,7 +90,8 @@
                   </Control>
                   <Control name="$(parent)Quantity">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="286" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="286" />
                      <OnInitialized>
                         --
                         -- We can't use resizeToFitDescendants, because that's a constant 
@@ -118,7 +122,8 @@
                   </Control>
                   <Control name="$(parent)QuantityEnum">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="336" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="336" />
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <Control name="$(parent)Number" inherits="ItemTrig_UITemplate_WCombobox">
@@ -133,7 +138,8 @@
                   </Control>
                   <Control name="$(parent)String">
                      <Anchor point="TOPLEFT" />
-                     <Dimensions x="600" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="600" />
                      <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                      <Controls>
                         <EditBox name="$(parent)Value"

@@ -147,9 +147,17 @@ function ItemTrig.OpcodeBase:forEachInArgumentEnum(index, functor)
    local arg      = self.args[tonumber(index)]
    local enum     = arg.enum
    local disabled = arg.disabledEnumIndices
-   for k, v in pairs(enum) do
-      if not (disabled and disabled:has(k)) then
-         functor(k, v)
+   if arg.enumIsContiguous then
+      for k, v in ipairs(enum) do
+         if not (disabled and disabled:has(k)) then
+            functor(k, v)
+         end
+      end
+   else
+      for k, v in pairs(enum) do
+         if not (disabled and disabled:has(k)) then
+            functor(k, v)
+         end
       end
    end
 end
@@ -341,7 +349,15 @@ end
       
       doNotSortEnum
          If this is set to true, then the argument's enum won't be sorted 
-         in the UI.
+         in the UI. This will not work properly unless (enumIsContiguous) 
+         is always set.
+      
+      enumIsContiguous
+         If the argument's enum uses a contiguous range of integer keys 
+         starting at 1 (i.e. if it's an array), then you can set this to 
+         true. This will change how OpcodeBase:forEachInArgumentEnum 
+         iterates over the enum (using ipairs instead of pairs). The main 
+         use of this field is to allow (doNotSortEnum) to work properly.
       
       explanation
          Text explaining the meaning of the argument. The UI can display it 
@@ -378,6 +394,30 @@ function ItemTrig.Opcode:new(base, args, opTable, opType)
    result.base = base
    result.args = args or {} -- array
    result.type = opType
+   if base then -- correct quantity arguments
+      --
+      -- Quantity arguments can be passed in as OpcodeQuantityArg instances 
+      -- or as tables. Either way, we at the very least need to correct the 
+      -- OpcodeQuantityArg::base field, so we may as well allow and handle 
+      -- bare tables.
+      --
+      local a = result.args
+      local b = result.base.args
+      for i = 1, #a do
+         if b.type == "quantity" then
+            if OpcodeQuantityArg:is(a) then
+               a.base = b[i]
+            else
+               if type(a) == "table" then
+                  local number    = a.number
+                  local qualifier = a.qualifier or "E"
+                  local alternate = a.alternate
+                  result.args[i] = OpcodeQuantityArg:new(qualifier, number, alternate, b[i])
+               end
+            end
+         end
+      end
+   end
    do -- setup default argument values
       local specified = args and #args or 0
       local count     = #base.args

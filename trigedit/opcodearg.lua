@@ -270,9 +270,6 @@ function WinCls:_construct()
       },
    })
    do -- scene setup
-      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control)
-      ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
       self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
    end
    do
@@ -364,12 +361,15 @@ function WinCls:autoSize(options)
    local explanation   = self.ui.explanation
    local explOldHeight = explanation:GetHeight()
    --
+   local viewPreferredW, _, _, _ = view:GetDimensionConstraints()
+   local viewPreferredH = view:GetHeight()
+   --
    local desiredWidth = options.forceWidth
    if not desiredWidth then
-      desiredWidth = window:GetWidth() - viewhold:GetWidth() + view:GetWidth()
+      desiredWidth = window:GetWidth() - viewhold:GetWidth() + viewPreferredW
    end
    window:SetWidth (desiredWidth)
-   local desiredHeight = window:GetHeight() - viewhold:GetHeight() - explOldHeight + view:GetHeight() + explanation:GetHeight()
+   local desiredHeight = window:GetHeight() - viewhold:GetHeight() - explOldHeight + viewPreferredH + explanation:GetHeight()
    window:SetHeight(desiredHeight)
    if not options.forceWidth and (desiredHeight >= desiredWidth * 1.5) then
       options.forceWidth = (desiredWidth + desiredHeight) / 2
