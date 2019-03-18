@@ -1,5 +1,14 @@
 <GuiXml>
    <Controls>
+      <TopLevelControl name="ItemTrig_TooltipTopLevel_OpcodeArgEdit_OpcodeValueConstraints" inherits="TooltipTopLevel">
+         <AnchorFill/>
+         <Controls>
+            <Tooltip name="ItemTrig_OpcodeArgEdit_OpcodeValueConstraints"
+               hidden="true"
+               inherits="ItemTrig_UITemplate_WTooltip"
+            />
+         </Controls>
+      </TopLevelControl>
       <TopLevelControl name="ItemTrig_OpcodeArgEdit"
          mouseEnabled="true"
          movable="true"

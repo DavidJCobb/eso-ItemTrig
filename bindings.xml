@@ -16,10 +16,13 @@
          <Action name="ITEMTRIG_INTERCEPT_UI_SHORTCUT_NEGATIVE" hideAction="true" rebindable="false" inheritsBindFrom="UI_SHORTCUT_NEGATIVE">
             <Down>return true</Down>
          </Action>
-         <!-- We don't want to disable the Esc key.
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_SYSTEM" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_SYSTEM">
-            <Down>return true</Down>
-         </Action>-->
+            <Down>
+               if ItemTrig.prefs:get("ui/allowEscForceClose") == false then
+                  return true
+               end
+            </Down>
+         </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">
             <Down>return true</Down>
          </Action>

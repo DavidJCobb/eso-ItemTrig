@@ -8,6 +8,38 @@ do -- helper classes for views
    local WCombobox       = ItemTrig.UI.WCombobox
    local WNumberEditbox  = ItemTrig.UI.WNumberEditbox
    local WViewHolderView = ItemTrig.UI.WViewHolderView
+   local function _showNumberValidationTooltip(constraints, control)
+      local tooltip = ItemTrig.UI.WTooltip:cast(ItemTrig_OpcodeArgEdit_OpcodeValueConstraints)
+      tooltip.options.adoptCrossAxisSize = true
+      if not constraints then
+         tooltip:hide()
+         return
+      end
+      local tokens = {}
+      local key    = ""
+      if constraints.requireInteger then
+         key = "INT"
+      end
+      if constraints.min then
+         key = key .. "MIN"
+         tokens[#tokens + 1] = constraints.min
+      end
+      if constraints.max then
+         key = key .. "MAX"
+         tokens[#tokens + 1] = constraints.max
+      end
+      if key ~= "" then
+         key = _G["ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_" .. key]
+         local translated = LocalizeString(GetString(key), unpack(tokens))
+         shown = true
+         local win     = control:GetOwningWindow()
+         local spacing = WinCls:getInstance().style.borderWidth
+         tooltip:show(win, translated, tooltip.AXIS_H, tooltip.PREFER_FORWARD, spacing)
+      end
+      if not shown then
+         tooltip:hide()
+      end
+   end
    do -- enum
       ViewCls.Enum = WViewHolderView:makeSubclass("OpcodeArgEnumView")
       function ViewCls.Enum:_construct()
@@ -65,7 +97,32 @@ do -- helper classes for views
                   color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
                end
                widget:asControl():SetColor(unpack(color))
+               --
+               local constraints
+               if not isNowValid then
+                  local editor  = WinCls:getInstance()
+                  local opcode  = editor.opcode
+                  local baseArg = opcode.base.args[editor.argIndex]
+                  constraints = baseArg
+               end
+               _showNumberValidationTooltip(constraints, widget:asControl())
             end
+         --
+         local vControl = self.value:asControl()
+         ZO_PreHookHandler(vControl, "OnFocusGained", function(control)
+               local widget = WNumberEditbox:cast(control)
+               local constraints
+               if not widget:validate() then
+                  local editor  = WinCls:getInstance()
+                  local opcode  = editor.opcode
+                  local baseArg = opcode.base.args[editor.argIndex]
+                  constraints = baseArg
+               end
+               _showNumberValidationTooltip(constraints, widget:asControl())
+         end)
+         ZO_PreHookHandler(vControl, "OnFocusLost", function(control)
+            ClearTooltip(ItemTrig_OpcodeArgEdit_OpcodeValueConstraints)
+         end)
       end
       function ViewCls.Number:GetValue()
          return self.value:value()
@@ -85,16 +142,43 @@ do -- helper classes for views
       ViewCls.Quantity = WViewHolderView:makeSubclass("OpcodeArgQuantityView")
       function ViewCls.Quantity:_construct()
          self.number = WNumberEditbox:install(self:GetNamedChild("Number"))
-         self.number.onValidationStateChanged =
-            function(widget, value, isNowValid)
-               local color = ItemTrig.theme.TEXTEDIT_TEXT
-               if not isNowValid then
-                  color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
+         do -- number validation
+            self.number.onValidationStateChanged =
+               function(widget, value, isNowValid)
+                  local color = ItemTrig.theme.TEXTEDIT_TEXT
+                  if not isNowValid then
+                     color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
+                  end
+                  widget:asControl():SetColor(unpack(color))
+                  --
+                  local constraints
+                  if not isNowValid then
+                     local editor  = WinCls:getInstance()
+                     local opcode  = editor.opcode
+                     local baseArg = opcode.base.args[editor.argIndex]
+                     constraints = baseArg
+                  end
+                  _showNumberValidationTooltip(constraints, widget:asControl())
                end
-               widget:asControl():SetColor(unpack(color))
-            end
+            local vControl = self.number:asControl()
+            ZO_PreHookHandler(vControl, "OnFocusGained", function(control)
+               local widget = WNumberEditbox:cast(control)
+               local constraints
+               if not widget:validate() then
+                  local editor  = WinCls:getInstance()
+                  local opcode  = editor.opcode
+                  local baseArg = opcode.base.args[editor.argIndex]
+                  constraints = baseArg
+               end
+               _showNumberValidationTooltip(constraints, widget:asControl())
+            end)
+            ZO_PreHookHandler(vControl, "OnFocusLost", function(control)
+               ClearTooltip(ItemTrig_OpcodeArgEdit_OpcodeValueConstraints)
+            end)
+         end
          self.qualifier = WCombobox:cast(self:GetNamedChild("Qualifier"))
          self.argBase   = nil
+         --
          --
          local qualifier = self.qualifier
          qualifier.onChange =
@@ -227,7 +311,7 @@ do -- helper classes for views
          self:show()
          self.value:SetText(argValue or "")
          --
-         if argBase.autocompleteSet and ItemTrig.prefs:get("opcodeArgAutocomplete") then
+         if argBase.autocompleteSet and ItemTrig.prefs:get("ui/opcodeArgAutocomplete") then
             local s = argBase.autocompleteSet
             if type(s) == "function" then
                s = s()

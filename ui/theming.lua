@@ -68,4 +68,7 @@ ItemTrig.theme = {
    COMBOBOX_MOUSEOVER_BACK     = { 0.70, 0.25, 0.00, 1 },
    COMBOBOX_BODY_BORDER_TOP    = { 0.70, 0.25, 0.00, 1 },
    COMBOBOX_BODY_BORDER_BOTTOM = { 0.00, 0.00, 0.00, 1 },
+   TOOLTIP_BACKGROUND          = { 1, 1, 0.5, 1 },
+   TOOLTIP_TEXT                = { 0, 0, 0, 1 },
+   TOOLTIP_BORDER              = { 0, 0, 0, 1 },
 }

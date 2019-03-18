@@ -2,12 +2,13 @@ do -- define prefs
    ItemTrig.assign(ItemTrig.prefs, {
       ["logging/actionsTaken"]    = { default = false },
       ["logging/triggerFailures"] = { default = false },
-      ["opcodeArgAutocomplete"]   = { default = false },
       ["robustFencing"]           = { default = true },
       ["pretendActions"]          = { default = false },
       ["runTriggersOn/crownCrateItems"] = { default = false },
       ["runTriggersOn/crownStoreItems"] = { default = false },
       ["runTriggersOn/lockedItems"]     = { default = false },
+      ["ui/allowEscForceClose"]   = { default = true },
+      ["ui/opcodeArgAutocomplete"] = { default = false },
    })
 end
 local prefs = ItemTrig.prefs
@@ -92,15 +93,27 @@ local options = {
    },
    {
       type = "header",
-      name = GetString(ITEMTRIG_STRING_OPTIONHEADER_EXTRA),
+      name = GetString(ITEMTRIG_STRING_OPTIONHEADER_UI),
+   },
+   {  -- Control whether Esc force-closes the editor without saving
+      --
+      type    = "checkbox",
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_ALLOWESCFORCECLOSE),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_ALLOWESCFORCECLOSE),
+      getFunc = function()  return prefs:get("ui/allowEscForceClose") end,
+      setFunc = function(v) prefs:set("ui/allowEscForceClose", v) end,
    },
    {  -- Enable auto-complete for trigger arguments that support it
       --
       type    = "checkbox",
       name    = GetString(ITEMTRIG_STRING_OPTIONNAME_TRIGGERARGAUTOCOMPLETE),
       tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_TRIGGERARGAUTOCOMPLETE),
-      getFunc = function()  return prefs:get("opcodeArgAutocomplete") end,
-      setFunc = function(v) prefs:set("opcodeArgAutocomplete", v) end,
+      getFunc = function()  return prefs:get("ui/opcodeArgAutocomplete") end,
+      setFunc = function(v) prefs:set("ui/opcodeArgAutocomplete", v) end,
+   },
+   {
+      type = "header",
+      name = GetString(ITEMTRIG_STRING_OPTIONHEADER_EXTRA),
    },
    {  -- Pre-sort items in the "fence" entry point, by value, descending
       --

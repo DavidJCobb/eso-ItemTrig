@@ -46,10 +46,15 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGALLITEMACTIONS", "Log whenever 
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERFAILURES", "Log trigger failures")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES", "Log every time a trigger stops early due to an error.")
 --
-ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_EXTRA", "Extra features")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_UI", "UI settings")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWESCFORCECLOSE", "Esc force-closes the editor")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWESCFORCECLOSE", "Control whether the Esc key force-closes the editor and discards unsaved changes")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_TRIGGERARGAUTOCOMPLETE", "Trigger argument autocomplete")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_TRIGGERARGAUTOCOMPLETE", "Enable auto-complete for trigger arguments that support it")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_EXTRA", "Extra features")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ROBUSTFENCING", "Robust Fencing")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ROBUSTFENCING", "For the \"Fence\" entry point, sort items by value before running triggers on them, so that the most valuable items are fenced or laundered first.")

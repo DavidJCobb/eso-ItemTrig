@@ -1,6 +1,8 @@
 if not ItemTrig then return end
 
-ItemTrig.PIXEL = GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth"))
+ItemTrig.PIXEL   = GuiRoot:GetWidth()  / tonumber(GetCVar("WindowedWidth"))
+ItemTrig.PIXEL_W = ItemTrig.PIXEL
+ItemTrig.PIXEL_H = GuiRoot:GetHeight() / tonumber(GetCVar("WindowedHeight"))
 
 function ItemTrig.dispatchEvent(control, eventName, ...)
    assert(control ~= nil, "Cannot dispatch an event to a nil control.")

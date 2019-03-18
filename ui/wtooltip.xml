@@ -1,0 +1,42 @@
+<GuiXml>
+   <Controls>
+      <Tooltip name="ItemTrig_UITemplate_WTooltip"
+         virtual="true"
+         clampedToScreen="true"
+         font="ITEMTRIG_FONT_BASIC"
+         headerVerticalOffset="0"
+         headerRowSpacing="0"
+         resizeToFitDescendants="true"
+      >
+         <OnCleared> ZO_Tooltip_OnCleared(self) </OnCleared>
+         <OnInitialized> ItemTrig.UI.WTooltip:install(self) </OnInitialized>
+         <ResizeToFitPadding width="0" height="0" />
+         <Controls>
+            <Texture name="$(parent)Edge" excludeFromResizeToFitExtents="true"
+               color="FFFFFF"
+               tier="MEDIUM" level="-1"
+            >
+               <AnchorFill />
+               <Controls>
+                  <Texture name="$(parent)Fill" color="FFFFFF" tier="MEDIUM" level="-1" excludeFromResizeToFitExtents="true">
+                     <Anchor point="TOPLEFT" offsetX="7" offsetY="7" />
+                     <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7" />
+                  </Texture>
+               </Controls>
+            </Texture>
+            <Label name="$(parent)Text" font="ITEMTRIG_FONT_BASIC" color="000000">
+               <!--
+                  Yes, tooltip elements have built-in means of showing text, but 
+                  when I try to use those, I end up with excess padding at the 
+                  top, no padding at the bottom, and no way to fix this. There's 
+                  barely any documentation for tooltips as of this writing, so 
+                  I'm not going to bother.
+               -->
+               <Anchor point="TOPLEFT" />
+               <Anchor point="TOPRIGHT" />
+               <DimensionConstraints maxX="600" />
+            </Label>
+         </Controls>
+      </Tooltip>
+   </Controls>
+</GuiXml>

@@ -72,6 +72,8 @@ ui/wscrollselectlist.xml
 ui/wscrollselectlistitem.xml
 ui/wcombobox.lua
 ui/wcombobox.xml
+ui/wtooltip.lua
+ui/wtooltip.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
 ui/editboxtemplates.lua
