@@ -3,6 +3,35 @@ if not (ItemTrig and ItemTrig.UI) then return end
 ItemTrig.UI.WTooltip = ItemTrig.UI.WidgetClass:makeSubclass("WTooltip", "tooltip")
 local WTooltip = ItemTrig.UI.WTooltip
 
+--[[--
+
+   WTOOLTIP
+
+   A simple widget for showing a text-only tooltip adjacent to some 
+   element. You can specify the axis on which you'd like to position 
+   the tooltip, and what side of that axis to prefer.
+   
+   An example call:
+   
+      tooltip:show(myControl, "Hi!", tooltip.AXIS_H, tooltip.PREFER_FORWARD, 7)
+   
+   In that example, the tooltip will try to position itself to the 
+   right of the target control (horizontal axis, forward direction). 
+   If there isn't enough room on the screen to do that, then it will 
+   instead position itself on the left. "Forward" refers to down and 
+   to the right, while "backward" is up and to the left.
+   
+   If you set the (adoptCrossAxisSize) option on the tooltip to true, 
+   then it will resize itself to match the element it is being placed 
+   near: it will copy whatever axis it is NOT being positioned by 
+   (e.g. if it's to the left or right of the target, then it will copy 
+   the target's height).
+   
+   "Cross axis" is a term borrowed from CSS flex; it exists in contrast 
+   to the "main axis."
+
+--]]--
+
 local borderWidth    = 3 * ItemTrig.PIXEL
 local borderDistance = 7
 
