@@ -3,32 +3,9 @@
 ## Description: Automatically performs actions on your items based on the rules you specify.
 ## APIVersion: 100026
 ## AddOnVersion: 1
-## Version: alpha01
+## Version: 1.0.0
 ## SavedVariables: ItemTrigSavedata
-##DependsOn: LibAddonMenu-2.0
-
-#
-# This add-on embeds versions of LibStub and LibAddonMenu. LibStub is 
-# a public domain work. LibAddonMenu uses a license that permits the 
-# redistribution of unmodified copies.
-#
-
-libs/LibStub/LibStub.lua
-libs\LibAddonMenu-2.0\LibAddonMenu-2.0.lua
-libs\LibAddonMenu-2.0\controls\panel.lua
-libs\LibAddonMenu-2.0\controls\submenu.lua
-libs\LibAddonMenu-2.0\controls\button.lua
-libs\LibAddonMenu-2.0\controls\checkbox.lua
-libs\LibAddonMenu-2.0\controls\colorpicker.lua
-libs\LibAddonMenu-2.0\controls\custom.lua
-libs\LibAddonMenu-2.0\controls\description.lua
-libs\LibAddonMenu-2.0\controls\dropdown.lua
-libs\LibAddonMenu-2.0\controls\editbox.lua
-libs\LibAddonMenu-2.0\controls\header.lua
-libs\LibAddonMenu-2.0\controls\slider.lua
-libs\LibAddonMenu-2.0\controls\texture.lua
-libs\LibAddonMenu-2.0\controls\iconpicker.lua
-libs\LibAddonMenu-2.0\controls\divider.lua
+## DependsOn: LibAddonMenu-2.0
 
 lang/en.lua
 lang/$(language).lua
