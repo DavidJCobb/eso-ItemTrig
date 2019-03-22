@@ -449,7 +449,7 @@ local _lazyGetterMappings = {
    isPrioritySell   = function(i) return _nilIfInvalid(i, IsItemLinkPrioritySell(i.link))         end,
    isResearchable   = function(i) return _nilIfInvalid(i, CanItemLinkBeTraitResearched(i.link))   end,
    itemFilters      = function(i) return not i.invalid and {GetItemFilterTypeInfo(i.bag, i.slot)} or {} end,
-   itemSetData =
+   itemSetData  =
       function(i)
          if i.invalid then
             return nil
@@ -463,7 +463,8 @@ local _lazyGetterMappings = {
             maxEquipped   = maxEquipped,
          }
       end,
-   soulGemInfo =
+   recipeType   = function(i) return _nilIfInvalid(i, GetItemLinkRecipeCraftingSkillType(i.link)) end,
+   soulGemInfo  =
       function(i)
          if i.invalid then
             return nil
@@ -848,6 +849,12 @@ do
       [WEAPONTYPE_TWO_HANDED_SWORD]  = CRAFTING_TYPE_BLACKSMITHING,
    }
    function ItemInterface:pertinentCraftingType()
+      if self.craftingSkill ~= CRAFTING_TYPE_INVALID then
+         return self.craftingSkill
+      end
+      if self.type == ITEMTYPE_RECIPE then
+         return self.recipeType
+      end
       if self.armorType ~= ARMORTYPE_NONE then
          return _mapArmorTypes[self.armorType]
       end
@@ -908,6 +915,7 @@ do
       then
          return CRAFTING_TYPE_WOODWORKING
       end
+      return CRAFTING_TYPE_INVALID
    end
 end
 function ItemInterface:sell(count)
