@@ -244,16 +244,17 @@ do -- helper classes for views
          qualifier:redraw()
       end
       function ViewCls.QuantityEnum:GetValue()
-         local q = { qualifier = self.qualifier:getSelectedData() }
-         local s = self.enum:getSelectedData()
-         if s then
-            q.number = s.value
-         end
-         if q.qualifier then
-            q.qualifier = q.qualifier.value
-         else
-            q.qualifier = "E"
-         end
+         local qualifier = self.qualifier:getSelectedData()
+         qualifier = qualifier and qualifier.value or "E"
+         local number = self.enum:getSelectedData()
+         number = number and number.value or 0
+         --
+         local q = ItemTrig.OpcodeQuantityArg:new(
+            qualifier,
+            number,
+            nil,
+            self.argBase
+         )
          return q
       end
       function ViewCls.QuantityEnum:SetupArgument(argValue, argBase, argIndex, opcodeBase)
@@ -261,7 +262,7 @@ do -- helper classes for views
          self.qualifier:select(1) -- default selection in case qualifier is invalid
          self.qualifier:select(function(item) return item.value == argValue.qualifier end)
          self.enum:clear()
-         if argBase.doNotSortEnum then
+         if argBase.doNotSortEnum or argBase.enumSortsByKey then
             self.enum:setShouldSort(false, false)
          else
             self.enum:setShouldSort(true, false)

@@ -122,6 +122,7 @@ ItemTrig.tableConditions = {
                [ITEM_QUALITY_ARTIFACT]  = GetString(SI_ITEMQUALITY4),
                [ITEM_QUALITY_LEGENDARY] = GetString(SI_ITEMQUALITY5),
             },
+            enumSortsByKey = true,
          },
       },
       function(state, context, args)

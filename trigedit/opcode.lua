@@ -342,16 +342,35 @@ function WinCls:refresh(options) -- Render the opcode being edited.
          -- of a set of multiple entry points.
          --
          local list = base.allowedEntryPoints
-         if list and #list then
-            local format = GetString(ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP)
-            if self.opcode.working.type == "condition" then
-               format = GetString(ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP)
-            elseif self.opcode.working.type == "action" then
-               format = GetString(ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP)
-            end
-            local ep = ItemTrig.ENTRY_POINT_NAMES[list[1]]
-            if ep then
-               text = LocalizeString(format, ep)
+         if list then
+            local count  = #list
+            if count == 1 then
+               local format = GetString(ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP)
+               if self.opcode.working.type == "condition" then
+                  format = GetString(ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP)
+               elseif self.opcode.working.type == "action" then
+                  format = GetString(ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP)
+               end
+               local ep = ItemTrig.ENTRY_POINT_NAMES[list[1]]
+               if ep then
+                  text = LocalizeString(format, ep)
+               end
+            else
+               local format = GetString(ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP_MULTI)
+               if self.opcode.working.type == "condition" then
+                  format = GetString(ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP_MULTI)
+               elseif self.opcode.working.type == "action" then
+                  format = GetString(ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP_MULTI)
+               end
+               local assembled = ""
+               for i = 1, count do
+                  local ep = ItemTrig.ENTRY_POINT_NAMES[list[i]]
+                  if i > 1 then
+                     assembled = assembled .. GetString(ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP_MULTI_SEP)
+                  end
+                  assembled = assembled .. ep
+               end
+               text = LocalizeString(format, assembled)
             end
          end
       end

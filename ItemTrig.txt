@@ -2,8 +2,8 @@
 ## Author: DavidJCobb
 ## Description: Automatically performs actions on your items based on the rules you specify.
 ## APIVersion: 100026
-## AddOnVersion: 1
-## Version: 1.0.0
+## AddOnVersion: 2
+## Version: 1.0.1
 ## SavedVariables: ItemTrigSavedata
 ## DependsOn: LibAddonMenu-2.0
 

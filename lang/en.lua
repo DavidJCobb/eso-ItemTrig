@@ -317,6 +317,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DEPOSITINBANK",  "banked")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP",    "This opcode can only be used from the \"<<X:1>>\" entry point.")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP", "This condition can only be used from the \"<<X:1>>\" entry point.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP",    "This action can only be used from the \"<<X:1>>\" entry point.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP_MULTI",    "This opcode can only be used from one of these entry points: <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP_MULTI", "This condition can only be used from one of these entry points: <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP_MULTI",    "This action can only be used from one of these entry points: <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP_MULTI_SEP", "; ")
 --
 --
 -- CONDITIONS

@@ -145,6 +145,15 @@ function ItemTrig.hasCyclicalReferences(tablevar, options)
    _cleanup()
    return false
 end
+function ItemTrig.keysIn(tablevar)
+   local r = {}
+   local n = 1
+   for k in pairs(tablevar) do
+      r[n] = k
+      n = n + 1
+   end
+   return r
+end
 function ItemTrig.moveToAfter(tablevar, i, target)
    if i > target then
       target = target + 1

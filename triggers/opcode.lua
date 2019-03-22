@@ -85,6 +85,9 @@ function OpcodeQuantityArg:clone()
    result.base      = self.base
    return result
 end
+function OpcodeQuantityArg:from(tbl, base)
+   return self:new(tbl.qualifier, tbl.number, tbl.alternate, base)
+end
 function OpcodeQuantityArg:isValid()
    local base = self.base
    if not base then
@@ -149,6 +152,15 @@ function ItemTrig.OpcodeBase:forEachInArgumentEnum(index, functor)
    local disabled = arg.disabledEnumIndices
    if arg.enumIsContiguous then
       for k, v in ipairs(enum) do
+         if not (disabled and disabled:has(k)) then
+            functor(k, v)
+         end
+      end
+   elseif arg.enumSortsByKey then
+      local keys = ItemTrig.keysIn(enum)
+      table.sort(keys)
+      for _, k in ipairs(keys) do
+         local v = enum[k]
          if not (disabled and disabled:has(k)) then
             functor(k, v)
          end
@@ -359,6 +371,12 @@ end
          iterates over the enum (using ipairs instead of pairs). The main 
          use of this field is to allow (doNotSortEnum) to work properly.
       
+      enumSortsByKey
+         If specified, then OpcodeBase:forEachInArgumentEnum will sort the 
+         enum's keys before iterating over them. Don't use this alongside 
+         (doNotSortEnum) or (enumIsContiguous); the UI already checks for 
+         this and declines to do its own sorting.
+      
       explanation
          Text explaining the meaning of the argument. The UI can display it 
          when the user is editing the argument's value.
@@ -453,10 +471,11 @@ function ItemTrig.Opcode:clone(deep)
                   result.args[i] = a
                end
             elseif baseArgs[i].type == "quantity" then
-               result.args[i] = {
-                  qualifier = a.qualifier,
-                  number    = a.number,
-               }
+               if OpcodeQuantityArg:is(a) then
+                  result.args[i] = a:clone()
+               else
+                  result.args[i] = OpcodeQuantityArg:from(a, self.base)
+               end
             else
                d("ItemTrig WARNING: Problem encountered when cloning opcode: unhandled table type.")
             end
@@ -480,10 +499,11 @@ function ItemTrig.Opcode:copyAssign(other, deep)
             if self.base.args[i].type == "trigger" then
                self.args[i] = a:clone()
             elseif self.base.args[i].type == "quantity" then
-               self.args[i] = {
-                  qualifier = a.qualifier,
-                  number    = a.number,
-               }
+               if OpcodeQuantityArg:is(a) then
+                  self.args[i] = a:clone()
+               else
+                  self.args[i] = OpcodeQuantityArg:from(a, self.base)
+               end
             else
                self.args[i] = a
             end
