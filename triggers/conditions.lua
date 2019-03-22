@@ -55,6 +55,7 @@ ItemTrig.tableConditions = {
          return nil
       end,
       {
+         explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_SETANDOR),
          neverSkip = true,
       }
    ),
@@ -1299,10 +1300,7 @@ ItemTrig.tableConditions = {
             result = quantity:test(remaining)
          end
          return result
-      end,
-      { -- extra data for this opcode
-         allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }
-      }
+      end
    ),
    [37] = ConditionBase:new( -- Can Fence
       _s(ITEMTRIG_STRING_CONDITIONNAME_CANFENCECOUNT),
@@ -1332,10 +1330,7 @@ ItemTrig.tableConditions = {
             result = quantity:test(remaining)
          end
          return result
-      end,
-      { -- extra data for this opcode
-         allowedEntryPoints = { ItemTrig.ENTRY_POINT_FENCE }
-      }
+      end
    ),
    [38] = ConditionBase:new( -- Is Known Recipe
       _s(ITEMTRIG_STRING_CONDITIONNAME_ISKNOWNRECIPE),
@@ -1546,6 +1541,74 @@ ItemTrig.tableConditions = {
             else
                result = name == stub
             end
+         end
+         if args[1] then
+            return result or false
+         end
+         return not result
+      end
+   ),
+   [43] = ConditionBase:new( -- Crafting Skill Maxed
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CRAFTINGSKILLMAXED),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CRAFTINGSKILLMAXED),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [-1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ANY),
+               [-2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ALL),
+               [-3] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ITEM),
+               [CRAFTING_TYPE_ALCHEMY]         = GetCraftingSkillName(CRAFTING_TYPE_ALCHEMY),
+               [CRAFTING_TYPE_BLACKSMITHING]   = GetCraftingSkillName(CRAFTING_TYPE_BLACKSMITHING),
+               [CRAFTING_TYPE_CLOTHIER]        = GetCraftingSkillName(CRAFTING_TYPE_CLOTHIER),
+               [CRAFTING_TYPE_ENCHANTING]      = GetCraftingSkillName(CRAFTING_TYPE_ENCHANTING),
+               [CRAFTING_TYPE_JEWELRYCRAFTING] = GetCraftingSkillName(CRAFTING_TYPE_JEWELRYCRAFTING),
+               [CRAFTING_TYPE_PROVISIONING]    = GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING),
+               [CRAFTING_TYPE_WOODWORKING]     = GetCraftingSkillName(CRAFTING_TYPE_WOODWORKING),
+            },
+            default = -3,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            if args[2] == -1 then -- any
+               result = false
+               for k, _ in pairs(ItemTrig.gameEnums.craftingTypes) do
+                  if ItemTrig.SkillCache:isCraftingSkillLineMaxed(k) then
+                     result = true
+                     break
+                  end
+               end
+            elseif args[2] == -2 then -- all
+               result = true
+               for k, _ in pairs(ItemTrig.gameEnums.craftingTypes) do
+                  if false == ItemTrig.SkillCache:isCraftingSkillLineMaxed(k) then
+                     result = false
+                     break
+                  end
+               end
+            else
+               local skill = args[2]
+               if skill == -3 then
+                  skill = context:pertinentCraftingType()
+               end
+               if skill then
+                  result = ItemTrig.SkillCache:isCraftingSkillLineMaxed(skill)
+               end
+            end
+         end
+         if result == nil then
+            return false
          end
          if args[1] then
             return result or false

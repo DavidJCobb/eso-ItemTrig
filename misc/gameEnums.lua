@@ -32,6 +32,16 @@ ItemTrig.gameEnums.alchemyEffectStrings = {
    [-29] = GetString(ITEMTRIG_STRING_ALCHEMYEFFECT_WEAPONCRITICAL),
 }
 
+ItemTrig.gameEnums.craftingTypes = {
+   [CRAFTING_TYPE_ALCHEMY]         = GetCraftingSkillName(CRAFTING_TYPE_ALCHEMY),
+   [CRAFTING_TYPE_BLACKSMITHING]   = GetCraftingSkillName(CRAFTING_TYPE_BLACKSMITHING),
+   [CRAFTING_TYPE_CLOTHIER]        = GetCraftingSkillName(CRAFTING_TYPE_CLOTHIER),
+   [CRAFTING_TYPE_ENCHANTING]      = GetCraftingSkillName(CRAFTING_TYPE_ENCHANTING),
+   [CRAFTING_TYPE_JEWELRYCRAFTING] = GetCraftingSkillName(CRAFTING_TYPE_JEWELRYCRAFTING),
+   [CRAFTING_TYPE_PROVISIONING]    = GetCraftingSkillName(CRAFTING_TYPE_PROVISIONING),
+   [CRAFTING_TYPE_WOODWORKING]     = GetCraftingSkillName(CRAFTING_TYPE_WOODWORKING),
+}
+
 do
    local styles = {}
    for i = 1, GetNumValidItemStyles() do

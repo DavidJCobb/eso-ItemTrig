@@ -7,8 +7,7 @@
          hidden="true"
          inherits="ItemTrig_UITemplate_WWindow"
       >
-         <Dimensions x="500" y="300" />
-         <DimensionConstraints minX="400" minY="200" />
+         <DimensionConstraints minX="500" minY="300" />
          <Anchor point="CENTER" />
          <OnInitialized> ItemTrig:setupWindow("opcodeEdit", self) </OnInitialized>
          <Controls>
@@ -57,9 +56,14 @@
                   </Button>
                </Controls>
             </Control>
-            <Control> <!-- body -->
-               <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)Row1"   relativePoint="BOTTOMLEFT" />
+            <Label name="$(parent)Explanation" font="ITEMTRIG_FONT_BASIC" text="Test!">
+               <Anchor point="BOTTOMLEFT"  offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
+            </Label>
+            <Control name="$(parent)Body"> <!-- body -->
+               <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)Row1"   relativePoint="BOTTOMLEFT" />
+               <!-- <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" /> -->
+               <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Explanation" relativePoint="TOPRIGHT" />
                <Controls>
                   <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
                      <AnchorFill />

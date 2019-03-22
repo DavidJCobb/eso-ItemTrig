@@ -350,7 +350,7 @@ end
       doNotSortEnum
          If this is set to true, then the argument's enum won't be sorted 
          in the UI. This will not work properly unless (enumIsContiguous) 
-         is always set.
+         is also set.
       
       enumIsContiguous
          If the argument's enum uses a contiguous range of integer keys 

@@ -37,7 +37,7 @@
                   </Button>
                </Controls>
             </Control>
-            <Label name="$(parent)Explanation" font="ITEMTRIG_FONT_BASIC" text="Test!">
+            <Label name="$(parent)Explanation" font="ITEMTRIG_FONT_BASIC" text="">
                <Anchor point="BOTTOMLEFT"  offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
             </Label>

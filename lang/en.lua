@@ -306,11 +306,17 @@ ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_VALUE_ERROR",  "One of 
 --
 ZO_CreateStringId("ITEMTRIG_STRING_PRETENDBASE", "|cFFA020[Pretend Mode] ItemTrig would have <<1>>|r <<2>>|cFFA020.|r")
 ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DESTROYITEM",    "destroyed")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_MODIFYJUNKFLAG", "modified the junk flag for")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGMODIFY", "modified the junk flag for")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGSET",    "marked-as-junk")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGCLEAR",  "unmarked-as-junk")
 ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_LAUNDER",        "laundered")
 ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_SELLORFENCE",    "sold/fenced")
 ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DECONSTRUCT",    "deconstructed")
 ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DEPOSITINBANK",  "banked")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP",    "This opcode can only be used from the \"<<X:1>>\" entry point.")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP", "This condition can only be used from the \"<<X:1>>\" entry point.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP",    "This action can only be used from the \"<<X:1>>\" entry point.")
 --
 --
 -- CONDITIONS
@@ -326,6 +332,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_SETANDOR", "Set And/Or")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_SETANDOR", "Switch to using <<1>> to evaluate conditions.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_SETANDOR_AND", "AND")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_SETANDOR_OR",  "OR")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_SETANDOR", "Conditions are AND-linked by default. A switch to OR-linked will not affect later triggers (even nested ones).")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ALWAYS", "Always/Never")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ALWAYS", "This condition is <<1>> true.")
@@ -539,7 +546,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_RITUALSODDITIES", 
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_WRITINGSMAPS",            "writings and maps")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_COSMETICSLINENSWARDROBE", "cosmetics, linens, and wardrobe accessories")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_DRINKWAREUTENSILSDISHES", "drinkware, utensils, and dishes")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2", "You can test the item against the current Covetous Countess quest objectives, if the quest is active and you haven't delivered the items to the Countess yet. Alternatively, you can test the items against your level: if you're below level 50, then the objective you get depends on your level. (If you're at or above level 50, then testing against your level is the same as \"any objective.\"")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARGEXPLANATION_COVETOUSCOUNTESS_2", "You can test the item against the current Covetous Countess quest objectives, if the quest is active and you haven't delivered the items to the Countess yet. Alternatively, you can test the items against your level: if you're below level 50, then the objective you get depends on your level. (If you're at or above level 50, then testing against your level is the same as \"any objective.\")")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ISITEMSET", "Item Set (Yes/No)")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ISITEMSET", "The item <<1>> to an Item Set.")
@@ -552,6 +559,14 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_NO",  "does not belong"
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_YES", "belongs")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_WHOLE",     "is")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMSETNAME_SUBSTRING", "contains")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CRAFTINGSKILLMAXED",  "Crafting Skill Maxed")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CRAFTINGSKILLMAXED",  "The player <<1>> maxed their <<2>> skill.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_NO",   "has not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_YES",  "has")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ANY",  "[any crafting skill]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ALL",  "[all crafting skills]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ITEM", "[crafting skill for this item]")
 --
 --
 -- ACTIONS

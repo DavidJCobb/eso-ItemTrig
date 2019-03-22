@@ -172,7 +172,13 @@ ItemTrig.tableActions = {
             return ItemTrig.OPCODE_FAILED, {}
          end
          if ItemTrig.prefs:get("pretendActions") then
-            return _doPretend(context, "MODIFYJUNKFLAG")
+            local task = "JUNKFLAGMODIFY"
+            if args[1] then
+               task = "JUNKFLAGSET"
+            else
+               task = "JUNKFLAGCLEAR"
+            end
+            return _doPretend(context, task)
          end
          local result, errorCode = context:modifyJunkState(args[1])
          if not result then

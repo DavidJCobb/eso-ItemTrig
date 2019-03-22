@@ -65,7 +65,9 @@ function WinCls:_construct()
       self.ui.opcodeType:setShouldSort(true, false)
       combobox:autocompleteEnabled(true)
    end
-   self.ui.opcodeBody = ItemTrig_OpcodeEdit_OpcodeBody
+   self.ui.opcodeBody  = ItemTrig_OpcodeEdit_OpcodeBody
+   self.ui.explanation = self:GetNamedChild("Explanation")
+   self.ui.explanation:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR))
    --
    self.ui.nestedTriggerEnable = GetControl(ItemTrig_OpcodeEdit_NestedTriggerHack, "Enabled")
    self.ui.nestedTriggerEnable.toggleFunction =
@@ -326,6 +328,51 @@ function WinCls:refresh(options) -- Render the opcode being edited.
       combobox:select(function(item) return item.base == opcodeBase end)
    end
    self:redrawDescription(options)
+   do -- opcode explanation
+      local node = self.ui.explanation
+      local base = self.opcode.working.base or {}
+      local text = base.explanation
+      if not (text and text ~= "") then
+         --
+         -- If an opcode doesn't supply its own explanation, and if the opcode 
+         -- can only be used from a specific entry point, then take this oppor-
+         -- tunity to bring that to the user's attention.
+         --
+         -- NOTE: This doesn't handle the case of an opcode only allowing one 
+         -- of a set of multiple entry points.
+         --
+         local list = base.allowedEntryPoints
+         if list and #list then
+            local format = GetString(ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP)
+            if self.opcode.working.type == "condition" then
+               format = GetString(ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP)
+            elseif self.opcode.working.type == "action" then
+               format = GetString(ITEMTRIG_STRING_ACTIONEXPLANATION_GENERIC_EP)
+            end
+            local ep = ItemTrig.ENTRY_POINT_NAMES[list[1]]
+            if ep then
+               text = LocalizeString(format, ep)
+            end
+         end
+      end
+      if text and text ~= "" then
+         node:SetText(text)
+         node:SetHidden(false)
+      else
+         node:SetText("")
+         node:SetHidden(true)
+      end
+   end
+   self:autoSize()
+   --zo_callLater(function() self:autoSize() end, 1) -- text wrapping can be pretty buggy in this engine
+end
+function WinCls:autoSize()
+   local window        = self:asControl()
+   local explanation   = self.ui.explanation
+   --local explOldHeight = explanation:GetHeight()
+   local _, baseH, _, _ = window:GetDimensionConstraints()
+   local explNewHeight = explanation:IsHidden() and 0 or explanation:GetHeight()
+   window:SetHeight(baseH + explNewHeight)
 end
 
 function WinCls:editNestedTriggerArgument(trigger)

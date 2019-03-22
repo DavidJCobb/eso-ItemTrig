@@ -115,6 +115,9 @@ do
    end
 end
 
+local function _onBeforeRunTriggers()
+   ItemTrig.SkillCache:update()
+end
 local function _itemShouldRunTriggers(item)
    local prefs = ItemTrig.prefs
    if item.locked then
@@ -135,6 +138,7 @@ local function _itemShouldRunTriggers(item)
    return true
 end
 local function _processInventory(entryPoint, entryPointData)
+   _onBeforeRunTriggers()
    local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
    ItemTrig.forEachBagSlot(BAG_BACKPACK, function(item)
       if not _itemShouldRunTriggers(item) then
@@ -150,6 +154,7 @@ local function _processInventory(entryPoint, entryPointData)
    end)
 end
 local function _processItemList(entryPoint, entryPointData, items)
+   _onBeforeRunTriggers()
    local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
    for i = 1, #items do
       local item = items[i]
@@ -166,6 +171,7 @@ local function _processItemList(entryPoint, entryPointData, items)
    end
 end
 local function _processSingleItem(entryPoint, entryPointData, item)
+   _onBeforeRunTriggers()
    local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
    if not _itemShouldRunTriggers(item) then
       return

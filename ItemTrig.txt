@@ -46,6 +46,7 @@ misc/timing.lua
 misc/ui.lua
 misc/item.lua
 misc/quest.lua
+misc/skills.lua
 options.lua
 triggers/system.lua
 triggers/serialization.lua
