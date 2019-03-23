@@ -252,6 +252,8 @@ ItemTrig.tableActions = {
             local extra = { code = errorCode, why = nil }
             if errorCode == ItemInterface.FAILURE_NORMAL_FENCE_LIMIT then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_NORMAL_MAX_FENCE)
+            elseif errorCode == ItemInterface.FAILURE_ITEM_IS_LOCKED then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_LOCKED)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end

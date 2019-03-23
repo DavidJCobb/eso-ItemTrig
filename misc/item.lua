@@ -920,7 +920,10 @@ do
 end
 function ItemInterface:sell(count)
    if self:isInvalid() then
-      return
+      return false, ItemInterface.FAILURE_ITEM_IS_INVALID
+   end
+   if self.locked then
+      return false, ItemInterface.FAILURE_ITEM_IS_LOCKED
    end
    if not count then
       count = self.count

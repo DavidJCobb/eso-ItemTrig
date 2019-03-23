@@ -630,6 +630,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NOT_STOLEN",        "
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_SELLORFENCE", "Sell or Fence")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_SELLORFENCE", "Sell <<1>> of the item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_NORMAL_MAX_FENCE", "You've hit the limit on how many items you can fence today.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_LOCKED",           "You cannot sell a locked item.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DECONSTRUCT", "Deconstruct")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DECONSTRUCT", "Deconstruct the item.")
