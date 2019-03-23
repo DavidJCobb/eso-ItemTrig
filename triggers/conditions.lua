@@ -735,7 +735,7 @@ ItemTrig.tableConditions = {
          neverSkip   = true,
       }
    ),
-   [20] = ConditionBase:new( -- Priority Sell
+   [20] = ConditionBase:new( -- [DEPRECATED] Priority Sell
       _s(ITEMTRIG_STRING_CONDITIONNAME_PRIORITYSELL),
       _s(ITEMTRIG_STRING_CONDITIONDESC_PRIORITYSELL),
       {
@@ -754,7 +754,15 @@ ItemTrig.tableConditions = {
             return context.isPrioritySell
          end
          return not context.isPrioritySell
-      end
+      end,
+      {
+         deprecated = true,
+         --
+         -- IF WE UN-DEPRECATE THIS CONDITION, THEN WE NEED TO REMOVE 
+         -- THIS EXPLANATION TEXT AS WELL:
+         --
+         explanation = _s(ITEMTRIG_STRING_CONDITIONEXPLANATION_PRIORITYSELL),
+      }
    ),
    [21] = ConditionBase:new( -- Is Crown Item
       _s(ITEMTRIG_STRING_CONDITIONNAME_CROWNITEM),

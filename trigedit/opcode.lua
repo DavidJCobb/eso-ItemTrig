@@ -162,14 +162,9 @@ function WinCls:requestEdit(opener, opcode, dirty, extra)
       combobox:clear()
       for i = 1, #list do
          local base = list[i]
-         --
-         -- ZO_ScrollableComboBox uses ZO_ScrollList under the hood. The data entries 
-         -- we add to the list are shown by accessing their "name" field, so we'd want 
-         -- to pass structs like { name = base.name, base = base }. (We wouldn't want 
-         -- to pass the OpcodeBase instances directly, as ZO_ScrollList tracks state 
-         -- by storing it directly on the data items we push into it.)
-         --
-         combobox:push({ name = base.name, base = base }, false)
+         if not base.deprecated or base == opcode.base then
+            combobox:push({ name = base.name, base = base }, false)
+         end
       end
       combobox:redraw()
    end

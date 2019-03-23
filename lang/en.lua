@@ -284,6 +284,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BAD_TAIL_ORS", "|c000000...|rNon
 -- SYSTEM
 --
 --
+ZO_CreateStringId("ITEMTRIG_STRING_USER_FACING_ASSERT_BAD_CONDITION_TABLE", "There is a problem with ItemTrig's trigger condition list. A syntax error or script error may have prevented the list from loading properly. The add-on is not usable in this state; please notify the developer.")
+ZO_CreateStringId("ITEMTRIG_STRING_USER_FACING_ASSERT_BAD_ACTION_TABLE",    "There is a problem with ItemTrig's trigger action list. A syntax error or script error may have prevented the list from loading properly. The add-on is not usable in this state; please notify the developer.")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME", "Unnamed trigger")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_QUANTITY", "quantity")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_PLACEHOLDER_TEXT", "text")
@@ -447,10 +450,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_LOGTRIGGERMISS", "Log Trigger M
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_LOGTRIGGERMISS", "Log debugging information if this trigger's conditions don't match.")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_LOGTRIGGERMISS", "If this condition is reached, then a detailed message will be logged if the trigger's conditions don't match. Only conditions after this one will log a message.")
 --
-ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_PRIORITYSELL", "Priority Sell")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_PRIORITYSELL", "Priority Sell [DEPRECATED]")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_PRIORITYSELL", "The item <<1>> basically useless and only good for selling.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_NO",  "is not")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_PRIORITYSELL_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_PRIORITYSELL", "This condition was originally intended to check whether an item is \"vendor trash.\" However, it appears that the ESO team has flagged a TON of items as vendor trash when they... aren't. Things like style materials (even rare one!)")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CROWNITEM", "Crown Item")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CROWNITEM", "The item <<1>> <<2>>.")

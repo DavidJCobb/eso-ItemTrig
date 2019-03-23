@@ -317,6 +317,8 @@ do -- A single chat command with arguments to control behavior
 end
 
 local function Initialize()
+   assert(ItemTrig.tableConditions, GetString(ITEMTRIG_STRING_USER_FACING_ASSERT_BAD_CONDITION_TABLE))
+   assert(ItemTrig.tableActions,    GetString(ITEMTRIG_STRING_USER_FACING_ASSERT_BAD_ACTION_TABLE))
    ItemTrig.registerLAMOptions()
    ItemTrig.Savedata:load()
    SLASH_COMMANDS["/itemtrig"] = _coreChatCommand
