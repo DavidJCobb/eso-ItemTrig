@@ -8,6 +8,7 @@ do -- helper classes for views
    local WCombobox       = ItemTrig.UI.WCombobox
    local WNumberEditbox  = ItemTrig.UI.WNumberEditbox
    local WViewHolderView = ItemTrig.UI.WViewHolderView
+   local getThemeColor   = ItemTrig.getCurrentThemeColor
    local function _showNumberValidationTooltip(constraints, control)
       local tooltip = ItemTrig.UI.WTooltip:cast(ItemTrig_OpcodeArgEdit_OpcodeValueConstraints)
       tooltip.options.adoptCrossAxisSize = true
@@ -92,9 +93,9 @@ do -- helper classes for views
          self.value = WNumberEditbox:install(self:GetNamedChild("Value"))
          self.value.onValidationStateChanged =
             function(widget, value, isNowValid)
-               local color = ItemTrig.theme.TEXTEDIT_TEXT
+               local color = getThemeColor("TEXTEDIT_TEXT")
                if not isNowValid then
-                  color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
+                  color = getThemeColor("TEXTEDIT_TEXT_WRONG")
                end
                widget:asControl():SetColor(unpack(color))
                --
@@ -145,9 +146,9 @@ do -- helper classes for views
          do -- number validation
             self.number.onValidationStateChanged =
                function(widget, value, isNowValid)
-                  local color = ItemTrig.theme.TEXTEDIT_TEXT
+                  local color = getThemeColor("TEXTEDIT_TEXT")
                   if not isNowValid then
-                     color = ItemTrig.theme.TEXTEDIT_TEXT_WRONG
+                     color = getThemeColor("TEXTEDIT_TEXT_WRONG")
                   end
                   widget:asControl():SetColor(unpack(color))
                   --
@@ -367,7 +368,6 @@ function WinCls:_construct()
       self.ui.views.quantEnum = ViewCls.QuantityEnum:install(viewholder:GetNamedChild("QuantityEnum"))
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
       self.ui.explanation = self:GetNamedChild("Explanation")
-      self.ui.explanation:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR))
    end
 end
 function WinCls:handleModalDeferredOnHide(deferred)

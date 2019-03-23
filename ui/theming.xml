@@ -7,6 +7,11 @@
    <Font name="ITEMTRIG_FONT_LIST_ITEM" font="$(GAMEPAD_MEDIUM_FONT)|$(GP_34)" />
    <Font name="ITEMTRIG_FONT_BASIC"     font="$(GAMEPAD_MEDIUM_FONT)|$(GP_34)" />
    <Controls>
+      <Label name="ItemTrig_UITemplate_ThemedBareText" virtual="true"
+         font="ITEMTRIG_FONT_BASIC"
+      >
+         <OnInitialized> ItemTrig.theming.bareText(self) </OnInitialized>
+      </Label>
       <Button name="ItemTrig_UITemplate_ThemedButton" virtual="true"
           font="ITEMTRIG_FONT_BUTTON"
           verticalAlignment="CENTER"
@@ -14,29 +19,10 @@
          <!-- <Dimensions x="128" y="28" /> -->
          <Dimensions x="128" y="42" />
          <PressedOffset x="1" y="1" />
-         <OnInitialized>
-            self:SetNormalFontColor(unpack(ItemTrig.theme.BUTTON_TEXT_NORMAL))
-            self:SetMouseOverFontColor(unpack(ItemTrig.theme.BUTTON_TEXT_MOUSEOVER))
-            self:SetPressedFontColor(unpack(ItemTrig.theme.BUTTON_TEXT_MOUSEDOWN))
-            --
-            -- TODO: font and background color for disabled buttons
-            --
-         </OnInitialized>
-         <OnMouseEnter> GetControl(self, "Back"):SetColor(unpack(ItemTrig.theme.BUTTON_BACKGROUND_MOUSEOVER)) </OnMouseEnter>
-         <OnMouseExit> GetControl(self, "Back"):SetColor(unpack(ItemTrig.theme.BUTTON_BACKGROUND_NORMAL)) </OnMouseExit>
-         <OnMouseDown> GetControl(self, "Back"):SetColor(unpack(ItemTrig.theme.BUTTON_BACKGROUND_MOUSEDOWN)) </OnMouseDown>
-         <OnMouseUp>
-            local back = GetControl(self, "Back")
-            if upInside then
-               back:SetColor(unpack(ItemTrig.theme.BUTTON_BACKGROUND_MOUSEOVER))
-            else
-               back:SetColor(unpack(ItemTrig.theme.BUTTON_BACKGROUND_NORMAL))
-            end
-         </OnMouseUp>
+         <OnInitialized> ItemTrig.UI.WThemedButton:install(self) </OnInitialized>
          <Controls>
             <Texture name="$(parent)Back" excludeFromResizeToFitExtents="true">
                <AnchorFill />
-               <OnInitialized> self:SetColor(unpack(ItemTrig.theme.BUTTON_BACKGROUND_NORMAL)) </OnInitialized>
             </Texture>
          </Controls>
       </Button>
@@ -47,14 +33,10 @@
          inherits="ZO_DefaultEdit"
       >
          <Dimensions y="42" />
-         <OnInitialized>
-            self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT))
-            self:SetSelectionColor(unpack(ItemTrig.theme.TEXTEDIT_SELECTION))
-         </OnInitialized>
+         <OnInitialized> ItemTrig.theming.editBox(self) </OnInitialized>
          <Controls>
             <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
                <AnchorFill />
-               <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_BACKGROUND)) </OnInitialized>
             </Texture>
          </Controls>
       </EditBox>

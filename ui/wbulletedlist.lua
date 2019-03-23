@@ -69,8 +69,8 @@ function WBulletedList:_construct(options)
       self.style = {
          tooDeepText = s.tooDeepText or nil, -- if this is a non-empty string, then the first too-deep list item will be rendered with this string
          font        = s.font        or "ITEMTRIG_FONT_BASIC",
-         fontColor   = s.fontColor   or ItemTrig.theme.WINDOW_BARE_TEXT_COLOR,
-         bulletColor = s.bulletColor or s.fontColor or ItemTrig.theme.WINDOW_BARE_TEXT_COLOR,
+         fontColor   = s.fontColor   or {0,0,0,1},
+         bulletColor = s.bulletColor or s.fontColor or {0,0,0,1},
          indent      = s.indent      or 48, -- indentation for nested list items
          bulletSpaceBefore = s.bulletSpaceBefore or 16, -- space between bullet and margin
          bulletSpaceAfter  = s.bulletSpaceAfter  or 16, -- space between bullet and text

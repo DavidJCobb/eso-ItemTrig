@@ -387,6 +387,8 @@ local function Initialize()
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_END_CRAFTING_STATION_INTERACT, _OnOpenClose)
       EVENT_MANAGER:RegisterForEvent("ItemTrig", EVENT_OPEN_FENCE,         _OnOpenClose) -- Closing the fence menu fires the EVENT_CLOSE_STORE event.
    end
+   --ItemTrig.ThemeManager:refresh()
+   ItemTrig.ThemeManager:switchTo(ItemTrig.prefs:get("ui/theme"))
 end
 local function OnAddonLoaded(eventCode, addonName)
    if addonName == ItemTrig.name then

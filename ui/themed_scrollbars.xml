@@ -1,0 +1,116 @@
+<GuiXml>
+   <Controls>
+      <Slider name="ItemTrig_UITemplate_ThemedScrollbarVertical" mouseEnabled="true" virtual="true">
+         <!--
+            This element is essentially the "full" scrollbar that you end up with 
+            when you inherit ZO_VerticalScrollbarBase, which in turn inherits from 
+            ZO_VerticalScrollbarBase_Shared. The buttons inherit from two templates, 
+            ZO_ScrollUpButton and ZO_ScrollDownButton, which have also been copied 
+            into here.
+            
+            Zenimax's scrollbars are not unlike the scrollbars in TES4: Oblivion, 
+            in that the endcap buttons are actually positioned outside of the 
+            scrollbar's bounds (in this case, the Slider control's bounds).
+            
+            We've made some changes to allow theming.
+         -->
+         <Dimensions x="16" y="32" />
+         <ThumbTexture
+            textureFile="EsoUI/Art/Miscellaneous/scrollbox_elevator.dds"
+            disabledTextureFile="EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds"
+            thumbWidth="16"
+            thumbHeight="32"
+         />
+         <BackgroundBottom textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+         <BackgroundMiddle textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+         <BackgroundTop    textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+
+         <OnInitialized>
+            ZO_VerticalScrollbarBase_OnInitialized(self)
+            --
+            -- New code follows.
+            --
+            ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function(theme)
+               local c = theme.colors
+               local n = theme.numbers
+               local s = theme.strings
+               assert(c and n and s, "Invalid theme specification.")
+               --
+               self:SetBackgroundBottomTexture(s.SCROLLBAR_TRACK_FILE)
+               self:SetBackgroundMiddleTexture(s.SCROLLBAR_TRACK_FILE)
+               self:SetBackgroundTopTexture   (s.SCROLLBAR_TRACK_FILE)
+               self:SetThumbTexture(
+                  s.SCROLLBAR_THUMB_FILE,
+                  s.SCROLLBAR_THUMB_FILE_DISABLED,
+                  s.SCROLLBAR_THUMB_FILE,
+                  n.SCROLLBAR_THUMB_SIZE_CROSS,
+                  n.SCROLLBAR_THUMB_SIZE_MAIN
+               )
+               --
+               local material = GetControl(self, "ThumbMunge")
+               if material then
+                  material:SetTexture(s.SCROLLBAR_THUMB_FILE_OVERLAY or "")
+               end
+               --
+               local arrowUp = GetControl(self, "Up")
+               arrowUp:SetNormalTexture(   s.SCROLLBAR_UP_ARROW_FILE_NORMAL)
+               arrowUp:SetPressedTexture(  s.SCROLLBAR_UP_ARROW_FILE_PRESSED)
+               arrowUp:SetMouseOverTexture(s.SCROLLBAR_UP_ARROW_FILE_HOVER)
+               arrowUp:SetDisabledTexture( s.SCROLLBAR_UP_ARROW_FILE_DISABLED)
+               arrowUp:SetWidth( n.SCROLLBAR_BUTTON_SIZE_CROSS)
+               arrowUp:SetHeight(n.SCROLLBAR_BUTTON_SIZE_MAIN)
+               --
+               local arrowDown = GetControl(self, "Down")
+               arrowDown:SetNormalTexture(   s.SCROLLBAR_DOWN_ARROW_FILE_NORMAL)
+               arrowDown:SetPressedTexture(  s.SCROLLBAR_DOWN_ARROW_FILE_PRESSED)
+               arrowDown:SetMouseOverTexture(s.SCROLLBAR_DOWN_ARROW_FILE_HOVER)
+               arrowDown:SetDisabledTexture( s.SCROLLBAR_DOWN_ARROW_FILE_DISABLED)
+               arrowDown:SetWidth( n.SCROLLBAR_BUTTON_SIZE_CROSS)
+               arrowDown:SetHeight(n.SCROLLBAR_BUTTON_SIZE_MAIN)
+            end)
+         </OnInitialized>
+         <OnEffectivelyHidden> ZO_VerticalScrollbarBase_OnEffectivelyHidden(self) </OnEffectivelyHidden>
+         
+         <OnMouseEnter> ZO_VerticalScrollbarBase_OnMouseEnter(self) </OnMouseEnter>
+         <OnMouseExit>  ZO_VerticalScrollbarBase_OnMouseExit(self) </OnMouseExit>
+         <OnMouseDown>  ZO_VerticalScrollbarBase_OnMouseDown(self) </OnMouseDown>
+         <OnMouseUp>    ZO_VerticalScrollbarBase_OnMouseUp(self) </OnMouseUp>
+         
+         <Controls>
+            <Texture name="$(parent)ThumbMunge" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP" layer="OVERLAY" alpha="0.5">
+               <OnInitialized>
+                  local slider = self:GetParent()
+                  local thumb  = slider:GetThumbTextureControl()
+                  self:SetAnchorFill(thumb)
+               </OnInitialized>
+            </Texture>
+            <Button name="$(parent)Up">
+               <Dimensions x="16" y="16" />
+               <Anchor point="BOTTOM" relativePoint="TOP" />
+               <Textures
+                  normal="EsoUI/Art/Buttons/scrollbox_upArrow_up.dds"
+                  pressed="EsoUI/Art/Buttons/scrollbox_upArrow_down.dds"
+                  mouseOver="EsoUI/Art/Buttons/scrollbox_upArrow_over.dds"
+                  disabled="EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds"
+               />
+               <OnMouseEnter> ZO_VerticalScrollbarBase_OnMouseEnter(self:GetParent()) </OnMouseEnter>
+               <OnMouseExit>  ZO_VerticalScrollbarBase_OnMouseExit(self:GetParent()) </OnMouseExit>
+               <OnClicked>    ZO_VerticalScrollbarBase_OnScrollBarArrowClicked(self:GetParent()) </OnClicked>
+            </Button>
+            <Button name="$(parent)Down">
+               <Dimensions x="16" y="16" />
+               <Anchor point="TOP" relativePoint="BOTTOM" />
+               <Textures
+                  normal="EsoUI/Art/Buttons/scrollbox_downArrow_up.dds"
+                  pressed="EsoUI/Art/Buttons/scrollbox_downArrow_down.dds"
+                  mouseOver="EsoUI/Art/Buttons/scrollbox_downArrow_over.dds"
+                  disabled="EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds"
+               />
+               <OnMouseEnter> ZO_VerticalScrollbarBase_OnMouseEnter(self:GetParent()) </OnMouseEnter>
+               <OnMouseExit>  ZO_VerticalScrollbarBase_OnMouseExit(self:GetParent()) </OnMouseExit>
+               <OnClicked>    ZO_VerticalScrollbarBase_OnScrollBarArrowClicked(self:GetParent()) </OnClicked>
+            </Button>
+         </Controls>
+      </Slider>
+   </Controls>
+</GuiXml>

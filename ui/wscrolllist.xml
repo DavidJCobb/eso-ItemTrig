@@ -17,7 +17,19 @@
                   widget:scrollBy(-delta * widget.scrollStep)
                </OnMouseWheel>
             </Scroll>
-            <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
+            <!-- <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
+               <Anchor point="TOPRIGHT" offsetY="16" />
+               <Anchor point="BOTTOMRIGHT" />
+               <OnMouseWheel>
+                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
+                  widget:scrollBy(-delta * widget.scrollStep)
+               </OnMouseWheel>
+               <OnValueChanged>
+                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
+                  widget:scrollTo(value, { fromSlider = true })
+               </OnValueChanged>
+            </Slider> -->
+            <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ItemTrig_UITemplate_ThemedScrollbarVertical">
                <Anchor point="TOPRIGHT" offsetY="16" />
                <Anchor point="BOTTOMRIGHT" />
                <OnMouseWheel>

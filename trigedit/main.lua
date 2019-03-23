@@ -9,6 +9,9 @@ ItemTrig:registerWindow("triggerList", WinCls)
 do -- helper class for trigger list entries
    ItemTrig.UI.TriggerListEntry = ItemTrig.UI.WidgetClass:makeSubclass("TriggerListEntry", "triggerListEntry")
    local TriggerListEntry = ItemTrig.UI.TriggerListEntry
+   
+   local getThemeColor = ItemTrig.getCurrentThemeColor
+   
    function TriggerListEntry:_construct()
       local control = self:asControl()
       self.back     = self:GetNamedChild("Bg")
@@ -21,9 +24,9 @@ do -- helper class for trigger list entries
       self.contents.style.tooDeepText       = "..."
       self.contents.style.topLevelHasBullet = false
       do -- theming
-         self.back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
-         self.name:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
-         self.desc:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+         self.back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND")))
+         self.name:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_NORMAL")))
+         self.desc:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_NORMAL")))
       end
       self.enabled.toggleFunction =
          function(self, checked)
@@ -47,9 +50,9 @@ do -- helper class for trigger list entries
    end
    function TriggerListEntry:getBaseBackgroundColor()
       if self:indexInParent() % 2 == 0 then
-         return ItemTrig.theme.LIST_ITEM_BACKGROUND_ALT
+         return getThemeColor("LIST_ITEM_BACKGROUND_ALT")
       end
-      return ItemTrig.theme.LIST_ITEM_BACKGROUND
+      return getThemeColor("LIST_ITEM_BACKGROUND")
    end
    function TriggerListEntry:makeReadOnly()
       self.enabled:SetHidden(true)
@@ -64,14 +67,14 @@ do -- helper class for trigger list entries
       do -- background color
          local color = self:getBaseBackgroundColor()
          if state then
-            color = ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT
+            color = getThemeColor("LIST_ITEM_BACKGROUND_SELECT")
          end
          self.back:SetColor(unpack(color))
       end
       do -- text color
-         local color = ItemTrig.theme.LIST_ITEM_TEXT_NORMAL
+         local color = getThemeColor("LIST_ITEM_TEXT_NORMAL")
          if state then
-            color = ItemTrig.theme.LIST_ITEM_TEXT_SELECTED
+            color = getThemeColor("LIST_ITEM_TEXT_SELECTED")
          end
          self.name:SetColor(unpack(color))
          self.desc:SetColor(unpack(color))
@@ -180,6 +183,8 @@ function WinCls:_construct()
       self.ui.entryPointFilterPane = pane
       --
       do -- config
+         local getThemeColor = ItemTrig.getCurrentThemeColor
+         --
          pane.onChange =
             function(pane)
                WinCls:getInstance():onEntryPointFilterChange()
@@ -203,26 +208,26 @@ function WinCls:_construct()
                local back = GetControl(control, "Bg")
                text:SetText(data.name)
                if extra and extra.selected then
-                  back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT))
-                  text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_SELECTED))
+                  back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND_SELECT")))
+                  text:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_SELECTED")))
                else
-                  back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
-                  text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+                  back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND")))
+                  text:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_NORMAL")))
                end
             end
          pane.element.onSelect =
             function(index, control, pane)
                local text = GetControl(control, "Text")
                local back = GetControl(control, "Bg")
-               back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT))
-               text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_SELECTED))
+               back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND_SELECT")))
+               text:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_SELECTED")))
             end
          pane.element.onDeselect =
             function(index, control, pane)
                local text = GetControl(control, "Text")
                local back = GetControl(control, "Bg")
-               back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
-               text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+               back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND")))
+               text:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_NORMAL")))
             end
       end
       do -- items
@@ -265,6 +270,10 @@ function WinCls:_construct()
             end
          end
    end
+   ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function()
+      self.ui.entryPointFilterPane:redraw()
+      self.ui.pane:redraw()
+   end)
 end
 
 function WinCls:onShow()

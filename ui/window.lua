@@ -18,14 +18,29 @@ WWindow.style = {
    --
    borderWidth        = 3 * ItemTrig.PIXEL,
    borderDistance     = 7,
-   borderColor        = ItemTrig.theme.WINDOW_BORDER_COLOR,
-   fillColorTop       = ItemTrig.theme.WINDOW_BACKGROUND_TOP,
-   fillColorBottom    = ItemTrig.theme.WINDOW_BACKGROUND_BOTTOM,
-   titleBarColorFocusStart = ItemTrig.theme.TITLE_BAR_COLOR_FOCUS_START,
-   titleBarColorFocusEnd   = ItemTrig.theme.TITLE_BAR_COLOR_FOCUS_END,
-   titleBarColorBlurStart  = ItemTrig.theme.TITLE_BAR_COLOR_BLUR_START,
-   titleBarColorBlurEnd    = ItemTrig.theme.TITLE_BAR_COLOR_BLUR_END,
+   borderColor        = ItemTrig.BLACK,
+   fillColorTop       = ItemTrig.WHITE,
+   fillColorBottom    = ItemTrig.WHITE,
+   titleBarColorFocusStart = ItemTrig.BLACK,
+   titleBarColorFocusEnd   = ItemTrig.BLACK,
+   titleBarColorBlurStart  = ItemTrig.BLACK,
+   titleBarColorBlurEnd    = ItemTrig.BLACK,
 }
+do
+   local registry = ItemTrig.ThemeManager.callbacks
+   local function _refresh(theme)
+      ItemTrig.assign(WWindow.style, {
+         borderColor             = theme.colors.WINDOW_BORDER_COLOR,
+         fillColorTop            = theme.colors.WINDOW_BACKGROUND_TOP,
+         fillColorBottom         = theme.colors.WINDOW_BACKGROUND_BOTTOM,
+         titleBarColorFocusStart = theme.colors.TITLE_BAR_COLOR_FOCUS_START,
+         titleBarColorFocusEnd   = theme.colors.TITLE_BAR_COLOR_FOCUS_END,
+         titleBarColorBlurStart  = theme.colors.TITLE_BAR_COLOR_BLUR_START,
+         titleBarColorBlurEnd    = theme.colors.TITLE_BAR_COLOR_BLUR_END,
+      })
+   end
+   registry:RegisterCallback("update", _refresh)
+end
 
 function WWindow:getDefaultOptions() -- override me, if you want
 end
@@ -47,7 +62,7 @@ function WWindow:_construct(options)
       modalOnly          = options.modalOnly          or false, -- boolean OR the name of the only allowed opener
       resizeThrottle     = options.resizeThrottle     or 1,     -- onResize will be called every X frames
    }
-   self.style = ItemTrig.assignDeep({}, self:getClass().style, WWindow.style) -- TODO: metatables
+   self.style = {} -- TODO: metatables
    self.state = {
       lastActionLayerUpdate = nil,
       moving                = false,
@@ -97,16 +112,33 @@ function WWindow:_construct(options)
       function(self) ItemTrig.UI.WWindow:cast(self):_onUpdate() end
    )
    self:refreshStyle()
+   ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function() self:refreshStyle() end)
 end
 
 function WWindow:pushActionLayer(name)
    table.insert(self.prefs.actionLayers, name)
    self:_updateActionLayers()
 end
+function WWindow:getComputedStyle()
+   local lists = { rawget(self, "style") }
+   local class = self:getClass()
+   while class do
+      local style = rawget(class, "style")
+      if style then
+         lists[#lists + 1] = style
+      end
+      class = class:getSuperclass()
+   end
+   local result = {}
+   for i = #lists, 1, -1 do
+      ItemTrig.assign(result, lists[i])
+   end
+   return result
+end
 function WWindow:refreshStyle()
    local edge  = self:GetNamedChild("Bg")
    local fill  = GetControl(edge, "Fill")
-   local style = self.style
+   local style = self:getComputedStyle()
    local vEdgeTop = VERTEX_POINTS_TOPLEFT    + VERTEX_POINTS_TOPRIGHT
    local vEdgeBot = VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT
    do -- blocker

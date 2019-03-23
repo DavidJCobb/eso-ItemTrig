@@ -65,6 +65,13 @@ function ItemTrig.deepCopy(tablevar)
    setmetatable(result, getmetatable(tablevar))
    return result
 end
+function ItemTrig.filterKeys(a, limitTo)
+   local result = {}
+   for k, _ in pairs(limitTo) do
+      result[k] = a[k]
+   end
+   return result
+end
 function ItemTrig.firstKeyIn(tablevar)
    if tablevar[1] then
       return 1

@@ -45,7 +45,7 @@
             <Texture name="$(parent)Bg" color="282828" excludeFromResizeToFitExtents="true">
                <AnchorFill />
             </Texture>
-            <Label name="$(parent)Text" font="ITEMTRIG_FONT_LIST_ITEM" text="Opcode text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+            <Label name="$(parent)Text" font="ITEMTRIG_FONT_LIST_ITEM" text="Opcode text">
                <Anchor point="TOPLEFT"  offsetX="7" />
                <Anchor point="TOPRIGHT" offsetX="-7" />
             </Label>
@@ -85,9 +85,8 @@
                <Dimensions y="50" />
                <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                <Controls>
-                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_NAME" font="ITEMTRIG_FONT_BASIC">
+                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_NAME" inherits="ItemTrig_UITemplate_ThemedBareText">
                      <Anchor point="TOPLEFT" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <EditBox name="$(parent)Value"
                      font="ITEMTRIG_FONT_BASIC"
@@ -115,10 +114,10 @@
                   local cList = self:GetNamedChild("Conditions")
                   local aHead = self:GetNamedChild("ActionsHeader")
                   local aList = self:GetNamedChild("Actions")
-                  local lastHeight = self:GetHeight()
+                  self.___lastHeight = self:GetHeight()
                   local function frameHandler(control)
                      local span = control:GetHeight()
-                     if span == lastHeight then
+                     if span == control.___lastHeight then
                         return
                      end
                      span = span - cHead:GetHeight()
@@ -127,6 +126,8 @@
                      cList:SetHeight(span / 2)
                      aList:SetHeight(span / 2)
                      --
+                     control.___lastHeight = control:GetHeight()
+                     --
                      ItemTrig.UI.WScrollList:cast(cList:GetNamedChild("List")):redraw()
                      ItemTrig.UI.WScrollList:cast(aList:GetNamedChild("List")):redraw()
                   end
@@ -134,19 +135,17 @@
                   frameHandler(self)
                </OnInitialized>
                <Controls>
-                  <Label name="$(parent)ConditionsHeader" font="ITEMTRIG_FONT_BASIC" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS">
+                  <Label name="$(parent)ConditionsHeader" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_CONDITIONS" inherits="ItemTrig_UITemplate_ThemedBareText">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="$(parent)Conditions" inherits="ItemTrig_TrigEdit_Template_OpcodeList">
                      <Anchor point="TOPLEFT"  relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMLEFT" />
                      <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionsHeader" relativePoint="BOTTOMRIGHT" />
                   </Control>
-                  <Label name="$(parent)ActionsHeader" font="ITEMTRIG_FONT_BASIC" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_ACTIONS">
+                  <Label name="$(parent)ActionsHeader" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_ACTIONS" inherits="ItemTrig_UITemplate_ThemedBareText">
                      <Anchor point="TOPLEFT"  relativeTo="$(parent)Conditions" relativePoint="BOTTOMLEFT" />
                      <Anchor point="TOPRIGHT" relativeTo="$(parent)Conditions" relativePoint="BOTTOMRIGHT" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="$(parent)Actions" inherits="ItemTrig_TrigEdit_Template_OpcodeList">
                      <Anchor point="TOPLEFT"     relativeTo="$(parent)ActionsHeader" relativePoint="BOTTOMLEFT" />
@@ -186,9 +185,8 @@
                   --
                </OnInitialized>
                <Controls>
-                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_ENTRYPOINTS" font="ITEMTRIG_FONT_BASIC">
+                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_LABEL_TRIGGER_ENTRYPOINTS" inherits="ItemTrig_UITemplate_ThemedBareText">
                      <Anchor point="TOPLEFT" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_WCombobox">
                      <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="8" />

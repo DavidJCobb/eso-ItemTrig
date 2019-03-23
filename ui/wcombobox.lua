@@ -18,6 +18,39 @@ end
 ItemTrig.UI.WCombobox   = ItemTrig.UI.WidgetClass:makeSubclass("WCombobox", "combobox")
 local WCombobox         = ItemTrig.UI.WCombobox
 local WScrollSelectList = ItemTrig.UI.WScrollSelectList
+local fadeToBottom      = ItemTrig.fadeToBottom
+
+WCombobox.style = {
+   --
+   -- Default style options for a window. You can override this 
+   -- per-subclass by assigning a table to the subclass.
+   --
+   font = "ZoFontGame",
+   focusRing        = ItemTrig.TRANSPARENT,
+   fontColorNormal  = ItemTrig.BLACK,
+   backColorNormal  = ItemTrig.TRANSPARENT,
+   fontColorFocus   = ItemTrig.BLACK,
+   backColorFocus   = ItemTrig.TRANSPARENT,
+   backBorderTop    = ItemTrig.TRANSPARENT,
+   backBorderBottom = ItemTrig.TRANSPARENT,
+}
+do
+   local registry = ItemTrig.ThemeManager.callbacks
+   local function _refresh(theme)
+      local colors = theme.colors
+      ItemTrig.assign(WCombobox.style, {
+         focusRing        = colors.COMBOBOX_FOCUS_RING,
+         fontColorNormal  = colors.COMBOBOX_TEXT,
+         backColorNormal  = colors.COMBOBOX_BACKGROUND,
+         fontColorFocus   = colors.COMBOBOX_MOUSEOVER_TEXT,
+         backColorFocus   = colors.COMBOBOX_MOUSEOVER_BACK,
+         backBorderTop    = colors.COMBOBOX_BODY_BORDER_TOP,
+         backBorderBottom = colors.COMBOBOX_BODY_BORDER_BOTTOM,
+      })
+   end
+   registry:RegisterCallback("update", _refresh)
+end
+
 function WCombobox:_construct(options)
    if not options then
       options = {}
@@ -75,14 +108,14 @@ function WCombobox:_construct(options)
       self._useAutocomplete = true
    end
    self.style = {
-      focusRing = options.style.focusRing or ItemTrig.theme.COMBOBOX_FOCUS_RING,
-      font      = options.style.font      or "ZoFontGame",
-      fontColorNormal  = options.style.fontColorNormal  or ItemTrig.theme.COMBOBOX_TEXT,
-      backColorNormal  = options.style.backColorNormal  or ItemTrig.theme.COMBOBOX_BACKGROUND,
-      fontColorFocus   = options.style.fontColorFocus   or ItemTrig.theme.COMBOBOX_MOUSEOVER_TEXT,
-      backColorFocus   = options.style.backColorFocus   or ItemTrig.theme.COMBOBOX_MOUSEOVER_BACK,
-      backBorderTop    = options.style.backBorderTop    or ItemTrig.theme.COMBOBOX_BODY_BORDER_TOP,
-      backBorderBottom = options.style.backBorderBottom or ItemTrig.theme.COMBOBOX_BODY_BORDER_BOTTOM,
+      focusRing        = options.style.focusRing,
+      font             = options.style.font,
+      fontColorNormal  = options.style.fontColorNormal,
+      backColorNormal  = options.style.backColorNormal,
+      fontColorFocus   = options.style.fontColorFocus,
+      backColorFocus   = options.style.backColorFocus,
+      backBorderTop    = options.style.backBorderTop,
+      backBorderBottom = options.style.backBorderBottom,
    }
    do -- configure pane
       local pane = self.controls.pane
@@ -98,14 +131,15 @@ function WCombobox:_construct(options)
             assert(data.name ~= nil, "The list item doesn't have a name.")
             local text     = GetControl(control, "Text")
             local combobox = WCombobox:fromItem(control)
+            local style    = combobox:getComputedStyle()
             text:SetText(tostring(data.name))
             if combobox then
                if extra.index == combobox.state.lastMouseoverIndex then
-                  GetControl(control, "Text"):SetColor(unpack(combobox.style.fontColorFocus))
-                  GetControl(control, "Back"):SetColor(unpack(combobox.style.backColorFocus))
+                  GetControl(control, "Text"):SetColor(unpack(style.fontColorFocus))
+                  GetControl(control, "Back"):SetColor(unpack(style.backColorFocus))
                else
-                  GetControl(control, "Text"):SetColor(unpack(combobox.style.fontColorNormal))
-                  GetControl(control, "Back"):SetColor(unpack(combobox.style.backColorNormal))
+                  GetControl(control, "Text"):SetColor(unpack(style.fontColorNormal))
+                  GetControl(control, "Back"):SetColor(unpack(style.backColorNormal))
                end
             end
             local checkbox = GetControl(control, "Enabled")
@@ -159,6 +193,7 @@ function WCombobox:_construct(options)
       pane:multiSelect(options.multiSelect or false)
    end
    self:refreshStyle()
+   ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function() self:refreshStyle() end)
 end
 
 function WCombobox:fromItem(control) -- static method
@@ -334,13 +369,14 @@ do -- internals
    function WCombobox:_onItemMouseEnter(control)
       local index = self.controls.pane:indexOfControl(control)
       do -- mouseover colors
-         local old = self.controls.pane:controlByIndex(self.state.lastMouseoverIndex)
+         local style = self:getComputedStyle()
+         local old   = self.controls.pane:controlByIndex(self.state.lastMouseoverIndex)
          self.state.lastMouseoverIndex = index
-         GetControl(control, "Text"):SetColor(unpack(self.style.fontColorFocus))
-         GetControl(control, "Back"):SetColor(unpack(self.style.backColorFocus))
+         GetControl(control, "Text"):SetColor(unpack(style.fontColorFocus))
+         GetControl(control, "Back"):SetColor(unpack(style.backColorFocus))
          if old and old ~= control then
-            GetControl(old, "Text"):SetColor(unpack(self.style.fontColorNormal))
-            GetControl(old, "Back"):SetColor(unpack(self.style.backColorNormal))
+            GetControl(old, "Text"):SetColor(unpack(style.fontColorNormal))
+            GetControl(old, "Back"):SetColor(unpack(style.backColorNormal))
          end
       end
       self:onItemMouseEnter(index, control)
@@ -390,6 +426,22 @@ function WCombobox:deselectAll(...)
 end
 function WCombobox:forEach(functor)
    return self.controls.pane:forEach(functor)
+end
+function WCombobox:getComputedStyle()
+   local lists = { rawget(self, "style") }
+   local class = self:getClass()
+   while class do
+      local style = rawget(class, "style")
+      if style then
+         lists[#lists + 1] = style
+      end
+      class = class:getSuperclass()
+   end
+   local result = {}
+   for i = #lists, 1, -1 do
+      ItemTrig.assign(result, lists[i])
+   end
+   return result
 end
 function WCombobox:getFirstSelectedIndex(...)
    return self.controls.pane:getFirstSelectedIndex(...)
@@ -496,15 +548,16 @@ function WCombobox:push(...)
 end
 function WCombobox:refreshStyle()
    assert(self ~= WCombobox, "This method must be called on an instance.")
-   local c = self.controls
-   c.label:SetColor(unpack(self.style.fontColorNormal))
-   c.back:SetColor(unpack(self.style.backColorNormal))
-   c.dropBack:SetColor(unpack(self.style.backColorNormal))
-   ItemTrig.fadeToBottom(c.dropEdge, self.style.backBorderTop, self.style.backBorderBottom)
+   local style = self:getComputedStyle()
+   local c     = self.controls
+   c.label:SetColor(   unpack(style.fontColorNormal))
+   c.back:SetColor(    unpack(style.backColorNormal))
+   c.dropBack:SetColor(unpack(style.backColorNormal))
+   fadeToBottom(c.dropEdge, style.backBorderTop, style.backBorderBottom)
    do -- focus ring
-      local color = self.style.backColorNormal
+      local color = style.backColorNormal
       if self:isOpen() then
-         color = self.style.focusRing
+         color = style.focusRing
       end
       c.edge:SetColor(unpack(color))
    end

@@ -23,11 +23,10 @@
                   ItemTrig.fitHeightToChildren(self)
                </OnInitialized>
                <Controls>
-                  <Label text="ITEMTRIG_STRING_UI_OPCODEEDIT_LABEL_TYPE" font="ITEMTRIG_FONT_BASIC">
+                  <Label text="ITEMTRIG_STRING_UI_OPCODEEDIT_LABEL_TYPE" inherits="ItemTrig_UITemplate_ThemedBareText">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="BOTTOMLEFT" />
                      <Dimensions x="113" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="ItemTrig_OpcodeEdit_Opcode" inherits="ItemTrig_UITemplate_WCombobox">
                      <Anchor point="TOPLEFT"  offsetX="120" />
@@ -56,23 +55,32 @@
                   </Button>
                </Controls>
             </Control>
-            <Label name="$(parent)Explanation" font="ITEMTRIG_FONT_BASIC" text="Test!">
+            <Label name="$(parent)Explanation" inherits="ItemTrig_UITemplate_ThemedBareText">
                <Anchor point="BOTTOMLEFT"  offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPLEFT" />
                <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" />
             </Label>
             <Control name="$(parent)Body"> <!-- body -->
                <Anchor point="TOPLEFT"     offsetY="7"  relativeTo="$(parent)Row1"   relativePoint="BOTTOMLEFT" />
-               <!-- <Anchor point="BOTTOMRIGHT" offsetY="-7" relativeTo="$(parent)Bottom" relativePoint="TOPRIGHT" /> -->
                <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Explanation" relativePoint="TOPRIGHT" />
                <Controls>
                   <Texture name="$(parent)Bg" excludeFromResizeToFitExtents="true">
                      <AnchorFill />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_BACKGROUND)) </OnInitialized>
+                     <OnInitialized>
+                        --self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_BACKGROUND))
+                        ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function(theme)
+                           self:SetColor(unpack(theme.colors.TEXTEDIT_BACKGROUND))
+                        end)
+                     </OnInitialized>
                   </Texture>
                   <Label name="ItemTrig_OpcodeEdit_OpcodeBodyUnderlay" text="" font="ITEMTRIG_FONT_BASIC">
                      <Anchor point="TOPLEFT"  offsetX="7" />
                      <Anchor point="TOPRIGHT" offsetX="-7" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT)) </OnInitialized>
+                     <OnInitialized>
+                        --self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT))
+                        ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function(theme)
+                           self:SetColor(unpack(theme.colors.TEXTEDIT_TEXT))
+                        end)
+                     </OnInitialized>
                   </Label>
                   <Label name="ItemTrig_OpcodeEdit_OpcodeBody" text="" font="ITEMTRIG_FONT_BASIC"
                      mouseEnabled="true"
@@ -96,7 +104,12 @@
                            <!-- <Anchor point="TOPLEFT"  relativeTo="$(parent)Enabled" relativePoint="TOPRIGHT" offsetX="7" offsetY="-7" /> -->
                            <Anchor point="TOPLEFT" offsetX="23" />
                            <Anchor point="TOPRIGHT" />
-                           <OnInitialized> self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT)) </OnInitialized>
+                           <OnInitialized>
+                              --self:SetColor(unpack(ItemTrig.theme.TEXTEDIT_TEXT))
+                              ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function(theme)
+                                 self:SetColor(unpack(theme.colors.TEXTEDIT_TEXT))
+                              end)
+                           </OnInitialized>
                         </Label>
                         <Label name="$(parent)Clickable" text="" font="ITEMTRIG_FONT_BASIC"
                            mouseEnabled="true"

@@ -1,3 +1,5 @@
+assert(ItemTrig.ThemeManager, "bad file load order")
+
 do -- define prefs
    ItemTrig.assign(ItemTrig.prefs, {
       ["logging/actionsTaken"]    = { default = false },
@@ -7,8 +9,9 @@ do -- define prefs
       ["runTriggersOn/crownCrateItems"] = { default = false },
       ["runTriggersOn/crownStoreItems"] = { default = false },
       ["runTriggersOn/lockedItems"]     = { default = false },
-      ["ui/allowEscForceClose"]   = { default = true },
+      ["ui/allowEscForceClose"]    = { default = true },
       ["ui/opcodeArgAutocomplete"] = { default = false },
+      ["ui/theme"]                 = { default = "OldDesktop" },
    })
 end
 local prefs = ItemTrig.prefs
@@ -95,6 +98,21 @@ local options = {
       type = "header",
       name = GetString(ITEMTRIG_STRING_OPTIONHEADER_UI),
    },
+   ItemTrig.assign(
+      {  -- Control whether Esc force-closes the editor without saving
+         --
+         type    = "dropdown",
+         name    = GetString(ITEMTRIG_STRING_OPTIONNAME_THEME),
+         tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_THEME),
+         getFunc = function() return prefs:get("ui/theme") end,
+         setFunc =
+            function(v)
+               prefs:set("ui/theme", v)
+               ItemTrig.ThemeManager:switchTo(v)
+            end,
+      },
+      ItemTrig.ThemeManager:setupOptions()
+   ),
    {  -- Control whether Esc force-closes the editor without saving
       --
       type    = "checkbox",

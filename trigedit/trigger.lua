@@ -25,44 +25,99 @@ ItemTrig:registerWindow("triggerEdit", WinCls)
 
 local OpcodeListCls = ItemTrig.UI.WidgetClass:makeSubclass("OpcodeListCls", "opcodeList")
 do -- helper class for opcode lists
+   local function _formatOpcode(opcode, color)
+      if not color then
+         color = "70B0FF"
+      end
+      local baseArgs = opcode.base.args
+      --
+      local function _formatOpcodeArg(s, i)
+         local function _validateEntryPoints(i)
+            local triggerEP = WinCls:getInstance().stack:getEnabledEntryPoints()
+            local opcodeEP  = baseArgs[i].allowedEntryPoints
+            if not opcodeEP then
+               return true
+            end
+            if not triggerEP then
+               return false
+            end
+            return ItemTrig.valuesOverlap(triggerEP, opcodeEP)
+         end
+         if not _validateEntryPoints(i) then
+            return s
+         end
+         --
+         s = ItemTrig.splitByCount(s, 200)
+         local out = ""
+         for j = 1, table.getn(s) do
+            out = out .. string.format("|c" .. color .. "%s|r", s[j])
+         end
+         return out
+      end
+      return opcode:format(_formatOpcodeArg)
+   end
+   --
    do -- helper class for list items
       ItemTrig.UI.OpcodeListEntry = ItemTrig.UI.WidgetClass:makeSubclass("OpcodeListEntry", "opcodeListEntry")
       local Cls = ItemTrig.UI.OpcodeListEntry
+   
+      local getThemeColor = ItemTrig.getCurrentThemeColor
+      
       function Cls:_construct()
          local control = self:asControl()
          self.back = self:GetNamedChild("Bg")
          self.text = self:GetNamedChild("Text")
          do -- theming
-            self.back:SetColor(unpack(ItemTrig.theme.LIST_ITEM_BACKGROUND))
-            self.text:SetColor(unpack(ItemTrig.theme.LIST_ITEM_TEXT_NORMAL))
+            self.back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND")))
+            self.text:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_NORMAL")))
          end
       end
       function Cls:getBaseBackgroundColor()
          if self:indexInParent() % 2 == 0 then
-            return ItemTrig.theme.LIST_ITEM_BACKGROUND_ALT
+            return getThemeColor("LIST_ITEM_BACKGROUND_ALT")
          end
-         return ItemTrig.theme.LIST_ITEM_BACKGROUND
+         return getThemeColor("LIST_ITEM_BACKGROUND")
       end
       function Cls:setSelected(state)
          do -- background color
             local color = self:getBaseBackgroundColor()
             if state then
-               color = ItemTrig.theme.LIST_ITEM_BACKGROUND_SELECT
+               color = getThemeColor("LIST_ITEM_BACKGROUND_SELECT")
             end
             self.back:SetColor(unpack(color))
          end
          do -- text color
-            local color = ItemTrig.theme.LIST_ITEM_TEXT_NORMAL
+            local color = getThemeColor("LIST_ITEM_TEXT_NORMAL")
             if state then
-               color = ItemTrig.theme.LIST_ITEM_TEXT_SELECTED
+               color = getThemeColor("LIST_ITEM_TEXT_SELECTED")
             end
             self.text:SetColor(unpack(color))
          end
+         do -- opcode color
+            local color = getThemeColor("OPCODE_ARGUMENT_LINK_NORMAL", true)
+            local alt   = getThemeColor("OPCODE_ARGUMENT_LINK_SELECT", true)
+            if color ~= alt then
+               local control = self:asControl()
+               local pane    = ItemTrig.UI.WScrollList:fromItem(control)
+               if pane then
+                  local index  = pane:indexOfControl(self:asControl())
+                  local opcode = pane:at(index)
+                  if opcode then
+                     if state then
+                        color = alt
+                     end
+                     self.text:SetText(_formatOpcode(opcode, color))
+                  end
+               end
+            end
+         end
       end
-      function Cls:setText(t)
+      function Cls:setText(t, setHeight)
          self.text:SetText(t)
-         local height = ItemTrig.offsetBottom(self.text) + ItemTrig.offsetTop(self.text)
-         self:asControl():SetHeight(ItemTrig.round(height))
+         if setHeight or setHeight == nil then
+            local height = ItemTrig.offsetBottom(self.text) + ItemTrig.offsetTop(self.text)
+            self:asControl():SetHeight(ItemTrig.round(height))
+         end
       end
    end
    --
@@ -74,33 +129,8 @@ do -- helper class for opcode lists
          pane.element.template = "ItemTrig_TrigEdit_Template_Opcode"
          pane.element.toConstruct =
             function(control, data, extra, pane)
-               local baseArgs = data.base.args
-               local function _formatOpcodeArg(s, i)
-                  local function _validateEntryPoints(i)
-                     local triggerEP = WinCls:getInstance().stack:getEnabledEntryPoints()
-                     local opcodeEP  = baseArgs[i].allowedEntryPoints
-                     if not opcodeEP then
-                        return true
-                     end
-                     if not triggerEP then
-                        return false
-                     end
-                     return ItemTrig.valuesOverlap(triggerEP, opcodeEP)
-                  end
-                  if not _validateEntryPoints(i) then
-                     return s
-                  end
-                  --
-                  s = ItemTrig.splitByCount(s, 200)
-                  local out = ""
-                  for j = 1, table.getn(s) do
-                     out = out .. string.format("|c70B0FF%s|r", s[j])
-                  end
-                  return out
-               end
-               --
                local widget = ItemTrig.UI.OpcodeListEntry:cast(control)
-               widget:setText(data:format(_formatOpcodeArg))
+               widget:setText(_formatOpcode(data, color))
                widget:setSelected(extra and extra.selected)
             end
          pane.element.onSelect =
@@ -135,6 +165,9 @@ do -- helper class for opcode lists
             )
          end
       end
+      ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function()
+         self.pane:redraw()
+      end)
    end
    function OpcodeListCls:getSelected()
       return self.pane:at(self.pane:getFirstSelectedIndex())
@@ -250,12 +283,7 @@ function WinCls:_construct()
    --
    local control = self:asControl()
    self.ui = {}
-   do -- scene setup
-      --[[self.ui.fragment = ZO_SimpleSceneFragment:New(control)
-      ItemTrig.SCENE_TRIGEDIT:AddFragment(self.ui.fragment)
-      SCENE_MANAGER:RegisterTopLevel(control, false)]]--
-      self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
-   end
+   self.ui.fragment = ItemTrig.registerTrigeditWindowFragment(control)
    self.stack      = TriggerStack:new() -- state of the trigger(s) we're editing; nested; "last" frame is the innermost edited trigger
    self.refreshing = true
    self.pendingResults = {

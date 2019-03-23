@@ -67,7 +67,6 @@ function WinCls:_construct()
    end
    self.ui.opcodeBody  = ItemTrig_OpcodeEdit_OpcodeBody
    self.ui.explanation = self:GetNamedChild("Explanation")
-   self.ui.explanation:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR))
    --
    self.ui.nestedTriggerEnable = GetControl(ItemTrig_OpcodeEdit_NestedTriggerHack, "Enabled")
    self.ui.nestedTriggerEnable.toggleFunction =
@@ -265,9 +264,9 @@ function WinCls:redrawDescription(options)
          end
          s = ItemTrig.splitByCount(s, 200)
          local out   = ""
-         local color = "70B0FF"
+         local color = ItemTrig.getCurrentThemeColor("OPCODE_ARGUMENT_LINK_NORMAL", true) or "70B0FF"
          if i == options.highlightIndex then
-            color = "EE3333"
+            color = ItemTrig.getCurrentThemeColor("OPCODE_ARGUMENT_LINK_FOCUS", true) or "EE3333"
          end
          local fmt = LocalizeString("|c<<1>>|l0:1:1:5%:2.5:<<1>>|l", color) .. "<<1>>|l|r"
          for j = 1, #s do

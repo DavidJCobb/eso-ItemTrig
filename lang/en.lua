@@ -47,6 +47,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERFAILURES", "Log trigger 
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES", "Log every time a trigger stops early due to an error.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_UI", "UI settings")
+
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_THEME", "UI color scheme")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_THEME", "What do you want ItemTrig to look like?")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWESCFORCECLOSE", "Esc force-closes the editor")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWESCFORCECLOSE", "Control whether the Esc key force-closes the editor and discards unsaved changes")
@@ -62,6 +65,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ROBUSTFENCING", "For the \"Fence\"
 --
 -- USER INTERFACE
 --
+--
+ZO_CreateStringId("ITEMTRIG_STRING_UI_THEMENAME_DARK",       "Dark")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_THEMEDESC_DARK",       "A dark theme that uses colors from ESO's PC interface: black and grey, with teal highlights.")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_THEMENAME_OLDDESKTOP", "Old Desktop")
+ZO_CreateStringId("ITEMTRIG_STRING_UI_THEMEDESC_OLDDESKTOP", "A theme inspired by desktop UIs from the 1990s: grey windows, with orange highlights instead of blue for some added flair.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_TITLE", "ItemTrig")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_TRIGGERLIST_FILTER_SHOW_ALL", "Show All Triggers")
@@ -676,6 +684,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_NAME",    "Stop l
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT", "If the next trigger action runs, then it will stop all processing on the current item. You can put a trigger like this at the very top of your trigger list to make sure that nothing ever runs on certain items. (There are also built-in convenience settings to suppress triggers for locked and Crown items.)")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DECONSTRUCTINTRICATE_NAME", "Deconstruct \"intricate\" gear for bonus XP")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_DECONSTRUCTWORTHLESS_NAME", "Deconstruct worthless equipment")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_SELLLOOTEDPOISONS_NAME", "Sell common non-crafted poisons")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_SELLTRASH_NAME", "Sell trash")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_SELLORNATE_NAME", "Sell \"ornate\" gear for additional gold")
 --

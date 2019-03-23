@@ -21,8 +21,9 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
+      cl[1] = Condition:new(15, { false }) -- The item [is not] locked
       cl[2] = Condition:new(24, { true }) -- The item [is] intricate
+      cl[3] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
       --
       al[1] = Action:new(9) -- Deconstruct the item.
       --
@@ -35,23 +36,56 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new(23, { true }) -- The item [is] ornate.
+      cl[1] = Condition:new(15, { false }) -- The item [is not] locked
+      cl[2] = Condition:new(23, { true }) -- The item [is] ornate.
       --
       al[1] = Action:new(8, { 9999 }) -- Sell [9999] of the item.
       --
       table.insert(gallery, t)
    end
-   do -- This trigger will never run
+   do -- Deconstruct worthless equipment
       local t = Trigger:new()
-      t.name        = GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME)
-      t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_DECONSTRUCTWORTHLESS_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new(1, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_COMMENT) }) -- Comment
-      cl[2] = Condition:new(3, { false }) -- [Never].
+      cl[1] = Condition:new(15, { false }) -- The item [is not] locked
+      cl[2] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
+      cl[3] = Condition:new(31, { { qualifier = "LTE", number = 0 } }) -- Sell value is [at most 0]
+      cl[4] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
       --
-      al[1] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE) }) -- Log Message
+      al[1] = Action:new(9) -- Deconstruct the item.
+      --
+      table.insert(gallery, t)
+   end
+   do -- Sell trash
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_SELLTRASH_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_BARTER }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new( 7, { true, ITEMTYPE_TRASH }) -- The item [is] a [Trash]
+      cl[2] = Condition:new(15, { false }) -- The item [is not] locked
+      --
+      al[1] = Action:new(7, { 9999 }) -- Sell as many as possible.
+      --
+      table.insert(gallery, t)
+   end
+   do -- Sell common non-crafted poisons
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_SELLLOOTEDPOISONS_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_BARTER }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new( 7, { true, ITEMTYPE_POISON }) -- The item [is] a [Poison]
+      cl[2] = Condition:new(15, { false }) -- The item [is not] locked
+      cl[3] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
+      cl[4] = Condition:new( 8, { false }) -- The item [was not] crafted by a player
+      --
+      al[1] = Action:new(7, { 9999 }) -- Sell as many as possible.
       --
       table.insert(gallery, t)
    end
@@ -240,6 +274,20 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new( 4, { GetString(ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT) }) -- Comment
       al[2] = Action:new(10) -- Stop processing triggers on this item
+      --
+      table.insert(gallery, t)
+   end
+   do -- This trigger will never run
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new(1, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_COMMENT) }) -- Comment
+      cl[2] = Condition:new(3, { false }) -- [Never].
+      --
+      al[1] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE) }) -- Log Message
       --
       table.insert(gallery, t)
    end

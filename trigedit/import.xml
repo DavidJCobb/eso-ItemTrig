@@ -19,9 +19,8 @@
                <Dimensions y="50" />
                <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
                <Controls>
-                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_IMPORTLIST_LABEL_IMPORTSOURCE" font="ITEMTRIG_FONT_BASIC">
+                  <Label name="$(parent)Label" text="ITEMTRIG_STRING_UI_IMPORTLIST_LABEL_IMPORTSOURCE" inherits="ItemTrig_UITemplate_ThemedBareText">
                      <Anchor point="TOPLEFT" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                   <Control name="ItemTrig_TriggerImportSourceSelectPlaceholder" inherits="ItemTrig_UITemplate_WComboboxPlaceholder">
                      <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="TOPRIGHT" offsetX="8" />
@@ -63,9 +62,11 @@
                      <Anchor point="LEFT"  offsetX="20"  relativeTo="$(parent)Col2Contents" />
                      <Anchor point="RIGHT" offsetX="-20" relativeTo="$(parent)Col2Contents" />
                      <OnInitialized>
-                        local c = ItemTrig.assign({}, ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)
-                        c[4] = c[4] - 0.4
-                        self:SetColor(unpack(c))
+                        ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function(theme)
+                           local c = ItemTrig.assign({}, theme.colors.WINDOW_BARE_TEXT_COLOR)
+                           c[4] = c[4] - 0.4
+                           self:SetColor(unpack(c))
+                        end)
                      </OnInitialized>
                   </Label>
                </Controls>

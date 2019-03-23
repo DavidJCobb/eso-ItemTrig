@@ -40,6 +40,8 @@ WTooltip.AXIS_V = 1
 WTooltip.PREFER_FORWARD  = 0
 WTooltip.PREFER_BACKWARD = 1
 
+local getCurrentThemeColor = ItemTrig.getCurrentThemeColor
+
 function WTooltip:_construct(options)
    options = options or {}
    --
@@ -61,7 +63,7 @@ function WTooltip:refreshStyle()
    local fill = self.controls.fill
    local text = self.controls.text
    do -- edge
-      local color  = ItemTrig.theme.TOOLTIP_BORDER
+      local color   = getCurrentThemeColor("TOOLTIP_BORDER")
       local offsetX = borderDistance + borderWidth
       local offsetY = borderWidth
       local parent = self:asControl()
@@ -71,7 +73,7 @@ function WTooltip:refreshStyle()
       edge:SetColor(unpack(color))
    end
    do -- fill
-      local color  = ItemTrig.theme.TOOLTIP_BACKGROUND
+      local color  = getCurrentThemeColor("TOOLTIP_BACKGROUND")
       local offsetX = borderWidth
       local offsetY = borderWidth
       fill:ClearAnchors()
@@ -80,7 +82,7 @@ function WTooltip:refreshStyle()
       fill:SetColor(unpack(color))
    end
    do -- text
-      local color  = ItemTrig.theme.TOOLTIP_TEXT
+      local color  = getCurrentThemeColor("TOOLTIP_TEXT")
       text:SetColor(unpack(color))
    end
 end
@@ -94,6 +96,8 @@ function WTooltip:show(target, text, axis, prefer, distance)
    axis     = axis     or self.AXIS_H
    prefer   = prefer   or self.PREFER_FORWARD
    distance = distance or 0
+   --
+   self:refreshStyle()
    --
    if target and text ~= "" then
       local control = self:asControl()
@@ -131,7 +135,7 @@ function WTooltip:show(target, text, axis, prefer, distance)
                before   = target:GetLeft() - distance
                after    = sh - target:GetLeft() - target:GetWidth() - distance
                --
-               offsetX = distance + (borderWidth * 2 + borderDistance)
+               offsetX = distance + (borderWidth * 2 + borderDistance * 2)
             else
                cross    = LEFT
                backward = TOP
@@ -140,7 +144,7 @@ function WTooltip:show(target, text, axis, prefer, distance)
                before   = target:GetTop() - distance
                after    = sh - target:GetTop() - target:GetHeight() - distance
                --
-               offsetY = distance + (borderWidth * 2 + borderDistance)
+               offsetY = distance + (borderWidth * 2 + borderDistance * 2)
             end
          end
          do

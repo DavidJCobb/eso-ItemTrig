@@ -21,6 +21,7 @@
                if ItemTrig.prefs:get("ui/allowEscForceClose") == false then
                   return true
                end
+               return false
             </Down>
          </Action>
          <Action name="ITEMTRIG_INTERCEPT_TOGGLE_GAME_CAMERA_UI_MODE" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_GAME_CAMERA_UI_MODE">

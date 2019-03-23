@@ -4,6 +4,10 @@ ItemTrig.PIXEL   = GuiRoot:GetWidth()  / tonumber(GetCVar("WindowedWidth"))
 ItemTrig.PIXEL_W = ItemTrig.PIXEL
 ItemTrig.PIXEL_H = GuiRoot:GetHeight() / tonumber(GetCVar("WindowedHeight"))
 
+ItemTrig.BLACK       = {0,0,0,1}
+ItemTrig.TRANSPARENT = {0,0,0,0}
+ItemTrig.WHITE       = {1,1,1,1}
+
 function ItemTrig.dispatchEvent(control, eventName, ...)
    assert(control ~= nil, "Cannot dispatch an event to a nil control.")
    local f = control:GetHandler(eventName)
@@ -85,20 +89,45 @@ function ItemTrig.registerTrigeditWindowFragment(control)
    return fragment
 end
 
---
--- THEMING HELPERS
---
--- Used in cases where virtual controls can't be relied on because ESO's XML 
--- parser, or its virtual control system, or Dibella only knows what, breaks 
--- for unknown reasons.
---
-ItemTrig.theming = {}
-function ItemTrig.theming.listBackground(control)
-   ItemTrig.fadeToBottom(control, ItemTrig.theme.LIST_BACKGROUND_TOP, ItemTrig.theme.LIST_BACKGROUND_BOTTOM)
-end
-function ItemTrig.theming.listBorder(control)
-   control:SetColor(unpack(ItemTrig.theme.LIST_BORDER))
-end
-function ItemTrig.theming.listEnd(control)
-   ItemTrig.fadeToBottom(control, {0,0,0,0.5}, {0,0,0,0})
+do
+   local fadeToBottom  = ItemTrig.fadeToBottom
+   local getThemeColor = ItemTrig.getCurrentThemeColor
+   --
+   -- THEMING HELPERS
+   --
+   -- Used in cases where virtual controls can't be relied on because ESO's XML 
+   -- parser, or its virtual control system, or Dibella only knows what, breaks 
+   -- for unknown reasons.
+   --
+   local function _updateBareText(control, theme)
+      control:SetColor(unpack(theme.colors.WINDOW_BARE_TEXT_COLOR))
+   end
+   local function _updateEditBox(control, theme)
+      control:SetColor(unpack(theme.colors.TEXTEDIT_TEXT))
+      control:SetSelectionColor(unpack(theme.colors.TEXTEDIT_SELECTION))
+      control:GetNamedChild("Bg"):SetColor(unpack(theme.colors.TEXTEDIT_BACKGROUND))
+   end
+   local function _updateListBackground(control, theme)
+      fadeToBottom(control, theme.colors.LIST_BACKGROUND_TOP, theme.colors.LIST_BACKGROUND_BOTTOM)
+   end
+   local function _updateListBorder(control, theme)
+      control:SetColor(unpack(theme.colors.LIST_BORDER))
+   end
+   --
+   ItemTrig.theming = {}
+   function ItemTrig.theming.bareText(control)
+      ItemTrig.ThemeManager.callbacks:RegisterCallback("update", _updateBareText, control)
+   end
+   function ItemTrig.theming.editBox(control)
+      ItemTrig.ThemeManager.callbacks:RegisterCallback("update", _updateEditBox, control)
+   end
+   function ItemTrig.theming.listBackground(control)
+      ItemTrig.ThemeManager.callbacks:RegisterCallback("update", _updateListBackground, control)
+   end
+   function ItemTrig.theming.listBorder(control)
+      ItemTrig.ThemeManager.callbacks:RegisterCallback("update", _updateListBorder, control)
+   end
+   function ItemTrig.theming.listEnd(control)
+      ItemTrig.fadeToBottom(control, {0,0,0,0.5}, {0,0,0,0})
+   end
 end

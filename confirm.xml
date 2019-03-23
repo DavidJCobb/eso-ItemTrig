@@ -34,13 +34,12 @@
                <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Buttons"  relativePoint="TOPRIGHT" />
                <Controls>
                   <Label name="$(parent)Text" 
-                     font="ITEMTRIG_FONT_BASIC"
                      horizontalAlignment="CENTER"
                      verticalAlignment="CENTER"
+                     inherits="ItemTrig_UITemplate_ThemedBareText"
                   >
                      <Anchor point="TOPLEFT"  offsetY="15" />
                      <Anchor point="TOPRIGHT" offsetY="15" />
-                     <OnInitialized> self:SetColor(unpack(ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)) </OnInitialized>
                   </Label>
                </Controls>
             </Control>

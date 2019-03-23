@@ -115,9 +115,11 @@
                      <Anchor point="LEFT"  offsetX="20"  relativeTo="$(parent)Col2Contents" />
                      <Anchor point="RIGHT" offsetX="-20" relativeTo="$(parent)Col2Contents" />
                      <OnInitialized>
-                        local c = ItemTrig.assign({}, ItemTrig.theme.WINDOW_BARE_TEXT_COLOR)
-                        c[4] = c[4] - 0.4
-                        self:SetColor(unpack(c))
+                        ItemTrig.ThemeManager.callbacks:RegisterCallback("update", function(theme)
+                           local c = ItemTrig.assign({}, theme.colors.WINDOW_BARE_TEXT_COLOR)
+                           c[4] = c[4] - 0.4
+                           self:SetColor(unpack(c))
+                        end)
                      </OnInitialized>
                   </Label>
                </Controls>

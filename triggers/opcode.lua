@@ -134,6 +134,7 @@ function ItemTrig.OpcodeBase:new(name, formatString, args, func, extra)
          extra = {}
       end
       result.allowedEntryPoints = extra.allowedEntryPoints or nil -- nil == no limit; else, array
+      result.deprecated         = extra.deprecated or false -- Indicates that the opcode is deprecated and should not be made available in the UI
       result.explanation        = extra.explanation or nil
       result.neverSkip          = extra.neverSkip or false -- Indicates that a condition shouldn't be skipped when doing short-circuiting for ORs
    end

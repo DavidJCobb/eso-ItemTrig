@@ -2,8 +2,8 @@
 ## Author: DavidJCobb
 ## Description: Automatically performs actions on your items based on the rules you specify.
 ## APIVersion: 100026
-## AddOnVersion: 2
-## Version: 1.0.1
+## AddOnVersion: 3
+## Version: 1.0.3
 ## SavedVariables: ItemTrigSavedata
 ## DependsOn: LibAddonMenu-2.0
 
@@ -24,6 +24,7 @@ misc/ui.lua
 misc/item.lua
 misc/quest.lua
 misc/skills.lua
+ui/thememanager.lua
 options.lua
 triggers/system.lua
 triggers/serialization.lua
@@ -32,8 +33,9 @@ triggers/actions.lua
 triggers/conditions.lua
 triggers/trigger.lua
 triggers/gallery.lua
-ui/theming.lua
+#ui/theming.lua
 ui/theming.xml
+ui/themed_scrollbars.xml
 ui/base.lua
 ui/keynav/wkeynavigable.lua
 ui/keynav/wkeynavigablewindow.lua
@@ -55,6 +57,7 @@ ui/wtooltip.xml
 ui/wviewholder.lua
 ui/wviewholder.xml
 ui/editboxtemplates.lua
+ui/wthemedbutton.lua
 #ui/testmenu.lua # DISABLED
 #ui/testmenu.xml # DISABLED
 trigedit/main.lua
