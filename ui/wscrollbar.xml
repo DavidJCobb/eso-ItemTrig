@@ -1,6 +1,6 @@
 <GuiXml>
    <Controls>
-      <Slider name="ItemTrig_UITemplate_ThemedScrollbarVertical" mouseEnabled="true" virtual="true">
+      <Slider name="ItemTrig_UITemplate_WScrollbar" mouseEnabled="true" virtual="true">
          <!--
             This element is essentially the "full" scrollbar that you end up with 
             when you inherit ZO_VerticalScrollbarBase, which in turn inherits from 

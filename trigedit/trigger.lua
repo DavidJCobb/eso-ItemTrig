@@ -94,8 +94,8 @@ do -- helper class for opcode lists
             self.text:SetColor(unpack(color))
          end
          do -- opcode color
-            local color = getThemeColor("OPCODE_ARGUMENT_LINK_NORMAL", true)
-            local alt   = getThemeColor("OPCODE_ARGUMENT_LINK_SELECT", true)
+            local color = ItemTrig.getCurrentThemeString("OPCODE_ARGUMENT_LINK_NORMAL", true)
+            local alt   = ItemTrig.getCurrentThemeString("OPCODE_ARGUMENT_LINK_SELECT", true)
             if color ~= alt then
                local control = self:asControl()
                local pane    = ItemTrig.UI.WScrollList:fromItem(control)
@@ -130,6 +130,7 @@ do -- helper class for opcode lists
          pane.element.toConstruct =
             function(control, data, extra, pane)
                local widget = ItemTrig.UI.OpcodeListEntry:cast(control)
+               local color  = ItemTrig.getCurrentThemeString("OPCODE_ARGUMENT_LINK_NORMAL", true)
                widget:setText(_formatOpcode(data, color))
                widget:setSelected(extra and extra.selected)
             end

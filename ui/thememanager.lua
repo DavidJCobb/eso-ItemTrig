@@ -24,9 +24,12 @@ function ItemTrig.getCurrentThemeNumber(name)
    end
    return 0
 end
-function ItemTrig.getCurrentThemeString(name)
+function ItemTrig.getCurrentThemeString(name, noFallback)
    if ThemeManager.current then
       return ThemeManager.current.strings[name]
+   end
+   if noFallback then
+      return
    end
    return ""
 end
@@ -80,35 +83,16 @@ do
          TOOLTIP_BACKGROUND          = { 1, 1, 0.5, 1 },
          TOOLTIP_TEXT                = { 0, 0, 0, 1 },
          TOOLTIP_BORDER              = { 0, 0, 0, 1 },
-         --
-         OPCODE_ARGUMENT_LINK_NORMAL = "70B0FF",
-         OPCODE_ARGUMENT_LINK_SELECT = "70B0FF", -- container is selected
-         OPCODE_ARGUMENT_LINK_FOCUS  = "EE3333", -- link is selected
       },
       numbers = {
-         SCROLLBAR_THICKNESS = 16, -- not implemented
-         SCROLLBAR_THUMB_SIZE_MAIN  = 32,
-         SCROLLBAR_THUMB_SIZE_CROSS = 16,
-         SCROLLBAR_BUTTON_SIZE_MAIN  = 16,
-         SCROLLBAR_BUTTON_SIZE_CROSS = 16,
-         --
          SCROLLBAR_ALPHA_INITIAL    = 0.75, -- alpha when the mouse isn't near the scrollbar
          SCROLLBAR_ALPHA_HOVER_AREA = 0.90, -- alpha when the mouse is over the scroll area
          SCROLLBAR_ALPHA_HOVER_SELF = 1.00, -- alpha when the mouse is over the scrollbar itself
       },
       strings = {
-         SCROLLBAR_TRACK_FILE = "EsoUI/Art/Miscellaneous/scrollbox_track.dds",
-         SCROLLBAR_THUMB_FILE          = "EsoUI/Art/Miscellaneous/scrollbox_elevator.dds",
-         SCROLLBAR_THUMB_FILE_DISABLED = "EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds",
-         SCROLLBAR_THUMB_FILE_OVERLAY  = "EsoUI/Art/Tooltips/munge_overlay.dds",
-         SCROLLBAR_UP_ARROW_FILE_NORMAL   = "ItemTrig/textures/scrollbutton_up_normal.dds",
-         SCROLLBAR_UP_ARROW_FILE_PRESSED  = "ItemTrig/textures/scrollbutton_up_pressed.dds",
-         SCROLLBAR_UP_ARROW_FILE_HOVER    = "ItemTrig/textures/scrollbutton_up_hover.dds",
-         SCROLLBAR_UP_ARROW_FILE_DISABLED = "ItemTrig/textures/scrollbutton_up_disabled.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_NORMAL   = "ItemTrig/textures/scrollbutton_down_normal.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_PRESSED  = "ItemTrig/textures/scrollbutton_down_pressed.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_HOVER    = "ItemTrig/textures/scrollbutton_down_hover.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_DISABLED = "ItemTrig/textures/scrollbutton_down_disabled.dds",
+         OPCODE_ARGUMENT_LINK_NORMAL = "70B0FF",
+         OPCODE_ARGUMENT_LINK_SELECT = "50CFFF", -- container is selected
+         OPCODE_ARGUMENT_LINK_FOCUS  = "EE3333", -- link is selected
       },
    })
    _add("Dark", {
@@ -151,35 +135,16 @@ do
          TOOLTIP_BACKGROUND          = {   0/255,   0/255,   0/255, 1 },
          TOOLTIP_TEXT                = { 1, 1, 1, 1 },
          TOOLTIP_BORDER              = {  67/255,  67/255,  59/255, 1 },
-         --
-         OPCODE_ARGUMENT_LINK_NORMAL = "70B0FF",
-         OPCODE_ARGUMENT_LINK_SELECT = "001080", -- container is selected
-         OPCODE_ARGUMENT_LINK_FOCUS  = "EE3333", -- link is selected
       },
       numbers = {
-         SCROLLBAR_THICKNESS = 16, -- not implemented
-         SCROLLBAR_THUMB_SIZE_MAIN  = 32,
-         SCROLLBAR_THUMB_SIZE_CROSS = 16,
-         SCROLLBAR_BUTTON_SIZE_MAIN  = 16,
-         SCROLLBAR_BUTTON_SIZE_CROSS = 16,
-         --
          SCROLLBAR_ALPHA_INITIAL    = 0.5, -- alpha when the mouse isn't near the scrollbar
          SCROLLBAR_ALPHA_HOVER_AREA = 0.8, -- alpha when the mouse is over the scroll area
          SCROLLBAR_ALPHA_HOVER_SELF = 1.0, -- alpha when the mouse is over the scrollbar itself
       },
       strings = {
-         SCROLLBAR_TRACK_FILE = "EsoUI/Art/Miscellaneous/scrollbox_track.dds",
-         SCROLLBAR_THUMB_FILE          = "EsoUI/Art/Miscellaneous/scrollbox_elevator.dds",
-         SCROLLBAR_THUMB_FILE_DISABLED = "EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds",
-         SCROLLBAR_THUMB_FILE_OVERLAY  = "EsoUI/Art/Tooltips/munge_overlay.dds",
-         SCROLLBAR_UP_ARROW_FILE_NORMAL   = "EsoUI/Art/Buttons/scrollbox_upArrow_up.dds",
-         SCROLLBAR_UP_ARROW_FILE_PRESSED  = "EsoUI/Art/Buttons/scrollbox_upArrow_down.dds",
-         SCROLLBAR_UP_ARROW_FILE_HOVER    = "EsoUI/Art/Buttons/scrollbox_upArrow_over.dds",
-         SCROLLBAR_UP_ARROW_FILE_DISABLED = "EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_NORMAL   = "EsoUI/Art/Buttons/scrollbox_downArrow_up.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_PRESSED  = "EsoUI/Art/Buttons/scrollbox_downArrow_down.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_HOVER    = "EsoUI/Art/Buttons/scrollbox_downArrow_over.dds",
-         SCROLLBAR_DOWN_ARROW_FILE_DISABLED = "EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds",
+         OPCODE_ARGUMENT_LINK_NORMAL = "70B0FF",
+         OPCODE_ARGUMENT_LINK_SELECT = "001080", -- container is selected
+         OPCODE_ARGUMENT_LINK_FOCUS  = "EE3333", -- link is selected
       },
    })
 end

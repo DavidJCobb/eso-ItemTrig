@@ -259,9 +259,9 @@ function WinCls:redrawDescription(options)
          end
          s = ItemTrig.splitByCount(s, 200)
          local out   = ""
-         local color = ItemTrig.getCurrentThemeColor("OPCODE_ARGUMENT_LINK_NORMAL", true) or "70B0FF"
+         local color = ItemTrig.getCurrentThemeString("OPCODE_ARGUMENT_LINK_NORMAL", true) or "70B0FF"
          if i == options.highlightIndex then
-            color = ItemTrig.getCurrentThemeColor("OPCODE_ARGUMENT_LINK_FOCUS", true) or "EE3333"
+            color = ItemTrig.getCurrentThemeString("OPCODE_ARGUMENT_LINK_FOCUS", true) or "EE3333"
          end
          local fmt = LocalizeString("|c<<1>>|l0:1:1:5%:2.5:<<1>>|l", color) .. "<<1>>|l|r"
          for j = 1, #s do

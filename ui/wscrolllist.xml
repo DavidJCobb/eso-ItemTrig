@@ -1,14 +1,7 @@
 <GuiXml>
    <Controls>
-      <!-- <Control name="ItemTrig_UITemplate_WScrollList" inherits="ZO_ScrollAreaBarBehavior" virtual="true"> -->
       <Control name="ItemTrig_UITemplate_WScrollList" virtual="true">
          <OnInitialized> ItemTrig.UI.WScrollList:install(self) </OnInitialized>
-         <!--
-            The inheritance just handles scrollbar opacity on hover, 
-            and our markup doesn't break compatibility with Zenimax 
-            code. However, we may want to keep an eye on that in 
-            case they change it.
-         -->
          <Controls>
             <Scroll name="$(parent)Contents" mouseEnabled="true">
                <Anchor point="TOPLEFT" />
@@ -18,19 +11,7 @@
                   widget:scrollBy(-delta * widget.scrollStep)
                </OnMouseWheel>
             </Scroll>
-            <!-- <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ZO_VerticalScrollbarBase">
-               <Anchor point="TOPRIGHT" offsetY="16" />
-               <Anchor point="BOTTOMRIGHT" />
-               <OnMouseWheel>
-                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
-                  widget:scrollBy(-delta * widget.scrollStep)
-               </OnMouseWheel>
-               <OnValueChanged>
-                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
-                  widget:scrollTo(value, { fromSlider = true })
-               </OnValueChanged>
-            </Slider> -->
-            <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ItemTrig_UITemplate_ThemedScrollbarVertical">
+            <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ItemTrig_UITemplate_WScrollbar">
                <Anchor point="TOPRIGHT" offsetY="16" />
                <Anchor point="BOTTOMRIGHT" />
             </Slider>

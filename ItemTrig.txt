@@ -33,7 +33,6 @@ triggers/actions.lua
 triggers/conditions.lua
 triggers/trigger.lua
 triggers/gallery.lua
-#ui/theming.lua
 ui/theming.xml
 ui/base.lua
 ui/keynav/wkeynavigable.lua
