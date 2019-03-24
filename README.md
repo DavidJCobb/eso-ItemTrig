@@ -1,38 +1,34 @@
 # eso-ItemTrig
-An attempt at making a trigger-based alternative to the Elder Scrolls Online add-on Dustman. The sort of stuff I'd like to enable are things like:
+An attempt at making a trigger-based alternative to the Elder Scrolls Online add-on Dustman. ItemTrig is available for download [from ESOUI](https://www.esoui.com/downloads/info2312-ItemTrig.html) or [NexusMods](https://www.nexusmods.com/elderscrollsonline/mods/134).
+
+The sort of stuff I'd like to enable are things like:
 
 ## Sample triggers
 
-**Name:** Deconstruct intricate items.  
-**Entry points:** Opening a crafting menu  
-**Conditions:**  
-The item [is] intricate.  
-You [have not] maxed out your crafting skill for this item.  
-The item [doesn’t have] a researchable trait.  
-The item's trait [is not] [Nirnhoned].  
-**Actions:**  
-Deconstruct all of these items.
+**Deconstruct intricate**
+**Entry points:** Crafting Menu Opened
+**Conditions:**
+The item [is] an [any equippable].
+The item [is] intricate.
+The current crafting station [is appropriate for] this item.
+The player [has not] maxed out their [crafting skill for this item] skill.
+**Actions:**
+Deconstruct the item.
 
-**Name:** Thieving: Common Treasures  
-**Entry points:** opening a fence menu; item added to inventory  
-**Conditions:**  
-The item [is] stolen.  
-The item [is] [treasure].  
-The item’s rarity is [less than green].  
-**Actions:**  
-Run nested trigger.  
-... **Name:** Stockpile items useful for The Covetous Countess.  
-... **Conditions:**  
-... Comment: [Conditions to be determined once I figure out an optimal strat for the CC. Nested trigger no-op'd in the meantime.]  
-... This condition is [never] true.  
-... **Actions:**  
-... Launder all of these items.  
-... Stop processing the top-level trigger.  
-Destroy all of these items.
+**Deconstruct worthless equipment**
+**Entry points:** Crafting Menu Opened
+**Conditions:**
+The item [is] an [any equippable].
+The item's rarity is [at most Normal].
+The item's sell value is [at most 0].
+The current crafting station [is appropriate for] this item.
+**Actions:**
+Deconstruct the item.
 
-**Name:** Protect purchases  
-**Entry points:** item purchased  
-**Conditions:**  
-This condition is [always] true.  
-**Actions:**  
-Exempt this item from all trigger processing for [15 minutes].
+**Sell trash**
+**Entry points:** Merchant Menu Opened
+**Conditions:**
+The item's rarity is [at most Worn].
+The item [is] a [Trash].
+**Actions:**
+Sell [9999] of the item.
