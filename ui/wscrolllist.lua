@@ -49,20 +49,11 @@ if not (ItemTrig and ItemTrig.UI) then return end
 -- handler in the future to account for this.
 --
 
-local function onScrollUpButton(self)
-   local widget = ItemTrig.UI.WScrollList:cast(self:GetParent():GetParent())
-   assert(not widget.dirty, "The drawn list items are out-of-date! When modifying list items, you should endeavor to redraw the list during the same frame.")
-   widget:scrollBy(-widget.scrollStep)
-end
-local function onScrollDownButton(self)
-   local widget = ItemTrig.UI.WScrollList:cast(self:GetParent():GetParent())
-   assert(not widget.dirty, "The drawn list items are out-of-date! When modifying list items, you should endeavor to redraw the list during the same frame.")
-   widget:scrollBy(widget.scrollStep)
-end
-
 local function _defaultSortFunction(itemA, itemB)
    return tostring(itemA.name or itemA):lower() < tostring(itemB.name or itemB):lower()
 end
+
+local WScrollbar = ItemTrig.UI.WScrollbar
 
 ItemTrig.UI.WScrollList = ItemTrig.UI.WidgetClass:makeSubclass("WScrollList", "scrollList")
 local WScrollList = ItemTrig.UI.WScrollList
@@ -73,8 +64,6 @@ function WScrollList:_construct(options)
    if not options.element then
       options.element = {}
    end
-   local scrollbar = self:GetNamedChild("ScrollBar")
-   scrollbar.hideScrollBarOnDisabled = false
    self.element = {
       template    = options.element.template    or "",
       toConstruct = options.element.toConstruct or nil,
@@ -88,9 +77,7 @@ function WScrollList:_construct(options)
    end
    self.contents   = self:GetNamedChild("Contents")
    self.dirty      = false -- list items have been added/removed and we haven't redrawn yet
-   self.scrollbar  = scrollbar
-   self.scrollBtnU = GetControl(scrollbar, "Up")
-   self.scrollBtnD = GetControl(scrollbar, "Down")
+   self.scrollbar  = WScrollbar:cast(self:GetNamedChild("ScrollBar"))
    self.scrollStep = options.scrollStep or 40
    self.scrollTop      = 0
    self.scrollMax      = -1 -- height of all generated elements
@@ -111,9 +98,23 @@ function WScrollList:_construct(options)
          end
       self.element._pool = ZO_ObjectPool:New(factoryFunction, self.element.toReset or ZO_ObjectPool_DefaultResetControl)
    end
-   self.scrollBtnU:SetHandler("OnMouseDown", onScrollUpButton)
-   self.scrollBtnD:SetHandler("OnMouseDown", onScrollDownButton)
-   self.scrollbar:SetEnabled(false)
+   do
+      local widget = self.scrollbar
+      widget.callbacks:RegisterCallback("request-scroll", function(event)
+         local delta = event.delta
+         if delta then
+            if event.direction == WScrollbar.DIRECTION_BACKWARD then
+               delta = -delta
+            end
+            assert(not self.dirty, "The drawn list items are out-of-date! When modifying list items, you should endeavor to redraw the list during the same frame.")
+            self:scrollBy(delta * self.scrollStep)
+         elseif event.position then
+            self:scrollTo(event.position, { fromSlider = true })
+         end
+      end)
+      widget:setArea(self:asControl())
+   end
+   self.scrollbar:asControl():SetEnabled(false)
 end
 
 do -- functions for working directly with controls
@@ -231,7 +232,7 @@ function WScrollList:indexOf(data)
    return 0
 end
 function WScrollList:isScrollbarVisible()
-   return not self.scrollbar:IsHidden()
+   return not self.scrollbar:asControl():IsHidden()
 end
 function WScrollList:push(obj, update)
    table.insert(self.listItems, obj)
@@ -306,9 +307,7 @@ function WScrollList:redraw(options)
    local contents  = self.contents
    if contents:GetHeight() < 0 then
       --
-      -- ESO's UI system is...
-      --
-      -- Okay, it's not *great*.
+      -- Sometimes, ESO's UI system gets confused.
       --
       return
    end
@@ -530,13 +529,11 @@ function WScrollList:scrollTo(position, options) -- analogous to ZO_ScrollList_S
       end
       self:_updateMouseoverStateOnScroll()
    end
-   if self.scrollbar:IsHidden() then
+   if self.scrollbar:asControl():IsHidden() then
       self.scrollTop = position
       return
    end
-   if not options.fromSlider then
-      self.scrollbar:SetValue(position)
-   end
+   self.scrollbar:setPosition(position)
 end
 function WScrollList:setShouldSort(to, update)
    self.shouldSort = to
@@ -587,7 +584,8 @@ function WScrollList:_updateScrollbar(scrollMax)
    -- b) Update anchors for the scrollbar and the content area, based on our 
    --    padding settings.
    --
-   local scrollbar  = self.scrollbar
+   local scrollWidget = self.scrollbar
+   local scrollbar    = scrollWidget:asControl()
    if scrollMax == nil then
       scrollMax = self.scrollMax
    end
@@ -612,16 +610,11 @@ function WScrollList:_updateScrollbar(scrollMax)
    local listHeight = self.contents:GetHeight()
    local barHeight  = scrollbar:GetHeight()
    if scrollMax > 0 and scrollMax > listHeight then
-      scrollbar:SetEnabled(true)
-      scrollbar:SetHidden(false)
+      scrollWidget:setExtents(0, scrollMax - listHeight)
       scrollbar:SetThumbTextureHeight(barHeight * listHeight / (scrollMax + listHeight))
-      scrollbar:SetMinMax(0, scrollMax - listHeight)
    else
       self.scrollTop = 0
-      --scrollbar:SetThumbTextureHeight(barHeight)
+      scrollWidget:setExtents(0, 0)
       scrollbar:SetThumbTextureHeight(0)
-      scrollbar:SetMinMax(0, 0)
-      scrollbar:SetEnabled(false)
-      scrollbar:SetHidden(scrollbar.hideScrollBarOnDisabled)
    end
 end

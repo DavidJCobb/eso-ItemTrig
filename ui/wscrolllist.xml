@@ -1,6 +1,7 @@
 <GuiXml>
    <Controls>
-      <Control name="ItemTrig_UITemplate_WScrollList" inherits="ZO_ScrollAreaBarBehavior" virtual="true">
+      <!-- <Control name="ItemTrig_UITemplate_WScrollList" inherits="ZO_ScrollAreaBarBehavior" virtual="true"> -->
+      <Control name="ItemTrig_UITemplate_WScrollList" virtual="true">
          <OnInitialized> ItemTrig.UI.WScrollList:install(self) </OnInitialized>
          <!--
             The inheritance just handles scrollbar opacity on hover, 
@@ -32,14 +33,6 @@
             <Slider name="$(parent)ScrollBar" mouseEnabled="true" inherits="ItemTrig_UITemplate_ThemedScrollbarVertical">
                <Anchor point="TOPRIGHT" offsetY="16" />
                <Anchor point="BOTTOMRIGHT" />
-               <OnMouseWheel>
-                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
-                  widget:scrollBy(-delta * widget.scrollStep)
-               </OnMouseWheel>
-               <OnValueChanged>
-                  local widget = ItemTrig.UI.WScrollList:cast(self:GetParent())
-                  widget:scrollTo(value, { fromSlider = true })
-               </OnValueChanged>
             </Slider>
          </Controls>
       </Control>

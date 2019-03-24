@@ -91,6 +91,10 @@ do
          SCROLLBAR_THUMB_SIZE_CROSS = 16,
          SCROLLBAR_BUTTON_SIZE_MAIN  = 16,
          SCROLLBAR_BUTTON_SIZE_CROSS = 16,
+         --
+         SCROLLBAR_ALPHA_INITIAL    = 0.75, -- alpha when the mouse isn't near the scrollbar
+         SCROLLBAR_ALPHA_HOVER_AREA = 0.90, -- alpha when the mouse is over the scroll area
+         SCROLLBAR_ALPHA_HOVER_SELF = 1.00, -- alpha when the mouse is over the scrollbar itself
       },
       strings = {
          SCROLLBAR_TRACK_FILE = "EsoUI/Art/Miscellaneous/scrollbox_track.dds",
@@ -158,6 +162,10 @@ do
          SCROLLBAR_THUMB_SIZE_CROSS = 16,
          SCROLLBAR_BUTTON_SIZE_MAIN  = 16,
          SCROLLBAR_BUTTON_SIZE_CROSS = 16,
+         --
+         SCROLLBAR_ALPHA_INITIAL    = 0.5, -- alpha when the mouse isn't near the scrollbar
+         SCROLLBAR_ALPHA_HOVER_AREA = 0.8, -- alpha when the mouse is over the scroll area
+         SCROLLBAR_ALPHA_HOVER_SELF = 1.0, -- alpha when the mouse is over the scrollbar itself
       },
       strings = {
          SCROLLBAR_TRACK_FILE = "EsoUI/Art/Miscellaneous/scrollbox_track.dds",

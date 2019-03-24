@@ -1,0 +1,75 @@
+<GuiXml>
+   <Controls>
+      <Slider name="ItemTrig_UITemplate_ThemedScrollbarVertical" mouseEnabled="true" virtual="true">
+         <!--
+            This element is essentially the "full" scrollbar that you end up with 
+            when you inherit ZO_VerticalScrollbarBase, which in turn inherits from 
+            ZO_VerticalScrollbarBase_Shared. The buttons inherit from two templates, 
+            ZO_ScrollUpButton and ZO_ScrollDownButton, which have also been copied 
+            into here.
+            
+            Zenimax's scrollbars are not unlike the scrollbars in TES4: Oblivion, 
+            in that the endcap buttons are actually positioned outside of the 
+            scrollbar's bounds (in this case, the Slider control's bounds).
+         -->
+         <Dimensions x="16" y="32" />
+         <ThumbTexture
+            textureFile="EsoUI/Art/Miscellaneous/scrollbox_elevator.dds"
+            disabledTextureFile="EsoUI/Art/Miscellaneous/scrollbox_elevator_disabled.dds"
+            thumbWidth="16"
+            thumbHeight="32"
+         />
+         <BackgroundBottom textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+         <BackgroundMiddle textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+         <BackgroundTop    textureFile="EsoUI/Art/Miscellaneous/scrollbox_track.dds" />
+
+         <OnInitialized> ItemTrig.UI.WScrollbar:install(self) </OnInitialized>
+         
+         <OnEffectivelyHidden> ItemTrig.UI.WScrollbar:cast(self):_onHidden() </OnEffectivelyHidden>
+         <OnMouseEnter>   ItemTrig.UI.WScrollbar:cast(self):_onMouseOver() </OnMouseEnter>
+         <OnMouseExit>    ItemTrig.UI.WScrollbar:cast(self):_onMouseOut() </OnMouseExit>
+         <OnMouseDown>    ItemTrig.UI.WScrollbar:cast(self):_onMouseDown() </OnMouseDown>
+         <OnMouseUp>      ItemTrig.UI.WScrollbar:cast(self):_onMouseUp() </OnMouseUp>
+         <OnMouseWheel>   ItemTrig.UI.WScrollbar:cast(self):_onMouseWheel(-delta) </OnMouseWheel>
+         <OnValueChanged> ItemTrig.UI.WScrollbar:cast(self):_onValueChanged(value) </OnValueChanged>
+         
+         <Controls>
+            <Texture name="$(parent)ThumbMunge" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP" layer="OVERLAY" alpha="0.5">
+               <OnInitialized>
+                  local slider = self:GetParent()
+                  local thumb  = slider:GetThumbTextureControl()
+                  self:SetAnchorFill(thumb)
+               </OnInitialized>
+            </Texture>
+            <Button name="$(parent)Up">
+               <Dimensions x="16" y="16" />
+               <Anchor point="BOTTOM" relativePoint="TOP" />
+               <Textures
+                  normal="EsoUI/Art/Buttons/scrollbox_upArrow_up.dds"
+                  pressed="EsoUI/Art/Buttons/scrollbox_upArrow_down.dds"
+                  mouseOver="EsoUI/Art/Buttons/scrollbox_upArrow_over.dds"
+                  disabled="EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds"
+               />
+               <OnMouseEnter> ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onMouseOver() </OnMouseEnter>
+               <OnMouseExit>  ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onMouseOut() </OnMouseExit>
+               <OnMouseWheel> ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onMouseWheel(-delta) </OnMouseWheel>
+               <OnClicked>    ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onButtonClick(self) </OnClicked>
+            </Button>
+            <Button name="$(parent)Down">
+               <Dimensions x="16" y="16" />
+               <Anchor point="TOP" relativePoint="BOTTOM" />
+               <Textures
+                  normal="EsoUI/Art/Buttons/scrollbox_downArrow_up.dds"
+                  pressed="EsoUI/Art/Buttons/scrollbox_downArrow_down.dds"
+                  mouseOver="EsoUI/Art/Buttons/scrollbox_downArrow_over.dds"
+                  disabled="EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds"
+               />
+               <OnMouseEnter> ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onMouseOver() </OnMouseEnter>
+               <OnMouseExit>  ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onMouseOut() </OnMouseExit>
+               <OnMouseWheel> ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onMouseWheel(-delta) </OnMouseWheel>
+               <OnClicked>    ItemTrig.UI.WScrollbar:cast(self:GetParent()):_onButtonClick(self) </OnClicked>
+            </Button>
+         </Controls>
+      </Slider>
+   </Controls>
+</GuiXml>

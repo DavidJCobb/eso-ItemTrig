@@ -62,7 +62,15 @@ function WWindow:_construct(options)
       modalOnly          = options.modalOnly          or false, -- boolean OR the name of the only allowed opener
       resizeThrottle     = options.resizeThrottle     or 1,     -- onResize will be called every X frames
    }
-   self.style = {} -- TODO: metatables
+   do -- style
+      self.style = {}
+      if options.style then
+         --
+         -- TODO: This doesn't allow subclasses to add their own style properties.
+         --
+         ItemTrig.assign(self.style, ItemTrig.filterKeys(options.style, WWindow.style))
+      end
+   end
    self.state = {
       lastActionLayerUpdate = nil,
       moving                = false,
