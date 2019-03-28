@@ -52,6 +52,56 @@ do -- Registry for windows
    end
 end
 
+local DeconstructQueueObserver = {}
+do
+   --
+   -- This singleton can be used to respond to notable events that occur 
+   -- when deconstructing a queue of items. We use this to power the user 
+   -- pref to log trigger actions taken on items.
+   --
+   function DeconstructQueueObserver:onComplete()
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_COMPLETE))
+   end
+   function DeconstructQueueObserver:onFailure(item, code, why)
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      local text = {}
+      text[1] = LocalizeString(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE), item.formattedName)
+      if code then
+         if code == item.FAILURE_ITEM_IS_LOCKED then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED)
+         elseif code == item.FAILURE_CANNOT_DECONSTRUCT then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE)
+         elseif code == item.FAILURE_WRONG_CRAFTING_STATION then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_STATION)
+         end
+         if why then
+            text[2] = LocalizeString(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY), why)
+         end
+      elseif why then
+         text[2] = LocalizeString(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY), why)
+      end
+      CHAT_SYSTEM:AddMessage(table.concat(ItemTrig.stripNils(text, 2), "\n"))
+   end
+   function DeconstructQueueObserver:onInterrupted()
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_INTERRUPT))
+   end
+   function DeconstructQueueObserver:onStart(count)
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      local text = LocalizeString(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_START), count)
+      CHAT_SYSTEM:AddMessage(text)
+   end
+end
+
 local TriggerExecutionEventHandler
 do
    --
@@ -225,6 +275,7 @@ do -- Event handlers
             _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, {
                craftingSkill = select(1, ...) or 0,
             })
+            ItemTrig.ItemQueues:start("deconstruct", DeconstructQueueObserver)
          elseif eventCode == EVENT_OPEN_STORE then
             _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
          elseif eventCode == EVENT_OPEN_FENCE then
@@ -323,6 +374,7 @@ local function Initialize()
    ItemTrig.Savedata:load()
    SLASH_COMMANDS["/itemtrig"] = _coreChatCommand
    --
+   ItemTrig.ItemQueues:setup("ItemTrig")
    ItemTrig.ItemStackTools:setup("ItemTrig")
    ItemTrig.ItemAPILimits:setup("ItemTrig")
    ItemTrig.ItemInterface.onModifyingAction =

@@ -255,6 +255,13 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",         "|cFFA020ItemTrig:|r De
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",         "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",            "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_START",       "|cFFA020ItemTrig:|r Attempting to deconstruct <<1>> items...")
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE",     "|cFFA020ItemTrig:|r Failed to deconstruct |cFFFF00<<1>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY", "|c000000...|r<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_INTERRUPT",   "|cFFA020ItemTrig:|r Deconstruction interrupted; you left the crafting station!")
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_COMPLETE",    "|cFFA020ItemTrig:|r Finished deconstructing items.")
+
+--
 -- Messages shown when a trigger stops due to an error, if the player has 
 -- fault logging enabled. We use black-colored dots to indent the text; 
 -- leading spaces will be stripped out.
@@ -646,8 +653,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_LOCKED",           "Y
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DECONSTRUCT", "Deconstruct")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DECONSTRUCT", "Deconstruct the item.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED",     "The item is locked.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE", "This item can't be deconstructed.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED",        "The item is locked.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE",    "This item can't be deconstructed.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_STATION", "This is the wrong crafting station.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_STOPRUNNINGTRIGGERS", "Stop Running Triggers")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_STOPRUNNINGTRIGGERS", "Stop all ongoing trigger processing for this item.")

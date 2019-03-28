@@ -58,6 +58,29 @@ function ItemTrig.getNaiveItemNameFor(id)
    return GetItemLinkName("|H1:item:" .. id .. ":0:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0|hUnknown Name|h")
 end
 
+--[[
+
+   BELOW, YOU WILL FIND...
+   
+   STACKTOOLS
+      A singleton intended to coordinate actions taken on item stacks, most 
+      particularly the splitting of stacks.
+   
+   APILIMITS
+      A singleton intended to ensure that we respect certain item-related 
+      API limits, lest we be booted from the server.
+   
+   QUEUES
+      A singleton that allows one to queue operations that must be performed 
+      sequentially, and that indicate successes/failures/interruptions using 
+      API events.
+   
+   ITEMINTERFACE
+      A class that can be used to wrap any bag slot, to quickly and efficient-
+      ly query and cache information about the item in that slot.
+
+]]--
+
 local StackTools = {
    eventPrefix   = nil,
    listening     = false,
@@ -317,6 +340,240 @@ do
    end
 end
 
+local Queues = {}
+ItemTrig.ItemQueues = Queues
+do
+   local function _tradeskillResultIsDeconstruct(tsr)
+      if tsr == CRAFTING_RESULT_CANT_DECONSTRUCT_WORN      -- 127: "You can't deconstruct an item that you are wearing."
+      or tsr == CRAFTING_RESULT_DECONSTRUCT_BAD_QUANTITY   -- 116: "Insufficient Quantity"
+      or tsr == CRAFTING_RESULT_INTERRUPTED                --  18: "Interrupted"
+      or tsr == CRAFTING_RESULT_ITEM_NOT_DECONSTRUCTABLE   --  30: "Item is not deconstructable"
+      or tsr == CRAFTING_RESULT_NEED_DECONSTRUCT_RANK      --  35: "Your rank is too low to deconstruct that"
+      or tsr == CRAFTING_RESULT_NEED_SPACE_TO_DECONSTRUCT  --  36: "Your inventory is full."
+      or tsr == CRAFTING_RESULT_NEED_UNLOCK_TO_DECONSTRUCT --  33: "Cannot deconstruct an item that is locked"
+      or tsr == CRAFTING_RESULT_NEED_VALID_DECONSTRUCTION  -- 900
+      or tsr == CRAFTING_RESULT_NO_ITEM_TO_DECONSTRUCT     --  32: "You must deconstruct an item"
+      or tsr == CRAFTING_RESULT_UNKNOWN_SKILL_DECONSTRUCT  --  34: "You are not trained in the crrect tradeskill to deconstruct that"
+      or tsr == CRAFTING_RESULT_WRONG_TARGET_DECONSTRUCT   --  31: "You must be at a crafting station to deconstruct"
+      then
+         return true
+      end
+      return false
+   end
+   --
+   local IQueue = {}
+   do
+      IQueue.meta = { __index = IQueue }
+      function IQueue:new()
+         local result = setmetatable({}, self.meta)
+         result.items    = {} -- vector<ItemInterface>
+         result.observer = nil
+         return result
+      end
+      function IQueue:advance()
+         local first = self.items[1]
+         if not first then
+            return IQueue.DONE_QUEUE
+         end
+         local result, code = self:operation(first)
+         if not result then
+            if self.observer and self.observer.onFailure then
+               self.observer:onFailure(first, code, nil)
+            end
+            table.remove(self.items, 1)
+            return self:advance()
+         end
+      end
+      function IQueue:callback(eventCode, ...)
+         --
+         -- Return DONE_QUEUE to signal that the queue is empty, or 
+         -- ABORT_QUEUE to signal that the queue should halt and be 
+         -- cleared early.
+         --
+         if eventCode == 0 then -- basic example of moving to the next queue item
+            return self:advance() -- if you've run all items, this returns DONE_QUEUE
+         end
+         return IQueue.ABORT_QUEUE -- to stop
+      end
+      function IQueue:clear()
+         self.items = {}
+      end
+      function IQueue:count()
+         return #self.items
+      end
+      function IQueue:empty()
+         return #self.items < 1
+      end
+      function IQueue:first()
+         return self.items[1]
+      end
+      function IQueue:operation(item)
+         --
+         -- This is the operation that the queue is meant to perform. 
+         -- Return a success bool and, for failures, an error code.
+         --
+         return false, IQueue.NOT_DEFINED
+      end
+      function IQueue:push(item)
+         self.items[#self.items + 1] = item
+      end
+   end
+   IQueue.ABORT_QUEUE = "STOP"
+   IQueue.DONE_QUEUE  = "DONE"
+   IQueue.NOT_DEFINED = "XXXX"
+   --
+   local IDeconstructQueue = setmetatable({}, IQueue.meta)
+   do
+      IDeconstructQueue.meta = { __index = IDeconstructQueue }
+      function IDeconstructQueue:new()
+         local result = IQueue:new()
+         setmetatable(result, self.meta)
+         return result
+      end
+      function IDeconstructQueue:callback(eventCode, ...)
+         if eventCode == EVENT_CRAFT_COMPLETED then -- operation finished or aborted
+            local skill = select(1, ...)
+            if GetCraftingInteractionType() == CRAFTING_TYPE_INVALID then
+               --
+               -- Player has left the crafting station.
+               --
+               if self.observer and self.observer.onInterrupted then
+                  self.observer:onInterrupted()
+               end
+               return IQueue.ABORT_QUEUE
+            end
+            --
+            -- We need to verify that this event is firing on the item that 
+            -- we meant it to fire on.
+            --
+            local first = self.items[1]
+            assert(first)
+            if not first:validate() then -- queue item successfully completed
+               table.remove(self.items, 1)
+            end
+         elseif eventCode == EVENT_CRAFT_FAILED then -- operation failed or aborted
+            if GetCraftingInteractionType() == CRAFTING_TYPE_INVALID then
+               --
+               -- Player has left the crafting station.
+               --
+               if self.observer and self.observer.onFailure then
+                  self.observer:onInterrupted()
+               end
+               return IQueue.ABORT_QUEUE
+            end
+            local tsr = select(1, ...)
+            if _tradeskillResultIsDeconstruct(tsr) then
+               local failureString = GetString("SI_TRADESKILLRESULT", tsr)
+               if self.observer and self.observer.onFailure then
+                  self.observer:onFailure(self:first(), nil, failureString)
+               end
+            end
+         elseif eventCode == EVENT_END_CRAFTING_STATION_INTERACT then
+            if self.observer and self.observer.onFailure then
+               self.observer:onInterrupted()
+            end
+            return IQueue.ABORT_QUEUE
+         end
+         return self:advance()
+      end
+      function IDeconstructQueue:operation(item)
+         local result, code = item:deconstruct(true)
+         --
+         -- Don't log successes; ItemInterface does that already.
+         --
+         return result, code
+      end
+   end
+   ItemTrig.assign(Queues, {
+      eventPrefix = nil,
+      listening   = false,
+      --
+      queues = {
+         deconstruct = IDeconstructQueue:new(),
+      },
+      currentQueue = nil,
+   })
+   local function _listener(eventCode, ...)
+      if not Queues.currentQueue then
+         --
+         -- ESO event flows are extremely messy, so if a queue is canceled 
+         -- early, some leftover events may make it here. As an example, if 
+         -- you exit the crafting station during a deconstruct operation, 
+         -- the following events all fire (not necessarily in a consistent 
+         -- order):
+         --
+         -- EVENT_END_CRAFTING_STATION_INTERACT
+         -- EVENT_CRAFT_FAILED
+         -- EVENT_CRAFT_COMPLETED
+         --
+         return
+      end
+      local result, str = Queues.currentQueue:callback(eventCode, ...)
+      if result == IQueue.ABORT_QUEUE then
+         Queues:stop()
+         return
+      end
+      if result == IQueue.DONE_QUEUE then
+         local observer = Queues.currentQueue.observer
+         if observer and observer.onComplete then
+            observer:onComplete()
+         end
+         Queues:stop()
+         return
+      end
+   end
+   function Queues:queueDeconstruct(item)
+      self.queues.deconstruct:push(item)
+   end
+   function Queues:setup(eventPrefix)
+      if self.listening then
+         self:teardown()
+      end
+      self.eventPrefix = eventPrefix
+      local namespace = eventPrefix .. "ItemQueuesListener"
+      EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CRAFT_COMPLETED, _listener)
+      EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CRAFT_FAILED, _listener)
+      EVENT_MANAGER:RegisterForEvent(namespace, EVENT_END_CRAFTING_STATION_INTERACT, _listener)
+      self.listening = true
+   end
+   function Queues:start(name, observer, evenIfEmpty)
+      assert(self.listening, "The ItemQueues system hasn't been setup yet!")
+      if self.currentQueue then -- queue already in progress
+         return
+      end
+      local queue = self.queues[name]
+      assert(queue, "Invalid queue name " .. tostring(name) .. ".")
+      if not evenIfEmpty and queue:empty() then
+         return
+      end
+      queue.observer = observer
+      self.currentQueue = queue
+      if observer and observer.onStart then
+         observer:onStart(queue:count())
+      end
+      self.currentQueue:advance()
+   end
+   function Queues:stop()
+      assert(self.listening, "The ItemQueues system hasn't been setup yet!")
+      if not self.currentQueue then
+         return
+      end
+      self.currentQueue:clear()
+      self.currentQueue.observer = nil
+      self.currentQueue = nil
+   end
+   function Queues:teardown()
+      if not self.listening then
+         return
+      end
+      local namespace = self.eventPrefix .. "ItemQueuesListener"
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_CRAFT_COMPLETED)
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_CRAFT_FAILED)
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_END_CRAFTING_STATION_INTERACT)
+      self.listening = false
+   end
+end
+
 --
 -- ITEMINTERFACE
 --
@@ -528,6 +785,7 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_LAUNDER_CANT_AFFORD     = "LNDG" -- You don't have enough gold to launder this item.
    ItemInterface.FAILURE_LAUNDER_NOT_STOLEN      = "LDNS" -- You can't launder something that isn't stolen!
    ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT   = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
+   ItemInterface.FAILURE_WRONG_CRAFTING_STATION  = "WCFT" -- This item type can't be used at this crafting station.
 end
 function ItemInterface:new(bagIndex, slotIndex)
    local result = setmetatable({}, self.meta)
@@ -650,7 +908,7 @@ function ItemInterface:canGemify()
    local data = self.gemifyData
    return data.itemsPerOperation > 0 and data.gemsPerOperation > 0
 end
-function ItemInterface:deconstruct()
+function ItemInterface:deconstruct(dontFlagInvalid)
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
    end
@@ -660,11 +918,28 @@ function ItemInterface:deconstruct()
    if not self:canDeconstruct() then
       return false, self.FAILURE_CANNOT_DECONSTRUCT
    end
-   --
-   -- TODO: We need to use ExtractEnchantingItem for glyphs
-   --
-   ExtractOrRefineSmithingItem(self.bag, self.slot)
+   if GetCraftingInteractionType() ~= self:pertinentCraftingType() then
+      return false, ItemInterface.FAILURE_WRONG_CRAFTING_STATION
+   end
+   if self.craftingType == ITEMTYPE_GLYPH_WEAPON
+   or self.craftingType == ITEMTYPE_GLYPH_ARMOR
+   or self.craftingType == ITEMTYPE_GLYPH_JEWELRY
+   then
+      ExtractEnchantingItem(self.bag, self.slot)
+   else
+      ExtractOrRefineSmithingItem(self.bag, self.slot)
+   end
    self:onModifyingAction("deconstruct")
+   if dontFlagInvalid then
+      --
+      -- If we're running this from the ItemQueues system, then we don't 
+      -- want to flag the ItemInterface instance as invalid. We need to 
+      -- be able to double-check, later on, that the item was actually 
+      -- deconstructed (i.e. we may receive "success" events for decon-
+      -- struction attempts by other add-ons or by the player).
+      --
+      return true
+   end
    self.invalid   = true
    self.destroyed = true
    return true

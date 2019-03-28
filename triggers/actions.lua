@@ -133,7 +133,8 @@ ItemTrig.tableActions = {
             return ItemTrig.OPCODE_FAILED, {}
          end
          if ItemTrig.prefs:get("pretendActions") then
-            return _doPretend(context, "DESTROYITEM")
+            _doPretend(context, "DESTROYITEM")
+            return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
          local count = nil
          if state.entryPoint == ItemTrig.ENTRY_POINT_ITEM_ADDED then
@@ -245,7 +246,8 @@ ItemTrig.tableActions = {
             return ItemTrig.OPCODE_FAILED, {}
          end
          if ItemTrig.prefs:get("pretendActions") then
-            return _doPretend(context, "SELLORFENCE")
+            _doPretend(context, "SELLORFENCE")
+            return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
          local result, errorCode = context:sell(args[1])
          if not result then
@@ -269,8 +271,10 @@ ItemTrig.tableActions = {
       function(state, context, args)
          assert(ItemInterface:is(context))
          if ItemTrig.prefs:get("pretendActions") then
-            return _doPretend(context, "DECONSTRUCT")
+            _doPretend(context, "DECONSTRUCT")
+            return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
+         --[[
          local result, errorCode = context:deconstruct()
          if not result then
             local extra = { code = errorCode, why = nil }
@@ -281,6 +285,9 @@ ItemTrig.tableActions = {
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
+         ]]--
+         ItemTrig.ItemQueues:queueDeconstruct(context)
+         return ItemTrig.RUN_NO_MORE_TRIGGERS
       end,
       { -- extra data for this opcode
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
@@ -311,7 +318,8 @@ ItemTrig.tableActions = {
       function(state, context, args)
          assert(ItemInterface:is(context))
          if ItemTrig.prefs:get("pretendActions") then
-            return _doPretend(context, "DEPOSITINBANK")
+            _doPretend(context, "DEPOSITINBANK")
+            return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
          local result, code = context:storeInBank(args[1])
          if not result then
