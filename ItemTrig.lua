@@ -59,6 +59,12 @@ do
    -- when deconstructing a queue of items. We use this to power the user 
    -- pref to log trigger actions taken on items.
    --
+   function DeconstructQueueObserver:onAbort()
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_ABORT))
+   end
    function DeconstructQueueObserver:onComplete()
       if ItemTrig.prefs:get("logging/actionsTaken") == false then
          return
@@ -92,6 +98,14 @@ do
          return
       end
       CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_INTERRUPT))
+   end
+   function DeconstructQueueObserver:onSingleSuccess(item)
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      local name    = item.formattedName
+      local message = GetString(ITEMTRIG_STRING_LOG_DECONSTRUCT)
+      CHAT_SYSTEM:AddMessage(LocalizeString(message, name))
    end
    function DeconstructQueueObserver:onStart(count)
       if ItemTrig.prefs:get("logging/actionsTaken") == false then

@@ -40,14 +40,6 @@ function ItemTrig.clearTable(tablevar)
       tablevar[k] = nil
    end
 end
-function ItemTrig.compact(tablevar)
-   for i = 1, #tablevar do
-      if tablevar[i] == nil then
-         tablevar[i] = tablevar[i + 1]
-         tablevar[i + 1] = nil
-      end
-   end
-end
 function ItemTrig.deepCopy(tablevar)
    assert(type(tablevar) ~= "userdata", "This function can't deep-copy a control.")
    if type(tablevar) ~= "table" then
@@ -215,28 +207,6 @@ function ItemTrig.overwriteTable(a, b)
    --
    ItemTrig.clearTable(a)
    ItemTrig.assign(a, b)
-end
-function ItemTrig.remove(tablevar, x) -- provided for completeness, but honestly? it's ugly.
-   if type(x) == "number" then -- remove at index
-      tablevar[x] = nil
-      ItemTrig.compact(tablevar)
-   elseif type(x) == "function" then -- this has significant overhead associated with it
-      local changed = false
-      local final   = {}
-      local count   = 1
-      for i = 1, #tablevar do
-         local test = x(i, tablevar[i])
-         if test then
-            changed = true
-         else
-            final[count] = tablevar[i]
-            count = count + 1
-         end
-      end
-      if changed then
-         ItemTrig.overwriteTable(tablevar, final)
-      end
-   end
 end
 function ItemTrig.stripNils(array, length)
    --

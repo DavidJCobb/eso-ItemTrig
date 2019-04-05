@@ -258,6 +258,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",            "|cFFA020ItemTrig:|r So
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_START",       "|cFFA020ItemTrig:|r Attempting to deconstruct <<1>> items...")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE",     "|cFFA020ItemTrig:|r Failed to deconstruct |cFFFF00<<1>>|r.")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY", "|c000000...|r<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_ABORT",       "|cFFA020ItemTrig:|r Deconstruction has stopped early due to the previous error.")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_INTERRUPT",   "|cFFA020ItemTrig:|r Deconstruction interrupted; you left the crafting station!")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_COMPLETE",    "|cFFA020ItemTrig:|r Finished deconstructing items.")
 
@@ -558,9 +559,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_TREASURETAG_NO",  "does not belong"
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_TREASURETAG_YES", "belongs")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_COVETOUSCOUNTESS", "Covetous Countess")
-ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_COVETOUSCOUNTESS", "The item <<1>> can be used for the Covetous Countess: <<2>>.")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_NO",  "does not belong")
-ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_YES", "belongs")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_COVETOUSCOUNTESS", "The item <<1>> for the Covetous Countess: <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_NO",  "cannot be used")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_YES", "can be used")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_CURRENT",                 "current objective")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_CHARACTER",               "current character level")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_COVETOUSCOUNTESS_ANY",                     "any objective")
@@ -590,6 +591,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_YES",  "has")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ANY",  "[any crafting skill]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ALL",  "[all crafting skills]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTINGSKILLMAXED_ITEM", "[crafting skill for this item]")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_SPECIALIZEDITEMTYPE", "Item Type (Detailed)")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_SPECIALIZEDITEMTYPE", "The item <<1>> a <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_SPECIALIZEDITEMTYPE_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_SPECIALIZEDITEMTYPE_YES", "is")
 --
 --
 -- ACTIONS

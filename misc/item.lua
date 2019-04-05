@@ -448,8 +448,11 @@ do
             --
             local first = self.items[1]
             assert(first)
-            if not first:validate() then -- queue item successfully completed
+            if not first:validate() then -- item is gone; queue item successfully completed
                table.remove(self.items, 1)
+               if self.observer and self.observer.onSingleSuccess then
+                  self.observer:onSingleSuccess(first)
+               end
             end
          elseif eventCode == EVENT_CRAFT_FAILED then -- operation failed or aborted
             if GetCraftingInteractionType() == CRAFTING_TYPE_INVALID then
@@ -467,6 +470,13 @@ do
                if self.observer and self.observer.onFailure then
                   self.observer:onFailure(self:first(), nil, failureString)
                end
+            end
+            if tsr == CRAFTING_RESULT_NEED_SPACE_TO_DECONSTRUCT then
+               --
+               -- We can't deconstruct any more items if the inventory is too full 
+               -- to deconstruct any single item.
+               --
+               return IQueue.ABORT_QUEUE
             end
          elseif eventCode == EVENT_END_CRAFTING_STATION_INTERACT then
             if self.observer and self.observer.onFailure then
@@ -510,6 +520,10 @@ do
       end
       local result, str = Queues.currentQueue:callback(eventCode, ...)
       if result == IQueue.ABORT_QUEUE then
+         local observer = Queues.currentQueue.observer
+         if observer and observer.onAbort then
+            observer:onAbort()
+         end
          Queues:stop()
          return
       end
@@ -680,7 +694,7 @@ local _lazyGetterMappings = {
          --
          return IsItemLinkForcedNotDeconstructable(i.link) and not IsItemLinkContainer(i.link)
       end,
-   formattedName = function(i) return LocalizeString("<<1>>", i.name) end,
+   formattedName = function(i) return LocalizeString("<<1>>", i.name) end, -- Don't validate the interface for this getter; we want to be able to format the last-known name even when it's invalid.
    gemifyData =
       function(i)
          if i.invalid then
@@ -908,7 +922,7 @@ function ItemInterface:canGemify()
    local data = self.gemifyData
    return data.itemsPerOperation > 0 and data.gemsPerOperation > 0
 end
-function ItemInterface:deconstruct(dontFlagInvalid)
+function ItemInterface:deconstruct(calledFromQueue)
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
    end
@@ -929,8 +943,7 @@ function ItemInterface:deconstruct(dontFlagInvalid)
    else
       ExtractOrRefineSmithingItem(self.bag, self.slot)
    end
-   self:onModifyingAction("deconstruct")
-   if dontFlagInvalid then
+   if calledFromQueue then
       --
       -- If we're running this from the ItemQueues system, then we don't 
       -- want to flag the ItemInterface instance as invalid. We need to 
@@ -938,8 +951,15 @@ function ItemInterface:deconstruct(dontFlagInvalid)
       -- deconstructed (i.e. we may receive "success" events for decon-
       -- struction attempts by other add-ons or by the player).
       --
+      -- Moreover, we want logging to run through the queue (which is 
+      -- better able to detect a successful deconstruction), so we don't 
+      -- want to call onModifyingAction. (If we allowed onModifyingAction 
+      -- to run, then ItemTrig would log a "success" even if we ended up 
+      -- hitting an error, like the inventory being full.)
+      --
       return true
    end
+   self:onModifyingAction("deconstruct")
    self.invalid   = true
    self.destroyed = true
    return true
