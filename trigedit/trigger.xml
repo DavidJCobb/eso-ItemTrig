@@ -23,9 +23,13 @@
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveUp" />
                   </Button>
-                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Delete" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DELETE">
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Duplicate" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DUPLICATE">
                      <Anchor point="LEFT" />
                      <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MoveDown" />
+                  </Button>
+                  <Button inherits="ItemTrig_UITemplate_ThemedButton" name="$(parent)Delete" text="ITEMTRIG_STRING_UI_TRIGGEREDIT_BUTTON_DELETE">
+                     <Anchor point="LEFT" />
+                     <Anchor point="TOPRIGHT" offsetY="8" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Duplicate" />
                   </Button>
                </Controls>
             </Control>

@@ -153,7 +153,7 @@ do -- helper class for opcode lists
       end
       do -- buttons
          local buttons = self:GetNamedChild("Buttons")
-         local names   = { "Add", "Edit", "MoveUp", "MoveDown", "Delete" }
+         local names   = { "Add", "Edit", "MoveUp", "MoveDown", "Duplicate", "Delete" }
          for _, v in pairs(names) do
             local button = GetControl(buttons, v)
             button.operation = v
@@ -193,6 +193,12 @@ do -- helper class for opcode lists
       local opcode = self:getSelected()
       if opcode then
          WinCls:getInstance():moveOpcode(opcode, 1)
+      end
+   end
+   function OpcodeListCls:handlerDuplicate()
+      local opcode = self:getSelected()
+      if opcode then
+         WinCls:getInstance():duplicateOpcode(opcode)
       end
    end
    function OpcodeListCls:handlerDelete()
@@ -405,6 +411,29 @@ function WinCls:moveOpcode(opcode, direction)
    trig.dirty = true
    self:refresh()
    pane:select(opcode)
+end
+function WinCls:duplicateOpcode(opcode)
+   local list
+   local pane
+   local trig = self.stack:last()
+   assert(trig ~= nil)
+   if opcode.type == "condition" then
+      list = trig.working.conditions
+      pane = self.ui.paneConditions
+   else
+      list = trig.working.actions
+      pane = self.ui.paneActions
+   end
+   local i = ItemTrig.indexOf(list, opcode)
+   if not i then
+      return
+   end
+   local copy = opcode:clone()
+   table.insert(list, i + 1, copy)
+   trig.dirty = true
+   self:refresh()
+   pane:select(copy)
+   pane:scrollToItem(pane:indexOf(copy), true, true)
 end
 function WinCls:deleteOpcode(opcode)
    assert(opcode ~= nil, "Cannot delete a nil opcode.")

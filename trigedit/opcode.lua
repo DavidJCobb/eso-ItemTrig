@@ -299,18 +299,12 @@ function WinCls:redrawDescription(options)
       end
    end
    --
-   do -- resize the window to prevent overflow
-      local hackNode   = ItemTrig_OpcodeEdit_NestedTriggerHack
-      local window     = self:asControl()
-      local wrapper    = self.ui.opcodeBody:GetParent()
-      local heightText = self.ui.opcodeBody:GetHeight()
-      local heightWrap = wrapper:GetHeight()
-      local heightHack = 0
-      if not hackNode:IsHidden() then
-         heightHack = GetControl(hackNode, "Underlay"):GetHeight()
-      end
-      window:SetHeight(window:GetHeight() - heightWrap + heightText + heightHack)
-   end
+   -- If you have reason to believe that the opcode text may have changed, 
+   -- make sure to call autoSize() at this point. You may also need to run 
+   -- a zo_callLater(function() self:autoSize() end, 1) call, since text 
+   -- doesn't always wrap/reflow/etc. properly on the same frame that it 
+   -- has changed.
+   --
 end
 function WinCls:refresh(options) -- Render the opcode being edited.
    if not options then
@@ -377,23 +371,38 @@ function WinCls:refresh(options) -- Render the opcode being edited.
       end
    end
    self:autoSize()
-   --zo_callLater(function() self:autoSize() end, 1) -- text wrapping can be pretty buggy in this engine
+   zo_callLater(function() self:autoSize() end, 1) -- in my experience, text doesn't always wrap/reflow/etc. on the same frame you edit it
 end
 function WinCls:autoSize()
    local window        = self:asControl()
    local explanation   = self.ui.explanation
-   --local explOldHeight = explanation:GetHeight()
-   local _, baseH, _, _ = window:GetDimensionConstraints()
+   local _, baseH      = window:GetDimensionConstraints()
    local explNewHeight = explanation:IsHidden() and 0 or explanation:GetHeight()
-   window:SetHeight(baseH + explNewHeight)
+   --
+   local nodeOpcodeBody   = self.ui.opcodeBody
+   local nodeNestedTrig   = ItemTrig_OpcodeEdit_NestedTriggerHack -- An additional line of text, used when editing the Run Nested Trigger action.
+   local heightOpcodeBody = nodeOpcodeBody:GetHeight()
+   local heightNestedTrig = 0
+   if not nodeNestedTrig:IsHidden() then
+      heightNestedTrig = GetControl(nodeNestedTrig, "Underlay"):GetHeight()
+   end
+   --
+   local heightAllOthers
+   do
+      window:SetHeight(baseH) -- should force reflow immediately
+      heightAllOthers = baseH - nodeOpcodeBody:GetParent():GetHeight()
+   end
+   --
+   local desired = heightAllOthers + heightOpcodeBody + heightNestedTrig + explNewHeight
+   if desired < baseH then
+      desired = baseH
+   end
+   window:SetHeight(desired)
 end
 
 function WinCls:editNestedTriggerArgument(trigger)
    local editor = ItemTrig.windows.triggerEdit
    assert(editor.stack:count() > 0, "This is supposed to be a nested trigger!")
-   --
-   --
-   --
    local state = {
       working  = self.opcode.working,
       target   = self.opcode.target,
