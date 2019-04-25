@@ -125,11 +125,43 @@ do
    -- trigger failure, and to honor the "Log Trigger Miss" condition.
    --
    TriggerExecutionEventHandler = {
-      topLevelTrigger = nil,
+      topLevelTrigger  = nil,
+      loggedErrorCodes = {}, -- key = code; value = number of faulting triggers
    }
+   ItemTrig.TriggerExecutionEventHandler = TriggerExecutionEventHandler
+   function TriggerExecutionEventHandler:setup()
+      --
+      -- ItemInterface isn't loaded before we declare TriggerExecutionEventHandler.
+      --
+      local ItemInterface = ItemTrig.ItemInterface
+      self.ERROR_CODES_THAT_CAN_BE_CONSIDERED_DUPLICATES = {
+         [ItemInterface.FAILURE_BANK_IS_FULL]           = true,
+         [ItemInterface.FAILURE_BANK_IS_NOT_OPEN]       = true,
+         [ItemInterface.FAILURE_NORMAL_FENCE_LIMIT]     = true,
+         [ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT]   = true,
+         [ItemInterface.FAILURE_ZENIMAX_DEPOSIT_LIMIT]  = true,
+         [ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT]  = true,
+         [ItemInterface.FAILURE_WRONG_CRAFTING_STATION] = true,
+      }
+   end
+   --
+   function TriggerExecutionEventHandler:onStart() -- not called by trigger.lua
+      self.loggedErrorCodes = {}
+   end
    function TriggerExecutionEventHandler:onTriggerFail(trigger, details)
       if ItemTrig.prefs:get("logging/triggerFailures") == false then
          return false
+      end
+      if details.code then
+         local code = details.code
+         if self.ERROR_CODES_THAT_CAN_BE_CONSIDERED_DUPLICATES[code] then
+            if ItemTrig.prefs:get("logging/collapseSameErrors") then
+               self.loggedErrorCodes[code] = (self.loggedErrorCodes[code] or 0) + 1
+               if self.loggedErrorCodes[code] > 1 then
+                  return
+               end
+            end
+         end
       end
       local text = {}
       text[1] = LocalizeString(GetString(ITEMTRIG_STRING_LOG_TRIGFAIL_BASE))
@@ -177,10 +209,35 @@ do
       end
       CHAT_SYSTEM:AddMessage(table.concat(ItemTrig.stripNils(text, 6), "\n"))
    end
+   function TriggerExecutionEventHandler:onEnd() -- not called by trigger.lua
+      if ItemTrig.prefs:get("logging/triggerFailures") == false then
+         return false
+      end
+      if ItemTrig.prefs:get("logging/collapseSameErrors") then
+         local showedHeader = false
+         for k, v in pairs(self.loggedErrorCodes) do
+            if v > 1 then
+               local key = "ITEMTRIG_STRING_LOG_TRIGFAILGROUP_" .. k
+               local str = GetString(_G[key])
+               if str ~= "" then
+                  if not showedHeader then
+                     CHAT_SYSTEM:AddMessage(LocalizeString(GetString(ITEMTRIG_STRING_LOG_TRIGFAILGROUP), v))
+                     showedHeader = true
+                  end
+                  CHAT_SYSTEM:AddMessage(str)
+               end
+            end
+         end
+      end
+   end
 end
 
 local function _onBeforeRunTriggers()
    ItemTrig.SkillCache:update()
+   TriggerExecutionEventHandler:onStart()
+end
+local function _onAfterRunTriggers()
+   TriggerExecutionEventHandler:onEnd()
 end
 local function _itemShouldRunTriggers(item)
    local prefs = ItemTrig.prefs
@@ -201,6 +258,23 @@ local function _itemShouldRunTriggers(item)
    end
    return true
 end
+local function _processBank(entryPoint, entryPointData)
+   _onBeforeRunTriggers()
+   local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
+   ItemTrig.forEachBagSlot(BAG_BANK, function(item)
+      if not _itemShouldRunTriggers(item) then
+         return
+      end
+      item.entryPointData = entryPointData
+      ItemTrig.executeTriggerList(list, entryPoint, item,
+         {
+            eventRecipient   = TriggerExecutionEventHandler,
+            stripBadTriggers = true,
+         }
+      )
+   end)
+   _onAfterRunTriggers()
+end
 local function _processInventory(entryPoint, entryPointData)
    _onBeforeRunTriggers()
    local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
@@ -216,6 +290,7 @@ local function _processInventory(entryPoint, entryPointData)
          }
       )
    end)
+   _onAfterRunTriggers()
 end
 local function _processItemList(entryPoint, entryPointData, items)
    _onBeforeRunTriggers()
@@ -233,6 +308,7 @@ local function _processItemList(entryPoint, entryPointData, items)
          }
       )
    end
+   _onAfterRunTriggers()
 end
 local function _processSingleItem(entryPoint, entryPointData, item)
    _onBeforeRunTriggers()
@@ -246,6 +322,7 @@ local function _processSingleItem(entryPoint, entryPointData, item)
          eventRecipient = TriggerExecutionEventHandler,
       }
    )
+   _onAfterRunTriggers()
 end
 
 local _OnItemAdded
@@ -285,10 +362,13 @@ do -- Event handlers
       do -- trigger entry points
          if eventCode == EVENT_OPEN_BANK and GetBankingBag() == BAG_BANK then
             _processInventory(ItemTrig.ENTRY_POINT_BANK, {})
+            _processBank(ItemTrig.ENTRY_POINT_BANK_BANK, {})
          elseif eventCode == EVENT_CRAFTING_STATION_INTERACT then
-            _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, {
+            local entryPointData = {
                craftingSkill = select(1, ...) or 0,
-            })
+            }
+            _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, entryPointData)
+            _processBank(ItemTrig.ENTRY_POINT_BANK_CRAFTING, entryPointData)
             ItemTrig.ItemQueues:start("deconstruct", DeconstructQueueObserver)
          elseif eventCode == EVENT_OPEN_STORE then
             _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
@@ -388,6 +468,7 @@ local function Initialize()
    ItemTrig.Savedata:load()
    SLASH_COMMANDS["/itemtrig"] = _coreChatCommand
    --
+   TriggerExecutionEventHandler:setup()
    ItemTrig.ItemQueues:setup("ItemTrig")
    ItemTrig.ItemStackTools:setup("ItemTrig")
    ItemTrig.ItemAPILimits:setup("ItemTrig")

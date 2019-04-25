@@ -30,13 +30,15 @@ do -- helper class for trigger list entries
       end
       self.enabled.toggleFunction =
          function(self, checked)
-            local control = self:GetParent()
-            local pane    = WinCls:getInstance().ui.pane
-            local index   = pane:indexOfControl(control)
-            if not index then
+            local control   = self:GetParent()
+            local pane      = ItemTrig.UI.WScrollList:fromItem(control)
+            local paneIndex = pane:indexOfControl(control)
+            --
+            local editor  = WinCls:getInstance()
+            local trigger = editor:getTriggerByPaneIndex(paneIndex)
+            if not trigger then
                return
             end
-            local trigger = pane:at(index)
             trigger.enabled = checked
          end
    end
@@ -201,6 +203,9 @@ function WinCls:_construct()
             return tostring(a.name or a):lower() < tostring(b.name or b):lower()
          end, false)
          --
+         local tooltip = ItemTrig.UI.WTooltip:cast(ItemTrig_TriggerList_EntryPointFullName)
+         tooltip.adoptCrossAxisSize = true
+         --
          pane.element.template = "ItemTrig_TrigEdit_Template_EntryPointFilterItem"
          pane.element.toConstruct =
             function(control, data, extra)
@@ -221,6 +226,8 @@ function WinCls:_construct()
                local back = GetControl(control, "Bg")
                back:SetColor(unpack(getThemeColor("LIST_ITEM_BACKGROUND_SELECT")))
                text:SetColor(unpack(getThemeColor("LIST_ITEM_TEXT_SELECTED")))
+               --
+               tooltip:hide()
             end
          pane.element.onDeselect =
             function(index, control, pane)

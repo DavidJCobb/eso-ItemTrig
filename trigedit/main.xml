@@ -1,5 +1,14 @@
 <GuiXml>
    <Controls>
+      <TopLevelControl name="ItemTrig_TooltipTopLevel_TriggerList_EntryPointFullName" inherits="TooltipTopLevel">
+         <AnchorFill/>
+         <Controls>
+            <Tooltip name="ItemTrig_TriggerList_EntryPointFullName"
+               hidden="true"
+               inherits="ItemTrig_UITemplate_WTooltipInPlace"
+            />
+         </Controls>
+      </TopLevelControl>
       <Control name="ItemTrig_TrigEdit_Template_TriggerOuter" virtual="true"
          mouseEnabled="true"
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
@@ -31,6 +40,47 @@
          inherits="ItemTrig_UITemplate_WScrollSelectListItem"
       >
          <Dimensions y="42" />
+         <OnMouseEnter>
+            local pane = ItemTrig.UI.WScrollList:fromItem(self)
+            if (not pane) or pane:isControlSelected(self) then
+               return
+            end
+            --
+            local tooltip = ItemTrig.UI.WTooltip:cast(ItemTrig_TriggerList_EntryPointFullName)
+            tooltip.adoptCrossAxisSize = true
+            --
+            local function _show()
+               local label = self:GetNamedChild("Text")
+               if label:WasTruncated() then
+                  local text = label:GetText()
+                  tooltip:show(self, text, tooltip.AXIS_H, tooltip.PREFER_FORWARD, -8, 0)
+               end
+            end
+            --
+            if tooltip:asControl():IsHidden() then
+               EVENT_MANAGER:RegisterForUpdate("ItemTrig_TriggerList_EntryPointTooltipTimer", 625,
+                  function()
+                     EVENT_MANAGER:UnregisterForUpdate("ItemTrig_TriggerList_EntryPointTooltipTimer")
+                     _show()
+                  end)
+            else
+               _show()
+            end
+            --
+            -- NOTE: The Lua file for this window also has a tiny bit of code 
+            -- relating to tooltips: we have the pane's onSelect handler hide 
+            -- the tooltip, since we don't want them showing overtop selected 
+            -- elements (that would obscure the "selected" background color, 
+            -- and not showing in-place tooltips on selected items even if 
+            -- they're truncated is consistent with the Windows behavior 
+            -- anyway).
+            --
+         </OnMouseEnter>
+         <OnMouseExit>
+            EVENT_MANAGER:UnregisterForUpdate("ItemTrig_TriggerList_EntryPointTooltipTimer")
+            local tooltip = ItemTrig.UI.WTooltip:cast(ItemTrig_TriggerList_EntryPointFullName)
+            tooltip:hide()
+         </OnMouseExit>
          <Controls>
             <Texture name="$(parent)Bg" level="0" excludeFromResizeToFitExtents="true">
                <AnchorFill />

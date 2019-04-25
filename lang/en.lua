@@ -34,7 +34,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONCROWNSTOREITEMS", "
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONLOCKEDITEMS", "Locked items")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_ALLOWTRIGGERSONLOCKEDITEMS", "Control whether triggers are run on locked items.")
-
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_BANKTRIGGERSALLOWDESTROY", "Banked items: allow destroy")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_BANKTRIGGERSALLOWDESTROY", "Control whether triggers are allowed to destroy banked items. This option does not affect deconstruction.")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_PRETENDACTIONS", "Pretend Mode")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_PRETENDACTIONS", "If this is enabled, then ItemTrig will not take any actions on your items. Instead, it will simply log what it would have done.")
 --
@@ -45,6 +48,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGALLITEMACTIONS", "Log whenever 
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_LOGTRIGGERFAILURES", "Log trigger failures")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES", "Log every time a trigger stops early due to an error.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_COLLAPSESAMETRIGFAILS", "Collapse duplicate failure messages")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_COLLAPSESAMETRIGFAILS", "Causes certain kinds of trigger failures to only show a single message. If you have ten triggers trying to deposit into a full bank, you don't need ten error messages telling you your bank is full, right?")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_UI", "UI settings")
 
@@ -303,6 +309,19 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_COND",      "|c000000...|r|cFFA0
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_NO_ORS",    "|c000000...|rNone of the OR-linked conditions had matched by this point.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BAD_TAIL_ORS", "|c000000...|rNone of the OR-linked conditions at the end matched.")
 --
+-- Messages shown when multiple triggers fail for the same reason, and when 
+-- the player has chosen to "collapse" these failures into summaries after 
+-- the first listed failure. These are per error code.
+--
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP",      "|cFFA020ItemTrig: <<1>> total triggers failed with the following error:|r")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_BKFL", "|c000000...|rCannot deposit items when the bank is full.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_BKNO", "|c000000...|rCannot deposit items when the bank is not open.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_FENL", "|c000000...|rYou've maxed out your fence transactions for the day.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_LNDL", "|c000000...|rYou've maxed out your launder transactions for the day.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZDPT", "|c000000...|rZenimax limits how many items an add-on can automatically deposit. Close and reopen the bank to deposit more.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZLND", "|c000000...|rZenimax limits how many items an add-on can automatically launder. Close and reopen the fence to launder more.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_WCFT", "|c000000...|rThis is the wrong crafting station for this type of item.")
+--
 --
 -- SYSTEM
 --
@@ -330,6 +349,8 @@ ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_BARTER",     "Merchant Menu Opened
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_CRAFTING",   "Crafting Menu Opened")
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_FENCE",      "Fence Menu Opened")
 ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_ITEM_ADDED", "Item Added")
+ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_BANK_BANK",     "Bank Opened (run on banked items)")
+ZO_CreateStringId("ITEMTRIG_STRING_ENTRYPOINT_BANK_CRAFTING", "Crafting Menu Opened (run on banked items)")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ENTRYPOINT_LIMIT",    "This action can only run from the following entry points: <<1>>")
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_CONDITION_ENTRYPOINT_LIMIT", "This condition can only run from the following entry points: <<1>>")
@@ -612,6 +633,21 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_SPECIALIZEDITEMTYPE", "The item
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_SPECIALIZEDITEMTYPE_NO",  "is not")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_SPECIALIZEDITEMTYPE_YES", "is")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ITEMLOCATION", "Item Location")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ITEMLOCATION", "The item <<1>> in <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMLOCATION_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMLOCATION_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMLOCATION_BACKPACK", "the player's backpack")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ITEMLOCATION_BANK",     "the player's bank")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_ITEMLOCATION", "ItemTrig offers an option to run triggers on items in your bank, if those triggers have the Bank Opened or Crafting Menu Opened entry points. This option is useful for things like mass deconstructing equipment stored in the bank. If you are not using that option, then this condition isn't useful.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_BOUND", "Bound")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_BOUND", "The item <<1>> <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_ANY",  "bound")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_CHAR", "Character Bound")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -651,8 +687,10 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DESTROYITEM", "Destroy Stack")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DESTROYITEM", "Destroy <<1>>.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_WHOLESTACK", "this stack of items")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_DESTROYITEM_ONLYADDED",  "the items that were added")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_LOCKED",     "The item is locked.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_CANT_SPLIT", "Your inventory is full. In order to destroy just the incoming items, you must have one slot to spare.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_LOCKED",      "The item is locked.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_CANT_SPLIT",  "Your inventory is full. In order to destroy just the incoming items, you must have one slot to spare.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NO_BANKED",   "You have disabled destroying items in the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NOT_AT_BANK", "You can only destroy banked items while the bank is open.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_MODIFYJUNKFLAG", "Modify Junk Flag")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_MODIFYJUNKFLAG", "<<1>> the item as junk.")
@@ -684,9 +722,11 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_STOPRUNNINGTRIGGERS", "This
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DEPOSITINBANK", "Deposit In Bank")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DEPOSITINBANK", "Deposit <<1>> of the item in the player's bank.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL",     "The bank is full.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN", "Cannot deposit items in the bank if you aren't viewing the bank.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN",   "You can't store stolen items in the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_ZENIMAX_MAX_COUNT", "Add-ons can only deposit 98 items every time the bank window is open; more than that and you'll disconnect from the server. Close the bank window and reopen it to deposit more items.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL",       "The bank is full.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN",   "Cannot deposit items in the bank if you aren't viewing the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN",     "You can't store stolen items in the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_CHAR_BOUND", "You can't deposit items in the bank if they are Character Bound.")
 --
 --
 -- GALLERY

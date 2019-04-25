@@ -284,9 +284,11 @@ do
    --
    ItemTrig.assign(APILimits, {
       limits = {
-         autoLaunders = 100,
+         autoDeposits =  99, -- stacks, not total items
+         autoLaunders = 100, -- total items, not stacks
       },
       safeties = { -- stop X below the limit, to be considerate to other add-ons
+         autoDeposits = 2,
          autoLaunders = 2,
       },
       state = {},
@@ -312,6 +314,13 @@ do
       self.state[name] = (self.state[name] or 0) + count
    end
    --
+   function APILimits:capDeposit(stackCount)
+      return self:capToLimit("autoDeposits", stackCount)
+   end
+   function APILimits:didDeposit(stackCount)
+      return self:trackOperation("autoDeposits", stackCount)
+   end
+   --
    function APILimits:capLaunder(count)
       return self:capToLimit("autoLaunders", count)
    end
@@ -323,10 +332,17 @@ do
       if eventCode == EVENT_OPEN_FENCE then
          APILimits.state.autoLaunders = 0
       end
+      if eventCode == EVENT_OPEN_BANK
+      or eventCode == EVENT_CLOSE_BANK
+      then
+         APILimits.state.autoDeposits = 0
+      end
    end
    function APILimits:teardown()
       local namespace = self.eventPrefix .. "ItemAPILimitsListener"
       EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_OPEN_FENCE)
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_OPEN_BANK)
+      EVENT_MANAGER:UnregisterForEvent(namespace, EVENT_CLOSE_BANK)
       self.listening = false
    end
    function APILimits:setup(eventPrefix)
@@ -335,7 +351,9 @@ do
       end
       self.eventPrefix = eventPrefix
       local namespace = eventPrefix .. "ItemAPILimitsListener"
-      EVENT_MANAGER:RegisterForEvent (namespace, EVENT_OPEN_FENCE, _listener)
+      EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_FENCE, _listener)
+      EVENT_MANAGER:RegisterForEvent(namespace, EVENT_OPEN_BANK,  _listener)
+      EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CLOSE_BANK, _listener)
       self.listening = true
    end
 end
@@ -676,6 +694,7 @@ local _lazyGetterMappings = {
          end
          return _handle(GetAlchemyItemTraits(i.bag, i.slot))
       end,
+   bindType       = function(i) return _nilIfInvalid(i, GetItemBindType(i.bag, i.slot)) end,
    canBeJunk      = function(i) return _nilIfInvalid(i, CanItemBeMarkedAsJunk(i.bag, i.slot)) end,
    canBeLocked    = function(i) return _nilIfInvalid(i, CanItemBePlayerLocked(i.bag, i.slot)) end,
    countTotal     = function(i) return _nilIfInvalid(i, GetItemTotalCount(i.bag, i.slot))     end,
@@ -784,9 +803,16 @@ ItemInterface.meta = {
       end,
 }
 do -- define failure reasons for member functions
+   --
+   -- These should be unique with anything else that can get routed 
+   -- to ItemTrig's TriggerExecutionEventHandler as an error code, 
+   -- and that that singleton would consider a "duplicate" error 
+   -- code.
+   --
    ItemInterface.FAILURE_BANK_CANT_STORE_STOLEN  = "BKST" -- You can't store stolen items in the bank.
    ItemInterface.FAILURE_BANK_IS_FULL            = "BKFL" -- The bank is full.
    ItemInterface.FAILURE_BANK_IS_NOT_OPEN        = "BKNO" -- You must have the bank open.
+   ItemInterface.FAILURE_BANK_CHARACTER_BOUND    = "BCHB" -- You can't deposit items that are Character Bound.
    ItemInterface.FAILURE_CANNOT_DECONSTRUCT      = "DCON" -- This item type can't be deconstructed.
    ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK     = "NJNK" -- This item type can't be flagged as junk.
    ItemInterface.FAILURE_CANNOT_LOCK             = "NLOK" -- This item type can't be locked.
@@ -798,6 +824,7 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT    = "LNDR" -- You've hit the limit of items you can launder for the day.
    ItemInterface.FAILURE_LAUNDER_CANT_AFFORD     = "LNDG" -- You don't have enough gold to launder this item.
    ItemInterface.FAILURE_LAUNDER_NOT_STOLEN      = "LDNS" -- You can't launder something that isn't stolen!
+   ItemInterface.FAILURE_ZENIMAX_DEPOSIT_LIMIT   = "ZDPT" --  We've hit the maximum number of items Zenimax allows add-ons to deposit every time the bank is opened.
    ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT   = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
    ItemInterface.FAILURE_WRONG_CRAFTING_STATION  = "WCFT" -- This item type can't be used at this crafting station.
 end
@@ -1256,14 +1283,21 @@ function ItemInterface:storeInBank(count)
    if self.stolen then
       return false, self.FAILURE_BANK_CANT_STORE_STOLEN
    end
+   if self.bindType == BIND_TYPE_ON_PICKUP_BACKPACK then -- Character Bound
+      return false, self.FAILURE_BANK_CHARACTER_BOUND
+   end
    if not DoesBagHaveSpaceFor(BAG_BANK, self.bag, self.slot) then
       return false, self.FAILURE_BANK_IS_FULL
    end
    if not (count and count <= self.count) then
       count = self.count
    end
+   if APILimits:capDeposit(1) < 1 then -- call this differently than usual because the bank limit is per stack, not per total
+      return false, self.FAILURE_ZENIMAX_DEPOSIT_LIMIT
+   end
    CallSecureProtected("PickupInventoryItem", self.bag, self.slot, count)
    CallSecureProtected("PlaceInTransfer")
+   APILimits:didDeposit(1) -- pass 1 because the bank limit is per stack, not per total
    self:updateCount(-count)
    self:onModifyingAction("deposit-bank", count)
    return true

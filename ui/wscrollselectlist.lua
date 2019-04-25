@@ -222,6 +222,13 @@ function WScrollSelectList:hasSelection()
    end
    return true
 end
+function WScrollSelectList:isControlSelected(control)
+   local index = self:indexOfControl(control)
+   if index then
+      return self:isIndexSelected(index)
+   end
+   return false
+end
 function WScrollSelectList:isIndexSelected(index)
    local sel = self.selection.index
    if not sel then

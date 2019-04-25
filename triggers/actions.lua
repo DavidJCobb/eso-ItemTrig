@@ -132,6 +132,14 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
+         if context.bag == BAG_BANK then
+            if not ItemTrig.prefs:get("bank/allowDestroy") then
+               return ItemTrig.OPCODE_FAILED, { why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NO_BANKED) }
+            end
+            if state.entryPoint ~= ItemTrig.ENTRY_POINT_BANK then
+               return ItemTrig.OPCODE_FAILED, { why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NOT_AT_BANK) }
+            end
+         end
          if ItemTrig.prefs:get("pretendActions") then
             _doPretend(context, "DESTROYITEM")
             return ItemTrig.RUN_NO_MORE_TRIGGERS
@@ -274,23 +282,11 @@ ItemTrig.tableActions = {
             _doPretend(context, "DECONSTRUCT")
             return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
-         --[[
-         local result, errorCode = context:deconstruct()
-         if not result then
-            local extra = { code = errorCode, why = nil }
-            if errorCode == ItemInterface.FAILURE_ITEM_IS_LOCKED then
-               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED)
-            elseif errorCode == ItemInterface.FAILURE_CANNOT_DECONSTRUCT then
-               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE)
-            end
-            return ItemTrig.OPCODE_FAILED, extra
-         end
-         ]]--
          ItemTrig.ItemQueues:queueDeconstruct(context)
          return ItemTrig.RUN_NO_MORE_TRIGGERS
       end,
       { -- extra data for this opcode
-         allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING, ItemTrig.ENTRY_POINT_BANK_CRAFTING }
       }
    ),
    [10] = ActionBase:new( -- Stop Running Triggers
@@ -321,7 +317,7 @@ ItemTrig.tableActions = {
             _doPretend(context, "DEPOSITINBANK")
             return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
-         local result, code = context:storeInBank(args[1])
+         local result, errorCode = context:storeInBank(args[1])
          if not result then
             local extra = { code = errorCode, why = nil }
             if errorCode == ItemInterface.FAILURE_BANK_CANT_STORE_STOLEN then
@@ -330,6 +326,10 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL)
             elseif errorCode == ItemInterface.FAILURE_BANK_IS_NOT_OPEN then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN)
+            elseif errorCode == ItemInterface.FAILURE_ZENIMAX_DEPOSIT_LIMIT then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_ZENIMAX_MAX_COUNT)
+            elseif errorCode == ItemInterface.FAILURE_BANK_CHARACTER_BOUND then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_CHAR_BOUND)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end

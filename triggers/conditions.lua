@@ -1774,6 +1774,43 @@ ItemTrig.tableConditions = {
          end
       end
    ),
+   [45] = ConditionBase:new( -- Is Bound
+      _s(ITEMTRIG_STRING_CONDITIONNAME_BOUND),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_BOUND),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_BOUND_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_BOUND_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [-1] = _s(ITEMTRIG_STRING_OPCODEARG_BOUND_ANY),
+               [BIND_TYPE_ON_PICKUP_BACKPACK] = _s(ITEMTRIG_STRING_OPCODEARG_BOUND_CHAR),
+            },
+            default = -1,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         do
+            if args[2] == -1 then -- any
+               result = context.bound
+            else
+               result = context.bound and context.bindType == BIND_TYPE_ON_PICKUP_BACKPACK
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
 }
 ItemTrig.countConditions = #ItemTrig.tableConditions
 for i = 1, ItemTrig.countConditions do

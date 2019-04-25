@@ -2,13 +2,15 @@ assert(ItemTrig.ThemeManager, "bad file load order")
 
 do -- define prefs
    ItemTrig.assign(ItemTrig.prefs, {
-      ["logging/actionsTaken"]    = { default = false },
-      ["logging/triggerFailures"] = { default = false },
+      ["logging/actionsTaken"]       = { default = false },
+      ["logging/collapseSameErrors"] = { default = true },
+      ["logging/triggerFailures"]    = { default = false },
       ["robustFencing"]           = { default = true },
       ["pretendActions"]          = { default = false },
       ["runTriggersOn/crownCrateItems"] = { default = false },
       ["runTriggersOn/crownStoreItems"] = { default = false },
       ["runTriggersOn/lockedItems"]     = { default = false },
+      ["bankTriggers/allowDestroy"]     = { default = false },
       ["ui/allowEscForceClose"]    = { default = true },
       ["ui/opcodeArgAutocomplete"] = { default = false },
       ["ui/theme"]                 = { default = "OldDesktop" },
@@ -40,6 +42,14 @@ local options = {
       type = "header",
       name = GetString(ITEMTRIG_STRING_OPTIONHEADER_ALLOWTRIGGERS),
    },
+   {  -- Only pretend to take actions
+      --
+      type    = "checkbox",
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_PRETENDACTIONS),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_PRETENDACTIONS),
+      getFunc = function()  return prefs:get("pretendActions") end,
+      setFunc = function(v) prefs:set("pretendActions", v) end,
+   },
    {  -- NEEDS TESTING
       -- Allow triggers to run on Crown Crate items
       --
@@ -66,13 +76,13 @@ local options = {
       getFunc = function()  return prefs:get("runTriggersOn/lockedItems") end,
       setFunc = function(v) prefs:set("runTriggersOn/lockedItems", v) end,
    },
-   {  -- Only pretend to take actions
+   {  -- Allow triggers to destroy banked items
       --
       type    = "checkbox",
-      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_PRETENDACTIONS),
-      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_PRETENDACTIONS),
-      getFunc = function()  return prefs:get("pretendActions") end,
-      setFunc = function(v) prefs:set("pretendActions", v) end,
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_BANKTRIGGERSALLOWDESTROY),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_BANKTRIGGERSALLOWDESTROY),
+      getFunc = function()  return prefs:get("bank/allowDestroy") end,
+      setFunc = function(v) prefs:set("bank/allowDestroy", v) end,
    },
    {
       type = "header",
@@ -93,6 +103,14 @@ local options = {
       tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_LOGTRIGGERFAILURES),
       getFunc = function()  return prefs:get("logging/triggerFailures") end,
       setFunc = function(v) prefs:set("logging/triggerFailures", v) end,
+   },
+   {  -- Collapse certain trigger-failure errors together when they occur multiple times at once
+      --
+      type    = "checkbox",
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_COLLAPSESAMETRIGFAILS),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_COLLAPSESAMETRIGFAILS),
+      getFunc = function()  return prefs:get("logging/collapseSameErrors") end,
+      setFunc = function(v) prefs:set("logging/collapseSameErrors", v) end,
    },
    {
       type = "header",

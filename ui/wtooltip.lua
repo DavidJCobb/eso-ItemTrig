@@ -92,10 +92,26 @@ function WTooltip:setText(text)
       self:hide()
    end
 end
-function WTooltip:show(target, text, axis, prefer, distance)
-   axis     = axis     or self.AXIS_H
-   prefer   = prefer   or self.PREFER_FORWARD
-   distance = distance or 0
+function WTooltip:show(target, text, axis, prefer, distance, crossOffset)
+   --
+   -- (axis) is the axis on which the tooltip should be positioned -- whether 
+   -- it should be horizontally aligned with the (target) i.e. to the left or 
+   -- to the right, or vertically aligned with the (target).
+   --
+   -- (prefer) indicates which direction on that axis you would prefer the 
+   -- tooltip to be positioned: forward (down/right) or backward (up/left). 
+   -- If there isn't room on the desired side (i.e. the tooltip would go off-
+   -- screen), then it will use the other side instead.
+   --
+   -- (distance) is the distance along the main axis (i.e. (axis)), while 
+   -- (crossOffset) is an offset along the cross axis (the opposite of the 
+   -- main axis). The (crossOffset) is always in the forward direction for 
+   -- the cross axis.
+   --
+   axis        = axis     or self.AXIS_H
+   prefer      = prefer   or self.PREFER_FORWARD
+   distance    = distance or 0
+   crossOffset = crossOffset or 0
    --
    self:refreshStyle()
    --
@@ -103,11 +119,18 @@ function WTooltip:show(target, text, axis, prefer, distance)
       local control = self:asControl()
       self:setText(text)
       if self.options.adoptCrossAxisSize then
-         if axis == self.AXIS_W then
+         if axis == self.AXIS_H then
             control:SetHeight(target:GetHeight())
          else
             control:SetWidth(target:GetWidth())
          end
+      end
+      if axis == self.AXIS_H then
+         --
+         -- gotta fix the width manually because resize-to-fit-descendents sucks
+         --
+         control:SetWidth(400) -- we need the text to not be wrapped
+         control:SetWidth(self.controls.text:GetTextWidth())
       end
       --
       local anchorThis
@@ -126,14 +149,14 @@ function WTooltip:show(target, text, axis, prefer, distance)
          local before
          local after
          local mainSize
-         do
-            if axis == self.AXIS_W then
+         do -- Assign vars based on the main and cross axes.
+            if axis == self.AXIS_H then
                cross    = TOP
-               backward = RIGHT
-               forward  = LEFT
+               backward = LEFT
+               forward  = RIGHT
                mainSize = cw
                before   = target:GetLeft() - distance
-               after    = sh - target:GetLeft() - target:GetWidth() - distance
+               after    = sw - target:GetLeft() - target:GetWidth() - distance
                --
                offsetX = distance + (borderWidth * 2 + borderDistance * 2)
             else
@@ -147,11 +170,11 @@ function WTooltip:show(target, text, axis, prefer, distance)
                offsetY = distance + (borderWidth * 2 + borderDistance * 2)
             end
          end
-         do
+         do -- Main positioning.
             local canFitBefore = before >= mainSize
             local canFitAfter  = after  >= mainSize
             if prefer == self.PREFER_FORWARD then
-               if not canFitAfter and canFitBefore then
+               if (not canFitAfter) and canFitBefore then
                   anchorTarget = backward or cross
                   anchorThis   = forward  or cross
                   --
@@ -162,7 +185,7 @@ function WTooltip:show(target, text, axis, prefer, distance)
                   anchorThis   = backward or cross
                end
             else
-               if not canFitBefore and canFitAfter then
+               if (not canFitBefore) and canFitAfter then
                   anchorTarget = forward  or cross
                   anchorThis   = backward or cross
                else
@@ -174,8 +197,67 @@ function WTooltip:show(target, text, axis, prefer, distance)
                end
             end
          end
+         do -- crossOffset
+            if axis == self.AXIS_H then
+               offsetY = crossOffset
+            else
+               offsetX = crossOffset
+            end
+         end
       end
       InitializeTooltip(control, target, anchorThis, offsetX, offsetY, anchorTarget)
+   else
+      self:hide()
+   end
+end
+
+--[[--
+
+   WTOOLTIPINPLACE
+   
+   This is what Windows calls an "in-place tooltip." If you hover over 
+   a list item somewhere that has been truncated, an in-place tooltip 
+   will fully cover the list item and extend beyond it, allowing you 
+   to see the full, untruncated text. You can click through the tooltip 
+   to activate the list item. Typical Windows behavior is not to show 
+   these on selected list items, since tooltips must have a uniform 
+   background color i.e. they cannot show "selected" state.
+   
+   This really just overrides the (show) method.
+
+--]]--
+
+ItemTrig.UI.WTooltipInPlace = ItemTrig.UI.WTooltip:makeSubclass("WTooltipInPlace")
+local WTooltipInPlace = ItemTrig.UI.WTooltipInPlace
+function WTooltipInPlace:_construct(options)
+end
+function WTooltipInPlace:show(target, text, axis, baseLength)
+   --
+   -- The (axis) is the axis on which the (target) control is truncated. 
+   -- The (baseLength) should be a maximum width for the tooltip. Note 
+   -- that you can no longer express a preference for aligning forward 
+   -- or backward; we always extend forward.
+   --
+   self:refreshStyle()
+   if target and text ~= "" then
+      local control = self:asControl()
+      self:setText(text)
+      if axis == self.AXIS_H then
+         control:SetHeight(target:GetHeight())
+         control:SetWidth(baseLength or 400)
+         --
+         local length = self.controls.text:GetTextWidth()
+         local other  = target:GetWidth()
+         control:SetWidth(math.max(length, other))
+      else
+         control:SetWidth(target:GetWidth())
+         control:SetHeight(baseLength or 400)
+         --
+         local length = self.controls.text:GetTextHeight()
+         local other  = target:GetHeight()
+         control:SetHeight(math.max(length, other))
+      end
+      InitializeTooltip(control, target, TOPLEFT, 0, 0, TOPLEFT)
    else
       self:hide()
    end

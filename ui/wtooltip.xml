@@ -38,5 +38,16 @@
             </Label>
          </Controls>
       </Tooltip>
+      <Tooltip name="ItemTrig_UITemplate_WTooltipInPlace"
+         virtual="true"
+         clampedToScreen="true"
+         font="ITEMTRIG_FONT_BASIC"
+         headerVerticalOffset="0"
+         headerRowSpacing="0"
+         resizeToFitDescendants="true"
+         inherits="ItemTrig_UITemplate_WTooltip"
+      >
+         <OnInitialized> ItemTrig.UI.WTooltipInPlace:install(self) </OnInitialized>
+      </Tooltip>
    </Controls>
 </GuiXml>
