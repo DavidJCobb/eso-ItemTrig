@@ -29,8 +29,7 @@ ItemTrig.ISavedata = ISavedataForAccount
    
       --
       -- Declare our savedata variable, an optional namespace to nest things 
-      -- under (insert "yo dawg" meme for variables here), and the current 
-      -- data version.
+      -- under, and the current data version.
       --
       local savedata = ISavedataForAccount("MyVarName", nil, 3)
       
@@ -195,8 +194,9 @@ function ISavedataCharacter:new(root, id, struct)
       id      = id,
       name    = struct.name,
       root    = root,
-      version = struct.version or 0,
+      version = tonumber(struct.version) or 0,
       wrapped = struct.data,
+      _initiallyLoadedVersion = tonumber(struct.version) or 0,
    })
    return result
 end
@@ -211,6 +211,13 @@ function ISavedataCharacter:data()
 end
 function ISavedataCharacter:isOutOfDate()
    return self.version < self.root.version
+end
+function ISavedataCharacter:setIsUpToDate()
+   self:setVersion(self.root.version)
+end
+function ISavedataCharacter:setVersion(v)
+   self.version = v
+   self.wrapped.version = v
 end
 function ISavedataCharacter:tryUpdateRoutine(functor)
    --
@@ -228,10 +235,10 @@ function ISavedataCharacter:tryUpdateRoutine(functor)
    end
    local result = functor(self, self.version)
    if result == true then
-      self.version = self.root.version
+      self:setVersion(self.root.version)
       return true
    elseif type(result) == "number" and result > self.version then
-      self.version = result
+      self:setVersion(result)
    end
    return false
 end

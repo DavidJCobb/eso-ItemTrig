@@ -259,20 +259,30 @@ local function _itemShouldRunTriggers(item)
    return true
 end
 local function _processBank(entryPoint, entryPointData)
-   _onBeforeRunTriggers()
    local list = ItemTrig.assign({}, ItemTrig.Savedata.triggers)
-   ItemTrig.forEachBagSlot(BAG_BANK, function(item)
+   local stop = false
+   --
+   local function functor(item)
       if not _itemShouldRunTriggers(item) then
          return
       end
       item.entryPointData = entryPointData
-      ItemTrig.executeTriggerList(list, entryPoint, item,
+      local result = ItemTrig.executeTriggerList(list, entryPoint, item,
          {
             eventRecipient   = TriggerExecutionEventHandler,
             stripBadTriggers = true,
          }
       )
-   end)
+      if result == ItemTrig.RUN_NO_MORE_TRIGGERS then
+         stop = true
+      end
+   end
+   --
+   _onBeforeRunTriggers()
+   ItemTrig.forEachBagSlot(BAG_BANK, functor)
+   if not stop then
+      ItemTrig.forEachBagSlot(BAG_SUBSCRIBER_BANK, functor)
+   end
    _onAfterRunTriggers()
 end
 local function _processInventory(entryPoint, entryPointData)
@@ -490,6 +500,10 @@ local function Initialize()
             CHAT_SYSTEM:AddMessage(LocalizeString(message, name))
          elseif action == "deposit-bank" then
             local message = GetString(ITEMTRIG_STRING_LOG_DEPOSIT_IN_BANK)
+            local count   = select(1, ...)
+            CHAT_SYSTEM:AddMessage(LocalizeString(message, name, count))
+         elseif action == "withdraw-bank" then
+            local message = GetString(ITEMTRIG_STRING_LOG_WITHDRAW_FROM_BANK)
             local count   = select(1, ...)
             CHAT_SYSTEM:AddMessage(LocalizeString(message, name, count))
          elseif action == "destroy" then

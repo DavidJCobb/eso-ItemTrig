@@ -84,7 +84,7 @@ function ItemTrig.filterTriggerList(list, entryPoint)
    local mapping  = {} -- list[mapping[i]] == filtered[i]
    for i = 1, #list do
       local trigger = list[i]
-      if trigger:allowsEntryPoint(entryPoint) then
+      if trigger and trigger:allowsEntryPoint(entryPoint) then
          table.insert(filtered, trigger)
          table.insert(mapping,  i)
       end
@@ -118,11 +118,13 @@ ItemTrig.Trigger.__index = ItemTrig.Trigger
 function ItemTrig.Trigger:new()
    local result = {}
    setmetatable(result, self)
-   result.name        = GetString(ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME)
-   result.enabled     = true
-   result.entryPoints = {}
-   result.conditions  = {} -- array
-   result.actions     = {} -- array
+   result.name           = GetString(ITEMTRIG_STRING_DEFAULT_TRIGGER_NAME)
+   result.enabled        = true
+   result.entryPoints    = {}
+   result.conditions     = {} -- array
+   result.actions        = {} -- array
+   result.galleryID      = nil -- number or nil
+   result.galleryUpdates = nil -- array of strings representing changed properties
    result.state = {
       using_or   = false,
       matched_or = false,
@@ -150,9 +152,10 @@ function ItemTrig.Trigger:clone(deep)
    setmetatable(result, getmetatable(self))
    result.name        = self.name
    result.enabled     = self.enabled
-   result.entryPoints = self.entryPoints
+   result.entryPoints = ItemTrig.assign({}, self.entryPoints or {})
    result.conditions  = {} -- array
    result.actions     = {} -- array
+   result.galleryID   = self.galleryID -- number or nil
    result.state = {
       using_or   = false,
       matched_or = false,
@@ -174,10 +177,11 @@ function ItemTrig.Trigger:copyAssign(other, deep)
    -- replace the variable rather than overwriting what it 
    -- pointed to).
    --
-   self.name        = other.name
-   self.enabled     = other.enabled or false
-   self.entryPoints = other.entryPoints or {}
+   self.name    = other.name
+   self.enabled = other.enabled or false
    if deep then
+      self.entryPoints = ItemTrig.assign({}, other.entryPoints or {})
+      --
       ZO_ClearNumericallyIndexedTable(self.conditions)
       ZO_ClearNumericallyIndexedTable(self.actions)
       --
@@ -188,10 +192,12 @@ function ItemTrig.Trigger:copyAssign(other, deep)
          self.actions[i] = other.actions[i]:clone(deep)
       end
    else
-      self.conditions = other.conditions
-      self.actions    = other.actions
-      self.state      = other.state
+      self.entryPoints = other.entryPoints or {}
+      self.conditions  = other.conditions
+      self.actions     = other.actions
+      self.state       = other.state
    end
+   self.galleryID = other.galleryID
 end
 function ItemTrig.Trigger:allowsEntryPoint(entryPoint)
    return not not ItemTrig.indexOf(self.entryPoints, entryPoint)
@@ -437,4 +443,13 @@ function ItemTrig.Trigger:resetRuntimeState()
 end
 function ItemTrig.Trigger:serialize()
    return ItemTrig.serializeTrigobject(self)
+end
+function ItemTrig.Trigger:updateGalleryTrigger(source)
+   if not self.galleryID then
+      return
+   end
+   if self.name ~= source.name then
+      return
+   end
+   self:copyAssign(source, true)
 end

@@ -12,12 +12,37 @@ local CAN_CHECK_WHETHER_ADDED_ITEM_WAS_WITHDRAWN = false
 
 local ITEM_NAME_LOCKPICK = ItemTrig.getNaiveItemNameFor(30357)
 
+--[[
+   THE TRIGGER GALLERY
+   
+   This is a list of pre-made triggers that the user can "import" into their 
+   own trigger list.
+   
+   As of 1.0.9, each gallery trigger has a galleryID, which must be a unique 
+   number. If a user imports a gallery trigger and never edits it, and if we 
+   later make changes to the gallery trigger, then we can use the galleryID 
+   to identify and update the imported trigger. This only works for top-level 
+   triggers, and only top-level triggers should have a galleryID.
+   
+   Note also that an imported gallery trigger will only update if its name 
+   matches the gallery trigger with the same galleryID. This may cause problems 
+   if a user changes the language they play on, or if we rename a trigger, but 
+   it's a useful check just to ~really~ make sure I don't make a destructive 
+   mistake.
+   
+   If the add-on is loaded on my ESO account (@DavidJCobb), then a check will 
+   be run to ensure that every gallery trigger has a unique ID. The first one 
+   that fails to meet this requirement will throw an error (which means that 
+   repeated /reloadui calls are needed if multiple mistakes were made).
+]]--
+
 function ItemTrig.retrieveTriggerGallery()
    local gallery = {}
    do -- Deconstruct "intricate" gear for bonus XP
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_DECONSTRUCTINTRICATE_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+      t.galleryID   = 1
       local cl = t.conditions
       local al = t.actions
       --
@@ -33,11 +58,13 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_SELLORNATE_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_BARTER }
+      t.galleryID   = 2
       local cl = t.conditions
       local al = t.actions
       --
       cl[1] = Condition:new(15, { false }) -- The item [is not] locked
       cl[2] = Condition:new(23, { true }) -- The item [is] ornate.
+      cl[3] = Condition:new( 4, { false }) -- The item [is not] stolen
       --
       al[1] = Action:new(8, { 9999 }) -- Sell [9999] of the item.
       --
@@ -47,13 +74,15 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_DECONSTRUCTWORTHLESS_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+      t.galleryID   = 3
       local cl = t.conditions
       local al = t.actions
       --
       cl[1] = Condition:new(15, { false }) -- The item [is not] locked
-      cl[2] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
-      cl[3] = Condition:new(31, { { qualifier = "LTE", number = 0 } }) -- Sell value is [at most 0]
-      cl[4] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
+      cl[2] = Condition:new( 7, { true, -9 }) -- Added item [is] an [any equippable]
+      cl[3] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
+      cl[4] = Condition:new(31, { { qualifier = "LTE", number = 0 } }) -- Sell value is [at most 0]
+      cl[5] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
       --
       al[1] = Action:new(9) -- Deconstruct the item.
       --
@@ -63,13 +92,15 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_SELLTRASH_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_BARTER }
+      t.galleryID   = 4
       local cl = t.conditions
       local al = t.actions
       --
       cl[1] = Condition:new( 7, { true, ITEMTYPE_TRASH }) -- The item [is] a [Trash]
       cl[2] = Condition:new(15, { false }) -- The item [is not] locked
+      cl[3] = Condition:new( 4, { false }) -- The item [is not] stolen
       --
-      al[1] = Action:new(7, { 9999 }) -- Sell as many as possible.
+      al[1] = Action:new(8, { 9999 }) -- Sell as many as possible.
       --
       table.insert(gallery, t)
    end
@@ -77,6 +108,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_SELLLOOTEDPOISONS_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_BARTER }
+      t.galleryID   = 5
       local cl = t.conditions
       local al = t.actions
       --
@@ -93,6 +125,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_DESTROYEXCESSSTYLEMATS_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      t.galleryID   = 6
       local cl = t.conditions
       local al = t.actions
       --
@@ -115,6 +148,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENCRAPTREASURE_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      t.galleryID   = 7
       local cl = t.conditions
       local al = t.actions
       --
@@ -156,6 +190,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_LAUNDERCOVETOUSCOUNTESS_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_FENCE }
+      t.galleryID   = 8
       local cl = t.conditions
       local al = t.actions
       --
@@ -174,6 +209,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_DESTROYSTOLENJUNK_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      t.galleryID   = 9
       local cl = t.conditions
       local al = t.actions
       --
@@ -260,6 +296,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_NAME)
       t.entryPoints = {}
+      t.galleryID   = 10
       for k in pairs(ItemTrig.ENTRY_POINT_NAMES) do -- we want all entry points
          t.entryPoints[#t.entryPoints + 1] = k
       end
@@ -281,6 +318,7 @@ function ItemTrig.retrieveTriggerGallery()
       local t = Trigger:new()
       t.name        = GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME)
       t.entryPoints = { ItemTrig.ENTRY_POINT_ITEM_ADDED }
+      t.galleryID   = 11
       local cl = t.conditions
       local al = t.actions
       --
@@ -290,6 +328,22 @@ function ItemTrig.retrieveTriggerGallery()
       al[1] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE) }) -- Log Message
       --
       table.insert(gallery, t)
+   end
+   if GetDisplayName() == "@DavidJCobb" then -- double-check gallery IDs in case we make a mistake
+      local seen = {}
+      for i = 1, #gallery do
+         local trigger = gallery[i]
+         local id      = trigger.galleryID
+         if not id then
+            error("Gallery trigger at index " .. i .. " is missing a unique ID!")
+         else
+            if seen[id] then
+               error("Gallery trigger ID " .. tostring(id) .. " appears more than once! Second occurrence was at " .. i .. ".")
+            else
+               seen[id] = true
+            end
+         end
+      end
    end
    return gallery
 end

@@ -132,7 +132,7 @@ ItemTrig.tableActions = {
          if context:isInvalid() then
             return ItemTrig.OPCODE_FAILED, {}
          end
-         if context.bag == BAG_BANK then
+         if context.bag == BAG_BANK or context.bag == BAG_SUBSCRIBER_BANK then
             if not ItemTrig.prefs:get("bank/allowDestroy") then
                return ItemTrig.OPCODE_FAILED, { why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NO_BANKED) }
             end
@@ -336,6 +336,40 @@ ItemTrig.tableActions = {
       end,
       {
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_BANK }
+      }
+   ),
+   [12] = ActionBase:new( -- Withdraw from Bank
+      _s(ITEMTRIG_STRING_ACTIONNAME_WITHDRAWFROMBANK),
+      _s(ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK),
+      {
+         [1] = {
+            type    = "number",
+            default = 9999,
+            requireInteger = true,
+            min = 0,
+         }
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if ItemTrig.prefs:get("pretendActions") then
+            _doPretend(context, "WITHDRAWFROMBANK")
+            return ItemTrig.RUN_NO_MORE_TRIGGERS
+         end
+         local result, errorCode = context:takeFromBank(args[1])
+         if not result then
+            local extra = { code = errorCode, why = nil }
+            if errorCode == ItemInterface.FAILURE_BACKPACK_IS_FULL then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FULL)
+            elseif errorCode == ItemInterface.FAILURE_BANK_IS_NOT_OPEN then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_NOT_OPEN)
+            elseif errorCode == ItemInterface.FAILURE_ZENIMAX_WITHDRAW_LIMIT then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_ZENIMAX_MAX_COUNT)
+            end
+            return ItemTrig.OPCODE_FAILED, extra
+         end
+      end,
+      {
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_BANK_BANK }
       }
    ),
 }

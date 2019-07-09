@@ -438,9 +438,14 @@ ItemTrig.tableConditions = {
          [1] = {
             type = "number",
             enum = {
-               [BAG_BACKPACK]        = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_BACKPACK),
-               [BAG_BANK]            = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_BANK),
-               [BAG_SUBSCRIBER_BANK] = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_CRAFTBAG),
+               --
+               -- FIXED IN 1.0.10: the Craft Bag was wrongly identified as SUBSCRIBER_BANK 
+               -- instead of VIRTUAL. An update routine in ItemTrig.Savedata:load should 
+               -- fix up existing triggers using the wrong argument.
+               --
+               [BAG_BACKPACK] = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_BACKPACK),
+               [BAG_BANK]     = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_BANK),
+               [BAG_VIRTUAL]  = _s(ITEMTRIG_STRING_OPCODEARG_TOTALCOUNT_CRAFTBAG),
             }
          },
          [2] = { type = "quantity", requireInteger = true, min = 0 },

@@ -24,6 +24,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_CHAT_SUBCOMMAND_EXEC_HELP_ITEM",   "|cFFA020<
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONBUTTON_EDITTRIGGERS", "Edit triggers...")
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_EDITTRIGGERS", "Click here to edit the rules you've set for handling items.")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_UPDATEGALLERYTRIGGERS", "Keep imported triggers up to date")
+ZO_CreateStringId("ITEMTRIG_STRING_OPTIONDESC_UPDATEGALLERYTRIGGERS", "ItemTrig offers a \"gallery\" of pre-made triggers that you can import for your own use. If this setting is enabled, then imported triggers will be kept up to date: if future versions of the mod change a gallery trigger, then the imported trigger will change to match it. Note that editing an imported trigger will sever the link and prevent it from auto-updating.")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONHEADER_ALLOWTRIGGERS", "Allow triggers to run on...")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPTIONNAME_ALLOWTRIGGERSONCROWNCRATEITEMS", "Crown Crate items")
@@ -270,11 +273,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_COVETOUS_NAME", "The Covetous Countess") -- Q
 -- MISCELLANEOUS
 --
 --
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_DECONSTRUCT",     "|cFFA020ItemTrig:|r Deconstructed <<1>>.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_DEPOSIT_IN_BANK", "|cFFA020ItemTrig:|r Deposited <<1>> x|cFFFF00<<2>>|r in the bank.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",         "|cFFA020ItemTrig:|r Destroyed <<1>> x|cFFFF00<<2>>|r.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",         "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",            "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DECONSTRUCT",        "|cFFA020ItemTrig:|r Deconstructed <<1>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DEPOSIT_IN_BANK",    "|cFFA020ItemTrig:|r Deposited <<1>> x|cFFFF00<<2>>|r in the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",            "|cFFA020ItemTrig:|r Destroyed <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",            "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",               "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_WITHDRAW_FROM_BANK", "|cFFA020ItemTrig:|r Withdrew <<1>> x|cFFFF00<<2>>|r from the bank.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_START",       "|cFFA020ItemTrig:|r Attempting to deconstruct <<1>> items...")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE",     "|cFFA020ItemTrig:|r Failed to deconstruct |cFFFF00<<1>>|r.")
@@ -320,6 +324,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_FENL", "|c000000...|rYou've
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_LNDL", "|c000000...|rYou've maxed out your launder transactions for the day.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZDPT", "|c000000...|rZenimax limits how many items an add-on can automatically deposit. Close and reopen the bank to deposit more.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZLND", "|c000000...|rZenimax limits how many items an add-on can automatically launder. Close and reopen the fence to launder more.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZWTH", "|c000000...|rZenimax limits how many items an add-on can automatically wothdraw. Close and reopen the bank to withdraw more.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_WCFT", "|c000000...|rThis is the wrong crafting station for this type of item.")
 --
 --
@@ -360,14 +365,15 @@ ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_TYPE_UNKNOWN", "One of 
 ZO_CreateStringId("ITEMTRIG_STRING_ERROR_ACTION_ARGUMENT_VALUE_ERROR",  "One of the options has a value that isn't allowed. This trigger will not run again until the next entry point.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_PRETENDBASE", "|cFFA020[Pretend Mode] ItemTrig would have <<1>>|r <<2>>|cFFA020.|r")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DESTROYITEM",    "destroyed")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGMODIFY", "modified the junk flag for")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGSET",    "marked-as-junk")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGCLEAR",  "unmarked-as-junk")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_LAUNDER",        "laundered")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_SELLORFENCE",    "sold/fenced")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DECONSTRUCT",    "deconstructed")
-ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DEPOSITINBANK",  "banked")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DESTROYITEM",      "destroyed")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGMODIFY",   "modified the junk flag for")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGSET",      "marked-as-junk")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_JUNKFLAGCLEAR",    "unmarked-as-junk")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_LAUNDER",          "laundered")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_SELLORFENCE",      "sold/fenced")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DECONSTRUCT",      "deconstructed")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_DEPOSITINBANK",    "banked")
+ZO_CreateStringId("ITEMTRIG_STRING_PRETEND_WITHDRAWFROMBANK", "withdrawn")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEEXPLANATION_GENERIC_EP",    "This opcode can only be used from the \"<<X:1>>\" entry point.")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_GENERIC_EP", "This condition can only be used from the \"<<X:1>>\" entry point.")
@@ -727,6 +733,12 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL",       "The b
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN",   "Cannot deposit items in the bank if you aren't viewing the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN",     "You can't store stolen items in the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_CHAR_BOUND", "You can't deposit items in the bank if they are Character Bound.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_WITHDRAWFROMBANK", "Withdraw From Bank")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK", "Withdraw <<1>> of the item from the player's bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_ZENIMAX_MAX_COUNT", "Add-ons can only withdraw 98 items every time the bank window is open; more than that and you'll disconnect from the server. Close the bank window and reopen it to withdraw more items.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FULL",       "Your backpack is full.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_NOT_OPEN",   "Cannot withdraw items in the bank if you aren't viewing the bank.")
 --
 --
 -- GALLERY

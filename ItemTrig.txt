@@ -1,9 +1,9 @@
 ## Title: ItemTrig
 ## Author: DavidJCobb
 ## Description: Automatically performs actions on your items based on the rules you specify.
-## APIVersion: 100026
-## AddOnVersion: 6
-## Version: 1.0.6
+## APIVersion: 100027
+## AddOnVersion: 10
+## Version: 1.0.10
 ## SavedVariables: ItemTrigSavedata
 ## DependsOn: LibAddonMenu-2.0
 

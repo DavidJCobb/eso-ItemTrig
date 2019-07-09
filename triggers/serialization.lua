@@ -94,6 +94,11 @@ local function serializeTrigger(t)
    local chunks = {
       _toChunk("e", t.enabled and "1" or "0"),
    }
+   do -- chunk: gallery trigger ID
+      if t.galleryID then
+         table.insert(chunks, _toChunk("glID", t.galleryID))
+      end
+   end
    do -- chunk: entry points
       local count = #t.entryPoints
       if count > 0 then
@@ -242,6 +247,8 @@ function _Parser:_parseTrigger(s)
                table.insert(t.entryPoints, list[i])
             end
          end
+      elseif head == "glID" then -- Chunk: Gallery Trigger ID
+         t.galleryID = tonumber(body)
       else
          if head == nil then
             self:warn("Trigger contained a chunk with no header.")

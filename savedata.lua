@@ -13,7 +13,7 @@ local function _prepTriggersToSave(tList)
    return s
 end
 
-local savedVars = ItemTrig.ISavedata:new("ItemTrigSavedata", nil, 1)
+local savedVars = ItemTrig.ISavedata:new("ItemTrigSavedata", nil, 2)
 --
 -- If we change the savedata format, we'll want to call:
 --
@@ -55,11 +55,61 @@ function ItemTrig.Savedata:load(characterID)
       self.prefs = p
    end
    self.triggers = self:loadTriggersFor(characterID)
+   if ItemTrig.prefs:get("updateGalleryTriggers") ~= false then -- update gallery triggers, if need be
+      local gallery -- lazy load
+      local indexedGallery = {}
+      local function _lazyLoad()
+         gallery = ItemTrig.retrieveTriggerGallery()
+         for i = 1, #gallery do
+            local t = gallery[i]
+            if t.galleryID then
+               indexedGallery[t.galleryID] = t
+            end
+         end
+      end
+      --
+      local list = self.triggers
+      for i = 1, #list do
+         local trigger = list[i]
+         local id      = trigger.galleryID
+         if id then
+            if not gallery then
+               _lazyLoad()
+            end
+            if indexedGallery[id] then
+               trigger:updateGalleryTrigger(indexedGallery[id]) -- checks and whatnot are done here
+            end
+         end
+      end
+   end
+   do -- update triggers
+      if character._initiallyLoadedVersion < 2 then
+         --
+         -- Condition "Total Count" uses the wrong enum value to 
+         -- identify the Craft Bag.
+         --
+         local baseToUpdate = ItemTrig.tableConditions[11]
+         for i = 1, #self.triggers do
+            local trigger = self.triggers[i]
+            local cList   = trigger.conditions
+            for j = 1, #cList do
+               local condition = cList[j]
+               if condition.base == baseToUpdate then
+                  local bagIndex = condition.args[1]
+                  if bagIndex == BAG_SUBSCRIBER_BANK then
+                     condition.args[1] = BAG_VIRTUAL
+                  end
+               end
+            end
+         end
+         --
+         character:setIsUpToDate()
+      end
+   end
 end
 
 function ItemTrig.Savedata:loadTriggersFor(characterID)
    local interface = savedVars:character(characterID)
-   interface:tryUpdateRoutine()
    do -- saved triggers
       local s = table.concat(interface:data().serializedTriggers or {})
       if s:len() == 0 then

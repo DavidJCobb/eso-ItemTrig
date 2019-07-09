@@ -5,8 +5,8 @@ do -- define prefs
       ["logging/actionsTaken"]       = { default = false },
       ["logging/collapseSameErrors"] = { default = true },
       ["logging/triggerFailures"]    = { default = false },
-      ["robustFencing"]           = { default = true },
       ["pretendActions"]          = { default = false },
+      ["robustFencing"]           = { default = true },
       ["runTriggersOn/crownCrateItems"] = { default = false },
       ["runTriggersOn/crownStoreItems"] = { default = false },
       ["runTriggersOn/lockedItems"]     = { default = false },
@@ -14,6 +14,7 @@ do -- define prefs
       ["ui/allowEscForceClose"]    = { default = true },
       ["ui/opcodeArgAutocomplete"] = { default = false },
       ["ui/theme"]                 = { default = "OldDesktop" },
+      ["updateGalleryTriggers"]    = { default = true },
    })
 end
 local prefs = ItemTrig.prefs
@@ -37,6 +38,14 @@ local options = {
             end
             ItemTrig.windows.triggerList:show()
          end,
+   },
+   {  -- Allow keeping gallery triggers up to date
+      --
+      type    = "checkbox",
+      name    = GetString(ITEMTRIG_STRING_OPTIONNAME_UPDATEGALLERYTRIGGERS),
+      tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_UPDATEGALLERYTRIGGERS),
+      getFunc = function()  return prefs:get("updateGalleryTriggers") end,
+      setFunc = function(v) prefs:set("updateGalleryTriggers", v) end,
    },
    {
       type = "header",
@@ -81,8 +90,8 @@ local options = {
       type    = "checkbox",
       name    = GetString(ITEMTRIG_STRING_OPTIONNAME_BANKTRIGGERSALLOWDESTROY),
       tooltip = GetString(ITEMTRIG_STRING_OPTIONDESC_BANKTRIGGERSALLOWDESTROY),
-      getFunc = function()  return prefs:get("bank/allowDestroy") end,
-      setFunc = function(v) prefs:set("bank/allowDestroy", v) end,
+      getFunc = function()  return prefs:get("bankTriggers/allowDestroy") end,
+      setFunc = function(v) prefs:set("bankTriggers/allowDestroy", v) end,
    },
    {
       type = "header",

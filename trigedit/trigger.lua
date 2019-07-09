@@ -275,6 +275,9 @@ do -- editor state
       self.frames[count] = nil
       if commit then
          last.target:copyAssign(last.working)
+         if last.dirty then
+            last.target.galleryID = nil -- if it was a gallery trigger and the user modified it, then unflag it
+         end
          if last.deferred then
             last.deferred:resolve()
          end
@@ -354,7 +357,7 @@ function WinCls:addOpcode(type, insertAfterIndex)
             trig.working:insertActionAfter(created, insertAfterIndex)
             pane = editor.ui.paneActions
          end
-         trig.dirty = true
+         editor.stack:dirty(true)
          editor:refresh()
          pane:select(created)
          pane:scrollToItem(pane:indexOf(created), true, true)
@@ -372,9 +375,8 @@ function WinCls:editOpcode(opcode)
       function(dirty) -- user clicked OK
          if dirty then
             local editor = WinCls:getInstance()
-            local trig   = editor.stack:last()
-            assert(trig ~= nil)
-            trig.dirty = true
+            assert(editor.stack:count() > 0)
+            editor.stack:dirty(true)
             editor:refresh()
          end
       end
@@ -408,7 +410,7 @@ function WinCls:moveOpcode(opcode, direction)
          return -- opcode was already at the start of the list, and was not moved
       end
    end
-   trig.dirty = true
+   self.stack:dirty(true)
    self:refresh()
    pane:select(opcode)
 end
@@ -430,7 +432,7 @@ function WinCls:duplicateOpcode(opcode)
    end
    local copy = opcode:clone()
    table.insert(list, i + 1, copy)
-   trig.dirty = true
+   self.stack:dirty(true)
    self:refresh()
    pane:select(copy)
    pane:scrollToItem(pane:indexOf(copy), true, true)
@@ -470,7 +472,7 @@ function WinCls:deleteOpcode(opcode)
             list = trig.working.actions
          end
          local index = pane:indexOf(opcode)
-         trig.dirty = true
+         w.stack:dirty(true)
          table.remove(list, index)
          pane:remove(index)
       end,
@@ -486,7 +488,7 @@ function WinCls:onNameChanged()
    local trig = self.stack:last()
    assert(trig ~= nil)
    trig.working.name = edit:GetText()
-   trig.dirty = true
+   self.stack:dirty(true)
 end
 function WinCls:onEntryPointsChanged()
    if self.refreshing then
@@ -501,7 +503,7 @@ function WinCls:onEntryPointsChanged()
       result[i] = points[i].value
    end
    trig.working.entryPoints = result
-   trig.dirty = true
+   self.stack:dirty(true)
 end
 
 function WinCls:handleModalDeferredOnHide(deferred)

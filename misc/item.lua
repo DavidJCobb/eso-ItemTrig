@@ -284,12 +284,14 @@ do
    --
    ItemTrig.assign(APILimits, {
       limits = {
-         autoDeposits =  99, -- stacks, not total items
-         autoLaunders = 100, -- total items, not stacks
+         autoDeposits    =  99, -- stacks, not total items
+         autoLaunders    = 100, -- total items, not stacks
+         autoWithdrawals =  99, -- stacks, not total items; exact limit unknown but is lower than 150; testing is... difficult
       },
       safeties = { -- stop X below the limit, to be considerate to other add-ons
-         autoDeposits = 2,
-         autoLaunders = 2,
+         autoDeposits    = 2,
+         autoLaunders    = 2,
+         autoWithdrawals = 2,
       },
       state = {},
       --
@@ -328,6 +330,13 @@ do
       return self:trackOperation("autoLaunders", count)
    end
    --
+   function APILimits:capWithdraw(stackCount)
+      return self:capToLimit("autoWithdrawals", stackCount)
+   end
+   function APILimits:didWithdraw(stackCount)
+      return self:trackOperation("autoWithdrawals", stackCount)
+   end
+   --
    local function _listener(eventCode, ...)
       if eventCode == EVENT_OPEN_FENCE then
          APILimits.state.autoLaunders = 0
@@ -335,7 +344,8 @@ do
       if eventCode == EVENT_OPEN_BANK
       or eventCode == EVENT_CLOSE_BANK
       then
-         APILimits.state.autoDeposits = 0
+         APILimits.state.autoDeposits    = 0
+         APILimits.state.autoWithdrawals = 0
       end
    end
    function APILimits:teardown()
@@ -477,7 +487,7 @@ do
                --
                -- Player has left the crafting station.
                --
-               if self.observer and self.observer.onFailure then
+               if self.observer and self.observer.onInterrupted then
                   self.observer:onInterrupted()
                end
                return IQueue.ABORT_QUEUE
@@ -489,6 +499,7 @@ do
                   self.observer:onFailure(self:first(), nil, failureString)
                end
             end
+            table.remove(self.items, 1)
             if tsr == CRAFTING_RESULT_NEED_SPACE_TO_DECONSTRUCT then
                --
                -- We can't deconstruct any more items if the inventory is too full 
@@ -497,7 +508,7 @@ do
                return IQueue.ABORT_QUEUE
             end
          elseif eventCode == EVENT_END_CRAFTING_STATION_INTERACT then
-            if self.observer and self.observer.onFailure then
+            if self.observer and self.observer.onInterrupted then
                self.observer:onInterrupted()
             end
             return IQueue.ABORT_QUEUE
@@ -583,7 +594,21 @@ do
       if observer and observer.onStart then
          observer:onStart(queue:count())
       end
-      self.currentQueue:advance()
+      local result, str = self.currentQueue:advance()
+      if result == IQueue.ABORT_QUEUE then
+         if observer and observer.onAbort then
+            observer:onAbort()
+         end
+         Queues:stop()
+         return
+      end
+      if result == IQueue.DONE_QUEUE then
+         if observer and observer.onComplete then
+            observer:onComplete()
+         end
+         Queues:stop()
+         return
+      end
    end
    function Queues:stop()
       assert(self.listening, "The ItemQueues system hasn't been setup yet!")
@@ -809,6 +834,7 @@ do -- define failure reasons for member functions
    -- and that that singleton would consider a "duplicate" error 
    -- code.
    --
+   ItemInterface.FAILURE_BACKPACK_IS_FULL        = "BGFL" -- Your backpack is full.
    ItemInterface.FAILURE_BANK_CANT_STORE_STOLEN  = "BKST" -- You can't store stolen items in the bank.
    ItemInterface.FAILURE_BANK_IS_FULL            = "BKFL" -- The bank is full.
    ItemInterface.FAILURE_BANK_IS_NOT_OPEN        = "BKNO" -- You must have the bank open.
@@ -826,6 +852,7 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_LAUNDER_NOT_STOLEN      = "LDNS" -- You can't launder something that isn't stolen!
    ItemInterface.FAILURE_ZENIMAX_DEPOSIT_LIMIT   = "ZDPT" --  We've hit the maximum number of items Zenimax allows add-ons to deposit every time the bank is opened.
    ItemInterface.FAILURE_ZENIMAX_LAUNDER_LIMIT   = "ZLND" -- We've hit the maximum number of items Zenimax allows add-ons to launder every time the fence is opened.
+   ItemInterface.FAILURE_ZENIMAX_WITHDRAW_LIMIT  = "ZWTH"
    ItemInterface.FAILURE_WRONG_CRAFTING_STATION  = "WCFT" -- This item type can't be used at this crafting station.
 end
 function ItemInterface:new(bagIndex, slotIndex)
@@ -961,6 +988,9 @@ function ItemInterface:deconstruct(calledFromQueue)
    end
    if GetCraftingInteractionType() ~= self:pertinentCraftingType() then
       return false, ItemInterface.FAILURE_WRONG_CRAFTING_STATION
+   end
+   if not CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, GetCraftingInteractionType()) then
+      return false, self.FAILURE_CANNOT_DECONSTRUCT
    end
    if self.craftingType == ITEMTYPE_GLYPH_WEAPON
    or self.craftingType == ITEMTYPE_GLYPH_ARMOR
@@ -1286,8 +1316,11 @@ function ItemInterface:storeInBank(count)
    if self.bindType == BIND_TYPE_ON_PICKUP_BACKPACK then -- Character Bound
       return false, self.FAILURE_BANK_CHARACTER_BOUND
    end
-   if not DoesBagHaveSpaceFor(BAG_BANK, self.bag, self.slot) then
-      return false, self.FAILURE_BANK_IS_FULL
+   do -- bank check
+      local canUseSub = IsESOPlusSubscriber() and DoesBagHaveSpaceFor(BAG_SUBSCRIBER_BANK, self.bag, self.slot)
+      if not (DoesBagHaveSpaceFor(BAG_BANK, self.bag, self.slot) or canUseSub) then
+         return false, self.FAILURE_BANK_IS_FULL
+      end
    end
    if not (count and count <= self.count) then
       count = self.count
@@ -1302,12 +1335,35 @@ function ItemInterface:storeInBank(count)
    self:onModifyingAction("deposit-bank", count)
    return true
 end
+function ItemInterface:takeFromBank(count)
+   if self:isInvalid() then
+      return false, self.FAILURE_ITEM_IS_INVALID
+   end
+   if not IsBankOpen() then
+      return false, self.FAILURE_BANK_IS_NOT_OPEN
+   end
+   if not DoesBagHaveSpaceFor(BAG_BACKPACK, self.bag, self.slot) then
+      return false, self.FAILURE_BACKPACK_IS_FULL
+   end
+   if not (count and count <= self.count) then
+      count = self.count
+   end
+   if APILimits:capWithdraw(1) < 1 then -- call this differently than usual because the bank limit is per stack, not per total
+      return false, self.FAILURE_ZENIMAX_WITHDRAW_LIMIT
+   end
+   CallSecureProtected("PickupInventoryItem", self.bag, self.slot, count)
+   CallSecureProtected("PlaceInTransfer")
+   APILimits:didWithdraw(1) -- pass 1 because the bank limit is per stack, not per total
+   self:updateCount(-count)
+   self:onModifyingAction("withdraw-bank", count)
+   return true
+end
 function ItemInterface:totalForBag(bag)
    if self.bag == BAG_BACKPACK then
       return self.totalBag
-   elseif self.bag == BAG_BANK then
+   elseif self.bag == BAG_BANK or self.bag == BAG_SUBSCRIBER_BANK then
       return self.totalBank
-   elseif self.bag == BAG_SUBSCRIBER_BANK then
+   elseif self.bag == BAG_VIRTUAL then
       return self.totalCraftBag
    end
 end
@@ -1318,9 +1374,9 @@ function ItemInterface:updateCount(change)
    self.count = self.count + change
    if self.bag == BAG_BACKPACK then
       self.totalBag = self.totalBag + change
-   elseif self.bag == BAG_BANK then
+   elseif self.bag == BAG_BANK or self.bag == BAG_SUBSCRIBER_BANK then
       self.totalBank = self.totalBank + change
-   elseif self.bag == BAG_SUBSCRIBER_BANK then
+   elseif self.bag == BAG_VIRTUAL then
       self.totalCraftBag = self.totalCraftBag + change
    end
 end
