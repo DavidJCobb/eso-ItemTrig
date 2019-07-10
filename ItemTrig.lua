@@ -52,13 +52,179 @@ do -- Registry for windows
    end
 end
 
-local DeconstructQueueObserver = {}
-do
+local CraftingStationQueueCoordinator = {}
+local DeconstructQueueObserver = { queueName = "deconstruct" }
+do -- CraftingStationQueueCoordinator
+   --
+   -- This singleton coordinates other singletons in order to carry out 
+   -- tasks after crafting station triggers have run. The main tasks we 
+   -- carry out are the deconstruction of items specifically requested 
+   -- by triggers, and the mass refinement of all raw materials (if that 
+   -- was requested by triggers).
+   --
+   -- The original intention was to allow triggers to request the refine-
+   -- ment of individual materials, and to handle this using the same 
+   -- queueing system as deconstruction. Unfortunately, however, the 
+   -- logistics behind refinement are tricky -- and largely hardcoded 
+   -- into the game. As such, refinement requires an entirely separate 
+   -- system.
+   --
+   function CraftingStationQueueCoordinator:fire()
+      self._waiting = { DeconstructQueueObserver } -- array
+      self:next()
+   end
+   function CraftingStationQueueCoordinator:next()
+      local list  = self._waiting
+      local count = #list
+      if count < 1 then
+         self:after()
+         return
+      end
+      local observer = list[count]
+      list[count] = nil
+      local attempt = ItemTrig.ItemQueues:start(observer.queueName, observer)
+      if attempt == false then
+         --
+         -- The task didn't run because it wasn't given anything to do.
+         --
+         self:next()
+         return
+      end
+   end
+   function CraftingStationQueueCoordinator:after()
+      ItemTrig.MassMaterialRefinementManager:afterTriggers()
+   end
+end
+local RefineQueueObserver = { idMap = {} }
+do -- RefineQueueObserver
+   --
+   -- The RefineQueueObserver is meant to be used with the MassMaterialRefinementQueue 
+   -- system, and is supplied to it by way of MassMaterialRefinementManager. This 
+   -- observer is a little bit different from DeconstructQueueObserver both because of 
+   -- the different queue system, and because of the observer's own differing needs.
+   --
+   -- A single item stack can be refined multiple times, but we don't want to generate 
+   -- a notification for each refine operation; rather, we want to group sequential 
+   -- operations taken on the same material. So instead of
+   --
+   --    Refined Rubedite Ore x10.
+   --    Refined Rubedite Ore x10.
+   --    Refined Rubedite Ore x10.
+   --    Refined Rough Ruby Ash x10.
+   --
+   -- we want to display
+   --
+   --    Refined Rubedite Ore x30.
+   --    Refined Rough Ruby Ash x10.
+   --
+   RefineQueueObserver.lastStack = {
+      id   = nil,
+      name = nil,
+      link = nil,
+   }
+   function RefineQueueObserver:_resetLastRefinedItem()
+      self.lastStack.id   = nil
+      self.lastStack.name = nil
+      self.lastStack.link = nil
+   end
+   function RefineQueueObserver:_logLastRefinedItem()
+      local ls = self.lastStack
+      if ls.id then
+         local name    = ls.name
+         local message = GetString(ITEMTRIG_STRING_LOG_REFINE)
+         local initial = self.idMap[ls.id].count
+         local bag, _, craftBag = GetItemLinkStacks(ls.link)
+         local current = bag + craftBag
+         --
+         local count = initial - current
+         self.idMap[ls.id].count = current
+         CHAT_SYSTEM:AddMessage(LocalizeString(message, name, count))
+         self:_resetLastRefinedItem()
+      end
+   end
+   function RefineQueueObserver:onAnyStop()
+      self:_resetLastRefinedItem()
+      self.idMap = {}
+      CraftingStationQueueCoordinator:next()
+   end
+   function RefineQueueObserver:onAbort()
+      if ItemTrig.prefs:get("logging/actionsTaken") then
+         return
+      end
+      self:_logLastRefinedItem()
+      CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_REFINEOBSERVER_ABORT))
+   end
+   function RefineQueueObserver:onComplete()
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      self:_logLastRefinedItem()
+      CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_REFINEOBSERVER_COMPLETE))
+   end
+   function RefineQueueObserver:onFailure(item, code, why)
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      self:_logLastRefinedItem()
+      --
+      local text = {}
+      text[1] = LocalizeString(GetString(ITEMTRIG_STRING_REFINEOBSERVER_FAILURE), item.formattedName)
+      if code then
+         if code == item.FAILURE_ITEM_IS_LOCKED then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_LOCKED)
+         elseif code == item.FAILURE_CANNOT_REFINE then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_TYPE)
+         elseif code == item.FAILURE_WRONG_CRAFTING_STATION then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_STATION)
+         elseif code == item.FAILURE_FCOIS_DISALLOWS then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_FCOIS)
+         elseif code == item.FAILURE_NOT_ENOUGH_TO_REFINE then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_NOT_ENOUGH)
+         end
+         if why then
+            text[2] = LocalizeString(GetString(ITEMTRIG_STRING_REFINEOBSERVER_FAILURE_WHY), why)
+         end
+      elseif why then
+         text[2] = LocalizeString(GetString(ITEMTRIG_STRING_REFINEOBSERVER_FAILURE_WHY), why)
+      end
+      CHAT_SYSTEM:AddMessage(table.concat(ItemTrig.stripNils(text, 2), "\n"))
+   end
+   function RefineQueueObserver:onInterrupted()
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      CHAT_SYSTEM:AddMessage(GetString(ITEMTRIG_STRING_REFINEOBSERVER_INTERRUPT))
+   end
+   function RefineQueueObserver:onSingleSuccess(item)
+      local ls = self.lastStack;
+      if item.id ~= ls.id then
+         if ItemTrig.prefs:get("logging/actionsTaken") then
+            self:_logLastRefinedItem()
+         end
+         ls.id   = item.id
+         ls.name = item.name
+         ls.link = item.link
+      end
+   end
+   function RefineQueueObserver:onStart(idMap)
+      self.idMap = idMap
+      self:_resetLastRefinedItem()
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
+         return
+      end
+      local text = LocalizeString(GetString(ITEMTRIG_STRING_REFINEOBSERVER_START), count)
+      CHAT_SYSTEM:AddMessage(text)
+   end
+end
+do -- DeconstructQueueObserver
    --
    -- This singleton can be used to respond to notable events that occur 
    -- when deconstructing a queue of items. We use this to power the user 
    -- pref to log trigger actions taken on items.
    --
+   function DeconstructQueueObserver:onAnyStop()
+      CraftingStationQueueCoordinator:next()
+   end
    function DeconstructQueueObserver:onAbort()
       if ItemTrig.prefs:get("logging/actionsTaken") == false then
          return
@@ -381,7 +547,7 @@ do -- Event handlers
             }
             _processInventory(ItemTrig.ENTRY_POINT_CRAFTING, entryPointData)
             _processBank(ItemTrig.ENTRY_POINT_BANK_CRAFTING, entryPointData)
-            ItemTrig.ItemQueues:start("deconstruct", DeconstructQueueObserver)
+            CraftingStationQueueCoordinator:fire()
          elseif eventCode == EVENT_OPEN_STORE then
             _processInventory(ItemTrig.ENTRY_POINT_BARTER, {})
          elseif eventCode == EVENT_OPEN_FENCE then
@@ -481,6 +647,7 @@ local function Initialize()
    SLASH_COMMANDS["/itemtrig"] = _coreChatCommand
    --
    TriggerExecutionEventHandler:setup()
+   ItemTrig.MassMaterialRefinementManager:setObserver(RefineQueueObserver)
    ItemTrig.ItemQueues:setup("ItemTrig")
    ItemTrig.ItemStackTools:setup("ItemTrig")
    ItemTrig.ItemAPILimits:setup("ItemTrig")

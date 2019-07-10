@@ -277,6 +277,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_DECONSTRUCT",        "|cFFA020ItemTrig:|r
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_DEPOSIT_IN_BANK",    "|cFFA020ItemTrig:|r Deposited <<1>> x|cFFFF00<<2>>|r in the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_DESTROY",            "|cFFA020ItemTrig:|r Destroyed <<1>> x|cFFFF00<<2>>|r.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_LAUNDER",            "|cFFA020ItemTrig:|r Laundered <<1>> x|cFFFF00<<2>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_REFINE",             "|cFFA020ItemTrig:|r Refined <<1>> x|cFFFF00<<2>>|r.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_SELL",               "|cFFA020ItemTrig:|r Sold <<1>> x|cFFFF00<<2>>|r.")
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_WITHDRAW_FROM_BANK", "|cFFA020ItemTrig:|r Withdrew <<1>> x|cFFFF00<<2>>|r from the bank.")
 --
@@ -286,6 +287,13 @@ ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY", "|c000000..
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_ABORT",       "|cFFA020ItemTrig:|r Deconstruction has stopped early due to the previous error.")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_INTERRUPT",   "|cFFA020ItemTrig:|r Deconstruction interrupted; you left the crafting station!")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_COMPLETE",    "|cFFA020ItemTrig:|r Finished deconstructing items.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_START",       "|cFFA020ItemTrig:|r Attempting to refine <<1>> items...")
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_FAILURE",     "|cFFA020ItemTrig:|r Failed to refine |cFFFF00<<1>>|r.")
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_FAILURE_WHY", "|c000000...|r<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_ABORT",       "|cFFA020ItemTrig:|r Refining has stopped early due to the previous error.")
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_INTERRUPT",   "|cFFA020ItemTrig:|r Refining interrupted; you left the crafting station!")
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_COMPLETE",    "|cFFA020ItemTrig:|r Finished refining items.")
 
 --
 -- Messages shown when a trigger stops due to an error, if the player has 
@@ -668,6 +676,51 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2HMELEE",          "[any
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_DESTRUCTIONSTAFF", "[any destruction staff]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_STAFF",            "[any staff]")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2H",               "[any two-handed]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_AXE",              "Axe")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_BOW",              GetString("SI_WEAPONTYPE", WEAPONTYPE_BOW))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_DAGGER",           GetString("SI_WEAPONTYPE", WEAPONTYPE_DAGGER))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_FIRE_STAFF",       GetString("SI_WEAPONTYPE", WEAPONTYPE_FIRE_STAFF))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_FROST_STAFF",      GetString("SI_WEAPONTYPE", WEAPONTYPE_FROST_STAFF))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_HAMMER",           "Mace")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_HEALING_STAFF",    GetString("SI_WEAPONTYPE", WEAPONTYPE_HEALING_STAFF))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_LIGHTNING_STAFF",  GetString("SI_WEAPONTYPE", WEAPONTYPE_LIGHTNING_STAFF))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_SHIELD",           GetString("SI_WEAPONTYPE", WEAPONTYPE_SHIELD))
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_SWORD",            "Sword")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_TWO_HANDED_AXE",   "Battleaxe")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_TWO_HANDED_MAUL",  "Maul")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_TWO_HANDED_SWORD", "Greatsword")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_FCOISMARK", "FCO ItemSaver: Mark")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_FCOISMARK", "The item <<1>> marked as <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK01", "Locked")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK03", "Research")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK05", "Sell")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK09", "Deconstruct")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK10", "Improve")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK11", "Sell at Guild Store")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK12", "Intricate")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_DYNAMIC",       "Dynamic <<1>> (<<2>>)")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_GEAR_SET",      "Gear Set <<1>> (<<2>>)")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_NAMELESS_ICON", "---")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANREFINE", "Can Refine")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANREFINE", "This item <<1>> be refined.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANREFINE_NO",  "can't")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANREFINE_YES", "can")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_CANREFINE", "This condition tests whether the current type of item can be refined, along with whether there are any conditions preventing refinement (e.g. not enough of the item, the item is locked, you're at the wrong crafting station).")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANDECONSTRUCT", "Can Deconstruct")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANDECONSTRUCT", "This item <<1>> be deconstructed.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANDECONSTRUCT_NO",  "can't")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANDECONSTRUCT_YES", "can")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_CANDECONSTRUCT", "This condition tests whether the current type of item can be deconstructed, along with whether there are any conditions preventing deconstruction (e.g. not enough of the item, the item is locked, you're at the wrong crafting station).")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_FCOISINSTALLED", "FCO ItemSaver: Is Installed")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_FCOISINSTALLED", "FCOIS <<1>> installed and loaded.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISINSTALLED_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISINSTALLED_YES", "is")
 --
 --
 -- ACTIONS
@@ -758,11 +811,38 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_CHAR_BOUND", "You c
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FCOIS",      "FCO ItemSaver has been told not to allow this item to be deposited in the bank.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_WITHDRAWFROMBANK", "Withdraw From Bank")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK", "Withdraw <<1>> of the item from the player's bank.")
-ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_ZENIMAX_MAX_COUNT", "Add-ons can only withdraw 98 items every time the bank window is open; more than that and you'll disconnect from the server. Close the bank window and reopen it to withdraw more items.")
+--ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK", "Withdraw <<1>> of the item from the player's bank.") -- July 10, 2019: the ZOS API ignores the count parameter when withdrawing
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK", "Withdraw this item stack from the player's bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_ZENIMAX_MAX_COUNT", "Add-ons can only withdraw 98 item stacks every time the bank window is open; more than that and you'll disconnect from the server. Close the bank window and reopen it to withdraw more items.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FULL",       "Your backpack is full.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_NOT_OPEN",   "Cannot withdraw items in the bank if you aren't viewing the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FCOIS",      "FCO ItemSaver has been told not to allow this item to be withdrawn from the bank.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_FCOISEDITMARK", "FCO ItemSaver: Modify Mark")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_FCOISEDITMARK", "<<1>> the item as <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_REMOVE", "Unmark")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_APPLY",  "Mark")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK01", "Locked")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK03", "Research")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK05", "Sell")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK09", "Deconstruct")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK10", "Improve")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK11", "Sell at Guild Store")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK12", "Intricate")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_DYNAMIC",       "Dynamic <<1>> (<<2>>)")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_GEAR_SET",      "Gear Set <<1>> (<<2>>)")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_NAMELESS_ICON", "---")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_REFINE", "Mass Refine")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_REFINE", "Schedule the mass refinement of <<1>>, to take place after all triggers are finished running.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_REFINE_THIS", "all of this item")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_REFINE_ALL",  "materials for this crafting station")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_LOCKED",        "The item is locked.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_TYPE",    "This item can't be refined.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_STATION", "This is the wrong crafting station.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_FCOIS",         "FCO ItemSaver has been told not to allow this item to be refined.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_NOT_ENOUGH",    "You don't have enough of this item to refine it.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_REFINE", "Due to the way refinement works, it is impossible to refine materials on a per-stack basis. If you queue a mass refine operation, all stacks of the material will be refined, across your inventory and your Craft Bag.")
 --
 --
 -- GALLERY
@@ -805,3 +885,5 @@ ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_SELLORNATE_NAME", "Sell \"ornate\" ge
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME",    "Example trigger that will never run")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_COMMENT", "A \"never\" condition can be used to turn off a trigger for testing purposes. Of course, it's easier to use the trigger's \"enabled\" checkbox.")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE", "This message should not appear!")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_REFINE_NAME", "Refine raw materials automatically")

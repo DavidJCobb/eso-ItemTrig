@@ -2,8 +2,8 @@
 ## Author: DavidJCobb
 ## Description: Automatically performs actions on your items based on the rules you specify.
 ## APIVersion: 100027
-## AddOnVersion: 10
-## Version: 1.0.10
+## AddOnVersion: 11
+## Version: 1.0.11
 ## SavedVariables: ItemTrigSavedata
 ## DependsOn: LibAddonMenu-2.0
 
@@ -14,6 +14,7 @@ misc/deferred.lua
 misc/gameEnums.lua
 misc/gameStats.lua
 misc/hook.lua
+misc/massMaterialRefine.lua
 misc/math.lua
 misc/savedata.lua
 misc/set.lua
@@ -50,6 +51,8 @@ ui/wscrolllist.xml
 ui/wscrollselectlist.lua
 ui/wscrollselectlist.xml
 ui/wscrollselectlistitem.xml
+ui/wcheckboxlist.lua
+ui/wcheckboxlist.xml
 ui/wcombobox.lua
 ui/wcombobox.xml
 ui/wtooltip.lua

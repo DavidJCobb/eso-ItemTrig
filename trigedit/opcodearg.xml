@@ -62,6 +62,18 @@
                         </Control>
                      </Controls>
                   </Control>
+                  <Control name="$(parent)ListNumber">
+                     <Anchor point="TOPLEFT" />
+                     <Anchor point="TOPRIGHT" />
+                     <DimensionConstraints minX="468" />
+                     <OnInitialized> ItemTrig.fitHeightToChildren(self) </OnInitialized>
+                     <Controls>
+                        <Control name="$(parent)Value" inherits="ItemTrig_UITemplate_WCheckboxList">
+                           <Anchor point="TOPLEFT" />
+                           <Anchor point="TOPRIGHT" />
+                        </Control>
+                     </Controls>
+                  </Control>
                   <Control name="$(parent)Multiline">
                      <Anchor point="TOPLEFT" />
                      <Anchor point="TOPRIGHT" />

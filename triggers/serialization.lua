@@ -75,6 +75,13 @@ local function serializeOpcode(o)
             safeArgs[i] = toSafeString(tostring(o.args[i]))
          elseif rawType == "boolean" then
             safeArgs[i] = tostring(o.args[i] and 1 or 0)
+         elseif baseType == "list<number>" then
+            local t = o.args[i] or {}
+            if not t then
+               safeArgs[i] = ""
+            else
+               safeArgs[i] = table.concat(t, ",")
+            end
          elseif baseType == "quantity" then
             safeArgs[i] = safeArgs[i].qualifier .. "," .. (safeArgs[i].number or safeArgs[i].alternate)
          elseif getmetatable(safeArgs[i]) == ItemTrig.Trigger then
@@ -198,6 +205,13 @@ function _Parser:_parseOpcode(s, opcodeClass)
          if arg ~= "0" then
             oCurrent.args[j] = true
          end
+      elseif aType == "list<number>" then
+         local list = ItemTrig.split(arg, ",")
+         for i = 1, #list do
+            list[i] = tonumber(list[i])
+         end
+         table.sort(list)
+         oCurrent.args[j] = list
       elseif aType == "number" then
          oCurrent.args[j] = tonumber(arg)
       elseif aType == "quantity" then

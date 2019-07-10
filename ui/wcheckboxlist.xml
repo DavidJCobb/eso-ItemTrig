@@ -1,0 +1,26 @@
+<GuiXml>
+   <Controls>
+      <Control name="ItemTrig_UITemplate_WCheckboxListItem" virtual="true" inherits="ItemTrig_UITemplate_WScrollSelectListItem">
+         <Dimensions y="42" />
+         <Controls>
+            <Texture name="$(parent)Back" excludeFromResizeToFitExtents="true">
+               <AnchorFill />
+            </Texture>
+            <Button inherits="ZO_CheckButton" name="$(parent)Enabled" mouseEnabled="false">
+               <Anchor point="LEFT" offsetX="7" />
+            </Button>
+            <Label name="$(parent)Text" font="ITEMTRIG_FONT_BASIC" wrapMode="ELLIPSIS" maxLineCount="1">
+               <Anchor point="LEFT"  relativeTo="$(parent)Enabled" relativePoint="RIGHT" offsetX="7" />
+               <Anchor point="RIGHT" offsetX="-7" />
+            </Label>
+         </Controls>
+      </Control>
+      <Control name="ItemTrig_UITemplate_WCheckboxListPlaceholder" virtual="true">
+         <Dimensions x="140" y="252" />
+      </Control>
+      <Control name="ItemTrig_UITemplate_WCheckboxList" virtual="true" inherits="ItemTrig_UITemplate_WScrollSelectList">
+         <Dimensions x="140" y="252" />
+         <OnInitialized> ItemTrig.UI.WCheckboxList:install(self) </OnInitialized>
+      </Control>
+   </Controls>
+</GuiXml>

@@ -214,6 +214,8 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
    local t = arg.type
    if t == "boolean" then
       return false
+   elseif t == "list<number>" then
+      return {}
    elseif t == "number" then
       if arg.enum then
          return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
@@ -261,6 +263,9 @@ end
       
       boolean
       
+      list<number>
+         An array of numbers.
+      
       number
       
       quantity
@@ -305,6 +310,10 @@ end
          presented with an appropriately labeled checkbox rather than a 
          combobox; the enum's [1] and [2] keys will still be used when 
          formatting the argument for display in any other context.
+      
+      list<number>
+         The argument values are treated as keys in the enum; the corres-
+         ponding values in the enum are what is shown.
       
       number
          The argument value is treated as a key in the enum; the corres-
@@ -471,6 +480,8 @@ function ItemTrig.Opcode:clone(deep)
                else
                   result.args[i] = a
                end
+            elseif baseArgs[i].type == "list<number>" then
+               result.args[i] = ItemTrig.assign({}, a)
             elseif baseArgs[i].type == "quantity" then
                if OpcodeQuantityArg:is(a) then
                   result.args[i] = a:clone()
@@ -497,9 +508,10 @@ function ItemTrig.Opcode:copyAssign(other, deep)
       for i = 1, #other.args do
          local a = other.args[i]
          if type(a) == "table" then
-            if self.base.args[i].type == "trigger" then
+            local baseType = self.base.args[i].type
+            if baseType == "trigger" then
                self.args[i] = a:clone()
-            elseif self.base.args[i].type == "quantity" then
+            elseif baseType == "quantity" then
                if OpcodeQuantityArg:is(a) then
                   self.args[i] = a:clone()
                else
@@ -582,9 +594,29 @@ function ItemTrig.Opcode:format(argTransform, fmtTransform)
          else
             renderArgs[i] = tostring(a)
          end
+      elseif t == "list<number>" then
+         renderArgs[i] = "<list...>"
+         local items = a or {}
+         if b.enum then
+            items = {}
+            for k, v in ipairs(a or {}) do
+               local entry = b.enum[v]
+               if type(entry) == "function" then
+                  entry = entry(v)
+               end
+               if not entry then
+                  entry = ZO_LocalizeDecimalNumber(v or 0)
+               end
+               items[k] = entry
+            end
+         end
+         renderArgs[i] = ZO_GenerateCommaSeparatedList(items)
       elseif t == "number" then
          if b.enum then
             renderArgs[i] = b.enum[a]
+            if type(renderArgs[i]) == "function" then
+               renderArgs[i] = renderArgs[i](a)
+            end
             if not renderArgs[i] then
                renderArgs[i] = ZO_LocalizeDecimalNumber(a or 0)
             end
@@ -599,6 +631,9 @@ function ItemTrig.Opcode:format(argTransform, fmtTransform)
             local number
             if b.enum then
                number = b.enum[a.number]
+               if type(number) == "function" then
+                  number = number(a.number)
+               end
                if not number then
                   number = ZO_LocalizeDecimalNumber(a.number or 0)
                end
@@ -664,6 +699,24 @@ function ItemTrig.Opcode:validateArgs()
       if t == "boolean" then
          if a ~= true and a ~= false then
             return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+      elseif t == "list<number>" then
+         if type(a) ~= "table" then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+         for k, v in pairs(a) do
+            if type(v) ~= "number" and not tonumber(v) then
+               return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+            end
+            if b.enum then
+               if not b.enum[v] then
+                  return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+               end
+               local dei = b.disabledEnumIndices
+               if dei and dei:has(tonumber(v)) then
+                  return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+               end
+            end
          end
       elseif t == "number" then
          if type(a) ~= "number" and not tonumber(a) then

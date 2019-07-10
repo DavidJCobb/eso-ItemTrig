@@ -83,6 +83,8 @@ do
          TOOLTIP_BACKGROUND          = { 1, 1, 0.5, 1 },
          TOOLTIP_TEXT                = { 0, 0, 0, 1 },
          TOOLTIP_BORDER              = { 0, 0, 0, 1 },
+         CHECKBOXLIST_ITEM_BACK      = { 1, 1, 1, 1 },
+         CHECKBOXLIST_ITEM_TEXT      = { 0, 0, 0, 1 },
       },
       numbers = {
          SCROLLBAR_ALPHA_INITIAL    = 0.75, -- alpha when the mouse isn't near the scrollbar

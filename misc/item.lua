@@ -74,6 +74,10 @@ end
       A singleton that allows one to queue operations that must be performed 
       sequentially, and that indicate successes/failures/interruptions using 
       API events.
+      
+      This singleton is only suitable for operations that can be tracked on a 
+      per-item-stack basis. The refining of raw materials is a notable except-
+      ion and is handled by MassMaterialRefinementQueue elsewhere.
    
    ITEMINTERFACE
       A class that can be used to wrap any bag slot, to quickly and efficient-
@@ -371,7 +375,7 @@ end
 local Queues = {}
 ItemTrig.ItemQueues = Queues
 do
-   local function _tradeskillResultIsDeconstruct(tsr)
+   local function _tradeskillErrorIsDeconstruct(tsr)
       if tsr == CRAFTING_RESULT_CANT_DECONSTRUCT_WORN      -- 127: "You can't deconstruct an item that you are wearing."
       or tsr == CRAFTING_RESULT_DECONSTRUCT_BAD_QUANTITY   -- 116: "Insufficient Quantity"
       or tsr == CRAFTING_RESULT_INTERRUPTED                --  18: "Interrupted"
@@ -493,7 +497,7 @@ do
                return IQueue.ABORT_QUEUE
             end
             local tsr = select(1, ...)
-            if _tradeskillResultIsDeconstruct(tsr) then
+            if _tradeskillErrorIsDeconstruct(tsr) then
                local failureString = GetString("SI_TRADESKILLRESULT", tsr)
                if self.observer and self.observer.onFailure then
                   self.observer:onFailure(self:first(), nil, failureString)
@@ -582,12 +586,17 @@ do
    function Queues:start(name, observer, evenIfEmpty)
       assert(self.listening, "The ItemQueues system hasn't been setup yet!")
       if self.currentQueue then -- queue already in progress
+         --
+         -- Queues can only run one queue at a time. It doesn't and can't 
+         -- know what queues to run next. If you want to run multiple queues 
+         -- sequentially, use your caller or observer to coordinate that.
+         --
          return
       end
       local queue = self.queues[name]
       assert(queue, "Invalid queue name " .. tostring(name) .. ".")
       if not evenIfEmpty and queue:empty() then
-         return
+         return false
       end
       queue.observer = observer
       self.currentQueue = queue
@@ -615,8 +624,14 @@ do
       if not self.currentQueue then
          return
       end
-      self.currentQueue:clear()
-      self.currentQueue.observer = nil
+      local old = self.currentQueue
+      old:clear()
+      if old.observer then
+         if old.observer.onAnyStop then
+            old.observer:onAnyStop()
+         end
+         old.observer = nil
+      end
       self.currentQueue = nil
    end
    function Queues:teardown()
@@ -844,13 +859,16 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_CANNOT_DECONSTRUCT      = "DCON" -- This item type can't be deconstructed.
    ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK     = "NJNK" -- This item type can't be flagged as junk.
    ItemInterface.FAILURE_CANNOT_LOCK             = "NLOK" -- This item type can't be locked.
+   ItemInterface.FAILURE_CANNOT_REFINE           = "REFN" -- This item type can't be refined.
    ItemInterface.FAILURE_CANNOT_SPLIT_STACK      = "SPLT" -- Cannot split the stack; your inventory is full.
    ItemInterface.FAILURE_FCOIS_DISALLOWS         = "FCOI" -- FCOIS does not allow you to take this action.
+   ItemInterface.FAILURE_FCOIS_NOT_INSTALLED     = "NFCO" -- FCOIS is not installed.
    ItemInterface.FAILURE_ITEM_IS_INVALID         = "INVA" -- The ItemInterface is invalid: the bag slot now contains something different.
    ItemInterface.FAILURE_ITEM_IS_LOCKED          = "LOCK" -- Cannot perform this operation on a locked item.
    ItemInterface.FAILURE_MOD_NOT_SETUP           = "NOPE" -- The mod wasn't set up properly.
    ItemInterface.FAILURE_NORMAL_FENCE_LIMIT      = "FENL" -- You've hit the limit of items you can fence for today.
    ItemInterface.FAILURE_NORMAL_LAUNDER_LIMIT    = "LNDR" -- You've hit the limit of items you can launder for the day.
+   ItemInterface.FAILURE_NOT_ENOUGH_TO_REFINE    = "RAMT" -- You don't have enough of this raw material to refine it.
    ItemInterface.FAILURE_LAUNDER_CANT_AFFORD     = "LNDG" -- You don't have enough gold to launder this item.
    ItemInterface.FAILURE_LAUNDER_NOT_STOLEN      = "LDNS" -- You can't launder something that isn't stolen!
    ItemInterface.FAILURE_ZENIMAX_DEPOSIT_LIMIT   = "ZDPT" --  We've hit the maximum number of items Zenimax allows add-ons to deposit every time the bank is opened.
@@ -934,6 +952,27 @@ function ItemInterface:new(bagIndex, slotIndex)
    return result
 end
 function ItemInterface:canDeconstruct()
+   if self:isInvalid() then
+      return false, self.FAILURE_ITEM_IS_INVALID
+   end
+   if self.locked then
+      return false, self.FAILURE_ITEM_IS_LOCKED
+   end
+   if not self:canDeconstructType() then
+      return false, self.FAILURE_CANNOT_DECONSTRUCT
+   end
+   if GetCraftingInteractionType() ~= self:pertinentCraftingType() then
+      return false, ItemInterface.FAILURE_WRONG_CRAFTING_STATION
+   end
+   if not CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, GetCraftingInteractionType()) then
+      return false, self.FAILURE_CANNOT_DECONSTRUCT
+   end
+   if self:queryFCOISProtection("deconstruct") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
+   end
+   return true
+end
+function ItemInterface:canDeconstructType()
    if self.craftingType == ITEMTYPE_GLYPH_WEAPON
    or self.craftingType == ITEMTYPE_GLYPH_ARMOR
    or self.craftingType == ITEMTYPE_GLYPH_JEWELRY
@@ -979,24 +1018,42 @@ function ItemInterface:canGemify()
    local data = self.gemifyData
    return data.itemsPerOperation > 0 and data.gemsPerOperation > 0
 end
-function ItemInterface:deconstruct(calledFromQueue)
+function ItemInterface:canRefine()
+   --
+   -- TODO: How do we handle the case of, say, the trigger running on a locked 
+   -- stack of 5 Rubedite Ore when the Craft Bag has an unlocked stack of 20?
+   --
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
    end
    if self.locked then
       return false, self.FAILURE_ITEM_IS_LOCKED
    end
-   if not self:canDeconstruct() then
-      return false, self.FAILURE_CANNOT_DECONSTRUCT
+   if not self:canRefineType() then
+      return false, self.FAILURE_CANNOT_REFINE
    end
    if GetCraftingInteractionType() ~= self:pertinentCraftingType() then
       return false, ItemInterface.FAILURE_WRONG_CRAFTING_STATION
    end
    if not CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, GetCraftingInteractionType()) then
-      return false, self.FAILURE_CANNOT_DECONSTRUCT
+      return false, self.FAILURE_CANNOT_REFINE
    end
-   if self:queryFCOISProtection("deconstruct") then
+   if self.count < GetRequiredSmithingRefinementStackSize() then
+      return false, self.FAILURE_NOT_ENOUGH_TO_REFINE
+   end
+   if self:queryFCOISProtection("refine") then
       return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
+   end
+   return true
+end
+function ItemInterface:canRefineType()
+   local refinesTo = GetItemLinkRefinedMaterialItemLink(self.link)
+   return refinesTo and (refinesTo ~= "")
+end
+function ItemInterface:deconstruct(calledFromQueue)
+   local able, reason = self:canDeconstruct()
+   if not able then
+      return false, reason
    end
    if self.craftingType == ITEMTYPE_GLYPH_WEAPON
    or self.craftingType == ITEMTYPE_GLYPH_ARMOR
@@ -1291,6 +1348,24 @@ function ItemInterface:queryFCOISProtection(verb) -- returns true if item is pro
    if not FCOIS then
       return false
    end
+   if IsInGamepadPreferredMode() then
+      --
+      -- As of July 10, 2019, FCOIS does not initialize properly if you start your session 
+      -- with the game's Gamepad Mode enabled. Attempting to query any of its protections 
+      -- after bad initialization will throw an error.
+      --
+      -- NOTE: This check could probably be done better. We need to know whether the user 
+      -- was in Gamepad Mode when add-ons loaded, NOT whether they are CURRENTLY in Game-
+      -- pad Mode.
+      --
+      local test, result = pcall(FCOIS.IsDeconstructionLocked, self.bag, self.slot)
+      if not test then
+         --
+         -- Yep, FCOIS is broken and its API is throwing errors. Nothing we can do.
+         --
+         return false
+      end
+   end
    if verb == "deconstruct" then
       return FCOIS.IsDeconstructionLocked(self.bag, self.slot) or FCOIS.IsJewelryDeconstructionLocked(self.bag, self.slot) or FCOIS.IsEnchantingExtractionLocked(self.bag, self.slot)
    end
@@ -1321,6 +1396,32 @@ function ItemInterface:queryFCOISProtection(verb) -- returns true if item is pro
       return FCOIS.IsPlayerBankWithdrawLocked(self.bag, self.slot) -- TODO: see API notes
       -- TODO: for guild bank, use IsGuildBankWithdrawLocked
    end
+end
+function ItemInterface:refine() -- unused
+   local able, reason = self:canRefine()
+   if not able then
+      return false, reason
+   end
+   ExtractOrRefineSmithingItem(self.bag, self.slot)
+   if calledFromQueue then
+      --
+      -- If we're running this from the ItemQueues system, then we don't 
+      -- want to flag the ItemInterface instance as invalid. We need to 
+      -- be able to double-check, later on, that the item was actually 
+      -- deconstructed (i.e. we may receive "success" events for decon-
+      -- struction attempts by other add-ons or by the player).
+      --
+      -- Moreover, we want logging to run through the queue (which is 
+      -- better able to detect a successful deconstruction), so we don't 
+      -- want to call onModifyingAction. (If we allowed onModifyingAction 
+      -- to run, then ItemTrig would log a "success" even if we ended up 
+      -- hitting an error, like the inventory being full.)
+      --
+      return true
+   end
+   self:onModifyingAction("refine")
+   self:validate()
+   return true
 end
 function ItemInterface:sell(count)
    if self:isInvalid() then

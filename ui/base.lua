@@ -114,11 +114,13 @@ function WClass:install(control, ...)
       --
       local superclasses = {}
       local class = self:getSuperclass()
+      local count = 0
       while class do
-         table.insert(superclasses, class)
+         count = count + 1
+         superclasses[count] = class
          class = class:getSuperclass()
       end
-      for i = #superclasses, 1, -1 do
+      for i = count, 1, -1 do
          local constructor = rawget(superclasses[i], "_construct")
          if constructor then
             constructor(instance, ...)

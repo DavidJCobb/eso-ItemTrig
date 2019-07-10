@@ -1867,21 +1867,21 @@ ItemTrig.tableConditions = {
                [-3] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2H),
                [-4] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_STAFF),
                [-5] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_DESTRUCTIONSTAFF),
-               [WEAPONTYPE_AXE]               = GetString("SI_WEAPONTYPE", WEAPONTYPE_AXE),
-               [WEAPONTYPE_BOW]               = GetString("SI_WEAPONTYPE", WEAPONTYPE_BOW),
-               [WEAPONTYPE_DAGGER]            = GetString("SI_WEAPONTYPE", WEAPONTYPE_DAGGER),
-               [WEAPONTYPE_FIRE_STAFF]        = GetString("SI_WEAPONTYPE", WEAPONTYPE_FIRE_STAFF),
-               [WEAPONTYPE_FROST_STAFF]       = GetString("SI_WEAPONTYPE", WEAPONTYPE_FROST_STAFF),
-               [WEAPONTYPE_HAMMER]            = GetString("SI_WEAPONTYPE", WEAPONTYPE_HAMMER), -- one-handed maul
-               [WEAPONTYPE_HEALING_STAFF]     = GetString("SI_WEAPONTYPE", WEAPONTYPE_HEALING_STAFF),
-               [WEAPONTYPE_LIGHTNING_STAFF]   = GetString("SI_WEAPONTYPE", WEAPONTYPE_LIGHTNING_STAFF),
-               --[WEAPONTYPE_NONE]              = GetString("SI_WEAPONTYPE", WEAPONTYPE_NONE),
-               --[WEAPONTYPE_RUNE]              = GetString("SI_WEAPONTYPE", WEAPONTYPE_RUNE),
-               [WEAPONTYPE_SHIELD]            = GetString("SI_WEAPONTYPE", WEAPONTYPE_SHIELD),
-               [WEAPONTYPE_SWORD]             = GetString("SI_WEAPONTYPE", WEAPONTYPE_SWORD),
-               [WEAPONTYPE_TWO_HANDED_AXE]    = GetString("SI_WEAPONTYPE", WEAPONTYPE_TWO_HANDED_AXE),
-               [WEAPONTYPE_TWO_HANDED_HAMMER] = GetString("SI_WEAPONTYPE", WEAPONTYPE_TWO_HANDED_HAMMER), -- two-handed maul
-               [WEAPONTYPE_TWO_HANDED_SWORD]  = GetString("SI_WEAPONTYPE", WEAPONTYPE_TWO_HANDED_SWORD),
+               [WEAPONTYPE_AXE]               = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_AXE),
+               [WEAPONTYPE_BOW]               = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_BOW),
+               [WEAPONTYPE_DAGGER]            = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_DAGGER),
+               [WEAPONTYPE_FIRE_STAFF]        = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_FIRE_STAFF),
+               [WEAPONTYPE_FROST_STAFF]       = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_FROST_STAFF),
+               [WEAPONTYPE_HAMMER]            = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_HAMMER), -- one-handed maul
+               [WEAPONTYPE_HEALING_STAFF]     = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_HEALING_STAFF),
+               [WEAPONTYPE_LIGHTNING_STAFF]   = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_LIGHTNING_STAFF),
+               --[WEAPONTYPE_NONE]              = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_NONE),
+               --[WEAPONTYPE_RUNE]              = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_RUNE),
+               [WEAPONTYPE_SHIELD]            = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_SHIELD),
+               [WEAPONTYPE_SWORD]             = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_SWORD),
+               [WEAPONTYPE_TWO_HANDED_AXE]    = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_TWO_HANDED_AXE),
+               [WEAPONTYPE_TWO_HANDED_HAMMER] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_TWO_HANDED_HAMMER), -- two-handed maul
+               [WEAPONTYPE_TWO_HANDED_SWORD]  = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_TWO_HANDED_SWORD),
             },
             default = -1,
          },
@@ -1935,6 +1935,163 @@ ItemTrig.tableConditions = {
                end
             end
          end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [48] = ConditionBase:new( -- FCOIS: Check Mark
+      _s(ITEMTRIG_STRING_CONDITIONNAME_FCOISMARK),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_FCOISMARK),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = (function()
+               local out = {
+                  --
+                  -- Start with the ones that have constant names.
+                  --
+                  [ 1] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK01), -- Lock
+                  [ 3] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK03), -- Research
+                  [ 5] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK05), -- Sell
+                  [ 9] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK09), -- Deconstruct
+                  [10] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK10), -- Improve
+                  [11] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK11), -- Sell at Guild Store
+                  [12] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK12), -- Intricate
+               }
+               --
+               -- Now here's where things get tricky: all other sets can be renamed 
+               -- by the user at any time, so we need to be able to update with those 
+               -- names at any time. This will require producing functions, which our 
+               -- opcode-to-string functions will call as appropriate.
+               --
+               local _markIDToSetNumber = {
+                  [2] = 1,
+                  [4] = 2,
+                  [6] = 3,
+                  [7] = 4,
+                  [8] = 5,
+               }
+               local function _gearSet(num)
+                  local fmt = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_GEAR_SET)
+                  local set = _markIDToSetNumber[num]
+                  local name
+                  if FCOIS then
+                     name = FCOIS.GetIconText(num)
+                  else
+                     name = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_NAMELESS_ICON)
+                  end
+                  return LocalizeString(fmt, set, name)
+               end
+               for k, _ in pairs(_markIDToSetNumber) do
+                  out[k] = _gearSet
+               end
+               --
+               -- Same for the "dynamic" sets:
+               --
+               local function _dynamic(num)
+                  local fmt = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_DYNAMIC)
+                  local set = num - 12
+                  local name
+                  if FCOIS then
+                     name = FCOIS.GetIconText(num)
+                  else
+                     name = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISMARK_MARK_NAMELESS_ICON)
+                  end
+                  return LocalizeString(fmt, set, name)
+               end
+               for i = 13, 42 do
+                  out[i] = _dynamic
+               end
+               --
+               return out
+            end)(),
+            default = 1,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result
+         if FCOIS then
+            result = FCOIS.IsMarked(context.bag, context.slot, args[2])
+         else
+            result = false
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [49] = ConditionBase:new( -- Refinement Possible
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CANREFINE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CANREFINE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CANREFINE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CANREFINE_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context:canRefine()
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [50] = ConditionBase:new( -- Deconstruction Possible
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CANDECONSTRUCT),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CANDECONSTRUCT),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CANDECONSTRUCT_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CANDECONSTRUCT_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context:canDeconstruct()
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [51] = ConditionBase:new( -- FCOIS: Is Installed
+      _s(ITEMTRIG_STRING_CONDITIONNAME_FCOISINSTALLED),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_FCOISINSTALLED),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISINSTALLED_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISINSTALLED_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = not not FCOIS
          if args[1] then
             return result
          end

@@ -1,5 +1,17 @@
 if not ItemTrig then return end
 
+function ItemTrig.join(tablevar, delim)
+   if type(tablevar) ~= "table" then
+      if tablevar == nil then
+         return ""
+      end
+      return tostring(tablevar)
+   end
+   if delim == nil then
+      delim = ","
+   end
+   return table.concat(tablevar, delim) -- consider just calling me directly!
+end
 function ItemTrig.posformat(f, ...)
    --
    -- Allows you to reorder tokens within a format string, e.g. 

@@ -391,6 +391,137 @@ ItemTrig.tableActions = {
          allowedEntryPoints = { ItemTrig.ENTRY_POINT_BANK_BANK }
       }
    ),
+   [13] = ActionBase:new( -- FCOIS: Modify Mark
+      _s(ITEMTRIG_STRING_ACTIONNAME_FCOISEDITMARK),
+      _s(ITEMTRIG_STRING_ACTIONDESC_FCOISEDITMARK),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_REMOVE),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_APPLY)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "list<number>",
+            enum = (function()
+               local out = {
+                  --
+                  -- Start with the ones that have constant names.
+                  --
+                  [ 1] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK01), -- Lock
+                  [ 3] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK03), -- Research
+                  [ 5] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK05), -- Sell
+                  [ 9] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK09), -- Deconstruct
+                  [10] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK10), -- Improve
+                  [11] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK11), -- Sell at Guild Store
+                  [12] = _s(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK12), -- Intricate
+               }
+               --
+               -- Now here's where things get tricky: all other sets can be renamed 
+               -- by the user at any time, so we need to be able to update with those 
+               -- names at any time. This will require producing functions, which our 
+               -- opcode-to-string functions will call as appropriate.
+               --
+               local _markIDToSetNumber = {
+                  [2] = 1,
+                  [4] = 2,
+                  [6] = 3,
+                  [7] = 4,
+                  [8] = 5,
+               }
+               local function _gearSet(num)
+                  local fmt = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_GEAR_SET)
+                  local set = _markIDToSetNumber[num]
+                  local name
+                  if FCOIS then
+                     name = FCOIS.GetIconText(num)
+                  else
+                     name = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_NAMELESS_ICON)
+                  end
+                  return LocalizeString(fmt, set, name)
+               end
+               for k, _ in pairs(_markIDToSetNumber) do
+                  out[k] = _gearSet
+               end
+               --
+               -- Same for the "dynamic" sets:
+               --
+               local function _dynamic(num)
+                  local fmt = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_DYNAMIC)
+                  local set = num - 12
+                  local name
+                  if FCOIS then
+                     name = FCOIS.GetIconText(num)
+                  else
+                     name = GetString(ITEMTRIG_STRING_OPCODEARG_FCOISEDITMARK_MARK_NAMELESS_ICON)
+                  end
+                  return LocalizeString(fmt, set, name)
+               end
+               for i = 13, 42 do
+                  out[i] = _dynamic
+               end
+               --
+               return out
+            end)(),
+            --default = 1,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if not FCOIS then
+            local extra = { code = ItemInterface.FAILURE_FCOIS_NOT_INSTALLED, why = GetString(ITEMTRIG_STRING_ACTIONERROR_FCOISEDITMARK_NOTINSTALLED) }
+            return ItemTrig.OPCODE_FAILED, extra
+         end
+         --
+         -- TODO: The fifth argument to this API is meant for optimization purposes 
+         -- and should only be set to (true) for the last item we mark. However, we 
+         -- can't know in advance how many items we want to mark, and therefore we 
+         -- can't know whether any given item is the last item we're marking. Is 
+         -- there anything we can do about this?
+         --
+         FCOIS.MarkItem(context.bag, context.slot, args[2], args[1], true)
+      end
+   ),
+   [14] = ActionBase:new( -- Queue Mass Refine
+      _s(ITEMTRIG_STRING_ACTIONNAME_REFINE),
+      _s(ITEMTRIG_STRING_ACTIONDESC_REFINE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_REFINE_THIS),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_REFINE_ALL)
+            },
+            default = false,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         if ItemTrig.prefs:get("pretendActions") then
+            _doPretend(context, "REFINE")
+            return
+         end
+         if args[1] then
+            ItemTrig.MassMaterialRefinementManager:queue()
+         else
+            if not context:canRefineType() then
+               local extra = { code = ItemInterface.FAILURE_CANNOT_REFINE, why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_TYPE) }
+               return ItemTrig.OPCODE_FAILED, extra
+            end
+            if GetCraftingInteractionType() ~= context:pertinentCraftingType() then
+               local extra = { code = ItemInterface.FAILURE_WRONG_CRAFTING_STATION, why = GetString(ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_STATION) }
+               return ItemTrig.OPCODE_FAILED, extra
+            end
+            ItemTrig.MassMaterialRefinementManager:queue(context.id)
+         end
+      end,
+      { -- extra data for this opcode
+         allowedEntryPoints = { ItemTrig.ENTRY_POINT_CRAFTING, ItemTrig.ENTRY_POINT_BANK_CRAFTING },
+         explanation = _s(ITEMTRIG_STRING_ACTIONEXPLANATION_REFINE),
+      }
+   ),
 }
 ItemTrig.countActions = #ItemTrig.tableActions
 for i = 1, ItemTrig.countActions do

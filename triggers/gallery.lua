@@ -37,6 +37,10 @@ local ITEM_NAME_LOCKPICK = ItemTrig.getNaiveItemNameFor(30357)
 ]]--
 
 function ItemTrig.retrieveTriggerGallery()
+   --
+   -- Latest galleryID as of July 10, 2019: 12
+   -- See explanation above.
+   --
    local gallery = {}
    do -- Deconstruct "intricate" gear for bonus XP
       local t = Trigger:new()
@@ -49,6 +53,10 @@ function ItemTrig.retrieveTriggerGallery()
       cl[1] = Condition:new(15, { false }) -- The item [is not] locked
       cl[2] = Condition:new(24, { true }) -- The item [is] intricate
       cl[3] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
+      cl[4] = Condition:new(50, { true }) -- Can Deconstruct
+      
+      -- TODO: Can Deconstruct tests the crafting station; we don't need Cond#35
+      
       --
       al[1] = Action:new(9) -- Deconstruct the item.
       --
@@ -83,8 +91,27 @@ function ItemTrig.retrieveTriggerGallery()
       cl[3] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
       cl[4] = Condition:new(31, { { qualifier = "LTE", number = 0 } }) -- Sell value is [at most 0]
       cl[5] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
+      cl[6] = Condition:new(50, { true }) -- Can Deconstruct
+      
+      -- TODO: Can Deconstruct tests the crafting station; we don't need Cond#35
+      
       --
       al[1] = Action:new(9) -- Deconstruct the item.
+      --
+      table.insert(gallery, t)
+   end
+   do -- Refine raw materials automatically
+      local t = Trigger:new()
+      t.name        = GetString(ITEMTRIG_STRING_GALLERY_REFINE_NAME)
+      t.entryPoints = { ItemTrig.ENTRY_POINT_CRAFTING }
+      t.galleryID   = 12
+      local cl = t.conditions
+      local al = t.actions
+      --
+      cl[1] = Condition:new( 7, { -7 })   -- Item Type: any unrefined material
+      cl[2] = Condition:new(49, { true }) -- Can Refine
+      --
+      al[1] = Action:new(14, {}) -- Refine
       --
       table.insert(gallery, t)
    end

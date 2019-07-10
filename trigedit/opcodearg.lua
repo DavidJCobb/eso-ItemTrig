@@ -5,6 +5,7 @@ ItemTrig:registerWindow("opcodeArgEdit", WinCls)
 
 local ViewCls = {}
 do -- helper classes for views
+   local WCheckboxList   = ItemTrig.UI.WCheckboxList
    local WCombobox       = ItemTrig.UI.WCombobox
    local WNumberEditbox  = ItemTrig.UI.WNumberEditbox
    local WViewHolderView = ItemTrig.UI.WViewHolderView
@@ -80,11 +81,60 @@ do -- helper classes for views
             self.value:setShouldSort(true, false)
          end
          opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
-            combobox:push({ name = v, index = k }, false)
+            local name = v
+            if type(name) == "function" then
+               name = name(k)
+            end
+            combobox:push({ name = name, index = k }, false)
          end)
          combobox:redraw()
          combobox:select(1) -- default selection
          combobox:select(function(item) return item.index == tonumber(argValue) end)
+      end
+   end
+   do -- list<number>
+      ViewCls.ListNumber = WViewHolderView:makeSubclass("OpcodeArgListNumberView")
+      function ViewCls.ListNumber:_construct()
+         self.value = WCheckboxList:cast(self:GetNamedChild("Value"))
+         self.value.onChange =
+            function()
+               local win = ItemTrig.windows.opcodeArgEdit
+               if win then -- the view initializes before the window, so this can run early
+                  win:onArgumentEdited()
+               end
+            end
+      end
+      function ViewCls.ListNumber:GetValue()
+         local list  = {}
+         local count = 0
+         self.value:forEachSelected(function(i, data)
+            count = count + 1
+            list[count] = data.index
+         end)
+         table.sort(list)
+         return list
+      end
+      function ViewCls.ListNumber:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         local checkboxlist = self.value
+         checkboxlist:clear()
+         if argBase.doNotSortEnum then
+            self.value:setShouldSort(false, false)
+         else
+            self.value:setShouldSort(true, false)
+         end
+         opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
+            local name = v
+            if type(name) == "function" then
+               name = name(k)
+            end
+            checkboxlist:push({ name = name, index = k }, false)
+         end)
+         checkboxlist:redraw()
+         checkboxlist:deselectAll()
+         for i = 1, #argValue do
+            checkboxlist:addToSelection(function(item) return item.index == tonumber(argValue[i]) end)
+         end
       end
    end
    do -- number
@@ -269,7 +319,11 @@ do -- helper classes for views
             self.enum:setShouldSort(true, false)
          end
          opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
-            self.enum:push({ name = v, value = k }, false)
+            local name = v
+            if type(name) == "function" then
+               name = name(k)
+            end
+            self.enum:push({ name = name, value = k }, false)
          end)
          self.enum:redraw()
          self.enum:select(1) -- default
@@ -335,13 +389,14 @@ function WinCls:_construct()
       ui = {
          viewholder = nil, -- WViewHolder
          views = {
-            checkbox  = nil, -- TODO
-            enum      = nil,
-            multiline = nil,
-            number    = nil, -- TODO
-            quantity  = nil,
-            quantEnum = nil,
-            string    = nil,
+            checkbox    = nil, -- TODO
+            enum        = nil,
+            list_number = nil,
+            multiline   = nil,
+            number      = nil,
+            quantity    = nil,
+            quantEnum   = nil,
+            string      = nil,
          },
          explanation = nil,
       },
@@ -362,6 +417,7 @@ function WinCls:_construct()
       local viewholder   = ItemTrig.UI.WViewHolder:cast(self:GetNamedChild("Body"))
       self.ui.viewholder = viewholder
       self.ui.views.enum      = ViewCls.Enum:install(viewholder:GetNamedChild("Enum"))
+      self.ui.views.list_number = ViewCls.ListNumber:install(viewholder:GetNamedChild("ListNumber"))
       self.ui.views.multiline = ViewCls.String:install(viewholder:GetNamedChild("Multiline"))
       self.ui.views.number    = ViewCls.Number:install(viewholder:GetNamedChild("Number"))
       self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
@@ -401,12 +457,11 @@ function WinCls:requestEdit(opener, opcode, argIndex)
          local archetype = base:getArgumentArchetype(argIndex)
          self.type = arg.type
          if archetype == "checkbox" then
-            self.view = self.ui.views.checkbox
-            --
-            -- TODO
-            --
+            self.view = self.ui.views.checkbox -- TODO
          elseif archetype == "enum" then
             self.view = self.ui.views.enum
+         elseif archetype == "list<number>" then
+            self.view = self.ui.views.list_number
          elseif archetype == "multiline" then
             self.view = self.ui.views.multiline
          elseif archetype == "number" then
