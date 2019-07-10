@@ -68,6 +68,7 @@ ItemTrig.tableActions = {
                countTotalBag = context.totalBag,
                creator       = context.creator,
                level         = context.level,
+               link          = context.link,
                name          = context.formattedName,
                price         = context.sellValue,
                style         = ItemTrig.gameEnums.styles[context.style or ITEMSTYLE_NONE],
@@ -157,6 +158,8 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_CANT_SPLIT)
             elseif errorCode == ItemInterface.FAILURE_ITEM_IS_LOCKED then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_LOCKED)
+            elseif errorCode == ItemInterface.FAILURE_FCOIS_DISALLOWS then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_FCOIS)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
@@ -194,6 +197,8 @@ ItemTrig.tableActions = {
             local extra = { code = errorCode, why = nil }
             if errorCode == ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_JUNK_NOT_ALLOWED)
+            elseif errorCode == ItemInterface.FAILURE_FCOIS_DISALLOWS then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_JUNK_FCOIS)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
@@ -229,6 +234,8 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_CANT_AFFORD)
             elseif errorCode == ItemInterface.FAILURE_LAUNDER_NOT_STOLEN then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NOT_STOLEN)
+            elseif errorCode == ItemInterface.FAILURE_FCOIS_DISALLOWS then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_FCOIS)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
@@ -264,6 +271,12 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_NORMAL_MAX_FENCE)
             elseif errorCode == ItemInterface.FAILURE_ITEM_IS_LOCKED then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_LOCKED)
+            elseif errorCode == ItemInterface.FAILURE_FCOIS_DISALLOWS then
+               if context.stolen then
+                  extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_FCOIS_FENCE)
+               else
+                  extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_FCOIS_SELL)
+               end
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
@@ -330,6 +343,8 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_ZENIMAX_MAX_COUNT)
             elseif errorCode == ItemInterface.FAILURE_BANK_CHARACTER_BOUND then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_CHAR_BOUND)
+            elseif errorCode == ItemInterface.FAILURE_FCOIS_DISALLOWS then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FCOIS)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end
@@ -342,12 +357,14 @@ ItemTrig.tableActions = {
       _s(ITEMTRIG_STRING_ACTIONNAME_WITHDRAWFROMBANK),
       _s(ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK),
       {
-         [1] = {
+         --[[[1] = {
             type    = "number",
             default = 9999,
             requireInteger = true,
             min = 0,
          }
+         -- July 10, 2019 -- Zenimax item transfer API doesn't use the count parameter for withdrawals
+         ]]--
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
@@ -355,7 +372,7 @@ ItemTrig.tableActions = {
             _doPretend(context, "WITHDRAWFROMBANK")
             return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
-         local result, errorCode = context:takeFromBank(args[1])
+         local result, errorCode = context:takeFromBank(args[1] or 9999)
          if not result then
             local extra = { code = errorCode, why = nil }
             if errorCode == ItemInterface.FAILURE_BACKPACK_IS_FULL then
@@ -364,6 +381,8 @@ ItemTrig.tableActions = {
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_NOT_OPEN)
             elseif errorCode == ItemInterface.FAILURE_ZENIMAX_WITHDRAW_LIMIT then
                extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_ZENIMAX_MAX_COUNT)
+            elseif errorCode == ItemInterface.FAILURE_FCOIS_DISALLOWS then
+               extra.why = GetString(ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FCOIS)
             end
             return ItemTrig.OPCODE_FAILED, extra
          end

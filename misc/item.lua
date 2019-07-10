@@ -719,6 +719,7 @@ local _lazyGetterMappings = {
          end
          return _handle(GetAlchemyItemTraits(i.bag, i.slot))
       end,
+   armorType      = function(i) return _nilIfInvalid(i, GetItemArmorType(i.bag, i.slot)) end,
    bindType       = function(i) return _nilIfInvalid(i, GetItemBindType(i.bag, i.slot)) end,
    canBeJunk      = function(i) return _nilIfInvalid(i, CanItemBeMarkedAsJunk(i.bag, i.slot)) end,
    canBeLocked    = function(i) return _nilIfInvalid(i, CanItemBePlayerLocked(i.bag, i.slot)) end,
@@ -804,6 +805,7 @@ local _lazyGetterMappings = {
          end
          return tags
       end,
+   weaponType = function(i) return _nilIfInvalid(i, GetItemWeaponType(i.bag, i.slot)) end,
 }
 
 ItemInterface.meta = {
@@ -843,6 +845,7 @@ do -- define failure reasons for member functions
    ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK     = "NJNK" -- This item type can't be flagged as junk.
    ItemInterface.FAILURE_CANNOT_LOCK             = "NLOK" -- This item type can't be locked.
    ItemInterface.FAILURE_CANNOT_SPLIT_STACK      = "SPLT" -- Cannot split the stack; your inventory is full.
+   ItemInterface.FAILURE_FCOIS_DISALLOWS         = "FCOI" -- FCOIS does not allow you to take this action.
    ItemInterface.FAILURE_ITEM_IS_INVALID         = "INVA" -- The ItemInterface is invalid: the bag slot now contains something different.
    ItemInterface.FAILURE_ITEM_IS_LOCKED          = "LOCK" -- Cannot perform this operation on a locked item.
    ItemInterface.FAILURE_MOD_NOT_SETUP           = "NOPE" -- The mod wasn't set up properly.
@@ -992,6 +995,9 @@ function ItemInterface:deconstruct(calledFromQueue)
    if not CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, GetCraftingInteractionType()) then
       return false, self.FAILURE_CANNOT_DECONSTRUCT
    end
+   if self:queryFCOISProtection("deconstruct") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
+   end
    if self.craftingType == ITEMTYPE_GLYPH_WEAPON
    or self.craftingType == ITEMTYPE_GLYPH_ARMOR
    or self.craftingType == ITEMTYPE_GLYPH_JEWELRY
@@ -1027,6 +1033,9 @@ function ItemInterface:destroy(count)
    end
    if self.locked then
       return false, self.FAILURE_ITEM_IS_LOCKED
+   end
+   if self:queryFCOISProtection("destroy") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
    end
    if count == nil or count >= self.count then
       DestroyItem(self.bag, self.slot)
@@ -1114,6 +1123,9 @@ function ItemInterface:launder(count)
          end
       end
    end
+   if self:queryFCOISProtection("launder") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
+   end
    do -- Constrain the launder count based on the player's gold.
       local cost = GetItemLaunderPrice(self.bag, self.slot)
       local gold = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
@@ -1145,6 +1157,11 @@ function ItemInterface:modifyJunkState(flag)
       return false, ItemInterface.FAILURE_ITEM_IS_INVALID
    end
    if self.canBeJunk then
+      if flag and not self.hasJunkFlag then
+         if self:queryFCOISProtection("mark-as-junk") then
+            return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
+         end
+      end
       SetItemIsJunk(self.bag, self.slot, flag)
       self.hasJunkFlag = IsItemJunk(self.bag, self.slot)
       local result = self.hasJunkFlag == flag
@@ -1270,6 +1287,41 @@ do
       return CRAFTING_TYPE_INVALID
    end
 end
+function ItemInterface:queryFCOISProtection(verb) -- returns true if item is protected
+   if not FCOIS then
+      return false
+   end
+   if verb == "deconstruct" then
+      return FCOIS.IsDeconstructionLocked(self.bag, self.slot) or FCOIS.IsJewelryDeconstructionLocked(self.bag, self.slot) or FCOIS.IsEnchantingExtractionLocked(self.bag, self.slot)
+   end
+   if verb == "deposit" then
+      return FCOIS.IsPlayerBankDepositLocked(self.bag, self.slot) -- TODO: see API notes
+      -- TODO: for guild bank, use IsGuildBankDepositLocked
+   end
+   if verb == "destroy" then
+      return FCOIS.IsDestroyLocked(self.bag, self.slot)
+   end
+   if verb == "launder" then
+      return FCOIS.IsLaunderLocked(self.bag, self.slot)
+   end
+   if verb == "mark-as-junk" then -- ONLY for marking, not for unmarking
+      return FCOIS.IsJunkLocked(self.bag, self.slot)
+   end
+   if verb == "refine" then
+      return FCOIS.IsRefinementLocked(self.bag, self.slot) or FCOIS.IsJewelryRefinementLocked(self.bag, self.slot)
+   end
+   if verb == "sell" then
+      if self.stolen then
+         return FCOIS.IsFenceSellLocked(self.bag, self.slot)
+      else
+         return FCOIS.IsVendorSellLocked(self.bag, self.slot)
+      end
+   end
+   if verb == "withdraw" then
+      return FCOIS.IsPlayerBankWithdrawLocked(self.bag, self.slot) -- TODO: see API notes
+      -- TODO: for guild bank, use IsGuildBankWithdrawLocked
+   end
+end
 function ItemInterface:sell(count)
    if self:isInvalid() then
       return false, ItemInterface.FAILURE_ITEM_IS_INVALID
@@ -1284,7 +1336,7 @@ function ItemInterface:sell(count)
       count = self.count
    end
    local willFail = false
-   do
+   if self.stolen then
       local max, used = GetFenceSellTransactionInfo()
       local remaining = max - used
       if count > remaining then
@@ -1294,6 +1346,9 @@ function ItemInterface:sell(count)
             return false, self.FAILURE_NORMAL_FENCE_LIMIT
          end
       end
+   end
+   if self:queryFCOISProtection("sell") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
    end
    SellInventoryItem(self.bag, self.slot, count)
    self:onModifyingAction("sell", count)
@@ -1321,6 +1376,9 @@ function ItemInterface:storeInBank(count)
       if not (DoesBagHaveSpaceFor(BAG_BANK, self.bag, self.slot) or canUseSub) then
          return false, self.FAILURE_BANK_IS_FULL
       end
+   end
+   if self:queryFCOISProtection("deposit") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
    end
    if not (count and count <= self.count) then
       count = self.count
@@ -1351,6 +1409,9 @@ function ItemInterface:takeFromBank(count)
    if APILimits:capWithdraw(1) < 1 then -- call this differently than usual because the bank limit is per stack, not per total
       return false, self.FAILURE_ZENIMAX_WITHDRAW_LIMIT
    end
+   if self:queryFCOISProtection("withdraw") then
+      return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
+   end
    CallSecureProtected("PickupInventoryItem", self.bag, self.slot, count)
    CallSecureProtected("PlaceInTransfer")
    APILimits:didWithdraw(1) -- pass 1 because the bank limit is per stack, not per total
@@ -1380,12 +1441,15 @@ function ItemInterface:updateCount(change)
       self.totalCraftBag = self.totalCraftBag + change
    end
 end
-function ItemInterface:use()
+function ItemInterface:use() -- INCOMPLETE AND UNTESTED
    if self:isInvalid() then
       return
    end
    --
    -- TODO: Should we check CanInteractWithItem first?
+   --
+   -- TODO: Set up queryFCOISProtection and call it for anything that could 
+   --       apply to "using" an item
    --
    UseItem(self.bag, self.slot) -- TODO: this only works out of combat; what happens if called while in combat? does it throw an error?
    self.count = select(2, GetItemInfo(self.bag, self.slot))

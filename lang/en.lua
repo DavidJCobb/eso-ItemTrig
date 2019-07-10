@@ -654,6 +654,21 @@ ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_YES", "is")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_ANY",  "bound")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_BOUND_CHAR", "Character Bound")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_ARMORTYPE", "Armor Type")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_ARMORTYPE", "The armor <<1>> <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ARMORTYPE_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_ARMORTYPE_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_WEAPONTYPE", "Weapon Type")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_WEAPONTYPE", "The weapon <<1>> a <<2>>.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_NO",  "is not")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_YES", "is")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_1HMELEE",          "[any one-handed melee]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2HMELEE",          "[any two-handed melee]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_DESTRUCTIONSTAFF", "[any destruction staff]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_STAFF",            "[any staff]")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2H",               "[any two-handed]")
+--
 --
 -- ACTIONS
 -- Action descriptions use Zenimax format strings, wherein arguments are 
@@ -670,6 +685,7 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_LOG", "You can specify the 
    "$(countTotalBag) = The total amount of the item in your inventory\n" .. 
    "$(creator) = The character who crafted the item\n" .. 
    "$(level) = The item's level\n" ..
+   "$(link) = The item's link\n" ..
    "$(name) = The item's name\n" ..
    "$(price) = The item's price\n" ..
    "$(style) = The item's style"
@@ -697,12 +713,14 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_LOCKED",      "The it
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_CANT_SPLIT",  "Your inventory is full. In order to destroy just the incoming items, you must have one slot to spare.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NO_BANKED",   "You have disabled destroying items in the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_NOT_AT_BANK", "You can only destroy banked items while the bank is open.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DESTROYITEM_FCOIS",       "FCO ItemSaver has been told not to allow this item to be destroyed.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_MODIFYJUNKFLAG", "Modify Junk Flag")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_MODIFYJUNKFLAG", "<<1>> the item as junk.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_MODIFYJUNKFLAG_OFF", "Unmark")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_MODIFYJUNKFLAG_ON",  "Mark")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_JUNK_NOT_ALLOWED", "This item can't be flagged as junk.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_JUNK_FCOIS",       "FCO ItemSaver has been told not to allow this item to be flagged as junk.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_LAUNDER", "Launder")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_LAUNDER", "Launder <<1>> of the item.")
@@ -710,17 +728,21 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_ZENIMAX_MAX_COUNT", "
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NORMAL_MAX_COUNT",  "You've hit the limit on how many items you can launder today.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_CANT_AFFORD",       "You don't have enough money to launder this item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_NOT_STOLEN",        "You can't launder an item that isn't stolen.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_LAUNDERITEM_FCOIS",             "FCO ItemSaver has been told not to allow this item to be laundered.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_SELLORFENCE", "Sell or Fence")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_SELLORFENCE", "Sell <<1>> of the item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_NORMAL_MAX_FENCE", "You've hit the limit on how many items you can fence today.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELLORFENCE_LOCKED",           "You cannot sell a locked item.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELL_OR_FENCE_FCOIS_FENCE",    "FCO ItemSaver has been told not to allow this item to be fenced.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_SELL_OR_FENCE_FCOIS_SELL",     "FCO ItemSaver has been told not to allow this item to be sold.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_DECONSTRUCT", "Deconstruct")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_DECONSTRUCT", "Deconstruct the item.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_LOCKED",        "The item is locked.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE",    "This item can't be deconstructed.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_STATION", "This is the wrong crafting station.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_FCOIS",         "FCO ItemSaver has been told not to allow this item to be deconstructed.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_STOPRUNNINGTRIGGERS", "Stop Running Triggers")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_STOPRUNNINGTRIGGERS", "Stop all ongoing trigger processing for this item.")
@@ -733,12 +755,14 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FULL",       "The b
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_NOT_OPEN",   "Cannot deposit items in the bank if you aren't viewing the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_STOLEN",     "You can't store stolen items in the bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_CHAR_BOUND", "You can't deposit items in the bank if they are Character Bound.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_DEPOSITINBANK_FCOIS",      "FCO ItemSaver has been told not to allow this item to be deposited in the bank.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_WITHDRAWFROMBANK", "Withdraw From Bank")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_WITHDRAWFROMBANK", "Withdraw <<1>> of the item from the player's bank.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_ZENIMAX_MAX_COUNT", "Add-ons can only withdraw 98 items every time the bank window is open; more than that and you'll disconnect from the server. Close the bank window and reopen it to withdraw more items.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FULL",       "Your backpack is full.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_NOT_OPEN",   "Cannot withdraw items in the bank if you aren't viewing the bank.")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_WITHDRAWFROMBANK_FCOIS",      "FCO ItemSaver has been told not to allow this item to be withdrawn from the bank.")
 --
 --
 -- GALLERY

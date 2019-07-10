@@ -84,6 +84,8 @@ do
             why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_TYPE)
          elseif code == item.FAILURE_WRONG_CRAFTING_STATION then
             why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_WRONG_STATION)
+         elseif code == item.FAILURE_FCOIS_DISALLOWS then
+            why = GetString(ITEMTRIG_STRING_ACTIONERROR_DECONSTRUCT_FCOIS)
          end
          if why then
             text[2] = LocalizeString(GetString(ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY), why)

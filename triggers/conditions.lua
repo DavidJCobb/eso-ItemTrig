@@ -1070,11 +1070,11 @@ ItemTrig.tableConditions = {
       function(state, context, args)
          assert(ItemInterface:is(context))
          local result = true
-         if item.requiredLevel > 0 or item.requiredChamp > 0 then
-            if GetUnitLevel("player") < item.requiredLevel then
+         if context.requiredLevel > 0 or context.requiredChamp > 0 then
+            if GetUnitLevel("player") < context.requiredLevel then
                result = false
             end
-            if GetPlayerChampionPointsEarned() < item.requiredChamp then
+            if GetPlayerChampionPointsEarned() < context.requiredChamp then
                result = false
             end
          end
@@ -1808,6 +1808,131 @@ ItemTrig.tableConditions = {
                result = context.bound
             else
                result = context.bound and context.bindType == BIND_TYPE_ON_PICKUP_BACKPACK
+            end
+         end
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [46] = ConditionBase:new( -- Armor Type
+      _s(ITEMTRIG_STRING_CONDITIONNAME_ARMORTYPE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_ARMORTYPE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_ARMORTYPE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_ARMORTYPE_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [ARMORTYPE_LIGHT]  = GetString("SI_ARMORTYPE", ARMORTYPE_LIGHT),
+               [ARMORTYPE_MEDIUM] = GetString("SI_ARMORTYPE", ARMORTYPE_MEDIUM),
+               [ARMORTYPE_HEAVY]  = GetString("SI_ARMORTYPE", ARMORTYPE_HEAVY),
+            },
+            default = ARMORTYPE_HEAVY,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = context.armorType == args[2]
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [47] = ConditionBase:new( -- Weapon Type
+      _s(ITEMTRIG_STRING_CONDITIONNAME_WEAPONTYPE),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_WEAPONTYPE),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_YES)
+            },
+            default = true,
+         },
+         [2] = {
+            type = "number",
+            enum = {
+               [-1] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_1HMELEE),
+               [-2] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2HMELEE),
+               [-3] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_2H),
+               [-4] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_STAFF),
+               [-5] = _s(ITEMTRIG_STRING_OPCODEARG_WEAPONTYPE_DESTRUCTIONSTAFF),
+               [WEAPONTYPE_AXE]               = GetString("SI_WEAPONTYPE", WEAPONTYPE_AXE),
+               [WEAPONTYPE_BOW]               = GetString("SI_WEAPONTYPE", WEAPONTYPE_BOW),
+               [WEAPONTYPE_DAGGER]            = GetString("SI_WEAPONTYPE", WEAPONTYPE_DAGGER),
+               [WEAPONTYPE_FIRE_STAFF]        = GetString("SI_WEAPONTYPE", WEAPONTYPE_FIRE_STAFF),
+               [WEAPONTYPE_FROST_STAFF]       = GetString("SI_WEAPONTYPE", WEAPONTYPE_FROST_STAFF),
+               [WEAPONTYPE_HAMMER]            = GetString("SI_WEAPONTYPE", WEAPONTYPE_HAMMER), -- one-handed maul
+               [WEAPONTYPE_HEALING_STAFF]     = GetString("SI_WEAPONTYPE", WEAPONTYPE_HEALING_STAFF),
+               [WEAPONTYPE_LIGHTNING_STAFF]   = GetString("SI_WEAPONTYPE", WEAPONTYPE_LIGHTNING_STAFF),
+               --[WEAPONTYPE_NONE]              = GetString("SI_WEAPONTYPE", WEAPONTYPE_NONE),
+               --[WEAPONTYPE_RUNE]              = GetString("SI_WEAPONTYPE", WEAPONTYPE_RUNE),
+               [WEAPONTYPE_SHIELD]            = GetString("SI_WEAPONTYPE", WEAPONTYPE_SHIELD),
+               [WEAPONTYPE_SWORD]             = GetString("SI_WEAPONTYPE", WEAPONTYPE_SWORD),
+               [WEAPONTYPE_TWO_HANDED_AXE]    = GetString("SI_WEAPONTYPE", WEAPONTYPE_TWO_HANDED_AXE),
+               [WEAPONTYPE_TWO_HANDED_HAMMER] = GetString("SI_WEAPONTYPE", WEAPONTYPE_TWO_HANDED_HAMMER), -- two-handed maul
+               [WEAPONTYPE_TWO_HANDED_SWORD]  = GetString("SI_WEAPONTYPE", WEAPONTYPE_TWO_HANDED_SWORD),
+            },
+            default = -1,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = false
+         do
+            local wt = context.weaponType
+            if args[2] >= 0 then
+               result = wt == args[2]
+            else -- special-case/custom values
+               if args[2] == -1 then -- any one-handed melee
+                  if wt == WEAPONTYPE_AXE
+                  or wt == WEAPONTYPE_HAMMER -- maul
+                  or wt == WEAPONTYPE_SWORD
+                  or wt == WEAPONTYPE_DAGGER
+                  then
+                     result = true
+                  end
+               elseif args[2] == -2 then -- any two-handed melee
+                  if wt == WEAPONTYPE_TWO_HANDED_SWORD
+                  or wt == WEAPONTYPE_TWO_HANDED_AXE
+                  or wt == WEAPONTYPE_TWO_HANDED_HAMMER -- maul
+                  then
+                     result = true
+                  end
+               elseif args[2] == -3 then -- any two-handed
+                  if wt == WEAPONTYPE_TWO_HANDED_SWORD
+                  or wt == WEAPONTYPE_TWO_HANDED_AXE
+                  or wt == WEAPONTYPE_TWO_HANDED_HAMMER -- maul
+                  or wt == WEAPONTYPE_BOW
+                  then
+                     result = true
+                  end
+               elseif args[2] == -4 then -- any staff
+                  if wt == WEAPONTYPE_FIRE_STAFF
+                  or wt == WEAPONTYPE_FROST_STAFF
+                  or wt == WEAPONTYPE_LIGHTNING_STAFF
+                  or wt == WEAPONTYPE_HEALING_STAFF
+                  then
+                     result = true
+                  end
+               elseif args[2] == -5 then -- any destruction staff
+                  if wt == WEAPONTYPE_FIRE_STAFF
+                  or wt == WEAPONTYPE_FROST_STAFF
+                  or wt == WEAPONTYPE_LIGHTNING_STAFF
+                  then
+                     result = true
+                  end
+               end
             end
          end
          if args[1] then

@@ -164,8 +164,28 @@ function _Parser:_parseOpcode(s, opcodeClass)
    local iOpcode  = 0 + s:match(pattern_OPCODEINDEX)
    local oCurrent = opcodeClass:new(iOpcode)
    local baseArgs = oCurrent.base.args
+   local argCount = #baseArgs
    local j = 1
    for arg in s:gmatch(pattern_OPCODEARG) do
+      if j > argCount then
+         --
+         -- This accounts for cases of arguments being removed from the END OF 
+         -- an OpcodeBase's arg list. It DOES NOT account for arguments being 
+         -- removed from the MIDDLE. If at any point we actually need to remove 
+         -- args from the middle of an OpcodeBase's argument list, then we 
+         -- should
+         --
+         -- 1. make some kind of system to deal with that, or
+         --
+         -- 2. just flag the args as deprecated and remove references to them 
+         --    from the translation strings, making them invisible.
+         --
+         -- This return statement should match the after-the-loop code at the 
+         -- end of the function. If we make changes there, we need to make them 
+         -- here as well.
+         --
+         return oCurrent
+      end
       arg = arg:sub(2, -2)
       local aType = baseArgs[j].type
       if aType == "string" or aType == "signature" then
