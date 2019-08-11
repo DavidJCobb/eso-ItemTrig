@@ -2,10 +2,14 @@
 ## Author: DavidJCobb
 ## Description: Automatically performs actions on your items based on the rules you specify.
 ## APIVersion: 100027
-## AddOnVersion: 11
-## Version: 1.0.11
+## AddOnVersion: 12
+## Version: 1.0.12
 ## SavedVariables: ItemTrigSavedata
 ## DependsOn: LibAddonMenu-2.0
+
+## Last change: 12 / 1.0.12
+## Updated all calls to CanItemBeSmithingExtractedOrRefined.
+## Fixed ItemInterface:totalForBag and by extension the Total Count condition.
 
 lang/en.lua
 lang/$(language).lua

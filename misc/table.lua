@@ -5,7 +5,7 @@ function ItemTrig.arrayConcat(target, ...)
       local current = select(i, ...)
       if current then
          for k, v in ipairs(current) do
-            target[#target] = v
+            target[#target + 1] = v
          end
       end
    end

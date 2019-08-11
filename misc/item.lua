@@ -48,6 +48,22 @@ function ItemTrig.countStolen(bag)
    end
    return totalItems, totalStacks
 end
+function ItemTrig.findInBag(bag, name) -- for command line testing
+   assert(type(name) == "string", "Must specify an item name as a string.")
+   name = name:lower()
+   local slot
+   ItemTrig.forEachBagSlot(bag or BAG_BACKPACK, function(item)
+      if item.formattedName:lower() == name then
+         slot = item.slot
+         return true
+      end
+   end)
+   if slot then
+      d(LocalizeString("Found <<1>> in slot <<2>>.", name, slot))
+   else
+      d("Item not found.")
+   end
+end
 
 function ItemTrig.getNaiveItemNameFor(id)
    --
@@ -951,7 +967,7 @@ function ItemInterface:new(bagIndex, slotIndex)
    end
    return result
 end
-function ItemInterface:canDeconstruct()
+function ItemInterface:canDeconstruct(anyStation)
    if self:isInvalid() then
       return false, self.FAILURE_ITEM_IS_INVALID
    end
@@ -964,8 +980,38 @@ function ItemInterface:canDeconstruct()
    if GetCraftingInteractionType() ~= self:pertinentCraftingType() then
       return false, ItemInterface.FAILURE_WRONG_CRAFTING_STATION
    end
-   if not CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, GetCraftingInteractionType()) then
-      return false, self.FAILURE_CANNOT_DECONSTRUCT
+   do
+      local result = true
+      if GetAPIVersion() < 100028 then
+         local arg = nil
+         if not anyStation then
+            arg = GetCraftingInteractionType()
+         end
+         result = CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, arg)
+      else
+         if anyStation then
+            local types = {
+               CRAFTING_TYPE_ALCHEMY,
+               CRAFTING_TYPE_BLACKSMITHING,
+               CRAFTING_TYPE_CLOTHIER,
+               CRAFTING_TYPE_ENCHANTING,
+               CRAFTING_TYPE_INVALID,
+               CRAFTING_TYPE_JEWELRYCRAFTING,
+               CRAFTING_TYPE_PROVISIONING,
+               CRAFTING_TYPE_WOODWORKING,
+            }
+            for _, v in ipairs(types) do
+               if not CanItemBeDeconstructed(self.bag, self.slot, v) then
+                  result = false
+               end
+            end
+         else
+            result = CanItemBeDeconstructed(self.bag, self.slot, GetCraftingInteractionType())
+         end
+      end
+      if not result then
+         return false, self.FAILURE_CANNOT_DECONSTRUCT
+      end
    end
    if self:queryFCOISProtection("deconstruct") then
       return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
@@ -1018,7 +1064,7 @@ function ItemInterface:canGemify()
    local data = self.gemifyData
    return data.itemsPerOperation > 0 and data.gemsPerOperation > 0
 end
-function ItemInterface:canRefine()
+function ItemInterface:canRefine(anyStation)
    --
    -- TODO: How do we handle the case of, say, the trigger running on a locked 
    -- stack of 5 Rubedite Ore when the Craft Bag has an unlocked stack of 20?
@@ -1035,8 +1081,39 @@ function ItemInterface:canRefine()
    if GetCraftingInteractionType() ~= self:pertinentCraftingType() then
       return false, ItemInterface.FAILURE_WRONG_CRAFTING_STATION
    end
-   if not CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, GetCraftingInteractionType()) then
-      return false, self.FAILURE_CANNOT_REFINE
+   do
+      local result = true
+      if GetAPIVersion() < 100028 then
+         local arg = nil
+         if not anyStation then
+            arg = GetCraftingInteractionType()
+         end
+         result = CanItemBeSmithingExtractedOrRefined(self.bag, self.slot, arg)
+      else
+         -- testing indicates that the crafting station arg for CanItemBeRefined is mandatory
+         if anyStation then
+            local types = {
+               CRAFTING_TYPE_ALCHEMY,
+               CRAFTING_TYPE_BLACKSMITHING,
+               CRAFTING_TYPE_CLOTHIER,
+               CRAFTING_TYPE_ENCHANTING,
+               CRAFTING_TYPE_INVALID,
+               CRAFTING_TYPE_JEWELRYCRAFTING,
+               CRAFTING_TYPE_PROVISIONING,
+               CRAFTING_TYPE_WOODWORKING,
+            }
+            for _, v in ipairs(types) do
+               if not CanItemBeRefined(self.bag, self.slot, v) then
+                  result = false
+               end
+            end
+         else
+            result = CanItemBeRefined(self.bag, self.slot, GetCraftingInteractionType())
+         end
+      end
+      if not result then
+         return false, self.FAILURE_CANNOT_REFINE
+      end
    end
    if self.count < GetRequiredSmithingRefinementStackSize() then
       return false, self.FAILURE_NOT_ENOUGH_TO_REFINE
@@ -1051,7 +1128,7 @@ function ItemInterface:canRefineType()
    return refinesTo and (refinesTo ~= "")
 end
 function ItemInterface:deconstruct(calledFromQueue)
-   local able, reason = self:canDeconstruct()
+   local able, reason = self:canDeconstruct(false)
    if not able then
       return false, reason
    end
@@ -1398,7 +1475,7 @@ function ItemInterface:queryFCOISProtection(verb) -- returns true if item is pro
    end
 end
 function ItemInterface:refine() -- unused
-   local able, reason = self:canRefine()
+   local able, reason = self:canRefine(false)
    if not able then
       return false, reason
    end
@@ -1521,11 +1598,11 @@ function ItemInterface:takeFromBank(count)
    return true
 end
 function ItemInterface:totalForBag(bag)
-   if self.bag == BAG_BACKPACK then
+   if bag == BAG_BACKPACK then
       return self.totalBag
-   elseif self.bag == BAG_BANK or self.bag == BAG_SUBSCRIBER_BANK then
+   elseif bag == BAG_BANK or bag == BAG_SUBSCRIBER_BANK then
       return self.totalBank
-   elseif self.bag == BAG_VIRTUAL then
+   elseif bag == BAG_VIRTUAL then
       return self.totalCraftBag
    end
 end

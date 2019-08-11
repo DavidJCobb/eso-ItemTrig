@@ -23,6 +23,12 @@ local savedVars = ItemTrig.ISavedata:new("ItemTrigSavedata", nil, 2)
 -- its prior version. Update routines will be run in order, so we can 
 -- just keep adding 'em and literally update from version to version.
 --
+-- However, if we need to update trigger data, we will need to do that 
+-- separately, since update routines only run on the original saved 
+-- data (trigger data is serialized to keep its size to a minimum; we 
+-- can't work with it in that form). Code for updating triggers is in 
+-- ItemTrig.Savedata:load, below.
+--
 do -- Define defaults
    local _defaults = {
       serializedTriggers = {}
@@ -83,8 +89,19 @@ function ItemTrig.Savedata:load(characterID)
       end
    end
    do -- update triggers
+      --
+      -- Unfortunately, although ISavedata offers the ability to register 
+      -- "update handlers," to be called behind the scenes, we can't use 
+      -- those. This is because trigger data is serialized into strings in 
+      -- order to minimize its saved size, and the update handlers work on 
+      -- the original savedata rather than what we've parsed and loaded for 
+      -- our use. We have to update trigger data here. ISavedata's version-
+      -- ing system is still useful for keeping track of what to update and 
+      -- when, which is nice.
+      --
       if character._initiallyLoadedVersion < 2 then
          --
+         -- v1.0.10
          -- Condition "Total Count" uses the wrong enum value to 
          -- identify the Craft Bag.
          --
@@ -102,9 +119,8 @@ function ItemTrig.Savedata:load(characterID)
                end
             end
          end
-         --
-         character:setIsUpToDate()
       end
+      character:setIsUpToDate()
    end
 end
 

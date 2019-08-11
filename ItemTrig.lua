@@ -130,7 +130,8 @@ do -- RefineQueueObserver
    function RefineQueueObserver:_logLastRefinedItem()
       local ls = self.lastStack
       if ls.id then
-         local name    = ls.name
+         --local name    = ls.name
+         local name    = ls.link
          local message = GetString(ITEMTRIG_STRING_LOG_REFINE)
          local initial = self.idMap[ls.id].count
          local bag, _, craftBag = GetItemLinkStacks(ls.link)
@@ -148,7 +149,7 @@ do -- RefineQueueObserver
       CraftingStationQueueCoordinator:next()
    end
    function RefineQueueObserver:onAbort()
-      if ItemTrig.prefs:get("logging/actionsTaken") then
+      if ItemTrig.prefs:get("logging/actionsTaken") == false then
          return
       end
       self:_logLastRefinedItem()
@@ -271,7 +272,8 @@ do -- DeconstructQueueObserver
       if ItemTrig.prefs:get("logging/actionsTaken") == false then
          return
       end
-      local name    = item.formattedName
+      --local name    = item.formattedName
+      local name    = item.link
       local message = GetString(ITEMTRIG_STRING_LOG_DECONSTRUCT)
       CHAT_SYSTEM:AddMessage(LocalizeString(message, name))
    end
@@ -663,7 +665,8 @@ local function Initialize()
          if ItemTrig.prefs:get("logging/actionsTaken") == false then
             return
          end
-         local name = interface.formattedName
+         --local name = interface.formattedName
+         local name = interface.link
          if action == "deconstruct" then
             local message = GetString(ITEMTRIG_STRING_LOG_DECONSTRUCT)
             CHAT_SYSTEM:AddMessage(LocalizeString(message, name))

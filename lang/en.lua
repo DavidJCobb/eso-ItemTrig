@@ -283,14 +283,14 @@ ZO_CreateStringId("ITEMTRIG_STRING_LOG_WITHDRAW_FROM_BANK", "|cFFA020ItemTrig:|r
 --
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_START",       "|cFFA020ItemTrig:|r Attempting to deconstruct <<1>> items...")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE",     "|cFFA020ItemTrig:|r Failed to deconstruct |cFFFF00<<1>>|r.")
-ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY", "|c000000...|r<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_FAILURE_WHY", "|u15:0::|u<<1>>")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_ABORT",       "|cFFA020ItemTrig:|r Deconstruction has stopped early due to the previous error.")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_INTERRUPT",   "|cFFA020ItemTrig:|r Deconstruction interrupted; you left the crafting station!")
 ZO_CreateStringId("ITEMTRIG_STRING_DECONSTRUCTOBSERVER_COMPLETE",    "|cFFA020ItemTrig:|r Finished deconstructing items.")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_START",       "|cFFA020ItemTrig:|r Attempting to refine <<1>> items...")
 ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_FAILURE",     "|cFFA020ItemTrig:|r Failed to refine |cFFFF00<<1>>|r.")
-ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_FAILURE_WHY", "|c000000...|r<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_FAILURE_WHY", "|u15:0::|u<<1>>")
 ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_ABORT",       "|cFFA020ItemTrig:|r Refining has stopped early due to the previous error.")
 ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_INTERRUPT",   "|cFFA020ItemTrig:|r Refining interrupted; you left the crafting station!")
 ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_COMPLETE",    "|cFFA020ItemTrig:|r Finished refining items.")
@@ -301,39 +301,39 @@ ZO_CreateStringId("ITEMTRIG_STRING_REFINEOBSERVER_COMPLETE",    "|cFFA020ItemTri
 -- leading spaces will be stripped out.
 --
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_BASE",      "|cFFA020ItemTrig: Encountered an error in a trigger.|r")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_ITEM",      "|c000000...|r|cFFA020Item:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_TRIG",      "|c000000...|r|cFFA020Faulting Trigger:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_TRIG_TOP",  "|c000000...|r|cFFA020Containing Top-Level Trigger:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_OP_C",      "|c000000...|r|cFFA020Condition:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_OP_A",      "|c000000...|r|cFFA020Action:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_REASON",    "|c000000...|r<<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_ERRORCODE", "|c000000...|r|cFFA020Error code:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_ITEM",      "|u15:0::|u|cFFA020Item:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_TRIG",      "|u15:0::|u|cFFA020Faulting Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_TRIG_TOP",  "|u15:0::|u|cFFA020Containing Top-Level Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_OP_C",      "|u15:0::|u|cFFA020Condition:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_OP_A",      "|u15:0::|u|cFFA020Action:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_REASON",    "|u15:0::|u<<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAIL_ERRORCODE", "|u15:0::|u|cFFA020Error code:|r <<1>>")
 --
 -- Messages shown when a trigger's conditions fail to match, if the missed 
 -- condition was preceded by a "Log Trigger Miss" condition. We use black-
 -- colored dots to indent the text; leading spaces will be stripped out.
 --
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BASE",      "|cFFA020ItemTrig: A trigger's conditions didn't match.|r")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_ITEM",      "|c000000...|r|cFFA020Item:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_TRIG",      "|c000000...|r|cFFA020Missed Trigger:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_TRIG_TOP",  "|c000000...|r|cFFA020Containing Top-Level Trigger:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_COND",      "|c000000...|r|cFFA020<<i:2>> condition:|r <<1>>")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_NO_ORS",    "|c000000...|rNone of the OR-linked conditions had matched by this point.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BAD_TAIL_ORS", "|c000000...|rNone of the OR-linked conditions at the end matched.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_ITEM",      "|u15:0::|u|cFFA020Item:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_TRIG",      "|u15:0::|u|cFFA020Missed Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_TRIG_TOP",  "|u15:0::|u|cFFA020Containing Top-Level Trigger:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_COND",      "|u15:0::|u|cFFA020<<i:2>> condition:|r <<1>>")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_NO_ORS",    "|u15:0::|uNone of the OR-linked conditions had matched by this point.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGMISS_BAD_TAIL_ORS", "|u15:0::|uNone of the OR-linked conditions at the end matched.")
 --
 -- Messages shown when multiple triggers fail for the same reason, and when 
 -- the player has chosen to "collapse" these failures into summaries after 
 -- the first listed failure. These are per error code.
 --
 ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP",      "|cFFA020ItemTrig: <<1>> total triggers failed with the following error:|r")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_BKFL", "|c000000...|rCannot deposit items when the bank is full.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_BKNO", "|c000000...|rCannot deposit items when the bank is not open.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_FENL", "|c000000...|rYou've maxed out your fence transactions for the day.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_LNDL", "|c000000...|rYou've maxed out your launder transactions for the day.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZDPT", "|c000000...|rZenimax limits how many items an add-on can automatically deposit. Close and reopen the bank to deposit more.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZLND", "|c000000...|rZenimax limits how many items an add-on can automatically launder. Close and reopen the fence to launder more.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZWTH", "|c000000...|rZenimax limits how many items an add-on can automatically wothdraw. Close and reopen the bank to withdraw more.")
-ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_WCFT", "|c000000...|rThis is the wrong crafting station for this type of item.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_BKFL", "|u15:0::|uCannot deposit items when the bank is full.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_BKNO", "|u15:0::|uCannot deposit items when the bank is not open.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_FENL", "|u15:0::|uYou've maxed out your fence transactions for the day.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_LNDL", "|u15:0::|uYou've maxed out your launder transactions for the day.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZDPT", "|u15:0::|uZenimax limits how many items an add-on can automatically deposit. Close and reopen the bank to deposit more.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZLND", "|u15:0::|uZenimax limits how many items an add-on can automatically launder. Close and reopen the fence to launder more.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_ZWTH", "|u15:0::|uZenimax limits how many items an add-on can automatically wothdraw. Close and reopen the bank to withdraw more.")
+ZO_CreateStringId("ITEMTRIG_STRING_LOG_TRIGFAILGROUP_WCFT", "|u15:0::|uThis is the wrong crafting station for this type of item.")
 --
 --
 -- SYSTEM
@@ -709,18 +709,23 @@ ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANREFINE", "Can Refine")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANREFINE", "This item <<1>> be refined.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANREFINE_NO",  "can't")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANREFINE_YES", "can")
-ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_CANREFINE", "This condition tests whether the current type of item can be refined, along with whether there are any conditions preventing refinement (e.g. not enough of the item, the item is locked, you're at the wrong crafting station).")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_CANREFINE", "This condition tests whether the current type of item can be refined, along with whether there are any conditions preventing refinement (i.e. not enough of the item, the item is locked, you're at the wrong crafting station).")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CANDECONSTRUCT", "Can Deconstruct")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CANDECONSTRUCT", "This item <<1>> be deconstructed.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANDECONSTRUCT_NO",  "can't")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CANDECONSTRUCT_YES", "can")
-ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_CANDECONSTRUCT", "This condition tests whether the current type of item can be deconstructed, along with whether there are any conditions preventing deconstruction (e.g. not enough of the item, the item is locked, you're at the wrong crafting station).")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONEXPLANATION_CANDECONSTRUCT", "This condition tests whether the current type of item can be deconstructed, along with whether there are any conditions preventing deconstruction (i.e. the item is locked, you're at the wrong crafting station).")
 --
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_FCOISINSTALLED", "FCO ItemSaver: Is Installed")
 ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_FCOISINSTALLED", "FCOIS <<1>> installed and loaded.")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISINSTALLED_NO",  "is not")
 ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_FCOISINSTALLED_YES", "is")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONNAME_CRAFTBAGACCESS", "Craft Bag Access")
+ZO_CreateStringId("ITEMTRIG_STRING_CONDITIONDESC_CRAFTBAGACCESS", "You currently <<1>> use the Craft Bag.")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTBAGACCESS_NO",  "can't")
+ZO_CreateStringId("ITEMTRIG_STRING_OPCODEARG_CRAFTBAGACCESS_YES", "can")
 --
 --
 -- ACTIONS
@@ -886,4 +891,4 @@ ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_NAME",    "Example trigg
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_COMMENT", "A \"never\" condition can be used to turn off a trigger for testing purposes. Of course, it's easier to use the trigger's \"enabled\" checkbox.")
 ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE", "This message should not appear!")
 --
-ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_REFINE_NAME", "Refine raw materials automatically")
+ZO_CreateStringId("ITEMTRIG_STRING_GALLERY_REFINE_NAME", "Refine all raw materials automatically")

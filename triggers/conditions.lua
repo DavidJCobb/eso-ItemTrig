@@ -2047,7 +2047,7 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local result = context:canRefine()
+         local result = context:canRefine(true)
          if args[1] then
             return result
          end
@@ -2069,7 +2069,7 @@ ItemTrig.tableConditions = {
       },
       function(state, context, args)
          assert(ItemInterface:is(context))
-         local result = context:canDeconstruct()
+         local result = context:canDeconstruct(true)
          if args[1] then
             return result
          end
@@ -2092,6 +2092,28 @@ ItemTrig.tableConditions = {
       function(state, context, args)
          assert(ItemInterface:is(context))
          local result = not not FCOIS
+         if args[1] then
+            return result
+         end
+         return not result
+      end
+   ),
+   [52] = ConditionBase:new( -- Craft Bag Access
+      _s(ITEMTRIG_STRING_CONDITIONNAME_CRAFTBAGACCESS),
+      _s(ITEMTRIG_STRING_CONDITIONDESC_CRAFTBAGACCESS),
+      {
+         [1] = {
+            type = "boolean",
+            enum = {
+               [1] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTBAGACCESS_NO),
+               [2] = _s(ITEMTRIG_STRING_OPCODEARG_CRAFTBAGACCESS_YES)
+            },
+            default = true,
+         },
+      },
+      function(state, context, args)
+         assert(ItemInterface:is(context))
+         local result = HasCraftBagAccess()
          if args[1] then
             return result
          end

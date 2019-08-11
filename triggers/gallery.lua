@@ -50,17 +50,12 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new(15, { false }) -- The item [is not] locked
-      cl[2] = Condition:new(24, { true }) -- The item [is] intricate
-      cl[3] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
-      cl[4] = Condition:new(50, { true }) -- Can Deconstruct
-      
-      -- TODO: Can Deconstruct tests the crafting station; we don't need Cond#35
-      
+      cl[1] = Condition:new(24, { true }) -- The item [is] intricate
+      cl[2] = Condition:new(50, { true }) -- Can Deconstruct
       --
       al[1] = Action:new(9) -- Deconstruct the item.
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Sell "ornate" gear for additional gold
       local t = Trigger:new()
@@ -76,7 +71,7 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new(8, { 9999 }) -- Sell [9999] of the item.
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Deconstruct worthless equipment
       local t = Trigger:new()
@@ -86,19 +81,14 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new(15, { false }) -- The item [is not] locked
-      cl[2] = Condition:new( 7, { true, -9 }) -- Added item [is] an [any equippable]
-      cl[3] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
-      cl[4] = Condition:new(31, { { qualifier = "LTE", number = 0 } }) -- Sell value is [at most 0]
-      cl[5] = Condition:new(35, { true }) -- Current crafting station [is] appropriate for this item
-      cl[6] = Condition:new(50, { true }) -- Can Deconstruct
-      
-      -- TODO: Can Deconstruct tests the crafting station; we don't need Cond#35
-      
+      cl[1] = Condition:new( 7, { true, -9 }) -- Added item [is] an [any equippable]
+      cl[2] = Condition:new( 6, { { qualifier = "LTE", number = ITEM_QUALITY_NORMAL } }) -- Rarity is [at most Normal]
+      cl[3] = Condition:new(31, { { qualifier = "LTE", number = 0 } }) -- Sell value is [at most 0]
+      cl[4] = Condition:new(50, { true }) -- Can Deconstruct
       --
       al[1] = Action:new(9) -- Deconstruct the item.
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Refine raw materials automatically
       local t = Trigger:new()
@@ -108,12 +98,11 @@ function ItemTrig.retrieveTriggerGallery()
       local cl = t.conditions
       local al = t.actions
       --
-      cl[1] = Condition:new( 7, { -7 })   -- Item Type: any unrefined material
-      cl[2] = Condition:new(49, { true }) -- Can Refine
+      cl[1] = Condition:new( 3, { true }) -- Always
       --
-      al[1] = Action:new(14, {}) -- Refine
+      al[1] = Action:new(14, { true }) -- Refine
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Sell trash
       local t = Trigger:new()
@@ -129,7 +118,7 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new(8, { 9999 }) -- Sell as many as possible.
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Sell common non-crafted poisons
       local t = Trigger:new()
@@ -146,7 +135,7 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new(7, { 9999 }) -- Sell as many as possible.
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Destroy common style materials past one stack, unless withdrawn or purchased
       local t = Trigger:new()
@@ -169,7 +158,7 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new(5, { false }) -- Destroy [the entire stack]
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Destroy low-rarity stolen goods, but stockpile Covetous Countess goods
       local t = Trigger:new()
@@ -211,7 +200,7 @@ function ItemTrig.retrieveTriggerGallery()
       end
       al[2] = Action:new(5, { true }) -- Destroy [the whole stack]
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Launder the Covetous Countess items
       local t = Trigger:new()
@@ -230,7 +219,7 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new(7, { 9999 }) -- Launder as many as possible.
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Destroy stolen junk
       local t = Trigger:new()
@@ -317,7 +306,7 @@ function ItemTrig.retrieveTriggerGallery()
       end
       al[6] = Action:new(5, { false }) -- Destroy [the entire stack]
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- Stop later triggers from running on certain item types
       local t = Trigger:new()
@@ -339,7 +328,7 @@ function ItemTrig.retrieveTriggerGallery()
       al[1] = Action:new( 4, { GetString(ITEMTRIG_STRING_GALLERY_STOPTRIGGERSEXAMPLE_COMMENT) }) -- Comment
       al[2] = Action:new(10) -- Stop processing triggers on this item
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    do -- This trigger will never run
       local t = Trigger:new()
@@ -354,7 +343,7 @@ function ItemTrig.retrieveTriggerGallery()
       --
       al[1] = Action:new(2, { GetString(ITEMTRIG_STRING_GALLERY_NEVEREXAMPLE_MESSAGE) }) -- Log Message
       --
-      table.insert(gallery, t)
+      gallery[#gallery + 1] = t
    end
    if GetDisplayName() == "@DavidJCobb" then -- double-check gallery IDs in case we make a mistake
       local seen = {}

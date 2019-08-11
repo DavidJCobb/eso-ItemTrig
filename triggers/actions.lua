@@ -363,7 +363,9 @@ ItemTrig.tableActions = {
             requireInteger = true,
             min = 0,
          }
-         -- July 10, 2019 -- Zenimax item transfer API doesn't use the count parameter for withdrawals
+         -- July 10, 2019: Zenimax item transfer API doesn't use the count 
+         -- parameter for withdrawals. Savedata.lua code will strip this 
+         -- argument from any savedata prior to v1.0.11.
          ]]--
       },
       function(state, context, args)
@@ -372,7 +374,7 @@ ItemTrig.tableActions = {
             _doPretend(context, "WITHDRAWFROMBANK")
             return ItemTrig.RUN_NO_MORE_TRIGGERS
          end
-         local result, errorCode = context:takeFromBank(args[1] or 9999)
+         local result, errorCode = context:takeFromBank(9999) -- count would go here
          if not result then
             local extra = { code = errorCode, why = nil }
             if errorCode == ItemInterface.FAILURE_BACKPACK_IS_FULL then

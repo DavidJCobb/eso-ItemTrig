@@ -79,6 +79,13 @@ do -- KnownMaterials: map of all materials we intend to mass-refine
       self.list = {}
       self.map  = {}
    end
+   function KnownMaterials:forEach(functor)
+      for _,v in pairs(self.list) do
+         if functor(v) then
+            return
+         end
+      end
+   end
    function KnownMaterials:getTopmost()
       return self.list[#self.list]
    end
@@ -97,10 +104,18 @@ do -- KnownMaterials: map of all materials we intend to mass-refine
          if IsItemPlayerLocked(bag, slot) then
             return false
          end
-         if not CanItemBeSmithingExtractedOrRefined(bag, slot) then
-            return false
+         local cit = GetCraftingInteractionType()
+         if cit ~= GetItemCraftingInfo(bag, slot) then
+            --
+            -- Raw style materials can be refined at any station and don't 
+            -- have a tradeskill type AFAIK; everything else should fail 
+            -- here.
+            --
+            if GetItemType(bag, slot) ~= ITEMTYPE_RAW_MATERIAL then
+               return false
+            end
          end
-         if GetCraftingInteractionType() ~= GetItemCraftingInfo(bag, slot) then
+         if not (CanItemBeRefined or CanItemBeSmithingExtractedOrRefined)(bag, slot, cit) then
             return false
          end
          local refinesTo = GetItemLinkRefinedMaterialItemLink(link)
@@ -139,9 +154,21 @@ do -- KnownMaterials: map of all materials we intend to mass-refine
       self:_scanBag(filterFunc, BAG_BACKPACK)
       self:_scanBag(filterFunc, BAG_VIRTUAL)
       --
-      for _, v in pairs(self.list) do
-         local countBag, _, countCraftBag = GetItemLinkStacks(v.link)
-         v.total = countBag + countCraftBag
+      do -- count the totals on each item, and filter out items that we don't have enough of
+         local enough  = {}
+         local length  = 0
+         local indexed = {}
+         for _, v in pairs(self.list) do
+            local countBag, _, countCraftBag = GetItemLinkStacks(v.link)
+            v.total = countBag + countCraftBag
+            if v.total >= 0 then
+               length = length + 1
+               enough[length] = v
+               indexed[v.id] = v
+            end
+         end
+         self.list = enough
+         self.map  = indexed
       end
    end
    function KnownMaterials:getAllTotals()
@@ -199,9 +226,55 @@ do -- MassMaterialRefinementQueue
       self.targetSlot      = nil
       self.targetInterface = nil
       KnownMaterials:build(filterFunc)
+      if not KnownMaterials:getTopmost() then
+         if observer and observer.onCantStartOnEmpty then
+            observer:onCantStartOnEmpty()
+         end
+         self.running  = false
+         self.observer = nil
+         return
+      end
       if observer and observer.onStart then
          observer:onStart(KnownMaterials:getAllTotals())
       end
+      --[[
+      --
+      -- AN EVALUATION OF THE MASS REFINE/DECONSTRUCT FEATURE INTRODUCED 
+      -- IN VERSION 100028:
+      --
+      --  * Most crafting errors no longer fire; INTERRUPTED is the only 
+      --    one I could force experimentally. AddItemToDeconstructMessage 
+      --    does most validation already and just returns false if the 
+      --    item fails to queue.
+      --
+      --    EVENT_CRAFT_FAILED hasn't been extended to give us any way to 
+      --    easily tell which items in a transaction have failed.
+      --
+      --  * EVENT_CRAFT_COMPLETE still fires
+      --
+      if GetAPIVersion() > 100027 then -- TEST TEST TEST
+d("TESTING NEW REFINE CODE...")
+         PrepareDeconstructionMessage()
+         KnownMaterials:forEach(function(materialType)
+            local entry = materialType:getTopmost()
+            if not entry then
+               return
+            end
+            local bag   = entry.bag
+            local slot  = entry.slot
+            local count = GetSlotStackSize(bag, slot)
+            if AddItemToDeconstructMessage(bag, slot, count) then
+               d(LocalizeString("Queued <<1>> for refine...", GetItemLink(bag, slot)))
+            else
+               d(LocalizeString("Failed to queue <<1>> for refine.", GetItemLink(bag, slot)))
+            end
+         end)
+         SendDeconstructionMessage()
+         self.running  = nil
+         self.observer = nil
+d("TESTED NEW REFINE CODE.")
+         return
+      end]]--
       self:advance()
    end
    function Queue:stop()
@@ -233,12 +306,38 @@ do -- MassMaterialRefinementQueue
       ExtractOrRefineSmithingItem(entry.bag, entry.slot)
    end
    function Queue:callback(eventCode, ...)
+      if not self.running then
+         return
+      end
       if eventCode == EVENT_END_CRAFTING_STATION_INTERACT then
          if self.observer and self.observer.onInterrupted then
             self.observer:onInterrupted()
          end
          self:stop()
          return
+      end
+      if eventCode == EVENT_INVENTORY_IS_FULL then
+         --
+         -- API version 100028 no longer fires EVENT_CRAFT_FAILED if the 
+         -- inventory is full; we get this instead
+         --
+         if GetCraftingInteractionType() ~= CRAFTING_TYPE_INVALID then
+            local slotsRequested = select(1, ...)
+            local slotsAvailable = select(2, ...)
+            local failureString = zo_strformat(SI_INVENTORY_ERROR_INSUFFICIENT_SPACE, slotsRequested - slotsAvailable)
+            if self.observer and self.observer.onFailure then
+               self.observer:onFailure(self.targetInterface, nil, failureString)
+            end
+            --
+            -- We can't deconstruct any more items if the inventory is too full 
+            -- to deconstruct any single item.
+            --
+            if self.observer and self.observer.onAbort then
+               self.observer:onAbort()
+            end
+            self:stop()
+            return
+         end
       end
       if eventCode == EVENT_CRAFT_COMPLETED then
          local skill = select(1, ...)
@@ -320,6 +419,7 @@ do -- MassMaterialRefinementQueue
    local namespace = "ItemTrigMassMaterialRefinementQueueListener"
    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CRAFT_COMPLETED, _listener)
    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CRAFT_FAILED, _listener)
+   EVENT_MANAGER:RegisterForEvent(namespace, EVENT_INVENTORY_IS_FULL, _listener)
    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_END_CRAFTING_STATION_INTERACT, _listener)
 end
 
