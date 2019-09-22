@@ -111,7 +111,7 @@ local function serializeTrigger(t)
       if count > 0 then
          local chunk = {}
          for i = 1, count do
-            chunk[i] = t.entryPoints[count]
+            chunk[i] = t.entryPoints[i]
          end
          chunk = table.concat(chunk, ",")
          table.insert(chunks, _toChunk("ep", chunk))

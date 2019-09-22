@@ -80,7 +80,6 @@ function ISavedataForAccount:new(globalName, namespace, version, account)
    if not _G[globalName][namespace][account] then
       _G[globalName][namespace][account] = {}
    end
-   --local result = setmetatable({}, self)
    local result = setmetatable({}, {
       __index =
          function(t, k, v)
@@ -91,6 +90,9 @@ function ISavedataForAccount:new(globalName, namespace, version, account)
                -- that actually copies the table instead. Something odd about 
                -- the native implementation of saved globals, perhaps.
                --
+               if not _G[globalName][namespace][account] then
+                  _G[globalName][namespace][account] = {}
+               end
                return _G[globalName][namespace][account]
             end
             if not v then
