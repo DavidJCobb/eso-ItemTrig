@@ -135,6 +135,8 @@ ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INTMAX",    "
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INTMIN",    "You must use an integer greater than or equal to <<1>>.")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_NUMBER_ALLOWED_INTMINMAX", "You must use an integer between <<1>> and <<2>>, inclusive.")
 --
+ZO_CreateStringId("ITEMTRIG_STRING_UI_OPCODEARGEDIT_SOUND_PREVIEW", "Play")
+--
 ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_TITLE", "Import trigger...")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_LABEL_IMPORTSOURCE", "Import from:")
 ZO_CreateStringId("ITEMTRIG_STRING_UI_IMPORTLIST_BUTTON_IMPORT", "Import")
@@ -257,6 +259,61 @@ ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_UTENSILS",            "Utensils")
 ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_WALLDECOR",           "Wall Décor") -- 62179: Pewter Portrait Frame
 ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_WARDROBEACCESSORIES", "Wardrobe Accessories") -- 61107: Common Buckle
 ZO_CreateStringId("ITEMTRIG_STRING_TREASURECAT_WRITINGS",            "Writings") -- 61207: Cheaply Bound Journal
+--
+-- SOUND NAMES
+--
+do
+   local function _defineSoundName(id, text)
+      ZO_CreateStringId("ITEMTRIG_SOUND_" .. id, text)
+   end
+   _defineSoundName("NONE",                "None")
+   _defineSoundName("POSITIVE_CLICK",      "UI: Confirm")
+   _defineSoundName("NEGATIVE_CLICK",      "UI: Not Allowed")
+   _defineSoundName("MENU_BAR_CLICK",      "UI: Menu Tab")
+   _defineSoundName("SYSTEM_WINDOW_OPEN",  "UI: Window Open")
+   _defineSoundName("SYSTEM_WINDOW_CLOSE", "UI: Window Close")
+   _defineSoundName("STABLE_FEED_SPEED",   "Stable Upgrade")
+   _defineSoundName("NO_INTERACT_TARGET",  "UI: Nothing To Activate")
+   _defineSoundName("NEW_NOTIFICATION",    "New Notification")
+   _defineSoundName("NEW_TIMED_NOTIFICATION", "New Notification, Timed")
+   _defineSoundName("NEW_MAIL",            "Mail Received")
+   _defineSoundName("MAIL_SENT",           "Mail Sent")
+   _defineSoundName("MAIL_ITEM_DELETED",   "Mail Deleted")
+   _defineSoundName("ACHIEVEMENT_AWARDED",  "Achievement Awarded")
+   _defineSoundName("QUEST_ACCEPTED",      "Quest Accepted")
+   _defineSoundName("QUEST_OBJECTIVE_STARTED", "Quest Updated")
+   _defineSoundName("QUEST_STEP_FAILED",   "Quest Objective Failed")
+   _defineSoundName("QUEST_SHARE_SENT",    "Quest Shared")
+   _defineSoundName("QUEST_ABANDONED",     "Quest Abandoned")
+   _defineSoundName("QUEST_COMPLETED",     "Quest Completed")
+   _defineSoundName("INVENTORY_ITEM_APPLY_CHARGE",  "Inventory: Item Charged")
+   _defineSoundName("INVENTORY_ITEM_APPLY_ENCHANT", "Inventory: Item Enchanted")
+   _defineSoundName("INVENTORY_ITEM_REPAIR",        "Inventory: Item Repaired")
+   _defineSoundName("ITEM_MONEY_CHANGED",    "Money Exchanged")
+   _defineSoundName("TELVAR_GAINED",         "Tel-Var Stones Gained")
+   _defineSoundName("TELVAR_LOST",           "Tel-Var Stones Lost")
+   _defineSoundName("TELVAR_MULTIPLIERUP",   "Tel-Var Stones Multiplier +")
+   _defineSoundName("TELVAR_MULTIPLIERMAX",  "Tel-Var Stones Multiplier Maxed")
+   _defineSoundName("TELVAR_TRANSACT",       "Tel-Var Stones Spent")
+   _defineSoundName("JUSTICE_NOW_KOS",       "Justice: Kill-on-Sight Start")
+   _defineSoundName("JUSTICE_NO_LONGER_KOS", "Justice: Kill-on-Sight End")
+   _defineSoundName("JUSTICE_STATE_CHANGED", "Justice: Infamy Changed")
+   _defineSoundName("BATTLEGROUND_MEDAL_RECEIVED",  "Battlegrounds: Medal Received")
+   _defineSoundName("BATTLEGROUND_NEARING_VICTORY", "Battlegrounds: Nearing Victory")
+   _defineSoundName("LEVEL_UP",              "Level Up")
+   _defineSoundName("SKILL_POINT_GAINED",    "Skill Point Gained")
+   _defineSoundName("SKILL_LINE_ADDED",      "Skill Line Added")
+   _defineSoundName("SKILL_LINE_LEVELED_UP", "Skill Line Leveled Up")
+   _defineSoundName("TUTORIAL_SHOWN",        "Tutorial Shown")
+   _defineSoundName("DISPLAY_ANNOUNCEMENT",    "Announcement")
+   _defineSoundName("CODE_REDEMPTION_SUCCESS", "Product Code Redeemed")
+   _defineSoundName("DUEL_BOUNDARY_WARNING",   "Dueling: Boundary Warning")
+   _defineSoundName("DUEL_INVITE_RECEIVED",    "Dueling: Invite Received")
+   _defineSoundName("DUEL_ACCEPTED",           "Dueling: Invite Accepted")
+   _defineSoundName("DUEL_START",              "Dueling: Start")
+   _defineSoundName("DUEL_WON",                "Dueling: Victory")
+   _defineSoundName("DUEL_FORFEIT",            "Dueling: Forfeit")
+end
 
 --
 -- COVETOUS COUNTESS
@@ -848,6 +905,9 @@ ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_WRONG_STATION", "This is t
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_FCOIS",         "FCO ItemSaver has been told not to allow this item to be refined.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONERROR_REFINE_NOT_ENOUGH",    "You don't have enough of this item to refine it.")
 ZO_CreateStringId("ITEMTRIG_STRING_ACTIONEXPLANATION_REFINE", "Due to the way refinement works, it is impossible to refine materials on a per-stack basis. If you queue a mass refine operation, all stacks of the material will be refined, across your inventory and your Craft Bag.")
+--
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONNAME_PLAYSOUND", "Play Sound")
+ZO_CreateStringId("ITEMTRIG_STRING_ACTIONDESC_PLAYSOUND", "Play a sound: <<1>>.")
 --
 --
 -- GALLERY

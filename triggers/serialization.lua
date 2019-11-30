@@ -71,7 +71,7 @@ local function serializeOpcode(o)
          safeArgs[i] = o.args[i]
          local rawType  = type(safeArgs[i])
          local baseType = bases[i].type
-         if rawType == "string" or rawType == "number" then
+         if rawType == "string" or rawType == "number" or rawType == "sound" then
             safeArgs[i] = toSafeString(tostring(o.args[i]))
          elseif rawType == "boolean" then
             safeArgs[i] = tostring(o.args[i] and 1 or 0)
@@ -195,7 +195,7 @@ function _Parser:_parseOpcode(s, opcodeClass)
       end
       arg = arg:sub(2, -2)
       local aType = baseArgs[j].type
-      if aType == "string" or aType == "signature" then
+      if aType == "string" or aType == "signature" or aType == "sound" then
          oCurrent.args[j] = fromSafeString(arg)
       elseif aType == "boolean" then
          --

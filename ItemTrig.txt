@@ -1,14 +1,15 @@
 ## Title: ItemTrig
 ## Author: DavidJCobb
 ## Description: Automatically performs actions on your items based on the rules you specify.
-## APIVersion: 100027
-## AddOnVersion: 13
-## Version: 1.0.13
+## APIVersion: 100029
+## AddOnVersion: 14
+## Version: 1.0.14
 ## SavedVariables: ItemTrigSavedata
 ## DependsOn: LibAddonMenu-2.0
 
-## Last change: 13 / 1.0.13
-## Fix to serialization of trigger entry points
+## Last change: 14 / 1.0.14
+## Fix to Mark as Junk action
+## Added "Play Sound" trigger action
 
 lang/en.lua
 lang/$(language).lua
@@ -28,6 +29,7 @@ misc/ui.lua
 misc/item.lua
 misc/quest.lua
 misc/skills.lua
+misc/sounds.lua
 ui/thememanager.lua
 options.lua
 triggers/system.lua

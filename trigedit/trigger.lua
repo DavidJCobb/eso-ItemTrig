@@ -475,6 +475,11 @@ function WinCls:deleteOpcode(opcode)
          w.stack:dirty(true)
          table.remove(list, index)
          pane:remove(index)
+         if pane:count() >= index then
+            pane:select(index) -- select the next opcode, if any
+         elseif index > 1 then
+            pane:select(index - 1) -- there is no next opcode; select the previous opcode
+         end
       end,
       self
    )

@@ -1296,13 +1296,10 @@ function ItemInterface:modifyJunkState(flag)
             return false, ItemInterface.FAILURE_FCOIS_DISALLOWS
          end
       end
-      SetItemIsJunk(self.bag, self.slot, flag)
-      self.hasJunkFlag = IsItemJunk(self.bag, self.slot)
-      local result = self.hasJunkFlag == flag
-      if result then
-         self:onModifyingAction("modifyJunkState", flag)
-      end
-      return result
+      SetItemIsJunk(self.bag, self.slot, flag) -- NOTE: has an unknown delay before updating
+      self.hasJunkFlag = flag -- because of the unpredictable delay, we have to assume it succeeds :(
+      self:onModifyingAction("modifyJunkState", flag)
+      return true
    end
    return false, ItemInterface.FAILURE_CANNOT_FLAG_AS_JUNK
 end

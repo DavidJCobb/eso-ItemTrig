@@ -225,6 +225,8 @@ function ItemTrig.OpcodeBase:getArgumentDefaultValue(index)
       return OpcodeQuantityArg:new()
    elseif t == "signature" then
       return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
+   elseif t == "sound" then
+      return "NONE"
    elseif t == "string" then
       if arg.enum then
          return ItemTrig.firstKeyIn(arg.enum) -- defined in /misc/table.lua
@@ -279,6 +281,9 @@ end
       
       signature
          A value stored as a string, but only alterable as an enum.
+      
+      sound
+         The ID of a sound, i.e. given SOUNDS.WHATEVER it'd be "WHATEVER".
       
       string
          The argument may have an additional field, "multiline," which 
@@ -656,6 +661,14 @@ function ItemTrig.Opcode:format(argTransform, fmtTransform)
       elseif t == "signature" then
          assert(b.enum ~= nil, "Signature arguments must use enums.")
          renderArgs[i] = b.enum[a]
+      elseif t == "sound" then
+         local key = "ITEMTRIG_SOUND_" .. tostring(a)
+         local s   = GetString(_G[key])
+         if s and s ~= "" then
+            renderArgs[i] = s
+         else
+            s = tostring(a)
+         end
       elseif t == "string" then
          if (not a) or a == "" then
             renderArgs[i] = b.placeholder or ""
@@ -753,6 +766,13 @@ function ItemTrig.Opcode:validateArgs()
             return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
          end
          if a:len() ~= 4 then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
+         end
+      elseif t == "sound" then
+         if type(a) ~= "string" then
+            return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_WRONG_TYPE
+         end
+         if not SOUNDS[a] then
             return false, i, ItemTrig.OPCODE_ARGUMENT_INVALID_BAD_VALUE
          end
       elseif t == "string" then

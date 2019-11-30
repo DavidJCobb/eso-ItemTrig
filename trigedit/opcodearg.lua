@@ -55,6 +55,8 @@ do -- helper classes for views
             end
          self.value:setShouldSort(true, false)
       end
+      function ViewCls.Enum:DoPreview()
+      end
       function ViewCls.Enum:GetValue()
          local x = self.value:getSelectedData()
          if x then
@@ -103,6 +105,8 @@ do -- helper classes for views
                   win:onArgumentEdited()
                end
             end
+      end
+      function ViewCls.ListNumber:DoPreview()
       end
       function ViewCls.ListNumber:GetValue()
          local list  = {}
@@ -175,6 +179,8 @@ do -- helper classes for views
             ClearTooltip(ItemTrig_OpcodeArgEdit_OpcodeValueConstraints)
          end)
       end
+      function ViewCls.Number:DoPreview()
+      end
       function ViewCls.Number:GetValue()
          return self.value:value()
       end
@@ -246,6 +252,8 @@ do -- helper classes for views
          qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_NOTEQ),   value = "NE"  }, false)
          qualifier:redraw()
       end
+      function ViewCls.Quantity:DoPreview()
+      end
       function ViewCls.Quantity:GetValue()
          local qualifier = self.qualifier:getSelectedData()
          qualifier = qualifier and qualifier.value or "E"
@@ -294,6 +302,8 @@ do -- helper classes for views
          qualifier:push({ name = GetString(ITEMTRIG_STRING_QUALIFIERPREFIX_NOTEQ),   value = "NE"  }, false)
          qualifier:redraw()
       end
+      function ViewCls.QuantityEnum:DoPreview()
+      end
       function ViewCls.QuantityEnum:GetValue()
          local qualifier = self.qualifier:getSelectedData()
          qualifier = qualifier and qualifier.value or "E"
@@ -330,6 +340,55 @@ do -- helper classes for views
          self.enum:select(function(item) return item.value == tonumber(argValue.number) end)
       end
    end
+   do -- sound
+      ViewCls.Sound = WViewHolderView:makeSubclass("OpcodeArgSoundView")
+      function ViewCls.Sound:_construct()
+         self.value = WCombobox:cast(self:GetNamedChild("Value"))
+         self.value.onChange =
+            function()
+               local win = ItemTrig.windows.opcodeArgEdit
+               if win then -- the view initializes before the window, so this can run early
+                  win:onArgumentEdited()
+               end
+            end
+         self.value:setShouldSort(true, false)
+      end
+      function ViewCls.Sound:DoPreview()
+         local sound = self:GetValue()
+         if sound then
+            local internal = SOUNDS[sound]
+            if internal then
+               PlaySound(internal)
+            end
+         end
+      end
+      function ViewCls.Sound:GetValue()
+         local x = self.value:getSelectedData()
+         if x then
+            return x.id
+         end
+      end
+      function ViewCls.Sound:SetupArgument(argValue, argBase, argIndex, opcodeBase)
+         self:show()
+         local combobox = self.value
+         combobox:clear()
+         if argBase.doNotSortEnum then
+            self.value:setShouldSort(false, false)
+         else
+            self.value:setShouldSort(true, false)
+         end
+         opcodeBase:forEachInArgumentEnum(argIndex, function(k, v)
+            local name = GetString(_G["ITEMTRIG_SOUND_" .. tostring(v)])
+            if (name == "") or not name then
+               name = tostring(v)
+            end
+            combobox:push({ name = name, id = v }, false)
+         end)
+         combobox:redraw()
+         combobox:select(1) -- default selection
+         combobox:select(function(item) return item.id == argValue end)
+      end
+   end
    do -- string
       local _autoCompleteData = { entries = {} }
       local _AUTOCOMPLETE_FLAG =
@@ -359,6 +418,8 @@ do -- helper classes for views
                _autoCompleteData.entries = {}
             end
          )
+      end
+      function ViewCls.String:DoPreview()
       end
       function ViewCls.String:GetValue()
          return self.value:GetText()
@@ -396,6 +457,7 @@ function WinCls:_construct()
             number      = nil,
             quantity    = nil,
             quantEnum   = nil,
+            sound       = nil,
             string      = nil,
          },
          explanation = nil,
@@ -422,6 +484,7 @@ function WinCls:_construct()
       self.ui.views.number    = ViewCls.Number:install(viewholder:GetNamedChild("Number"))
       self.ui.views.quantity  = ViewCls.Quantity:install(viewholder:GetNamedChild("Quantity"))
       self.ui.views.quantEnum = ViewCls.QuantityEnum:install(viewholder:GetNamedChild("QuantityEnum"))
+      self.ui.views.sound     = ViewCls.Sound:install(viewholder:GetNamedChild("Sound"))
       self.ui.views.string    = ViewCls.String:install(viewholder:GetNamedChild("String"))
       self.ui.explanation = self:GetNamedChild("Explanation")
    end
@@ -470,6 +533,8 @@ function WinCls:requestEdit(opener, opcode, argIndex)
             self.view = self.ui.views.quantity
          elseif archetype == "quantity-enum" then
             self.view = self.ui.views.quantEnum
+         elseif archetype == "sound" then
+            self.view = self.ui.views.sound
          elseif archetype == "string" then
             self.view = self.ui.views.string
          end
@@ -526,6 +591,11 @@ function WinCls:autoSize(options)
 end
 function WinCls:onArgumentEdited()
    self.dirty = true
+end
+function WinCls:onArgumentPreviewRequested()
+   if self.view then
+      self.view:DoPreview()
+   end
 end
 function WinCls:unsavedChangesMatter()
    --
